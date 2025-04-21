@@ -21,9 +21,11 @@
         </button>
         <div class="flex flex-col items-center justify-center">
             <span class="text-atzicay-purple-500">Al iniciar sesión aceptas nuestros</span>
-            <button type="button" class="text-atzicay-purple-500 font-bold hover:underline cursor-pointer">
+            <button (click)="handleOpenModal()" type="button" class="text-atzicay-purple-500 font-bold hover:underline cursor-pointer">
                 términos y condiciones
             </button>
         </div>
     </form>
 </div>
+
+<app-modal [visible]="showModal" (closeModal)="handleCloseModal()"/> 
