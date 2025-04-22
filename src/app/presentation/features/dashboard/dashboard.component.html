@@ -1,0 +1,117 @@
+<div class="bg-[#F2EEFD] border-r border-gray-200">
+  <div class="bg-[#F2EEFD] rounded-lg p-6 mb-8">
+    <h1 class="text-[#7e3af2] text-2xl font-semibold mb-2">Explora Juegos Educativos</h1>
+    <p class="text-gray-500 mb-6">Descubre juegos divertidos para aprender mientras juegas</p>
+
+    <div class="flex flex-col sm:flex-row mb-6 gap-4">
+      <div class="relative flex-1">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input
+          type="search"
+          class="w-full ps-10 py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+          placeholder="Buscar juegos..."
+        >
+      </div>
+
+      <div class="relative">
+        <button class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filtros
+        </button>
+
+        <div class="hidden absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 w-48 z-10">
+          <div class="p-2">
+            <div class="flex items-center p-2">
+              <input type="checkbox" id="filterByName" class="mr-2">
+              <label for="filterByName" class="text-sm">Nombre</label>
+            </div>
+            <div class="flex items-center p-2">
+              <input type="checkbox" id="filterByAuthor" class="mr-2">
+              <label for="filterByAuthor" class="text-sm">Autor</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Games Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 max-w-7xl mx-auto">
+    <!-- Game Cards -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md flex flex-col h-[420px]">
+      <div class="h-40 bg-gray-200 flex justify-center items-center relative shrink-0">
+        <!-- Placeholder for game image -->
+        <span class="text-gray-500">Imagen del juego</span>
+      </div>
+      <div class="p-4 flex flex-col flex-grow overflow-hidden">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="text-[#7e3af2] text-lg font-semibold mr-2 overflow-hidden overflow-ellipsis line-clamp-2">Física Básica</h3>
+          <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-medium">Básico</span>
+        </div>
+        <p class="text-gray-500 text-sm mb-3 overflow-hidden overflow-ellipsis line-clamp-3 flex-grow">
+          Aprende los fundamentos de la física de forma interactiva
+        </p>
+        <div class="mt-auto">
+          <div class="text-gray-400 text-xs mb-3">Pedrito Patroncio</div>
+          <button class="w-full bg-[#7e3af2] hover:bg-[#6c2bd9] text-white rounded-lg py-2 font-medium transition duration-200">
+            Jugar ahora
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md flex flex-col h-[420px]">
+      <div class="h-40 bg-gray-200 flex justify-center items-center relative shrink-0">
+        <span class="text-gray-500">Imagen del juego</span>
+      </div>
+      <div class="p-4 flex flex-col flex-grow overflow-hidden">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="text-[#7e3af2] text-lg font-semibold mr-2 overflow-hidden overflow-ellipsis line-clamp-2">Historia Universal</h3>
+          <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-medium">Avanzado</span>
+        </div>
+        <p class="text-gray-500 text-sm mb-3 overflow-hidden overflow-ellipsis line-clamp-3 flex-grow">
+          Aprende la historia de la humanidad de forma interactiva
+        </p>
+        <div class="mt-auto">
+          <div class="text-gray-400 text-xs mb-3">Pedrito Patroncio</div>
+          <button class="w-full bg-[#7e3af2] hover:bg-[#6c2bd9] text-white rounded-lg py-2 font-medium transition duration-200">
+            Jugar ahora
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-md flex flex-col h-[420px]">
+      <div class="h-40 bg-gray-200 flex justify-center items-center relative shrink-0">
+        <span class="text-gray-500">Imagen del juego</span>
+      </div>
+      <div class="p-4 flex flex-col flex-grow overflow-hidden">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="text-[#7e3af2] text-lg font-semibold mr-2 overflow-hidden overflow-ellipsis line-clamp-2">Geografía</h3>
+          <span class="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-xs font-medium">Intermedio</span>
+        </div>
+        <p class="text-gray-500 text-sm mb-3 overflow-hidden overflow-ellipsis line-clamp-3 flex-grow">
+          Aprende a ubicar países y ciudades de forma interactiva
+        </p>
+        <div class="mt-auto">
+          <div class="text-gray-400 text-xs mb-3">Pedrito Patroncio</div>
+          <button class="w-full bg-[#7e3af2] hover:bg-[#6c2bd9] text-white rounded-lg py-2 font-medium transition duration-200">
+            Jugar ahora
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-8 m-6">
+    <button class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition duration-200 w-full">
+      Ver más
+    </button>
+  </div>
+</div>

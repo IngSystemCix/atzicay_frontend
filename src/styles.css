@@ -1,5 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+
+
 @theme {
     --color-atzicay-purple-50: #f4eefd;
     --color-atzicay-purple-500: #a193f7;
