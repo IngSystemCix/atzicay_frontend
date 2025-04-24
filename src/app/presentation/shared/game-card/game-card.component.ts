@@ -1,50 +1,31 @@
-import { Component, Input, ElementRef, ViewChild, AfterViewInit, Renderer2 } from '@angular/core';
-import {NgClass, NgForOf} from '@angular/common';
+// game-card.component.ts
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-game-card',
+  standalone: true,
   templateUrl: './game-card.component.html',
-  imports: [
-    NgClass,
-    NgForOf
-  ],
-  styleUrls: ['./game-card.component.css']
 })
-export class GameCardComponent implements AfterViewInit {
+export class GameCardComponent {
   @Input() title: string = '';
   @Input() description: string = '';
-  @Input() level: string = 'Básico';
+  @Input() level: string = '';
   @Input() author: string = '';
   @Input() rating: number = 0;
+  @Input() image: string = '';
 
-  @ViewChild('menuButton') menuButton!: ElementRef;
-  @ViewChild('menuDropdown') menuDropdown!: ElementRef;
+  ratingArray: number[] = [1, 2, 3, 4, 5];
 
-  isMenuOpen: boolean = false;
-
-  constructor(private renderer: Renderer2) {
-    // Cierra el menú al hacer clic en cualquier parte del documento
-    this.renderer.listen('document', 'click', (event: Event) => {
-      if (this.isMenuOpen &&
-        !this.menuButton.nativeElement.contains(event.target) &&
-        !this.menuDropdown.nativeElement.contains(event.target)) {
-        this.isMenuOpen = false;
-        this.renderer.setStyle(this.menuDropdown.nativeElement, 'display', 'none');
-      }
-    });
-  }
-
-  ngAfterViewInit() {
-    // Configurar comportamiento del menú
-    this.renderer.listen(this.menuButton.nativeElement, 'click', (event: Event) => {
-      event.stopPropagation();
-      this.isMenuOpen = !this.isMenuOpen;
-
-      if (this.isMenuOpen) {
-        this.renderer.setStyle(this.menuDropdown.nativeElement, 'display', 'block');
-      } else {
-        this.renderer.setStyle(this.menuDropdown.nativeElement, 'display', 'none');
-      }
-    });
+  get levelClasses(): string {
+    switch(this.level.toLowerCase()) {
+      case 'básico':
+        return 'bg-[#C9FFD0] text-green-800';
+      case 'intermedio':
+        return 'bg-[#FFFEC2] text-yellow-800';
+      case 'avanzado':
+        return 'bg-[#FFB4B4] text-red-800';
+      default:
+        return 'bg-gray-200 text-gray-800';
+    }
   }
 }

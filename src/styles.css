@@ -4,16 +4,87 @@
     --color-atzicay-purple-50: #f4eefd;
     --color-atzicay-purple-500: #a193f7;
     --color-atzicay-red-300: #fe6161;
+    --color-atzicay-bg: #F2EEFD;
+
+    /* Botones */
+    --color-atzicay-purple-500: #A293FA;
+    --color-atzicay-purple-700: #7B5FEA;
+    --color-atzicay-text-light: #EAF2FF;
+
+    /* Tipografía */
+    --color-atzicay-heading: #A294F8;
+    --color-atzicay-subheading: #C0B0FF;
+
+    /* Inputs */
+    --color-atzicay-placeholder: #747B94;
+    --color-atzicay-input-border: #BCB6E2;
+    --color-atzicay-input-bg: #FCFCFE;
+
+    /* Niveles de dificultad */
+    --color-dificultad-basico: #C9FFD0;
+    --color-dificultad-intermedio: #FFFEC2;
+    --color-dificultad-dificil: #FFB4B4;
+    --color-texto-basico: #166534;
+    --color-texto-intermedio: #854D0E;
+    --color-texto-dificil: #991B1B;
 }
 
 @layer base {
- 
+  h1 {
+    color: var(--color-atzicay-heading);
+  }
+
+  h5 {
+    color: var(--color-atzicay-subheading);
+  }
+  input[type="text"],
+  input[type="search"],
+  textarea {
+    border: 1px solid var(--color-atzicay-input-border);
+    background-color: var(--color-atzicay-input-bg);
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    color: #000;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-atzicay-placeholder);
+  }
 }
 
 @layer components {
+  .btn-atzicay {
+    background-color: var(--color-atzicay-purple-500);
+    color: var(--color-atzicay-text-light);
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
 
+  .btn-atzicay:hover {
+    background-color: var(--color-atzicay-purple-700);
+  }
+
+  .badge-dificultad-basico {
+    background-color: var(--color-dificultad-basico);
+    color: var(--color-texto-basico);
+  }
+
+  .badge-dificultad-intermedio {
+    background-color: var(--color-dificultad-intermedio);
+    color: var(--color-texto-intermedio);
+  }
+
+  .badge-dificultad-dificil {
+    background-color: var(--color-dificultad-dificil);
+    color: var(--color-texto-dificil);
+  }
 }
 
 @layer utilities {
 
 }
+
+
