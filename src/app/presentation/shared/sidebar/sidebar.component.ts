@@ -1,15 +1,16 @@
-import { Component } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, Inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html'
 })
 export class SidebarComponent {
-  constructor(private router: Router) {}
+  constructor(@Inject(DOCUMENT) public document: Document, public auth: AuthService) {}
 
   cerrarSesion() {
-    // Implement logout logic here
-    this.router.navigate(['/login']);
+    this.auth.logout({logoutParams:{returnTo: this.document.location.origin}});
   }
 }
