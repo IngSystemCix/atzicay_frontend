@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
+import { DashboardComponent, LoginComponent } from './presentation';
 
 export const routes: Routes = [
   {
@@ -9,7 +10,7 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./presentation/features/login/login.component').then((m) => m.LoginComponent)
+    component: LoginComponent
   },
   {
     path: 'dashboard',
@@ -17,7 +18,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./presentation/features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+        component: DashboardComponent
       },
 
     ]
