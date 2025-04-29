@@ -8,7 +8,7 @@
     </svg>
 
     <!-- Menu button -->
-    <button title="menu" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 transition-colors">
+    <button title="menu" (click)="dropdownToggle()" class="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 transition-colors">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
       </svg>
@@ -17,15 +17,17 @@
       Autor: {{ author }}
     </div>
 
-    <!-- Dropdown menu (hidden by default) -->
-    <div class="hidden absolute top-10 right-2 bg-white rounded-md shadow-lg py-1 z-10 w-48 border border-gray-200">
-      <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+
+
+
+    <div #dropdownMenu [class.hidden]="!isDropdownOpen" class="absolute top-10 right-2 bg-white rounded-md shadow-lg py-1 z-10 w-48 border border-atzicay-dropdown-text">
+      <a href="#" class="flex items-center px-4 py-2 text-sm text-atzicay-dropdown-text hover:bg-gray-100">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
         </svg>
         Programar Juego
       </a>
-      <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+      <a href="#" class="flex items-center px-4 py-2 text-sm text-atzicay-dropdown-text hover:bg-gray-100">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
@@ -34,11 +36,12 @@
     </div>
   </div>
 
-  <!-- Game Content -->
+
+
+
   <div class="p-4 flex flex-col flex-grow overflow-hidden">
-    <!-- game-card.component.html -->
     <div class="flex justify-between items-start mb-2">
-      <h3 class="text-[#7e3af2] text-lg font-semibold overflow-hidden overflow-ellipsis line-clamp-2 leading-snug">
+      <h3 class="text-atzicay-purple-500 text-lg font-bold overflow-hidden overflow-ellipsis line-clamp-2 leading-snug">
         {{ title }}
       </h3>
       <span

@@ -1,5 +1,5 @@
 // game-card.component.ts
-import { Component, Input } from '@angular/core';
+import { Component, Input, ElementRef, ViewChild, HostListener  } from '@angular/core';
 
 @Component({
   selector: 'app-game-card',
@@ -13,7 +13,9 @@ export class GameCardComponent {
   @Input() author: string = '';
   @Input() rating: number = 0;
   @Input() image: string = '';
+  @ViewChild('dropdownMenu') dropdownMenu!: ElementRef;
 
+  isDropdownOpen = false;
   ratingArray: number[] = [1, 2, 3, 4, 5];
 
   get levelClasses(): string {
@@ -27,5 +29,14 @@ export class GameCardComponent {
       default:
         return 'bg-gray-200 text-gray-800';
     }
+  }
+
+  dropdownToggle() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  // Close dropdown when clicking outside
+  closeDropdown() {
+    this.isDropdownOpen = false;
   }
 }
