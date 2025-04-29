@@ -7,80 +7,85 @@
       <div class="relative flex-1">
         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
           <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
-        <input
-          type="search"
-          class="w-full ps-10 py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
-          placeholder="Buscar juegos..."
-        >
+        <input type="search"
+          class="w-full ps-10 py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atzicay-purple-500 focus:border-atzicay-purple-500 outline-none"
+          placeholder="Buscar juegos...">
       </div>
 
       <div class="relative">
-        <button class="btn-atzicay text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        <button (click)="toggleFilterDropdown()"
+          class="btn-atzicay text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
           Filtros
         </button>
 
-        <div class="hidden absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 w-48 z-10">
-          <div class="p-2">
-            <div class="flex items-center p-2">
-              <input type="checkbox" id="filterByName" class="mr-2">
-              <label for="filterByName" class="text-sm">Nombre</label>
-            </div>
-            <div class="flex items-center p-2">
-              <input type="checkbox" id="filterByAuthor" class="mr-2">
-              <label for="filterByAuthor" class="text-sm">Autor</label>
-            </div>
+        <div [class.hidden]="!isFilterDropdownOpen"
+          class="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg py-1 z-10 w-48 border border-atzicay-dropdown-text">
+          <div class="flex items-center px-4 py-2 text-sm text-atzicay-dropdown-text hover:bg-gray-100">
+            <input type="checkbox" id="filterByName" class="mr-2">
+            <label for="filterByName">Por Nombre</label>
+          </div>
+          <div class="flex items-center px-4 py-2 text-sm text-atzicay-dropdown-text hover:bg-gray-100">
+            <input type="checkbox" id="filterByAuthor" class="mr-2">
+            <label for="filterByAuthor">Por Autor</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="hidden absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 w-48 z-10">
+        <div class="p-2">
+          <div class="flex items-center p-2">
+            <input type="checkbox" id="filterByName" class="mr-2">
+            <label for="filterByName" class="text-sm">Nombre</label>
+          </div>
+          <div class="flex items-center p-2">
+            <input type="checkbox" id="filterByAuthor" class="mr-2">
+            <label for="filterByAuthor" class="text-sm">Autor</label>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Games Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 max-w-8xl mx-auto">
-    @for (game of displayedGames; track game.id) {
-      @defer {
-        <app-game-card
-          [title]="game.title"
-          [description]="game.description"
-          [level]="game.level"
-          [author]="game.author"
-          [rating]="game.rating"
-          [image]="game.image"
-        ></app-game-card>
-      }
-    }
-    @empty {
-      <div class="col-span-full text-center p-4">
-        No hay juegos disponibles.
-      </div>
-    }
+<!-- Games Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 max-w-8xl mx-auto">
+  @for (game of displayedGames; track game.id) {
+  @defer {
+  <app-game-card [title]="game.title" [description]="game.description" [level]="game.level" [author]="game.author"
+    [rating]="game.rating" [image]="game.image"></app-game-card>
+  }
+  }
+  @empty {
+  <div class="col-span-full text-center p-4">
+    No hay juegos disponibles.
   </div>
+  }
+</div>
 
-  <div class="text-center mt-8 m-6">
-    @if (displayedGames.length < totalGames) {
-      <button
-        class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full"
-        (click)="loadMoreGames()">
-        Ver más
-      </button>
+<div class="text-center mt-8 m-6">
+  @if (displayedGames.length < totalGames) { <button
+    class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full" (click)="loadMoreGames()">
+    Ver más
+    </button>
     } @else if (displayedGames.length > 0) {
-      <p class="text-gray-500">Has llegado al final de los juegos disponibles</p>
-      <div class="text-center">
-        <button
-          class="btn-atzicay bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition"
-          (click)="refreshGames()">
-          🔄 Actualizar Juegos
-        </button>
-      </div>
+    <p class="text-gray-500">Has llegado al final de los juegos disponibles</p>
+    <div class="text-center">
+      <button class="btn-atzicay bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition"
+        (click)="refreshGames()">
+        🔄 Actualizar Juegos
+      </button>
+    </div>
 
     } @else {
-      <p class="text-gray-500">No hay juegos disponibles para mostrar</p>
+    <p class="text-gray-500">No hay juegos disponibles para mostrar</p>
     }
-  </div>
 </div>

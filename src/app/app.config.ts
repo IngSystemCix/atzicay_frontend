@@ -11,7 +11,7 @@ export const appConfig: ApplicationConfig = {
       domain: environment.domain,
       clientId: environment.clientId,
       authorizationParams: {
-        redirect_uri: window.location.origin
+        redirect_uri: window.location.origin + '/dashboard',
       }
     }),
   ]

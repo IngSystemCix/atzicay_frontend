@@ -23,6 +23,11 @@ type GameType = {
 export class DashboardComponent {
   private PAGE_SIZE = 3;
   currentPage = 1;
+  isFilterDropdownOpen = false;
+
+  toggleFilterDropdown() {
+    this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
+  }
 
   games: GameType[] = [
     {
