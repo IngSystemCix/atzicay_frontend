@@ -1,7 +1,8 @@
 // src/app/presentation/features/dashboard/dashboard.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ChangeDetectorRef } from '@angular/core';
 import { GameCardComponent } from '../../shared/game-card/game-card.component';
+import { AtzicayService } from '../../../core/infrastructure/api/atzicay.service';
 
 type GameType = {
   id: number;
@@ -20,7 +21,7 @@ type GameType = {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private PAGE_SIZE = 3;
   currentPage = 1;
   isFilterDropdownOpen = false;
@@ -29,84 +30,11 @@ export class DashboardComponent {
     this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
   }
 
-  games: GameType[] = [
-    {
-      id: 1,
-      title: 'Matemáticas Divertidas',
-      level: 'Básico',
-      description: 'Aprende operaciones básicas de forma divertida',
-      rating: 4.8,
-      author: 'Pedrito Patroclo',
-      image: 'assets/images/math-game.png',
-    },
-    {
-      id: 2,
-      title: 'Aventura Gramatical',
-      level: 'Intermedio',
-      description: 'Mejora tu gramática con esta aventura interactiva',
-      rating: 4.8,
-      author: 'Pedrito Patroclo',
-      image: 'assets/images/grammar-game.png',
-    },
-    {
-      id: 3,
-      title: 'Química Básica',
-      level: 'Básico',
-      description: 'Aprende los fundamentos de la química de forma interativa',
-      rating: 4.8,
-      author: 'Pedrito Patroclo',
-      image: 'assets/images/chemistry-game.png',
-    },
-    {
-      id: 4,
-      title: 'Historia Mundial',
-      level: 'Avanzado',
-      description: 'Explora eventos históricos importantes de forma interactiva',
-      rating: 4.5,
-      author: 'María González',
-      image: 'assets/images/history-game.png',
-    },
-    {
-      id: 5,
-      title: 'Física Elemental',
-      level: 'Intermedio',
-      description: 'Aprende conceptos de física a través de experimentos virtuales',
-      rating: 4.7,
-      author: 'Carlos Mendoza',
-      image: 'assets/images/physics-game.png',
-    },
-    {
-      id: 6,
-      title: 'Biología Celular',
-      level: 'Avanzado',
-      description: 'Explora el mundo de las células y sus funciones',
-      rating: 4.9,
-      author: 'Ana Rodríguez',
-      image: 'assets/images/biology-game.png',
-    },
-    {
-      id: 7,
-      title: 'Geometría Espacial',
-      level: 'Básico',
-      description: 'Aprende conceptos de geometría a través de juegos interactivos',
-      rating: 4.6,
-      author: 'Pedrito Patroclo',
-      image: 'assets/images/geometry-game.png',
-    },
-    {
-      id: 8,
-      title: 'Aritmética Matemática',
-      level: 'Intermedio',
-      description: 'Aprende operaciones matemáticas a través de juegos divertidos',
-      rating: 4.8,
-      author: 'Pedrito Patroclo',
-      image: 'assets/images/math-game.png',
-    }
-  ];
+  games: any[]=[];
 
   displayedGames: GameType[] = [];
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor(private cdr: ChangeDetectorRef, private atzicayService: AtzicayService) {
     this.displayedGames = this.games.slice(0, this.PAGE_SIZE);
     console.log('Displayed games initialized:', this.displayedGames);
   }
@@ -116,6 +44,10 @@ export class DashboardComponent {
       this.loadInitialGames();
     }
     this.cdr.detectChanges();
+
+    this.atzicayService.getAllGameInstances().subscribe(data=>{
+      this.games=data;
+    })
   }
 
   get totalGames(): number {
