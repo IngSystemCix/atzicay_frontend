@@ -1,6 +1,19 @@
 <app-juegos-header></app-juegos-header>
 <app-juegos-categorias></app-juegos-categorias>
-<app-juegos-tabs></app-juegos-tabs>
-<app-juegos-filtros></app-juegos-filtros>
-<app-juegos-lista></app-juegos-lista>
+
+<app-juegos-tabs (tabChanged)="cambiarVista($event)"></app-juegos-tabs>
+
+@switch (activeTab) {
+  @case ('misJuegos') {
+    <app-juegos-filtros (filtroChange)="actualizarFiltro($event)"></app-juegos-filtros>
+    <app-juegos-lista [filtroActual]="filtroSeleccionado"></app-juegos-lista>
+
+
+  }
+
+  @case ('misProgramaciones') {
+    <app-my-programmings></app-my-programmings>
+  }
+}
 <app-ver-mas-button></app-ver-mas-button>
+

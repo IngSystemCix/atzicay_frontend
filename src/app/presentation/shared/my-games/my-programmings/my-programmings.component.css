@@ -1,0 +1,9 @@
+:host {
+  --color-dificultad-basico: #C9FFD0;
+  --color-dificultad-intermedio: #FFFEC2;
+  --color-dificultad-dificil: #FFB4B4;
+}
+
+input[type="date"] {
+  min-width: 140px;
+}

@@ -1,0 +1,9 @@
+button {
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.bg-gray-100 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}

@@ -1,0 +1,91 @@
+<div class="p-4">
+  <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+    <div class="bg-[#E5D8F2] rounded-lg p-2 mx-4 my-4 flex flex-wrap w-fit gap-x-2">
+      @for (tab of tabs; track tab) {
+        <button
+          class="px-6 py-2 rounded-lg font-medium transition-colors"
+          [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white' : 'text-gray-600 hover:bg-gray-200'"
+          (click)="selectedTab = tab">
+          {{ tab }}
+        </button>
+      }
+    </div>
+
+    <div class="bg-[#E5D8F2] rounded-lg p-2 mx-4 my-4 flex flex-wrap w-fit gap-x-2">
+      <span class="text-sm text-gray-600 px-2">Fecha Inicio</span>
+      <input
+        type="date"
+        [(ngModel)]="startDate"
+        class="bg-purple-200 rounded-lg px-2 py-1 text-sm">
+
+      <span class="text-sm text-gray-600 px-2">Fecha Fin</span>
+      <input
+        type="date"
+        [(ngModel)]="endDate"
+        class="bg-purple-200 rounded-lg px-2 py-1 text-sm">
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (activity of getFilteredActivities(); track activity.id) {
+      <div
+        [class]="'rounded-lg p-6 relative ' + getDifficultyClass(activity.difficulty)">
+
+        <div class="flex justify-between items-start mb-6">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">{{ getTypeIcon(activity.type) }}</span>
+            <div>
+              <h3 class="font-medium text-atzicay-text-color">
+                {{ activity.type }}: {{ activity.title }}
+              </h3>
+              <h6 class="text-sm atzicay-text-color font-bold">{{ activity.group }}</h6>
+            </div>
+          </div>
+          
+          <div class="relative">
+            <button
+              class="text-gray-600 hover:text-gray-800"
+              (click)="showOptions($event, activity.id)">
+              <span class="text-xl">⋯</span>
+            </button>
+
+            @if (menuAbierto === activity.id) {
+              <div class="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg py-2 w-44 z-10 border border-[#A091F9]">
+                <button
+                  class="flex items-center px-4 py-2 text-sm text-[#A091F9] w-full hover:bg-gray-100"
+                  (click)="eliminarActividad(activity.id)">
+                  <span class="mr-2">🗑️</span> Eliminar
+                </button>
+                <button
+                  class="flex items-center px-4 py-2 text-sm text-[#A091F9] w-full hover:bg-gray-100"
+                  (click)="editarActividad(activity.id)">
+                  <span class="mr-2">✏️</span> Editar
+                </button>
+                <button
+                  class="flex items-center px-4 py-2 text-sm text-[#A091F9] w-full hover:bg-gray-100"
+                  (click)="verReporte(activity.id)">
+                  <span class="mr-2">📊</span> Ver Reporte
+                </button>
+              </div>
+            }
+          </div>
+
+        </div>
+
+        <div class="flex justify-between items-center mt-20">
+          <div>
+            <span class="text-sm text-atzicay-text-color font-bold">Estado</span>
+            <div
+              [class]="'px-3 py-1 rounded-lg text-xs ' +
+                (activity.status === 'Activo' ? 'bg-green-400 text-green-800' : 'bg-gray-400 text-gray-800')">
+              {{ activity.status }}
+            </div>
+          </div>
+          <button class="text-sm text-atzicay-text-color font-bold">
+            Obtener URL
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

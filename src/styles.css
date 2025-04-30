@@ -10,11 +10,14 @@
     --color-atzicay-purple-500: #A293FA;
     --color-atzicay-purple-700: #7B5FEA;
     --color-atzicay-text-light: #EAF2FF;
+    --color-atzicay-bg-button: #A294F9;
 
     /* Tipografía */
     --color-atzicay-heading: #A294F8;
     --color-atzicay-subheading: #C0B0FF;
     --color-atzicay-dropdown-text: #A091F9;
+    --color-atzicay-border: #CDC1FE;
+    --color-atzicay-text-color:#8571FB;
 
     /* Inputs */
     --color-atzicay-placeholder: #747B94;

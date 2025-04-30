@@ -1,0 +1,10 @@
+<div class="bg-[#E5D8F2] rounded-lg p-1 mx-4 my-4 flex flex-wrap gap-x-2">
+  @for (filtro of filtros; track filtro) {
+    <button
+      (click)="filtrar(filtro)"
+      class="flex-1 py-2 px-4 text-center rounded-lg transition-all duration-200"
+      [class]="filtroSeleccionado === filtro ? 'bg-atzicay-bg-button text-white' : 'text-gray-600 hover:bg-gray-200'">
+      {{filtro}}
+    </button>
+  }
+</div>

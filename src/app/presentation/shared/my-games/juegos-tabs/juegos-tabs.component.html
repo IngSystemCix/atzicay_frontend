@@ -1,0 +1,13 @@
+<div class="bg-[#E5D8F2] rounded-lg p-2 mx-4 my-4 flex flex-wrap w-fit gap-x-2">
+  @for (tab of tabs; track tab.id) {
+    <button
+      (click)="cambiarTab(tab.id)"
+      class="px-6 py-2 rounded-lg font-medium transition-colors"
+      [class]="tabActiva === tab.id ? 'bg-atzicay-bg-button text-white' : 'text-gray-700 hover:bg-gray-100'">
+      {{ tab.nombre }}
+    </button>
+  }
+</div>
+<div class="mx-4 text-gray-600">
+  <p>Total: {{ totalJuegos }} juegos</p>
+</div>
