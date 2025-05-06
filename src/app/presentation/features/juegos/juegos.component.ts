@@ -4,7 +4,6 @@ import {JuegosCategoriasComponent} from '../../shared/my-games/juegos-categorias
 import {JuegosTabsComponent} from '../../shared/my-games/juegos-tabs/juegos-tabs.component';
 import {JuegosFiltrosComponent} from '../../shared/my-games/juegos-filtros/juegos-filtros.component';
 import {JuegosListaComponent} from '../../shared/my-games/juegos-lista/juegos-lista.component';
-import {VerMasButtonComponent} from '../../../shared/ver-mas-button/ver-mas-button.component';
 import {MyProgrammingsComponent} from '../../shared/my-games/my-programmings/my-programmings.component';
 
 
@@ -16,7 +15,6 @@ import {MyProgrammingsComponent} from '../../shared/my-games/my-programmings/my-
     JuegosTabsComponent,
     JuegosFiltrosComponent,
     JuegosListaComponent,
-    VerMasButtonComponent,
     MyProgrammingsComponent
   ],
   templateUrl: './juegos.component.html',
