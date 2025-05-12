@@ -20,11 +20,11 @@ export class GameCardComponent {
 
   get levelClasses(): string {
     switch(this.level.toLowerCase()) {
-      case 'básico':
+      case 'E':
         return 'bg-[#C9FFD0] text-green-800';
-      case 'intermedio':
+      case 'M':
         return 'bg-[#FFFEC2] text-yellow-800';
-      case 'avanzado':
+      case 'D':
         return 'bg-[#FFB4B4] text-red-800';
       default:
         return 'bg-gray-200 text-gray-800';

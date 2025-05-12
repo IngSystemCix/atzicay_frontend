@@ -61,40 +61,4 @@ export class DashboardComponent {
       this.cdr.detectChanges();
     }
   }
-
-  refreshGames(): void {
-    // Simulación: en un caso real, esta lógica debería disparar un fetch desde el backend.
-    const currentGames = this.games();
-
-    const newGames: Game[] = [
-      {
-        id: currentGames.length + 1,
-        title: 'Programación Divertida',
-        level: 'Intermedio',
-        description: 'Aprende a programar jugando con retos y puzzles',
-        rating: 4.9,
-        author: 'Lina Dev',
-        image: 'assets/images/code-game.png',
-      },
-      {
-        id: currentGames.length + 2,
-        title: 'Inglés Interactivo',
-        level: 'Básico',
-        description: 'Practica inglés con diálogos y juegos',
-        rating: 4.7,
-        author: 'John Teacher',
-        image: 'assets/images/english-game.png',
-      },
-    ];
-
-    console.warn(
-      'refreshGames: Esta acción debería hacerse desde el backend o usando Subject en el servicio.'
-    );
-
-    this.displayedGames = [...currentGames, ...newGames].slice(
-      0,
-      this.PAGE_SIZE * this.currentPage
-    );
-    this.cdr.detectChanges();
-  }
 }

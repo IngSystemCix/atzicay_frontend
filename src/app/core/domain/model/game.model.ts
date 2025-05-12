@@ -6,4 +6,5 @@ export interface Game {
   rating: number;
   author: string;
   image: string;
+  type: 'Hangman' | 'Memory' | 'Puzzle' | 'Solve the Word';
 }

@@ -10,14 +10,24 @@ import { map } from 'rxjs';
 export class GameService {
   private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/';
   private http= inject(HttpClient);
+  private imageMap: { [key: string]: string } = {
+    Hangman: 'assets/ahorcado.png',
+    Memory: 'assets/memoria.png',
+    Puzzle: 'assets/rompecabezas.png',
+    'Solve the Word': 'assets/pupiletras.png',
+  };
 
   getAllGames() {
-    return this.http.get<ApiResponse<Game[]>>(`${this.apiUrl}game-instances/all`).pipe(
-      map(response => response.data.map(game => ({
-        ...game,
-        image: 'assets/images/default-game.png' // ruta a tu imagen por defecto
-      })))
-    );
+    return this.http
+      .get<ApiResponse<Game[]>>(`${this.apiUrl}game-instances/all`)
+      .pipe(
+        map((response) =>
+          response.data.map((game) => ({
+            ...game,
+            image: this.imageMap[game.type] || 'assets/default-game.png',
+          }))
+        )
+      );
   }
 
 }
