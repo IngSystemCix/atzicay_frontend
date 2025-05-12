@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideAuth0 } from '@auth0/auth0-angular';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment.development';
+import { provideHttpClient } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,5 +15,6 @@ export const appConfig: ApplicationConfig = {
         redirect_uri: window.location.origin + '/dashboard',
       }
     }),
+    provideHttpClient(),
   ]
 };
