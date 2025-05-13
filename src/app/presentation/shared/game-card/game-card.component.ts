@@ -1,10 +1,14 @@
 // game-card.component.ts
 import { Component, Input, ElementRef, ViewChild, HostListener  } from '@angular/core';
+import {NgClass} from '@angular/common';
 
 @Component({
   selector: 'app-game-card',
   standalone: true,
   templateUrl: './game-card.component.html',
+  imports: [
+    NgClass
+  ]
 })
 export class GameCardComponent {
   @Input() title: string = '';

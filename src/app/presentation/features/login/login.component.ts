@@ -27,7 +27,7 @@ export class LoginComponent {
       }
     });
   }
-  
+
   handleOpenModal = () => {
     this.showModal = true;
   }
@@ -45,5 +45,3 @@ export class LoginComponent {
     });
   }
 }
-
-

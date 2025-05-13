@@ -8,120 +8,143 @@
     </p>
 
     <div class="flex flex-col sm:flex-row gap-4">
+      <!-- Barra de búsqueda -->
       <div class="relative flex-1">
-        <div
-          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"
-        >
-          <svg
-            class="w-4 h-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
         </div>
         <input
           type="search"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilters()"
           class="w-full ps-10 py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atzicay-purple-500 focus:border-atzicay-purple-500 outline-none"
           placeholder="Buscar juegos..."
         />
       </div>
 
+      <!-- Dropdown de filtros -->
       <div class="relative">
         <button
           (click)="toggleFilterDropdown()"
           class="btn-atzicay text-white px-4 py-2 rounded-lg transition duration-200 flex items-center"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
           </svg>
           Filtros
         </button>
 
+        <!-- Menú desplegable de filtros -->
         <div
           [class.hidden]="!isFilterDropdownOpen"
-          class="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg py-1 z-10 w-48 border border-atzicay-dropdown-text"
+          class="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg py-1 z-10 w-64 border border-atzicay-dropdown-text"
         >
-          <div
-            class="flex items-center px-4 py-2 text-sm text-atzicay-dropdown-text hover:bg-gray-100"
-          >
-            <input type="checkbox" id="filterByName" class="mr-2" />
-            <label for="filterByName">Por Nombre</label>
+          <!-- Filtros por tipo de juego -->
+          <div class="px-4 py-2 text-sm text-atzicay-dropdown-text font-medium border-b border-gray-100">
+            Tipo de Juego
           </div>
-          <div
-            class="flex items-center px-4 py-2 text-sm text-atzicay-dropdown-text hover:bg-gray-100"
-          >
-            <input type="checkbox" id="filterByAuthor" class="mr-2" />
-            <label for="filterByAuthor">Por Autor</label>
+          <div *ngFor="let type of gameTypes" class="flex items-center px-4 py-1 text-sm text-atzicay-dropdown-text hover:bg-gray-50">
+            <input
+              type="checkbox"
+              [id]="'filterType_' + type.value"
+              [checked]="selectedTypes.includes(type.value)"
+              (change)="toggleTypeFilter(type.value)"
+              class="mr-2 rounded text-atzicay-purple-500 focus:ring-atzicay-purple-500"
+            />
+            <label [for]="'filterType_' + type.value" class="cursor-pointer">{{ type.label }}</label>
+          </div>
+
+          <!-- Filtros por nivel de dificultad -->
+          <div class="px-4 py-2 text-sm text-atzicay-dropdown-text font-medium border-t border-gray-100 mt-1">
+            Nivel de Dificultad
+          </div>
+          <div *ngFor="let level of difficultyLevels" class="flex items-center px-4 py-1 text-sm text-atzicay-dropdown-text hover:bg-gray-50">
+            <input
+              type="checkbox"
+              [id]="'filterLevel_' + level.value"
+              [checked]="selectedLevels.includes(level.value)"
+              (change)="toggleLevelFilter(level.value)"
+              class="mr-2 rounded text-atzicay-purple-500 focus:ring-atzicay-purple-500"
+            />
+            <label [for]="'filterLevel_' + level.value" class="cursor-pointer">{{ level.label }}</label>
+          </div>
+
+          <!-- Botón para limpiar filtros -->
+          <div class="border-t border-gray-100 mt-1 pt-1 px-4">
+            <button
+              (click)="clearFilters()"
+              class="w-full text-xs text-atzicay-purple-500 hover:text-atzicay-purple-700 py-1 text-left"
+            >
+              Limpiar todos los filtros
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
-      <div
-        class="hidden absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-gray-200 w-48 z-10"
-      >
-        <div class="p-2">
-          <div class="flex items-center p-2">
-            <input type="checkbox" id="filterByName" class="mr-2" />
-            <label for="filterByName" class="text-sm">Nombre</label>
-          </div>
-          <div class="flex items-center p-2">
-            <input type="checkbox" id="filterByAuthor" class="mr-2" />
-            <label for="filterByAuthor" class="text-sm">Autor</label>
-          </div>
-        </div>
+    <!-- Etiquetas de filtros activos -->
+    <div *ngIf="selectedTypes.length > 0 || selectedLevels.length > 0" class="mt-4 flex flex-wrap gap-2">
+      <!-- Filtros de tipo activos -->
+      <div *ngFor="let type of selectedTypes" class="bg-atzicay-purple-100 text-atzicay-purple-800 text-xs px-3 py-1 rounded-full flex items-center">
+        {{ getTypeLabel(type) }}
+        <button (click)="removeTypeFilter(type)" class="ml-1 text-atzicay-purple-500 hover:text-atzicay-purple-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Filtros de nivel activos -->
+      <div *ngFor="let level of selectedLevels" class="bg-atzicay-blue-100 text-atzicay-blue-800 text-xs px-3 py-1 rounded-full flex items-center">
+        {{ getLevelLabel(level) }}
+        <button (click)="removeLevelFilter(level)" class="ml-1 text-atzicay-blue-500 hover:text-atzicay-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- Games Grid -->
-<div
-  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-8xl mx-auto"
->
-  @for (game of displayedGames; track game.id) { @defer {
-  <app-game-card
-    [title]="game.title"
-    [description]="game.description"
-    [level]="game.level"
-    [author]="game.author"
-    [rating]="game.rating"
-    [image]="game.image"
-  ></app-game-card>
-  } } @empty {
-  <div class="col-span-full text-center p-4">No hay juegos disponibles.</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-8xl mx-auto">
+  @for (game of displayedGames; track game.id) {
+    @defer {
+        <app-game-card
+          [title]="game.title"
+          [description]="game.description"
+          [level]="game.level"
+          [author]="game.author"
+          [rating]="game.rating"
+          [image]="game.image"
+        ></app-game-card>
+    }
+  }
+  @empty {
+    <div class="col-span-full text-center p-4">
+      @if (selectedTypes.length > 0 || selectedLevels.length > 0 || searchTerm) {
+        No se encontraron juegos con los filtros aplicados.
+      } @else {
+        No hay juegos disponibles.
+      }
+    </div>
   }
 </div>
 
+<!-- Botón "Ver más" o mensaje final -->
 <div class="text-center mt-8 m-6">
-  @if (games.length < totalGames) {
-  <button
-    class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full"
-    (click)="loadMoreGames()"
-  >
-    Ver más
-  </button>
-  } @else if (games.length > 0) {
-  <p class="text-gray-500">Has llegado al final de los juegos disponibles</p>
-  } @else {
-  <p class="text-gray-500">No hay juegos disponibles para mostrar</p>
+  @if (displayedGames.length < filteredGames.length) {
+    <button
+      class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full sm:w-auto"
+      (click)="loadMoreGames()"
+    >
+      Ver más juegos ({{ filteredGames.length - displayedGames.length }})
+    </button>
+  }
+  @else if (filteredGames.length > 0) {
+    <p class="text-gray-500">Has visto todos los juegos disponibles</p>
   }
 </div>
