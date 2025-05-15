@@ -5,11 +5,13 @@ import {JuegosTabsComponent} from '../../shared/my-games/juegos-tabs/juegos-tabs
 import {JuegosFiltrosComponent} from '../../shared/my-games/juegos-filtros/juegos-filtros.component';
 import {JuegosListaComponent} from '../../shared/my-games/juegos-lista/juegos-lista.component';
 import {MyProgrammingsComponent} from '../../shared/my-games/my-programmings/my-programmings.component';
+import { HttpClientModule } from '@angular/common/http';
 
 
 @Component({
   selector: 'app-juegos',
   imports: [
+    HttpClientModule,
     JuegosHeaderComponent,
     JuegosCategoriasComponent,
     JuegosTabsComponent,

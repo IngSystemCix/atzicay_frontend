@@ -1,0 +1,39 @@
+/* src/app/features/hangman/create-hangman/create-hangman.component.css */
+/* Estilos adicionales específicos para el componente si son necesarios */
+
+/* Estilos personalizados para la barra de desplazamiento */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c4b5fd;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a78bfa;
+}
+
+/* Animación para el toggle de mostrar pistas */
+.toggle-track {
+  transition: background-color 0.3s ease;
+}
+
+.toggle-thumb {
+  transition: transform 0.3s ease;
+}
+
+/* Estilos para mensajes de validación */
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+}

@@ -1,79 +1,133 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-4">
-  @for (juego of juegosFiltrados; track juego.id) {
-    <div
-      class="rounded-lg p-4 relative border border-[#CDC1FE]"
-      [ngClass]="{
-        'bg-dificultad-basico': juego.dificultad === 'basico',
-        'bg-dificultad-intermedio': juego.dificultad === 'intermedio',
-        'bg-dificultad-dificil': juego.dificultad === 'dificil'
-      }"
-    >
-      <div class="flex justify-between items-center">
-        <div class="flex items-center">
-          <div class="text-2xl mr-2">{{juego.icono}}</div>
-          <h3 class="text-lg font-bold text-[#8571FB]">{{juego.titulo}}</h3>
-        </div>
-        <div class="relative">
-          <button class="text-gray-600 text-2xl font-bold" (click)="toggleMenu(juego.id)">⋯</button>
-          @if (menuAbierto === juego.id) {
-            <div class="absolute right-0 bg-white shadow-lg rounded-md py-2 w-50 z-10 border border-[#A091F9] rounded-lg">
-              <button
-                class="flex items-center px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100"
-                (click)="programarJuego(juego.id)"
-              >
-                <span class="mr-2">➕</span> Programar juego
-              </button>
-              <button
-                class="flex items-center px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100"
-                (click)="eliminarJuego(juego.id)"
-              >
-                <span class="mr-2">🗑️</span> Eliminar
-              </button>
-              <button
-                class="flex items-center px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100"
-                (click)="editarJuego(juego.id)"
-              >
-                <span class="mr-2">✏️</span> Editar
-              </button>
-            </div>
-          }
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4 mt-6">
-        <div>
-          <h6 class="text-[#7971AC] font-bold text-sm">Veces Jugado</h6>
-          <p class="font-bold">{{juego.vecesJugado}}</p>
-        </div>
-        <div>
-          <h6 class="text-[#7971AC] font-bold text-sm">Puntuación</h6>
+  @if (cargando) {
+    <div class="col-span-full text-center py-12">
+      <p class="text-xl text-gray-500">Cargando juegos...</p>
+    </div>
+  } @else if (error) {
+    <div class="col-span-full text-center py-12">
+      <p class="text-xl text-red-500">{{error}}</p>
+      <button 
+        class="mt-4 px-4 py-2 bg-[#8571FB] text-white rounded-lg hover:bg-[#7161EB]"
+        (click)="cargarJuegos()">
+        Reintentar
+      </button>
+    </div>
+  } @else {
+    @for (juego of juegosFiltrados; track juego.id) {
+      <div
+        class="rounded-lg p-4 relative border border-[#CDC1FE]"
+        [ngClass]="{
+          'bg-dificultad-basico': juego.dificultad === 'basico',
+          'bg-dificultad-intermedio': juego.dificultad === 'intermedio',
+          'bg-dificultad-dificil': juego.dificultad === 'dificil'
+        }"
+      >
+        <div class="flex justify-between items-center">
           <div class="flex items-center">
-            <p class="font-bold mr-2">{{juego.puntuacion}}</p>
-            <div class="flex text-yellow-400">
-              @for (star of [1,2,3,4,5]; track $index) {
-                <span [class.text-gray-300]="$index >= juego.puntuacion">★</span>
-              }
+            <div class="text-2xl mr-2">{{juego.icono}}</div>
+            <h3 class="text-lg font-bold text-[#8571FB]">{{juego.titulo}}</h3>
+          </div>
+          <div class="relative">
+            <button class="text-gray-600 text-2xl font-bold" (click)="toggleMenu(juego.id)">⋯</button>
+            @if (menuAbierto === juego.id) {
+              <div class="absolute right-0 bg-white shadow-lg rounded-md py-2 w-50 z-10 border border-[#A091F9] rounded-lg">
+                <button
+                  class="flex items-center px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100"
+                  (click)="programarJuego(juego.id)"
+                >
+                  <span class="mr-2">➕</span> Programar juego
+                </button>
+                <button
+                  class="flex items-center px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100"
+                  (click)="eliminarJuego(juego.id)"
+                >
+                  <span class="mr-2">🗑️</span> Eliminar
+                </button>
+                <button
+                  class="flex items-center px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100"
+                  (click)="editarJuego(juego.id)"
+                >
+                  <span class="mr-2">✏️</span> Editar
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Información del GameInstance -->
+        @if (juego.descripcion) {
+          <div class="mt-3">
+            <h6 class="text-[#7971AC] font-bold text-sm">Descripción</h6>
+            <p class="text-gray-700">{{juego.descripcion}}</p>
+          </div>
+        }
+
+        <!-- Pista del juego -->
+        @if (juego.clue) {
+          <div class="mt-3">
+            <h6 class="text-[#7971AC] font-bold text-sm">Pista</h6>
+            <p class="text-gray-700">{{juego.clue}}</p>
+          </div>
+        }
+
+        <!-- Palabra del juego (podría estar oculta en producción) -->
+        @if (juego.word) {
+          <div class="mt-3">
+            <h6 class="text-[#7971AC] font-bold text-sm">Palabra</h6>
+            <p class="font-bold text-gray-800">{{juego.word}}</p>
+          </div>
+        }
+
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <h6 class="text-[#7971AC] font-bold text-sm">Veces Jugado</h6>
+            <p class="font-bold">{{juego.vecesJugado}}</p>
+          </div>
+          <div>
+            <h6 class="text-[#7971AC] font-bold text-sm">Puntuación</h6>
+            <div class="flex items-center">
+              <p class="font-bold mr-2">{{juego.puntuacion}}</p>
+              <div class="flex text-yellow-400">
+                @for (star of [1,2,3,4,5]; track $index) {
+                  <span [class.text-gray-300]="$index >= juego.puntuacion">★</span>
+                }
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="mt-4">
-        <p class="text-[#7971AC] font-bold text-sm">Estado</p>
-        @switch (juego.estado) {
-          @case ('Activo') {
-            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs">Activo</span>
-          }
-          @case ('Desactivado') {
-            <span class="bg-red-400 text-white px-3 py-1 rounded-full text-xs">Desactivado</span>
-          }
-        }
+        <div class="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <p class="text-[#7971AC] font-bold text-sm">Estado</p>
+            @switch (juego.estado) {
+              @case ('Activo') {
+                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs">Activo</span>
+              }
+              @case ('Desactivado') {
+                <span class="bg-red-400 text-white px-3 py-1 rounded-full text-xs">Desactivado</span>
+              }
+            }
+          </div>
+          <div>
+            <p class="text-[#7971AC] font-bold text-sm">Visibilidad</p>
+            @switch (juego.visibilidad) {
+              @case ('P') {
+                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs">Público</span>
+              }
+              @case ('R') {
+                <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs">Restringido</span>
+              }
+              @default {
+                <span class="bg-gray-400 text-white px-3 py-1 rounded-full text-xs">No definido</span>
+              }
+            }
+          </div>
+        </div>
       </div>
-    </div>
-  } @empty {
-    <div class="col-span-full text-center py-12">
-      <p class="text-xl text-gray-500">No hay juegos disponibles</p>
-    </div>
+    } @empty {
+      <div class="col-span-full text-center py-12">
+        <p class="text-xl text-gray-500">No hay juegos disponibles</p>
+      </div>
+    }
   }
 </div>
-

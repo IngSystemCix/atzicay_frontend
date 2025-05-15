@@ -3,6 +3,7 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout.component
 import { DashboardComponent, LoginComponent } from './presentation';
 import { JuegosComponent } from './presentation/features/juegos/juegos.component';
 import { ProfileComponent } from './presentation/features/profile/profile.component';
+import {CreateHangmanComponent} from './presentation/features/hangman/create-hangman/create-hangman.component';
 
 export const routes: Routes = [
   {
@@ -29,6 +30,10 @@ export const routes: Routes = [
       {
         path: 'perfil',
         component: ProfileComponent
+      },
+      {
+        path: 'juegos/create-hangman',
+        component: CreateHangmanComponent
       }
     ]
   }
