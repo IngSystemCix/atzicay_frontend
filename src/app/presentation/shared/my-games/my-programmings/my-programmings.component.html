@@ -14,15 +14,17 @@
     <div class="bg-[#E5D8F2] rounded-lg p-2 mx-4 my-4 flex flex-wrap w-fit gap-x-2">
       <span class="text-sm text-gray-600 px-2">Fecha Inicio</span>
       <input
+        title="Fecha de inicio"
         type="date"
         [(ngModel)]="startDate"
-        class="bg-purple-200 rounded-lg px-2 py-1 text-sm">
+        class="bg-purple-200 rounded-lg px-2 py-1 text-sm"/>
 
       <span class="text-sm text-gray-600 px-2">Fecha Fin</span>
       <input
+        title="Fecha de fin"
         type="date"
         [(ngModel)]="endDate"
-        class="bg-purple-200 rounded-lg px-2 py-1 text-sm">
+        class="bg-purple-200 rounded-lg px-2 py-1 text-sm"/>
     </div>
   </div>
 
@@ -41,7 +43,7 @@
               <h6 class="text-sm atzicay-text-color font-bold">{{ activity.group }}</h6>
             </div>
           </div>
-          
+
           <div class="relative">
             <button
               class="text-gray-600 hover:text-gray-800"
