@@ -1,0 +1,9 @@
+/* Si necesitamos estilos específicos no cubiertos por Tailwind */
+.highlighted {
+  background-color: rgba(139, 92, 246, 0.3);
+}
+
+:host {
+  display: block;
+  width: 100%;
+}

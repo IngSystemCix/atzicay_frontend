@@ -1,5 +1,5 @@
 export class Hangman {
-  Id: number;
+  Id?: number;
   GameInstanceId: number;
   Word: string;
   Clue: string;

@@ -4,6 +4,10 @@ import { DashboardComponent, LoginComponent } from './presentation';
 import { JuegosComponent } from './presentation/features/juegos/juegos.component';
 import { ProfileComponent } from './presentation/features/profile/profile.component';
 import {CreateHangmanComponent} from './presentation/features/hangman/create-hangman/create-hangman.component';
+import {GameHangmanComponent} from './presentation/features/hangman/game-hangman/game-hangman.component';
+import {
+  GameSolveTheWordComponent
+} from './presentation/features/solveTheWord/game-solve-the-word/game-solve-the-word.component';
 
 export const routes: Routes = [
   {
@@ -34,6 +38,14 @@ export const routes: Routes = [
       {
         path: 'juegos/create-hangman',
         component: CreateHangmanComponent
+      },
+      {
+        path: 'juegos/jugar-hangman',
+        component: GameHangmanComponent
+      },
+      {
+        path: 'juegos/solve-the-word',
+        component: GameSolveTheWordComponent
       }
     ]
   }

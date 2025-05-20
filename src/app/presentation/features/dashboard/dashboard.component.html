@@ -28,13 +28,17 @@
             />
           </svg>
         </div>
+        <div class="w-full flex items-center justify-center space-x-2">
         <input
           type="search"
           [(ngModel)]="searchTerm"
-          (input)="applyFilters()"
           class="w-full ps-10 py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atzicay-purple-500 focus:border-atzicay-purple-500 outline-none"
           placeholder="Buscar juegos..."
         />
+        <button class="cursor-pointer btn-atzicay text-white px-4 py-2 rounded-lg transition duration-200 flex items-center" (click)="applyFilters()">
+          Buscar
+        </button>
+        </div>
       </div>
 
       <!-- Dropdown de filtros -->

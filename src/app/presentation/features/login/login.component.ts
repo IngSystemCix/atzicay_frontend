@@ -1,42 +1,47 @@
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { ModalComponent } from '../../shared/modal/modal.component';
-import { environment } from '../../../../environments/environment.development';
+import { ModalComponent } from "../../shared/modal/modal.component";
+import { AuthService } from '@auth0/auth0-angular';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ModalComponent, RouterModule],
+  imports: [CommonModule,ModalComponent, RouterModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+  styleUrl: './login.component.css'
 })
 export class LoginComponent {
-  protected showModal = false;
-  protected isLoading = signal(false);
-  protected accessToken = signal<string>('');
+  protected showModal: boolean = false;
+  protected isLoading: boolean = true;
 
-  private auth0 = inject(Auth0Service);
+  constructor(
+    public auth: AuthService,
+    private router: Router
+  ) {
+    this.auth.isAuthenticated$.subscribe((authenticated) => {
+      if (authenticated) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.isLoading = false;
+      }
+    });
+  }
 
   handleOpenModal = () => {
     this.showModal = true;
-  };
-
+  }
   handleCloseModal = () => {
     this.showModal = false;
-  };
-
+  }
   handleLogin = () => {
-    this.isLoading.set(true);
-
-    this.auth0.loginWithRedirect({
+    this.auth.loginWithRedirect({
       authorizationParams: {
         connection: 'google-oauth2',
-        audience: environment.audience,
-        scope: 'openid profile email',
       },
-      appState: { target: '/dashboard' },
+      appState: {
+        target: '/dashboard'
+      },
     });
-  };
+  }
 }

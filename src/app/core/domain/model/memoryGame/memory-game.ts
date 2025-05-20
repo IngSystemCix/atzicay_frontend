@@ -1,5 +1,5 @@
 export class MemoryGame {
-  Id: number;
+  Id?: number;
   GameInstanceId: number;
   Mode: 'II'|'ID';
   PathImg1: string;

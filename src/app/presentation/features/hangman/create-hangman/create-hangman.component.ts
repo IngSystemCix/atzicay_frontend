@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
 import { Hangman } from '../../../../core/domain/model/hangman/hangman';
-import {RouterLink} from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 interface WordClue {
   word: string;
@@ -62,7 +62,12 @@ export class CreateHangmanComponent implements OnInit {
   }
 
   removeWord(index: number): void {
-    this.wordsArray.removeAt(index);
+    if (this.wordsArray.length > 1) {
+      this.wordsArray.removeAt(index);
+    } else {
+      this.errorMessage = 'Se requiere al menos una palabra para el juego.';
+      setTimeout(() => this.errorMessage = '', 3000);
+    }
   }
 
   toggleShowClues(): void {
@@ -71,38 +76,49 @@ export class CreateHangmanComponent implements OnInit {
 
   onSubmit(): void {
     if (this.hangmanForm.valid && this.wordsForm.valid) {
-      // Assuming you want to submit each word individually
-      // or modify this to match your API requirements
+      const words = this.wordsArray.controls.map(control => ({
+        Word: control.get('Word')?.value,
+        Clue: control.get('Clue')?.value
+      }));
+
+      if (words.length === 0) {
+        this.errorMessage = 'Debes agregar al menos una palabra.';
+        return;
+      }
+
+      // Preparar los datos para enviar al servicio
       const baseData = {
         GameInstanceId: this.hangmanForm.value.GameInstanceId,
         Presentation: this.hangmanForm.value.Presentation
       };
 
-      // Example for first word (modify as needed for your API)
-      if (this.wordsArray.length > 0) {
-        const firstWordData = {
-          ...baseData,
-          Word: this.wordsArray.at(0).get('Word')?.value,
-          Clue: this.wordsArray.at(0).get('Clue')?.value
-        };
+      // Enviar la primera palabra como ejemplo (ajusta según tus necesidades)
+      const hangmanData: Hangman = new Hangman({
+        ...baseData,
+        Word: words[0].Word,
+        Clue: words[0].Clue
+      });
 
-        const hangmanData: Hangman = new Hangman(firstWordData);
-
-        this.hangmanService.createHangman(hangmanData).subscribe({
-          next: (response) => {
-            this.successMessage = 'Juego de Hangman creado exitosamente.';
-            this.hangmanForm.reset();
-            this.resetWordsForm();
-          },
-          error: (error) => {
-            this.errorMessage = 'Ocurrió un error al crear el juego.';
-            console.error(error);
-          }
-        });
-      }
+      this.hangmanService.createHangman(hangmanData).subscribe({
+        next: (response) => {
+          this.successMessage = 'Juego de Hangman creado exitosamente.';
+          this.hangmanForm.reset();
+          this.resetWordsForm();
+          // Limpiar el mensaje después de 3 segundos
+          setTimeout(() => this.successMessage = '', 3000);
+        },
+        error: (error) => {
+          this.errorMessage = 'Ocurrió un error al crear el juego.';
+          console.error(error);
+          // Limpiar el mensaje después de 3 segundos
+          setTimeout(() => this.errorMessage = '', 3000);
+        }
+      });
     } else {
       this.markAllAsTouched();
       this.errorMessage = 'Por favor completa todos los campos requeridos.';
+      // Limpiar el mensaje después de 3 segundos
+      setTimeout(() => this.errorMessage = '', 3000);
     }
   }
 
@@ -120,5 +136,4 @@ export class CreateHangmanComponent implements OnInit {
       control.markAllAsTouched();
     });
   }
-
 }
