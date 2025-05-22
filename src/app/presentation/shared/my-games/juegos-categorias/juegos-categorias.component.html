@@ -17,7 +17,7 @@
 </div>
 
 <!-- Listado de categorías -->
-<div *ngIf="!cargando && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 m-4">
+<div *ngIf="!cargando && !error" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 m-4 hover:cursor-pointer">
   @for (categoria of categorias; track categoria.nombre) {
     <div
       class="rounded-lg p-4"

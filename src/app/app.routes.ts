@@ -33,6 +33,7 @@ import {
   ConfigurationMemoryComponent
 } from './presentation/features/memory/configuration-memory/configuration-memory.component';
 import {CreateMemoryComponent} from './presentation/features/memory/create-memory/create-memory.component';
+import {LayoutHangmanComponent} from './presentation/features/hangman/layout-hangman/layout-hangman.component';
 
 export const routes: Routes = [
   {
@@ -63,27 +64,19 @@ export const routes: Routes = [
 
 
 
+      // app.routes.ts o donde tengas tus rutas
       {
         path: 'juegos/hangman',
+        component: LayoutHangmanComponent,
         children: [
-          {
-            path: 'create',
-            component: CreateHangmanComponent
-          },
-          {
-            path: 'jugar',
-            component: GameHangmanComponent
-          },
-          {
-            path: 'configuration',
-            component: ConfigurationHangmanComponent
-          },
-          {
-            path: 'view',
-            component: PreViewHangmanComponent
-          }
+          { path: 'content', component: CreateHangmanComponent },
+          { path: 'config', component: ConfigurationHangmanComponent },
+          { path: 'preview', component: PreViewHangmanComponent },
+          { path: 'jugar', component: GameHangmanComponent },
+          { path: '', redirectTo: 'content', pathMatch: 'full' }
         ]
-      },
+      }
+      ,
 
 
 

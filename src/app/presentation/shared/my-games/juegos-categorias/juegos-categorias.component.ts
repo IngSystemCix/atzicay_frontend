@@ -109,75 +109,75 @@ export class JuegosCategoriasComponent implements OnInit {
       }
     });
 
-  //   // Cargar datos de Rompecabezas
-  //   this.puzzleService.getAllPuzzles().subscribe({
-  //     next: (puzzles) => {
-  //       this.contadores.Rompecabezas = puzzles.length;
-  //       const categoriaPuzzle = this.categorias.find(c => c.nombre === 'Rompecabezas');
-  //       if (categoriaPuzzle) {
-  //         categoriaPuzzle.cantidad = puzzles.length;
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Error al cargar Rompecabezas:', err);
-  //     }
-  //   });
-  //
-  //   // Cargar datos de Memoria
-  //   this.memoryService.getAllMemoryGames().subscribe({
-  //     next: (memoryGames) => {
-  //       this.contadores.Memoria = memoryGames.length;
-  //       const categoriaMemoria = this.categorias.find(c => c.nombre === 'Memoria');
-  //       if (categoriaMemoria) {
-  //         categoriaMemoria.cantidad = memoryGames.length;
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Error al cargar Memoria:', err);
-  //     }
-  //   });
-  //
-  //   // Cargar datos de Pupiletras
-  //   this.wordSearchService.getAllSolveTheWords().subscribe({
-  //     next: (solveTheWords) => {
-  //       this.contadores.Pupiletras = solveTheWords.length;
-  //       const categoriaPupiletras = this.categorias.find(c => c.nombre === 'Pupiletras');
-  //       if (categoriaPupiletras) {
-  //         categoriaPupiletras.cantidad = solveTheWords.length;
-  //       }
-  //     },
-  //     error: (err) => {
-  //       console.error('Error al cargar Pupiletras:', err);
-  //     }
-  //   });
-  // }
+    //   // Cargar datos de Rompecabezas
+    //   this.puzzleService.getAllPuzzles().subscribe({
+    //     next: (puzzles) => {
+    //       this.contadores.Rompecabezas = puzzles.length;
+    //       const categoriaPuzzle = this.categorias.find(c => c.nombre === 'Rompecabezas');
+    //       if (categoriaPuzzle) {
+    //         categoriaPuzzle.cantidad = puzzles.length;
+    //       }
+    //     },
+    //     error: (err) => {
+    //       console.error('Error al cargar Rompecabezas:', err);
+    //     }
+    //   });
+    //
+    //   // Cargar datos de Memoria
+    //   this.memoryService.getAllMemoryGames().subscribe({
+    //     next: (memoryGames) => {
+    //       this.contadores.Memoria = memoryGames.length;
+    //       const categoriaMemoria = this.categorias.find(c => c.nombre === 'Memoria');
+    //       if (categoriaMemoria) {
+    //         categoriaMemoria.cantidad = memoryGames.length;
+    //       }
+    //     },
+    //     error: (err) => {
+    //       console.error('Error al cargar Memoria:', err);
+    //     }
+    //   });
+    //
+    //   // Cargar datos de Pupiletras
+    //   this.wordSearchService.getAllSolveTheWords().subscribe({
+    //     next: (solveTheWords) => {
+    //       this.contadores.Pupiletras = solveTheWords.length;
+    //       const categoriaPupiletras = this.categorias.find(c => c.nombre === 'Pupiletras');
+    //       if (categoriaPupiletras) {
+    //         categoriaPupiletras.cantidad = solveTheWords.length;
+    //       }
+    //     },
+    //     error: (err) => {
+    //       console.error('Error al cargar Pupiletras:', err);
+    //     }
+    //   });
+    // }
 
-  // getColor(colorVar: string): string {
-  //   return `var(--tw-${colorVar})`;
-  // }
-  //
-  // getTextColor(color: string): string {
-  //   const map: Record<string, string> = {
-  //     purple: '#7B5FEA',
-  //     blue: '#3B82F6',
-  //     green: '#16A34A',
-  //     yellow: '#EAB308',
-  //   };
-  //   return map[color] ?? '#000';
-  // }
-  //
-  // getColorTone(color: string, tone: string): string {
-  //   const map: Record<string, Record<string, string>> = {
-  //     purple: { '200': '#DDD6FE', '700': '#7B5FEA' },
-  //     blue: { '200': '#BFDBFE', '700': '#1D4ED8' },
-  //     green: { '200': '#BBF7D0', '700': '#15803D' },
-  //     yellow: { '200': '#FEF9C3', '700': '#A16207' },
-  //   };
-  //   return map[color]?.[tone] ?? '#CCC';
-  // }
-  //
-  // crearJuego(tipo: string) {
-  //   console.log(`Crear juego de tipo: ${tipo}`);
+    // getColor(colorVar: string): string {
+    //   return `var(--tw-${colorVar})`;
+    // }
+    //
+    // getTextColor(color: string): string {
+    //   const map: Record<string, string> = {
+    //     purple: '#7B5FEA',
+    //     blue: '#3B82F6',
+    //     green: '#16A34A',
+    //     yellow: '#EAB308',
+    //   };
+    //   return map[color] ?? '#000';
+    // }
+    //
+    // getColorTone(color: string, tone: string): string {
+    //   const map: Record<string, Record<string, string>> = {
+    //     purple: { '200': '#DDD6FE', '700': '#7B5FEA' },
+    //     blue: { '200': '#BFDBFE', '700': '#1D4ED8' },
+    //     green: { '200': '#BBF7D0', '700': '#15803D' },
+    //     yellow: { '200': '#FEF9C3', '700': '#A16207' },
+    //   };
+    //   return map[color]?.[tone] ?? '#CCC';
+    // }
+    //
+    // crearJuego(tipo: string) {
+    //   console.log(`Crear juego de tipo: ${tipo}`);
 
     // Encuentra la categoría correspondiente
     // const categoria = this.categorias.find(cat => cat.nombre === tipo);

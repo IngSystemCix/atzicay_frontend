@@ -1,14 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+// configuration-hangman.component.ts
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
-import { Hangman } from '../../../../core/domain/model/hangman/hangman';
-import { RouterLink } from '@angular/router';
-
-interface WordClue {
-  word: string;
-  clue: string;
-}
+import { Router, RouterLink } from '@angular/router';
+import {HangmanStateService} from '../../../../core/infrastructure/api/Hangman/hangman-state.service';
 
 @Component({
   selector: 'app-configuration-hangman',
@@ -19,122 +15,82 @@ interface WordClue {
     RouterLink
   ],
   templateUrl: './configuration-hangman.component.html',
-  styleUrl: './configuration-hangman.component.css'
+  styleUrls: ['./configuration-hangman.component.css']
 })
 export class ConfigurationHangmanComponent {
-  activeTab: 'content' | 'config' | 'preview' = 'content';
-    showClues: boolean = true;
-    hangmanForm: FormGroup;
-    wordsForm: FormGroup;
-    successMessage: string = '';
-    errorMessage: string = '';
-    words: WordClue[] = [];
-    router: string = '';
-  
-    constructor(private fb: FormBuilder, private hangmanService: HangmanService) {
-      this.hangmanForm = this.fb.group({
-        GameInstanceId: ['', Validators.required],
-        Presentation: ['', Validators.required]
-      });
-  
-      this.wordsForm = this.fb.group({
-        words: this.fb.array([])
-      });
+  configForm: FormGroup;
+  successMessage: string = '';
+  errorMessage: string = '';
+  isLoading: boolean = false;
+
+  // Opciones para los selectores
+  themes = ['Claro', 'Oscuro', 'Azul', 'Verde'];
+  fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
+  difficulties = ['Fácil', 'Medio', 'Difícil'];
+
+  constructor(
+    private fb: FormBuilder,
+    private hangmanStateService: HangmanStateService,
+    private hangmanService: HangmanService,
+    private router: Router
+  ) {
+    this.configForm = this.fb.group({
+      timeLimit: [30, [Validators.min(10), Validators.max(300)]],
+      theme: ['Claro', Validators.required],
+      font: ['Arial', Validators.required],
+      backgroundColor: ['#ffffff', Validators.required],
+      fontColor: ['#000000', Validators.required],
+      successMessage: ['¡Felicidades!', [Validators.required, Validators.minLength(3)]],
+      failureMessage: ['Inténtalo de nuevo', [Validators.required, Validators.minLength(3)]],
+      publicGame: [true]
+    });
+  }
+
+  onSubmit(): void {
+    if (this.isLoading) return;
+
+    this.configForm.markAllAsTouched();
+
+    if (this.configForm.invalid) {
+      this.showError('Por favor completa todos los campos requeridos correctamente.');
+      return;
     }
-  
-    ngOnInit(): void {
-      // Add initial two words
-      this.addNewWord();
-      this.addNewWord();
-    }
-  
-    get wordsArray(): FormArray {
-      return this.wordsForm.get('words') as FormArray;
-    }
-  
-    addNewWord(): void {
-      const wordForm = this.fb.group({
-        Word: ['', [Validators.required, Validators.minLength(3)]],
-        Clue: ['', Validators.required]
-      });
-  
-      this.wordsArray.push(wordForm);
-    }
-  
-    removeWord(index: number): void {
-      if (this.wordsArray.length > 1) {
-        this.wordsArray.removeAt(index);
-      } else {
-        this.errorMessage = 'Se requiere al menos una palabra para el juego.';
-        setTimeout(() => this.errorMessage = '', 3000);
-      }
-    }
-  
-    toggleShowClues(): void {
-      //this.showClues = !this.showClues;
-      this.showClues = true;
-    }
-  
-    onSubmit(): void {
-      if (this.hangmanForm.valid && this.wordsForm.valid) {
-        const words = this.wordsArray.controls.map(control => ({
-          Word: control.get('Word')?.value,
-          Clue: control.get('Clue')?.value
-        }));
-  
-        if (words.length === 0) {
-          this.errorMessage = 'Debes agregar al menos una palabra.';
-          return;
-        }
-  
-        // Preparar los datos para enviar al servicio
-        const baseData = {
-          GameInstanceId: this.hangmanForm.value.GameInstanceId,
-          Presentation: this.hangmanForm.value.Presentation
-        };
-  
-        // Enviar la primera palabra como ejemplo (ajusta según tus necesidades)
-        const hangmanData: Hangman = new Hangman({
-          ...baseData,
-          Word: words[0].Word,
-          Clue: words[0].Clue
-        });
-  
-        this.hangmanService.createHangman(hangmanData).subscribe({
-          next: (response) => {
-            this.successMessage = 'Juego de Hangman creado exitosamente.';
-            this.hangmanForm.reset();
-            this.resetWordsForm();
-            // Limpiar el mensaje después de 3 segundos
-            setTimeout(() => this.successMessage = '', 3000);
-          },
-          error: (error) => {
-            this.errorMessage = 'Ocurrió un error al crear el juego.';
-            console.error(error);
-            // Limpiar el mensaje después de 3 segundos
-            setTimeout(() => this.errorMessage = '', 3000);
-          }
-        });
-      } else {
-        this.markAllAsTouched();
-        this.errorMessage = 'Por favor completa todos los campos requeridos.';
-        // Limpiar el mensaje después de 3 segundos
-        setTimeout(() => this.errorMessage = '', 3000);
-      }
-    }
-  
-    private resetWordsForm(): void {
-      while (this.wordsArray.length) {
-        this.wordsArray.removeAt(0);
-      }
-      this.addNewWord();
-      this.addNewWord();
-    }
-  
-    private markAllAsTouched(): void {
-      this.hangmanForm.markAllAsTouched();
-      this.wordsArray.controls.forEach(control => {
-        control.markAllAsTouched();
-      });
-    }
+
+    this.isLoading = true;
+
+    // Guardar configuración en el servicio compartido
+    this.hangmanStateService.updateConfiguration(this.configForm.value);
+
+    setTimeout(() => {
+      this.showSuccess('Configuración guardada exitosamente');
+      this.isLoading = false;
+
+      // Redirigir al componente de creación
+      this.router.navigate(['/juegos/hangman/crear']);
+    }, 1500);
+  }
+
+  onColorChange(field: string, color: string): void {
+    this.configForm.get(field)?.setValue(color);
+  }
+
+  private showSuccess(message: string): void {
+    this.successMessage = message;
+    this.errorMessage = '';
+    setTimeout(() => this.successMessage = '', 5000);
+  }
+
+  private showError(message: string): void {
+    this.errorMessage = message;
+    this.successMessage = '';
+    setTimeout(() => this.errorMessage = '', 5000);
+  }
+
+  get timeLimit() { return this.configForm.get('timeLimit'); }
+  get theme() { return this.configForm.get('theme'); }
+  get font() { return this.configForm.get('font'); }
+  get backgroundColor() { return this.configForm.get('backgroundColor'); }
+  get fontColor() { return this.configForm.get('fontColor'); }
+  get successMessageControl() { return this.configForm.get('successMessage'); }
+  get failureMessageControl() { return this.configForm.get('failureMessage'); }
 }

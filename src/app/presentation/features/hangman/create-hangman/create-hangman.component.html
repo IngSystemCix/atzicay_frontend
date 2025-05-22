@@ -1,30 +1,4 @@
 <div class="min-h-screen bg-purple-50 p-4">
-  <!-- Tabs -->
-  <div class="flex mb-4">
-      <button
-      (click)="activeTab = 'content'"
-      class="px-6 py-2 rounded-l-lg font-bold cursor-pointer"
-      [ngClass]="activeTab === 'content' ? ' bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-    >
-      Contenido
-    </button>
-    
-    <button
-      (click)="activeTab = 'config'"
-      class="px-6 py-2 font-bold cursor-pointer"
-      [ngClass]="activeTab === 'config' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-    >
-      Configuración
-    </button>
-    <button
-      (click)="activeTab = 'preview'"
-      class="px-6 py-2 rounded-r-lg font-bold cursor-pointer"
-      [ngClass]="activeTab === 'preview' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-    >
-      Vista Previa
-    </button>
-  </div>
-
   <!-- Content area -->
   <div class="flex gap-4">
     <!-- Left panel - Game Information -->
@@ -33,24 +7,82 @@
       <p class="text-gray-500 mb-6 font-semibold">Tu progreso en la plataforma</p>
 
       <form [formGroup]="hangmanForm">
+        <!-- Nombre del juego -->
         <div class="mb-4">
-          <label for="GameInstanceId" class="block text-gray-900 mb-2 font-semibold">Título del Juego</label>
+          <label for="name" class="block text-gray-900 mb-2 font-semibold">
+            Título del Juego <span class="text-red-500">*</span>
+          </label>
           <input
-            id="GameInstanceId"
-            formControlName="GameInstanceId"
+            id="name"
+            formControlName="name"
             type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Ej: Aprende Vocabulario"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            [class.border-red-500]="isNameInvalid"
+            [class.border-gray-300]="!isNameInvalid"
           />
+          @if (isNameInvalid) {
+            <span class="text-red-500 text-sm mt-1 block">El nombre debe tener al menos 3 caracteres</span>
+          }
         </div>
 
+        <!-- Descripción -->
         <div class="mb-4">
-          <label for="Presentation" class="block text-gray-900 mb-2 font-semibold">Descripción</label>
+          <label for="description" class="block text-gray-900 mb-2 font-semibold">
+            Descripción <span class="text-red-500">*</span>
+          </label>
           <textarea
-            id="Presentation"
-            formControlName="Presentation"
-            rows="5"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            id="description"
+            formControlName="description"
+            rows="4"
+            placeholder="Describe el objetivo y contenido del juego..."
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            [class.border-red-500]="isDescriptionInvalid"
+            [class.border-gray-300]="!isDescriptionInvalid"
           ></textarea>
+          @if (isDescriptionInvalid) {
+            <span class="text-red-500 text-sm mt-1 block">La descripción debe tener al menos 10 caracteres</span>
+          }
+        </div>
+
+        <!-- Dificultad -->
+        <div class="mb-4">
+          <label for="difficulty" class="block text-gray-900 mb-2 font-semibold">Dificultad</label>
+          <select
+            id="difficulty"
+            formControlName="difficulty"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="E">Fácil</option>
+            <option value="M">Medio</option>
+            <option value="H">Difícil</option>
+          </select>
+        </div>
+
+        <!-- Visibilidad -->
+        <div class="mb-4">
+          <label for="visibility" class="block text-gray-900 mb-2 font-semibold">Visibilidad</label>
+          <select
+            id="visibility"
+            formControlName="visibility"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="P">Público</option>
+            <option value="R">Restringido</option>
+          </select>
+        </div>
+
+        <!-- Presentación -->
+        <div class="mb-4">
+          <label for="presentation" class="block text-gray-900 mb-2 font-semibold">Tipo de Presentación</label>
+          <select
+            id="presentation"
+            formControlName="presentation"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="A">Alfabético</option>
+            <option value="F">Figura</option>
+          </select>
         </div>
       </form>
     </div>
@@ -63,8 +95,9 @@
           <p class="text-gray-500 font-semibold">Agrega las palabras que los estudiantes deberán adivinar</p>
         </div>
         <button
+          type="button"
           (click)="addNewWord()"
-          class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-4 py-2 rounded-md cursor-pointer font-bold"
+          class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-4 py-2 rounded-md cursor-pointer font-bold transition-colors"
         >
           Agregar Palabra
         </button>
@@ -74,7 +107,7 @@
         <span class="text-gray-900 font-semibold">Mostrar pistas</span>
         <div
           (click)="toggleShowClues()"
-          class="w-12 h-6 bg-gray-200 rounded-full p-1 cursor-pointer"
+          class="w-12 h-6 bg-gray-200 rounded-full p-1 cursor-pointer transition-colors"
           [class.bg-purple-500]="showClues"
         >
           <div
@@ -86,7 +119,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span class="ml-1 text-sm">Se recomienda agregar al menos 5 palabras</span>
+          <span class="ml-1 text-sm">Se recomienda agregar al menos 2 palabras</span>
         </div>
       </div>
 
@@ -95,8 +128,16 @@
           @for (wordForm of wordsArray.controls; track $index) {
             <div class="bg-purple-100 p-4 rounded-md relative" [formGroupName]="$index">
               <div class="flex justify-between items-center mb-2">
-                <h3 class="text-white bg-atzicay-purple-500 font-medium rounded-4xl p-1">Palabra {{ $index + 1 }}</h3>
-                <button type="button" (click)="removeWord($index)" class="text-red-500 hover:text-red-700">
+                <h3 class="text-white bg-atzicay-purple-500 font-medium rounded-full px-3 py-1 text-sm">
+                  Palabra {{ $index + 1 }}
+                </h3>
+                <button
+                  type="button"
+                  (click)="removeWord($index)"
+                  class="text-red-500 hover:text-red-700 transition-colors"
+                  [disabled]="wordsArray.length <= 1"
+                  [class.opacity-50]="wordsArray.length <= 1"
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -107,27 +148,38 @@
                 <label class="block mb-1 text-gray-700 font-semibold">Palabra o Frase</label>
                 <input
                   type="text"
-                  formControlName="Word"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  formControlName="word"
+                  placeholder="Ingresa la palabra..."
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  [class.border-red-500]="isWordInvalid($index)"
+                  [class.border-gray-300]="!isWordInvalid($index)"
                 />
-                @if (wordForm.get('Word')?.invalid && wordForm.get('Word')?.touched) {
+                @if (wordForm.get('word')?.invalid && wordForm.get('word')?.touched) {
                   <span class="text-red-500 text-sm mt-1">La palabra es requerida (mínimo 3 caracteres)</span>
                 }
               </div>
 
               <div>
-                <label class="block mb-1 text-gray-700 font-semibold">Pista</label>
+                <label class="block mb-1 text-gray-700 font-semibold">
+                  Pista
+                  @if (showClues) {
+                    <span class="text-red-500">*</span>
+                  }
+                </label>
                 <input
                   type="text"
-                  formControlName="Clue"
-                  [attr.disabled]="!showClues ? true : null"
-                  [attr.placeholder]="!showClues ? 'Habilitar para agregar pista' : ''"
-                  [ngClass]="{
-                    'bg-gray-100 cursor-not-allowed': !showClues
-                  }"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  formControlName="clue"
+                  [disabled]="!showClues"
+                  [placeholder]="!showClues ? 'Habilitar para agregar pista' : 'Ingresa una pista...'"
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
+                  [class.bg-gray-100]="!showClues"
+                  [class.cursor-not-allowed]="!showClues"
+                  [class.border-red-500]="isClueInvalid($index)"
+                  [class.border-gray-300]="!isClueInvalid($index)"
                 />
-                
+                @if (isClueInvalid($index)) {
+                  <span class="text-red-500 text-sm mt-1 block">La pista debe tener al menos 5 caracteres</span>
+                }
               </div>
             </div>
           } @empty {
@@ -146,7 +198,7 @@
             class="border border-purple-500 text-purple-500 hover:bg-purple-200 hover:text-white px-8 py-3 rounded-md font-bold cursor-pointer">
       Cancelar
     </button>
-    <button (click)="onSubmit()" class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md cursor-pointer font-bold">
+    <button  class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md cursor-pointer font-bold">
       Guardar
     </button>
   </div>
