@@ -1,8 +1,10 @@
 @import "tailwindcss";
 
 @theme {
+  /* Colores */
     --color-atzicay-purple-50: #f4eefd;
     --color-atzicay-purple-500: #a193f7;
+    --color-purple-500: #a193f7;
     --color-atzicay-red-300: #fe6161;
     --color-atzicay-bg: #F2EEFD;
 

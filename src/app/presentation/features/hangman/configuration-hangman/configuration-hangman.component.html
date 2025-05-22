@@ -1,1 +1,127 @@
-<p>configuration-hangman works!</p>
+<div class="min-h-screen bg-purple-50 p-4">
+    <!-- Tabs -->
+    <div class="flex mb-3">
+        <button (click)="activeTab = 'content'" class="px-6 py-2 rounded-l-lg font-bold cursor-pointer"
+            [ngClass]="activeTab === 'content' ? ' bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'">
+            Contenido
+        </button>
+
+        <button (click)="activeTab = 'config'" class="px-6 py-2 font-bold cursor-pointer"
+            [ngClass]="activeTab === 'config' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'">
+            Configuración
+        </button>
+        <button (click)="activeTab = 'preview'" class="px-6 py-2 rounded-r-lg font-bold cursor-pointer"
+            [ngClass]="activeTab === 'preview' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'">
+            Vista Previa
+        </button>
+    </div>
+
+    <!-- Content area -->
+    <div class="flex gap-4">
+        <!-- Left panel - Game Information -->
+        <div class="w-full bg-white p-6 rounded-lg shadow-sm">
+            <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Configuración del juego</h2>
+            <p class="text-gray-500 mb-6 font-semibold">Personaliza las reglas y opciones del juego</p>
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Fuente -->
+                <div>
+                    <label class="block text-gray-900 mb-2 font-semibold">Fuente</label>
+                    <input type="text"
+                        class="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-purple-400" />
+                </div>
+
+                <!-- Mensaje de Éxito -->
+                <div>
+                    <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Éxito</label>
+                    <input type="text"
+                        class="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-purple-400" />
+                </div>
+
+                <!-- Fondo -->
+                <div>
+                    <label class="block text-gray-900 mb-2 font-semibold">Fondo</label>
+                    <div class="flex gap-2">
+                        <button class="w-8 h-8 rounded bg-gray-300"></button>
+                        <button class="w-8 h-8 rounded bg-gray-200"></button>
+                        <button class="w-8 h-8 rounded bg-white border"></button>
+                        <button
+                            class="w-8 h-8 rounded bg-gradient-to-br from-red-500 via-yellow-500 to-green-500"></button>
+                    </div>
+                </div>
+
+                <!-- Mensaje de Fracaso -->
+                <div>
+                    <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Fracaso</label>
+                    <input type="text"
+                        class="w-full rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-purple-400" />
+                </div>
+
+                <!-- Color de Fuente -->
+                <div>
+                    <label class="block text-gray-900 mb-2 font-semibold">Color de Fuente</label>
+                    <div class="flex gap-2">
+                        <button class="w-8 h-8 rounded bg-gray-300"></button>
+                        <button class="w-8 h-8 rounded bg-purple-200"></button>
+                        <button
+                            class="w-8 h-8 rounded bg-gradient-to-br from-blue-500 via-green-500 to-yellow-500"></button>
+                    </div>
+                </div>
+
+                <!-- Nivel de Dificultad - Combo Box -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" >Nivel de Dificultad</label>
+                    <select formControlName="difficulty"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-400">
+                        <option value="" disabled selected>Selecciona una opción</option>
+                        <option value="Facil">Fácil</option>
+                        <option value="Medio">Medio</option>
+                        <option value="Dificil">Difícil</option>
+                    </select>
+                </div>
+
+                <!-- Juego Público -->
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-gray-900 font-semibold">Juego Público</span>
+                    <div (click)="toggleShowClues()" class="w-12 h-6 bg-gray-200 rounded-full p-1 cursor-pointer"
+                        [class.bg-purple-500]="showClues">
+                        <div class="bg-white w-4 h-4 rounded-full transform duration-300 ease-in-out"
+                            [class.translate-x-6]="showClues"></div>
+                    </div>
+                    <div class="flex items-center text-gray-500">
+                        <span class="ml-1 text-sm">Otros usuarios podrán usar este juego</span>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Botones -->
+            <div class="flex justify-between mt-6">
+                <button class="text-purple-500 hover:underline">Cancelar</button>
+                <button class="bg-purple-500 text-white px-6 py-2 rounded-md hover:bg-purple-600">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buttons -->
+<div class="flex justify-between mt-2">
+    <button routerLink="/juegos"
+        class="border border-purple-500 text-purple-500 hover:bg-purple-200 hover:text-white px-8 py-3 rounded-md font-bold cursor-pointer">
+        Cancelar
+    </button>
+    <button (click)="onSubmit()"
+        class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md cursor-pointer font-bold">
+        Guardar
+    </button>
+</div>
+
+@if (successMessage) {
+<div class="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+    {{ successMessage }}
+</div>
+}
+
+@if (errorMessage) {
+<div class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+    {{ errorMessage }}
+</div>
+}
