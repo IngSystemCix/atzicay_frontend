@@ -190,4 +190,13 @@ export class JuegosCategoriasComponent implements OnInit {
     //   console.log('Ruta no definida para este tipo de juego');
     // }
   }
+
+  crearJuego(ruta: string) {
+    if (ruta) {
+      this.router.navigate([ruta]);
+    } else {
+      console.error('No se definió ruta para este juego');
+    }
+
+  }
 }

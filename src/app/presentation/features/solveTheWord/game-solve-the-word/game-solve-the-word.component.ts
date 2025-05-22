@@ -56,6 +56,8 @@ export class GameSolveTheWordComponent implements OnInit {
     this.startTimer();
   }
 
+  isSelecting = false;
+
   initializeGrid() {
     this.grid = [];
     for (let i = 0; i < this.gridSize; i++) {
@@ -183,46 +185,102 @@ export class GameSolveTheWordComponent implements OnInit {
   }
 
   onCellMouseDown(cell: WordCell) {
+    this.isSelecting = true;
     this.selection = [cell];
-    cell.isFound = true;
   }
 
   onCellMouseOver(cell: WordCell) {
-    if (this.selection.length > 0) {
-      // Verificar que la celda esté alineada con la selección actual
-      if (this.isAligned(this.selection[0], cell, this.selection.length)) {
-        // Evitar duplicados
-        if (!this.selection.some(c => c.position.row === cell.position.row && c.position.col === cell.position.col)) {
-          this.selection.push(cell);
-          cell.isFound = true;
-        }
+    if (!this.isSelecting) return;
+
+    // Si es la primera celda, simplemente la agregamos
+    if (this.selection.length === 0) {
+      this.selection.push(cell);
+      return;
+    }
+
+    const firstCell = this.selection[0];
+    const lastCell = this.selection[this.selection.length - 1];
+
+    // Calcular dirección entre la primera y última celda seleccionada
+    const direction = this.calculateDirection(firstCell, lastCell);
+
+    // Verificar si la nueva celda continúa en la misma dirección
+    if (this.isInDirection(lastCell, cell, direction)) {
+      // Verificar que no esté ya seleccionado
+      if (!this.selection.some(c =>
+        c.position.row === cell.position.row &&
+        c.position.col === cell.position.col)) {
+        this.selection.push(cell);
+      }
+    } else {
+      // Si no está en la misma dirección, verificar si forma nueva dirección con la primera celda
+      const newDirection = this.calculateDirection(firstCell, cell);
+      if (this.isValidDirection(newDirection) &&
+        Math.abs(cell.position.row - firstCell.position.row) ===
+        Math.abs(cell.position.col - firstCell.position.col) ||
+        cell.position.row === firstCell.position.row ||
+        cell.position.col === firstCell.position.col) {
+        // Reiniciar selección con la nueva dirección válida
+        this.selection = [firstCell, cell];
       }
     }
   }
 
+  private calculateDirection(start: WordCell, end: WordCell): { row: number, col: number } {
+    const rowDiff = end.position.row - start.position.row;
+    const colDiff = end.position.col - start.position.col;
+
+    return {
+      row: rowDiff !== 0 ? rowDiff / Math.abs(rowDiff) : 0,
+      col: colDiff !== 0 ? colDiff / Math.abs(colDiff) : 0
+    };
+  }
+
+  private isInDirection(from: WordCell, to: WordCell, direction: { row: number, col: number }): boolean {
+    return to.position.row === from.position.row + direction.row &&
+      to.position.col === from.position.col + direction.col;
+  }
+
+  private isValidDirection(direction: { row: number, col: number }): boolean {
+    // Todas las direcciones son válidas (horizontal, vertical y diagonal)
+    return Math.abs(direction.row) <= 1 && Math.abs(direction.col) <= 1;
+  }
+
+
   onCellMouseUp() {
+    this.isSelecting = false;
+
+    if (this.selection.length < 2) {
+      this.selection = [];
+      return;
+    }
+
     const selectedWord = this.selection.map(cell => cell.letter).join('');
     const reversedWord = selectedWord.split('').reverse().join('');
 
-    // Comprobar si la palabra seleccionada está en la lista
+    // Buscar palabra en ambas direcciones
     const foundWord = this.words.find(word =>
-      word.text === selectedWord || word.text === reversedWord
+      !word.found &&
+      (word.text === selectedWord || word.text === reversedWord)
     );
 
-    if (foundWord && !foundWord.found) {
+    if (foundWord) {
       foundWord.found = true;
       this.wordsFound++;
 
-      // Mantener las celdas marcadas como encontradas
-      if (foundWord.positions) {
-        for (const pos of foundWord.positions) {
-          this.grid[pos.row][pos.col].isFound = true;
-        }
-      }
-    } else {
-      // Si no se encontró la palabra, resetear las celdas
+      // Marcar todas las celdas de la palabra como encontradas
       for (const cell of this.selection) {
-        // Solo restablecer si la celda no pertenece a una palabra ya encontrada
+        cell.isFound = true;
+      }
+
+      // Guardar las posiciones para referencia futura
+      foundWord.positions = this.selection.map(cell => ({
+        row: cell.position.row,
+        col: cell.position.col
+      }));
+    } else {
+      // Si no es una palabra válida, desmarcar las celdas
+      for (const cell of this.selection) {
         if (!this.cellBelongsToFoundWord(cell)) {
           cell.isFound = false;
         }
@@ -231,10 +289,15 @@ export class GameSolveTheWordComponent implements OnInit {
 
     this.selection = [];
 
-    // Comprobar si se han encontrado todas las palabras
+    // Comprobar si se completó el juego
     if (this.wordsFound === this.totalWords) {
       clearInterval(this.timer);
-      // Manejo de fin de juego
+    }
+  }
+
+  onCellMouseLeave() {
+    if (!this.isSelecting) {
+      this.selection = [];
     }
   }
 
@@ -261,5 +324,28 @@ export class GameSolveTheWordComponent implements OnInit {
       }
     }
     return false;
+  }
+
+
+  resetGame() {
+    // Reiniciar todas las variables del juego
+    this.wordsFound = 0;
+    this.timeLeft = 347;
+    this.selection = [];
+    this.isSelecting = false;
+
+    // Reiniciar el estado de las palabras
+    this.words.forEach(word => word.found = false);
+
+    // Reiniciar el tablero
+    this.initializeGrid();
+    this.placeWordsOnGrid();
+    this.fillRemainingCells();
+
+    // Reiniciar el temporizador
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+    this.startTimer();
   }
 }

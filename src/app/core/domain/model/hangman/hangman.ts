@@ -3,13 +3,13 @@ export class Hangman {
   GameInstanceId: number;
   Word: string;
   Clue: string;
-  Presentation: string;
+  PresentationType: 'A' | 'F';
 
   constructor(data: any) {
     this.Id = data.Id;
     this.GameInstanceId = data.GameInstanceId;
     this.Word = data.Word;
     this.Clue = data.Clue;
-    this.Presentation = data.Presentation;
+    this.PresentationType = data.PresentationType;
   }
 }

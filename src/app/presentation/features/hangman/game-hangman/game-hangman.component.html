@@ -4,18 +4,15 @@
   </h1>
 
   <!-- Información del juego -->
-  <div class="w-full p-4">
+  <div class="w-full p-4 m-2 ">
     <div class="flex justify-between items-center mb-2">
-      <div class="text-C3B5FA">Intentos restantes: {{ state.intentosRestantes }}</div>
+      <div class="text-C3B5FA">Intentos restantes: {{ state.vidasRestantes }}</div>
       <div class="text-C3B5FA">Tiempo: {{ formatearTiempo() }}</div>
     </div>
     <div class="text-C3B5FA mb-4">Palabra: {{ state.numPalabra }} de {{ state.totalPalabras }}</div>
 
-    <!-- Barra de progreso para intentos -->
-    <div class="w-full bg-C3B5FA rounded-full h-2 mb-8">
-      <div class="bg-C3B5FA h-2 rounded-full"
-           [style.width]="(state.intentosRestantes / 6 * 100) + '%'"></div>
-    </div>
+  </div>
+
 
     <!-- Área del juego -->
     <div class="flex flex-col md:flex-row justify-between items-center">
@@ -88,14 +85,13 @@
         </div>
       </div>
     </div>
-  </div>
 
   <!-- Mensaje de resultado -->
   <div *ngIf="state.juegoTerminado"
        class="mt-6 p-3 rounded-md text-center w-full max-w-md"
        [ngClass]="state.juegoGanado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
     <p *ngIf="state.juegoGanado" class="mb-2">¡Felicidades! Has adivinado la palabra.</p>
-    <p *ngIf="!state.juegoGanado" class="mb-2">¡Oh no! Has perdido. La palabra era {{ state.palabraActual }}.</p>
+    <p *ngIf="!state.juegoGanado" class="mb-2">¡Oh no! Has perdido.</p>
   </div>
 
   <!-- Pista -->
@@ -103,9 +99,36 @@
     Pista: {{ state.pistaPalabra }}
   </div>
 
-  <!-- Botón para jugar de nuevo -->
-  <button (click)="reiniciarJuego()"
-          class="mt-6 px-8 py-2 bg-purple-400 hover:bg-purple-500 text-white rounded-md transition-colors font-medium">
-    {{ state.juegoTerminado ? 'Jugar de Nuevo' : 'Reiniciar Juego' }}
-  </button>
+  <!-- Mostrar botones al finalizar palabra -->
+  <div *ngIf="state.juegoTerminado" class="text-center mt-6">
+
+    <!-- Juego finalizado por vidas -->
+    <div *ngIf="state.juegoFinalizado">
+      <p class="text-red-600 text-lg font-bold mb-4">¡Juego terminado! Se acabaron tus intentos.</p>
+      <button (click)="reiniciarJuego()"
+              class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+        Reiniciar juego completo
+      </button>
+    </div>
+
+    <!-- Ganó la palabra -->
+    <div *ngIf="!state.juegoFinalizado && state.juegoGanado">
+      <button (click)="reiniciarJuego()"
+              class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+        Siguiente palabra
+      </button>
+    </div>
+
+    <!-- Perdió la palabra pero aún tiene vidas -->
+    <div *ngIf="!state.juegoFinalizado && !state.juegoGanado">
+      <p class="text-yellow-600 font-medium mb-2">Perdiste esta palabra. Te quedan {{ state.vidasRestantes }} vidas.</p>
+      <button (click)="reiniciarJuego()"
+              class="px-6 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+        Reintentar
+      </button>
+    </div>
+  </div>
+
+
+
 </div>

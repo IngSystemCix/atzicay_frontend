@@ -39,11 +39,12 @@
       <button
         class="w-full py-2 border rounded-md font-bold transition duration-300"
         [ngStyle]="{
-          'background-color': '#FFFFFF',
-          'border-color': '#CDC1FE',
-          'color': '#63606C'
-        }"
+    'background-color': '#FFFFFF',
+    'border-color': '#CDC1FE',
+    'color': '#63606C'
+  }"
         [ngClass]="categoria.hover"
+        (click)="crearJuego(categoria.ruta)"
       >
         Crear {{ categoria.nombre }}
       </button>

@@ -30,6 +30,8 @@ export class GamePuzzleComponent implements OnInit {
   timeElapsed = 0;
   timer: any;
   allowWrongPlacements = false; // Control para permitir colocaciones incorrectas
+  maxTime = 300;
+  timeLeft = this.maxTime;
 
   // Dimensiones de la imagen
   imageWidth = 800;
@@ -39,7 +41,7 @@ export class GamePuzzleComponent implements OnInit {
   sidebarWidth = 200;
 
   ngOnInit() {
-    this.initializePuzzle();
+    this.startGame();
   }
 
   initializePuzzle() {
@@ -73,13 +75,17 @@ export class GamePuzzleComponent implements OnInit {
       clearInterval(this.timer);
     }
 
-    // Reiniciar el tiempo
-    this.timeElapsed = 0;
+    this.timeLeft = this.maxTime;
+
     this.timer = setInterval(() => {
-      this.timeElapsed++;
+      if (this.timeLeft > 0) {
+        this.timeLeft--;
+      } else {
+        clearInterval(this.timer);
+        this.endGame();
+      }
     }, 1000);
 
-    // Reinicializar el puzzle
     this.initializePuzzle();
     this.gameStarted = true;
     this.gameCompleted = false;
@@ -245,10 +251,11 @@ export class GamePuzzleComponent implements OnInit {
   }
 
   formatTime(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   }
+
 
   toggleHelp() {
     this.allowWrongPlacements = !this.allowWrongPlacements;
@@ -264,6 +271,12 @@ export class GamePuzzleComponent implements OnInit {
       });
     }
   }
+
+  endGame() {
+    this.gameCompleted = true;
+    this.gameStarted = false;
+  }
+
 
   protected readonly Array = Array;
 }
