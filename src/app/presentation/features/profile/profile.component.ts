@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
 import {CommonModule} from '@angular/common';
 import { RouterModule } from '@angular/router';
+import {ModalEditUsersComponent} from '../../shared/modal-edit-users/modal-edit-users.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ModalEditUsersComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
@@ -18,5 +19,15 @@ export class ProfileComponent {
       this.user = user;
       console.log(user);
     });
+  }
+
+  showModal = false;
+
+  abrirModal() {
+    this.showModal = true;
+  }
+
+  cerrarModal() {
+    this.showModal = false;
   }
 }

@@ -8,6 +8,31 @@ import {GameHangmanComponent} from './presentation/features/hangman/game-hangman
 import {
   GameSolveTheWordComponent
 } from './presentation/features/solveTheWord/game-solve-the-word/game-solve-the-word.component';
+import {GamePuzzleComponent} from './presentation/features/Puzzle/game-puzzle/game-puzzle.component';
+import {CreatePuzzleComponent} from './presentation/features/Puzzle/create-puzzle/create-puzzle.component';
+import {
+  ConfigurationPuzzleComponent
+} from './presentation/features/Puzzle/configuration-puzzle/configuration-puzzle.component';
+import {
+  CreateSolveTheWordComponent
+} from './presentation/features/solveTheWord/create-solve-the-word/create-solve-the-word.component';
+import {
+  ConfigurationSolveTheWordComponent
+} from './presentation/features/solveTheWord/configuration-solve-the-word/configuration-solve-the-word.component';
+import {
+  PreViewSolveTheWordComponent
+} from './presentation/features/solveTheWord/pre-view-solve-the-word/pre-view-solve-the-word.component';
+import {
+  ConfigurationHangmanComponent
+} from './presentation/features/hangman/configuration-hangman/configuration-hangman.component';
+import {PreViewHangmanComponent} from './presentation/features/hangman/pre-view-hangman/pre-view-hangman.component';
+import {MemoryGame} from './core/domain/model/memoryGame/memory-game';
+import {GameMemoryComponent} from './presentation/features/memory/game-memory/game-memory.component';
+import {PreViewMemoryComponent} from './presentation/features/memory/pre-view-memory/pre-view-memory.component';
+import {
+  ConfigurationMemoryComponent
+} from './presentation/features/memory/configuration-memory/configuration-memory.component';
+import {CreateMemoryComponent} from './presentation/features/memory/create-memory/create-memory.component';
 
 export const routes: Routes = [
   {
@@ -35,18 +60,105 @@ export const routes: Routes = [
         path: 'perfil',
         component: ProfileComponent
       },
+
+
+
       {
-        path: 'juegos/create-hangman',
-        component: CreateHangmanComponent
+        path: 'juegos/hangman',
+        children: [
+          {
+            path: 'create',
+            component: CreateHangmanComponent
+          },
+          {
+            path: 'jugar',
+            component: GameHangmanComponent
+          },
+          {
+            path: 'configuration',
+            component: ConfigurationHangmanComponent
+          },
+          {
+            path: 'view',
+            component: PreViewHangmanComponent
+          }
+        ]
       },
-      {
-        path: 'juegos/jugar-hangman',
-        component: GameHangmanComponent
-      },
+
+
+
       {
         path: 'juegos/solve-the-word',
-        component: GameSolveTheWordComponent
-      }
+        children: [
+          {
+            path: 'jugar',
+            component: GameSolveTheWordComponent
+          },
+          {
+            path: 'create',
+            component: CreateSolveTheWordComponent
+          },
+          {
+            path: 'configuration',
+            component: ConfigurationSolveTheWordComponent
+          },
+          {
+            path: 'view',
+            component: PreViewSolveTheWordComponent
+          }
+        ]
+      },
+
+
+      {
+        path: 'juegos/puzzle',
+        children: [
+          {
+            path: 'jugar',
+            component: GamePuzzleComponent
+          },
+          {
+            path: 'create',
+            component: CreatePuzzleComponent
+          },
+          {
+            path: 'configuration',
+            component: ConfigurationPuzzleComponent
+          },
+          {
+            path: 'view',
+            component: GamePuzzleComponent
+          }
+        ]
+      },
+
+
+      {
+        path: 'juegos/memory',
+        children: [
+          {
+            path: '',
+            redirectTo: 'jugar',
+            pathMatch: 'full'
+          },
+          {
+            path: 'jugar',
+            component: GameMemoryComponent
+          },
+          {
+            path: 'view',
+            component: PreViewMemoryComponent
+          },
+          {
+            path: 'configuration',
+            component: ConfigurationMemoryComponent
+          },
+          {
+            path: 'create',
+            component: CreateMemoryComponent
+          }
+        ]
+      },
     ]
   }
 ];

@@ -12,6 +12,10 @@ export class PuzzleService {
 
   constructor(private http: HttpClient) { }
 
+  getAllPuzzles(): Observable<Puzzle[]> {
+    return this.http.get<Puzzle[]>(this.apiUrl);
+  }
+
   getPuzzleById(id: number): Observable<Puzzle> {
     return this.http.get<Puzzle>(`${this.apiUrl}/${id}`);
   }

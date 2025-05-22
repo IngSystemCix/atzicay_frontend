@@ -1,0 +1,70 @@
+/* Perspectiva 3D para las cartas */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Contenedor interno de la carta para el flip */
+.card-inner {
+  transform-style: preserve-3d;
+}
+
+.card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+/* Caras de las cartas */
+.card-face {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.card-back {
+  transform: rotateY(0deg);
+}
+
+.card-front {
+  transform: rotateY(180deg);
+}
+
+/* Animación para cartas emparejadas */
+.card-front.matched {
+  animation: matchedPulse 0.6s ease-in-out;
+}
+
+@keyframes matchedPulse {
+  0%, 100% {
+    transform: rotateY(180deg) scale(1);
+  }
+  50% {
+    transform: rotateY(180deg) scale(1.1);
+  }
+}
+
+/* Efectos hover mejorados */
+.cursor-pointer:hover .card-inner:not(.flipped) {
+  transform: rotateY(5deg) scale(1.02);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .text-4xl {
+    font-size: 2rem;
+  }
+
+  .text-6xl {
+    font-size: 3rem;
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition-property: transform, opacity, background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}

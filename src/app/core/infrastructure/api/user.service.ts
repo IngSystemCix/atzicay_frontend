@@ -57,9 +57,9 @@ export class UserService {
       Name: this.getFirstName(auth0User),
       LastName: this.getLastName(auth0User),
       Gender: 'O',
-      CountryId: 1, // Valor por defecto (ajusta según tu sistema)
+      CountryId: 1,
       City: 'Desconocida',
-      Birthdate: '2000-01-01', // Valor por defecto
+      Birthdate: '2000-01-01',
       CreatedAt: new Date().toISOString()
     };
 

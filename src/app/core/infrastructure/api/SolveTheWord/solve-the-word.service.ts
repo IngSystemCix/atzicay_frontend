@@ -12,6 +12,10 @@ export class SolveTheWordService {
 
   constructor(private http: HttpClient) { }
 
+  getAllSolveTheWords(): Observable<SolveTheWord[]> {
+    return this.http.get<SolveTheWord[]>(this.apiUrl);
+  }
+
   getSolveTheWordById(id: number): Observable<SolveTheWord> {
     return this.http.get<SolveTheWord>(`${this.apiUrl}/${id}`);
   }

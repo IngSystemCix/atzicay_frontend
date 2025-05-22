@@ -19,7 +19,7 @@
         <p><strong>Miembro desde:</strong><br>{{ user?.created_at || 'Fecha no disponible' }}</p>
       </div>
 
-      <button class="mt-6 w-full bg-[#A78BFA] text-white font-medium py-2 rounded-lg hover:bg-[#8B5CF6]">
+      <button (click)="abrirModal()" class="mt-6 w-full bg-[#A78BFA] text-white font-medium py-2 rounded-lg hover:bg-[#8B5CF6]">
         Editar Perfil
       </button>
     </div>
@@ -36,5 +36,11 @@
         </div>
       </div>
     </div>
+    <app-modal-edit-users
+      *ngIf="showModal"
+      [userData]="user"
+      (close)="cerrarModal()"
+    ></app-modal-edit-users>
+
   </div>
 </div>
