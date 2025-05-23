@@ -203,14 +203,15 @@ export class GamePuzzleComponent implements OnInit {
     return this.pieces.some(p => p.inBoard && p.currentRow === row && p.currentCol === col);
   }
 
-  getPieceAt(row: number, col: number): PuzzlePiece {
-    return this.pieces.find(p => p.inBoard && p.currentRow === row && p.currentCol === col)!;
+  getPieceAt(row: number, col: number): PuzzlePiece | undefined {
+    return this.pieces.find(p => p.inBoard && p.currentRow === row && p.currentCol === col);
   }
 
   isPieceCorrect(row: number, col: number): boolean {
     const piece = this.getPieceAt(row, col);
-    return piece && piece.correctPos;
+    return !!piece?.correctPos;
   }
+
 
   // Determinar si una pieza está en el sidebar
   isInSidebar(piece: PuzzlePiece): boolean {

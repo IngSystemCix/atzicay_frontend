@@ -71,16 +71,19 @@
                  (drop)="onDrop(rowIndex, colIndex, $event)">
 
               <!-- Piezas colocadas en el tablero - Ahora dentro de la zona de drop -->
-              <div *ngIf="isPieceAt(rowIndex, colIndex)"
-                   [ngStyle]="getPieceStyle(getPieceAt(rowIndex, colIndex))"
-                   class="piece-in-board transition-all duration-300 hover:shadow-md"
-                   [class.selected]="selectedPiece?.id === getPieceAt(rowIndex, colIndex)?.id"
-                   [class.correct]="isPieceCorrect(rowIndex, colIndex)"
-                   [draggable]="gameStarted && !gameCompleted"
-                   (click)="onPieceClick(getPieceAt(rowIndex, colIndex))"
-                   (dragstart)="onDragStart(getPieceAt(rowIndex, colIndex), $event)"
-                   (dblclick)="returnToSidebar(getPieceAt(rowIndex, colIndex))">
-              </div>
+              <ng-container *ngIf="getPieceAt(rowIndex, colIndex) as piece">
+                <div
+                  [ngStyle]="getPieceStyle(piece)"
+                  class="piece-in-board transition-all duration-300 hover:shadow-md"
+                  [class.selected]="selectedPiece?.id === piece.id"
+                  [class.correct]="piece.correctPos"
+                  [draggable]="gameStarted && !gameCompleted"
+                  (click)="onPieceClick(piece)"
+                  (dragstart)="onDragStart(piece, $event)"
+                  (dblclick)="returnToSidebar(piece)">
+                </div>
+              </ng-container>
+
             </div>
           }
         }

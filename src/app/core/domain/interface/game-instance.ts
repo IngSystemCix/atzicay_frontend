@@ -1,19 +1,11 @@
 export interface GameInstance {
+  Id: number;
   Name: string;
   Description: string;
   ProfessorId: number;
   Activated: boolean;
-  Difficulty: 'E' | 'M' | 'H';
-  Visibility: 'P' | 'R';
-  settings: { ConfigKey: string; ConfigValue: string }[];
-  assessment: {
-    value: number;
-    comments: string;
-  };
-  game_type: string;
-  hangman: {
-    word: string;
-    clue: string;
-    presentation: 'A' | 'F';
-  };
+  Difficulty: string;
+  Visibility: string;
+  created_at: string;
+  updated_at: string;
 }
