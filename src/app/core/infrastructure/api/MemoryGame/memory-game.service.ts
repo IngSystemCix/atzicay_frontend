@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {MemoryGame} from '../../../domain/model/memoryGame/memory-game';
+import { environment } from '../../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MemoryGameService {
 
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/memory-game';
+  private apiUrl = environment.api_base_url + 'memory-game';
 
   constructor(private http: HttpClient) { }
 

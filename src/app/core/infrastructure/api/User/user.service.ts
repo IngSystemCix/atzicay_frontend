@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { AuthService, User as Auth0User } from '@auth0/auth0-angular';
 import {Observable, switchMap, catchError, of, tap, map} from 'rxjs';
 import { User } from '../../../domain/model/users/user';
+import { environment } from '../../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/users';
+  private apiUrl = environment.api_base_url +  'users';
 
   constructor(
     private http: HttpClient,

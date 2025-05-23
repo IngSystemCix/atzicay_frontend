@@ -3,12 +3,13 @@ import { inject, Injectable } from '@angular/core';
 import { ApiResponse } from '../../domain/model/api.response';
 import { Game } from '../../domain/model/game.model';
 import { map } from 'rxjs';
+import { environment } from '../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/';
+  private apiUrl = environment.api_base_url;
   private http= inject(HttpClient);
   private imageMap: { [key: string]: string } = {
     Hangman: 'assets/ahorcado.png',

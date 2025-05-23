@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { Country } from '../../../domain/model/country/country';
+import { environment } from '../../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CountryService {
 
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/countries';
+  private apiUrl = environment.api_base_url + 'countries';
 
   constructor(private http: HttpClient) { }
 

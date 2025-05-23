@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { GameInstance } from '../../../domain/model/gameInstance/game-instance';
+import { environment } from '../../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameInstanceService {
 
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/game-instances';
+  private apiUrl = environment.api_base_url + 'game-instances';
 
   constructor(private http: HttpClient) { }
 

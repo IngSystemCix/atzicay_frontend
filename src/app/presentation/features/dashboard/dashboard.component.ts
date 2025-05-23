@@ -33,7 +33,6 @@ export class DashboardComponent implements OnInit {
       .subscribe({
         next: (claims) => {
           const idToken = claims?.__raw; // este es el id_token en formato JWT completo
-
           if (idToken) {
             this.backendAuthService.login(idToken).subscribe({
               next: (response) => {
@@ -92,7 +91,7 @@ export class DashboardComponent implements OnInit {
   games: Signal<Game[]> = toSignal(this.gameService.getAllGames(), {
     initialValue: [],
   });
-  
+
 
   // Métodos para manejar filtros
   toggleTypeFilter(type: string): void {
