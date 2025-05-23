@@ -32,7 +32,7 @@ export class JuegosCategoriasComponent implements OnInit {
       colorFondo: '#F4E8FE',
       borde: '#A294F8',
       hover: 'hover:bg-[#EADDFD]',
-      ruta: 'juegos/hangman/create'
+      ruta: 'juegos/hangman'
     },
     {
       nombre: 'Rompecabezas',
