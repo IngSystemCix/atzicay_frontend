@@ -72,11 +72,15 @@ export const routes: Routes = [
           { path: 'content', component: CreateHangmanComponent },
           { path: 'config', component: ConfigurationHangmanComponent },
           { path: 'preview', component: PreViewHangmanComponent },
-          { path: 'jugar', component: GameHangmanComponent },
+         
           { path: '', redirectTo: 'content', pathMatch: 'full' }
         ]
       }
       ,
+      {
+        path: 'juegos/hangman/jugar',
+         component: GameHangmanComponent
+      },
 
 
 

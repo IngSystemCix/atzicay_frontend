@@ -20,8 +20,8 @@ interface PuzzlePiece {
 })
 export class GamePuzzleComponent implements OnInit {
   pieces: PuzzlePiece[] = [];
-  rows = 10;
-  cols = 10;
+  rows = 6;
+  cols = 6;
   totalPieces = this.rows * this.cols;
   gameStarted = false;
   gameCompleted = true;
@@ -227,7 +227,7 @@ export class GamePuzzleComponent implements OnInit {
     const style = {
       'width.px': pieceWidth,
       'height.px': pieceHeight,
-      'background-image': 'url(assets/sistema_solar.jpeg)',
+      'background-image': 'url(assets/pedrito.jpg)',
       'background-position': `-${piece.col * pieceWidth}px -${piece.row * pieceHeight}px`,
       'background-size': `${this.imageWidth}px ${this.imageHeight}px`,
       'cursor': this.gameStarted && !this.gameCompleted ? 'pointer' : 'default',
