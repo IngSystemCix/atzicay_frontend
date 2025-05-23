@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import {SolveTheWord} from '../../../domain/model/solveTheWord/solve-the-word';
+import { environment } from '../../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SolveTheWordService {
 
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/solve-the-word';
+  private apiUrl = environment.api_base_url + 'solve-the-word';
 
   constructor(private http: HttpClient) { }
 

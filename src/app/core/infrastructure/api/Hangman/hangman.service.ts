@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {map, Observable} from 'rxjs';
 import { Hangman } from '../../../domain/model/hangman/hangman';
+import { environment } from '../../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HangmanService {
 
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/hangman';
+  private apiUrl = environment.api_base_url + 'hangman';
 
   constructor(private http: HttpClient) { }
 

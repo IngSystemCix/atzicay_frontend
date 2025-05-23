@@ -2,12 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Auth, AuthResponse } from '../../domain/model/auth.model';
 import { map, Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://127.0.0.1:8000/api/atzicay/v1/';
+  private apiUrl = environment.api_base_url;
   private http = inject(HttpClient);
 
   login(idToken: string): Observable<Auth> {
