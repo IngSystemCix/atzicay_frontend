@@ -2,9 +2,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
 import { Router, RouterLink } from '@angular/router';
-import {HangmanStateService} from '../../../../core/infrastructure/api/Hangman/hangman-state.service';
+import {HangmanStateService} from '../../../../core/infrastructure/api/createGame/hangman-state.service';
+import {GameService} from '../../../../core/infrastructure/api/createGame/game.service';
 
 @Component({
   selector: 'app-configuration-hangman',
@@ -12,7 +12,6 @@ import {HangmanStateService} from '../../../../core/infrastructure/api/Hangman/h
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink
   ],
   templateUrl: './configuration-hangman.component.html',
   styleUrls: ['./configuration-hangman.component.css']
@@ -31,7 +30,7 @@ export class ConfigurationHangmanComponent {
   constructor(
     private fb: FormBuilder,
     private hangmanStateService: HangmanStateService,
-    private hangmanService: HangmanService,
+    private gameService: GameService,
     private router: Router
   ) {
     this.configForm = this.fb.group({
@@ -47,27 +46,90 @@ export class ConfigurationHangmanComponent {
   }
 
   onSubmit(): void {
-    if (this.isLoading) return;
-
-    this.configForm.markAllAsTouched();
-
-    if (this.configForm.invalid) {
-      this.showError('Por favor completa todos los campos requeridos correctamente.');
+    if (this.isLoading || this.configForm.invalid) {
+      this.showError('Por favor completa todos los campos requeridos.');
       return;
     }
 
     this.isLoading = true;
 
-    // Guardar configuración en el servicio compartido
-    this.hangmanStateService.updateConfiguration(this.configForm.value);
-
-    setTimeout(() => {
-      this.showSuccess('Configuración guardada exitosamente');
+    // Recuperar datos previos del estado compartido
+    const hangmanData = this.hangmanStateService.getHangmanData();
+    if (!hangmanData) {
+      this.showError('No hay datos previos del juego. Completa la información antes.');
       this.isLoading = false;
+      return;
+    }
 
-      // Redirigir al componente de creación
-      this.router.navigate(['/juegos/hangman/crear']);
-    }, 1500);
+    // Combinar datos de configuración con los del juego
+    const completeGameData = {
+      ...hangmanData,
+      ...this.configForm.value
+    };
+
+    // Preparar payload final para el backend
+    const payload = {
+      Name: completeGameData.name,
+      Description: completeGameData.description,
+      ProfessorId: completeGameData.professorId,
+      Activated: true,
+      Difficulty: completeGameData.difficulty,
+      Visibility: completeGameData.visibility,
+      settings: [
+        { ConfigKey: 'TiempoLimite', ConfigValue: completeGameData.timeLimit.toString() },
+        { ConfigKey: 'Tema', ConfigValue: completeGameData.theme },
+        { ConfigKey: 'Fuente', ConfigValue: completeGameData.font },
+        { ConfigKey: 'ColorFondo', ConfigValue: completeGameData.backgroundColor },
+        { ConfigKey: 'ColorTexto', ConfigValue: completeGameData.fontColor },
+        { ConfigKey: 'MensajeExito', ConfigValue: completeGameData.successMessage },
+        { ConfigKey: 'MensajeFallo', ConfigValue: completeGameData.failureMessage }
+      ],
+      assessment: {
+        value: completeGameData.assessmentValue,
+        comments: completeGameData.assessmentComments
+      },
+      game_type: 'hangman',
+      hangman: {
+        word: completeGameData.words[0]?.word || '',
+        clue: completeGameData.words[0]?.clue || '',
+        presentation: completeGameData.presentation
+      }
+    };
+
+    // Validar antes de enviar
+    const errors = this.gameService.validateGameData(payload as any);
+    if (errors.length > 0) {
+      this.showError(errors.join(', '));
+      this.isLoading = false;
+      return;
+    }
+
+    // Enviar al backend
+    this.gameService.createHangmanGame(
+      {
+        Name: payload.Name,
+        Description: payload.Description,
+        ProfessorId: payload.ProfessorId,
+        Activated: payload.Activated,
+        Difficulty: payload.Difficulty,
+        Visibility: payload.Visibility,
+        settings: payload.settings,
+        assessment: payload.assessment
+      },
+      payload.hangman!
+    ).subscribe({
+      next: () => {
+        this.showSuccess('Juego creado exitosamente');
+        this.isLoading = false;
+        setTimeout(() => {
+          this.router.navigate(['/juegos']);
+        }, 2000);
+      },
+      error: (err: any) => {
+        this.showError(err.message || 'Error al crear el juego');
+        this.isLoading = false;
+      }
+    });
   }
 
   onColorChange(field: string, color: string): void {

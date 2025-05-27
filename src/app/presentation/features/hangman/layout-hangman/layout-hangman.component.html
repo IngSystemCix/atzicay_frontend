@@ -1,25 +1,19 @@
-<div class="flex mb-3 p-4">
-  <a
-    routerLink="content"
-    class="px-6 py-2 rounded-l-lg font-bold cursor-pointer"
-    [ngClass]="activeTab === 'content' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-  >
-    Contenido
-  </a>
-  <a
-    routerLink="config"
-    class="px-6 py-2 font-bold cursor-pointer"
-    [ngClass]="activeTab === 'config' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-  >
-    Configuración
-  </a>
-  <a
-    routerLink="preview"
-    class="px-6 py-2 rounded-r-lg font-bold cursor-pointer"
-    [ngClass]="activeTab === 'preview' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-  >
-    Vista Previa
-  </a>
+<div class="flex mb-3 p-4 justify-between">
+  <!-- Tabs -->
+  <div class="flex">
+    <a routerLink="content" [ngClass]="activeTab === 'content' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
+       class="px-6 py-2 rounded-l-lg font-bold cursor-pointer">Contenido</a>
+    <a routerLink="config" [ngClass]="activeTab === 'config' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
+       class="px-6 py-2 font-bold cursor-pointer">Configuración</a>
+    <a routerLink="preview" [ngClass]="activeTab === 'preview' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
+       class="px-6 py-2 rounded-r-lg font-bold cursor-pointer">Vista Previa</a>
+  </div>
+
+  <!-- Botón GLOBAL de guardar -->
+  <button (click)="onSave()" [disabled]="isLoading"
+          class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md font-bold disabled:opacity-50">
+    {{ isLoading ? 'Guardando...' : 'Guardar Juego' }}
+  </button>
 </div>
 
 <router-outlet></router-outlet>

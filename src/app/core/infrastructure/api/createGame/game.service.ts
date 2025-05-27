@@ -53,7 +53,6 @@ export class GameService {
       game_type: GameType.HANGMAN,
       hangman: hangmanData
     };
-
     return this.createGame(gameRequest);
   }
 

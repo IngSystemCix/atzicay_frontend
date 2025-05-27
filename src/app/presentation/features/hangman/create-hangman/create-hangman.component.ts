@@ -3,8 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
-import { HangmanFormData } from '../../../../core/domain/interface/hangman-form';
+import {CreateGame} from '../../../../core/domain/interface/create-game';
+import {GameType} from '../../../../core/domain/enum/game-type';
+import {HangmanData} from '../../../../core/domain/interface/hangman-data';
+import {GameService} from '../../../../core/infrastructure/api/createGame/game.service';
+import {HangmanStateService} from '../../../../core/infrastructure/api/createGame/hangman-state.service';
+import {HangmanFormData} from '../../../../core/domain/interface/hangman-form';
 
 @Component({
   selector: 'app-create-hangman',
@@ -29,7 +33,8 @@ export class CreateHangmanComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private hangmanService: HangmanService,
+    private gameService: GameService,
+    private hangmanStateServie: HangmanStateService,
     private router: Router
   ) {
     this.initializeForms();
@@ -46,7 +51,7 @@ export class CreateHangmanComponent implements OnInit {
     this.hangmanForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      professorId: [1, [Validators.required, Validators.min(1)]], // Valor por defecto, ajustar según tu lógica
+      professorId: [1, [Validators.required, Validators.min(1)]],
       difficulty: ['M', Validators.required],
       visibility: ['P', Validators.required],
       presentation: ['A', Validators.required]
@@ -57,16 +62,16 @@ export class CreateHangmanComponent implements OnInit {
       words: this.fb.array([])
     });
 
-    // Formulario de configuración (opcional, para usar en el componente de configuración)
+    // Formulario de configuración
     this.configForm = this.fb.group({
       timeLimit: [30, [Validators.min(10), Validators.max(300)]],
       theme: ['Claro'],
       font: ['Arial'],
       backgroundColor: ['#ffffff'],
       fontColor: ['#000000'],
-      successMessage: ['¡Felicidades! Has completado el juego.'],
-      failureMessage: ['¡Inténtalo de nuevo!'],
-      assessmentValue: [0.8, [Validators.min(0), Validators.max(5)]],
+      successMessage: ['¡Felicidades!', [Validators.required]],
+      failureMessage: ['Inténtalo de nuevo', [Validators.required]],
+      assessmentValue: [0.8],
       assessmentComments: ['Juego de hangman creado exitosamente']
     });
   }
@@ -119,32 +124,30 @@ export class CreateHangmanComponent implements OnInit {
 
   private prepareFormData(): HangmanFormData {
     const hangmanData = this.hangmanForm.value;
-    const configData = this.configForm.value;
+
     const words = this.wordsArray.controls.map(control => ({
-      word: control.get('word')?.value?.trim() || '',
-      clue: control.get('clue')?.value?.trim() || ''
+      word: control.get('word')?.value || '',
+      clue: control.get('clue')?.value || ''
     })).filter(w => w.word.length > 0);
 
     return {
-      name: hangmanData.name?.trim(),
-      description: hangmanData.description?.trim(),
+      name: hangmanData.name,
+      description: hangmanData.description,
       professorId: hangmanData.professorId,
       difficulty: hangmanData.difficulty,
       visibility: hangmanData.visibility,
       presentation: hangmanData.presentation,
       showClues: this.showClues,
       words: words,
-
-      // Configuraciones opcionales
-      timeLimit: configData.timeLimit,
-      theme: configData.theme,
-      font: configData.font,
-      backgroundColor: configData.backgroundColor,
-      fontColor: configData.fontColor,
-      successMessage: configData.successMessage,
-      failureMessage: configData.failureMessage,
-      assessmentValue: configData.assessmentValue,
-      assessmentComments: configData.assessmentComments
+      timeLimit: this.configForm.get('timeLimit')?.value || 30,
+      theme: this.configForm.get('theme')?.value || 'Claro',
+      font: this.configForm.get('font')?.value || 'Arial',
+      backgroundColor: this.configForm.get('backgroundColor')?.value || '#ffffff',
+      fontColor: this.configForm.get('fontColor')?.value || '#000000',
+      successMessage: this.configForm.get('successMessage')?.value || '¡Felicidades!',
+      failureMessage: this.configForm.get('failureMessage')?.value || 'Inténtalo de nuevo',
+      assessmentValue: this.configForm.get('assessmentValue')?.value || 0.8,
+      assessmentComments: this.configForm.get('assessmentComments')?.value || 'Juego de hangman creado exitosamente'
     };
   }
 
@@ -191,7 +194,7 @@ export class CreateHangmanComponent implements OnInit {
     setTimeout(() => this.successMessage = '', 5000);
   }
 
-  private showError(message: string): void {
+  private   showError(message: string): void {
     this.errorMessage = message;
     this.successMessage = '';
     setTimeout(() => this.errorMessage = '', 5000);
@@ -217,5 +220,119 @@ export class CreateHangmanComponent implements OnInit {
     if (!this.showClues) return false;
     const control = this.wordsArray.at(index)?.get('clue');
     return !!(control && control.invalid && control.touched);
+  }
+
+  onSubmit(): void {
+    if (!this.isFormValid()) {
+      this.markAllAsTouched();
+      this.showError('Por favor completa todos los campos requeridos.');
+      return;
+    }
+
+    this.isLoading = true;
+
+    const { hangmanData, gameInfo } = this.prepareFormDataToSend();
+
+    // Validar antes de enviar (opcional pero recomendado)
+    const errors = this.gameService.validateGameData({
+      ...gameInfo,
+      game_type: GameType.HANGMAN,
+      hangman: hangmanData
+    });
+
+    if (errors.length > 0) {
+      this.showError(errors.join(', '));
+      this.isLoading = false;
+      return;
+    }
+
+    // Enviar al backend
+    this.gameService.createHangmanGame(gameInfo, hangmanData).subscribe({
+      next: (gameInstance) => {
+        this.showSuccess('Juego creado exitosamente');
+        this.resetForms();
+        this.isLoading = false;
+        setTimeout(() => {
+          this.router.navigate(['/juegos']);
+        }, 2000);
+      },
+      error: (err) => {
+        this.showError(err.message || 'Error al crear el juego');
+        this.isLoading = false;
+      }
+    });
+  }
+
+  // Navega a configuración con datos
+  onNextStep(): void {
+    if (!this.isFormValid()) {
+      this.markAllAsTouched();
+      this.showError('Por favor completa todos los campos requeridos.');
+      return;
+    }
+
+    const formData = this.prepareFormData();
+
+    this.hangmanStateServie.setHangmanData(formData);
+    this.router.navigate(['/juegos/hangman/config']);
+  }
+  onGoBack(): void {
+    // Actualiza los datos actuales en el estado compartido antes de volver
+    const currentData = this.hangmanStateServie.getHangmanData();
+    if (currentData) {
+      const updatedData = {
+        ...currentData,
+        ...this.configForm.value
+      };
+      this.hangmanStateServie.setHangmanData(updatedData);
+    }
+
+    this.router.navigate(['/juegos/hangman/content']); // Vuelve a contenido
+  }
+
+  private prepareFormDataToSend() {
+    const hangmanData = this.hangmanForm.value;
+    const configData = this.configForm.value;
+
+    const words = this.wordsArray.controls.map(control => ({
+      word: control.get('word')?.value?.trim() || '',
+      clue: control.get('clue')?.value?.trim() || ''
+    })).filter(w => w.word.length > 0);
+
+    const firstWord = words[0]?.word || '';
+    const firstClue = words[0]?.clue || '';
+
+    const gameInfo: Omit<CreateGame, 'game_type' | 'hangman'> = {
+      Name: hangmanData.name,
+      Description: hangmanData.description,
+      ProfessorId: hangmanData.professorId,
+      Activated: true,
+      Difficulty: hangmanData.difficulty,
+      Visibility: hangmanData.visibility,
+      settings: [
+        { ConfigKey: 'TiempoLimite', ConfigValue: configData.timeLimit.toString() },
+        { ConfigKey: 'Tema', ConfigValue: configData.theme },
+        { ConfigKey: 'Fuente', ConfigValue: configData.font },
+        { ConfigKey: 'ColorFondo', ConfigValue: configData.backgroundColor },
+        { ConfigKey: 'ColorTexto', ConfigValue: configData.fontColor },
+        { ConfigKey: 'MensajeExito', ConfigValue: configData.successMessage },
+        { ConfigKey: 'MensajeFallo', ConfigValue: configData.failureMessage }
+      ],
+      assessment: {
+        value: configData.assessmentValue,
+        comments: configData.assessmentComments
+      }
+    };
+
+    const hangmanDataToSend: HangmanData = {
+      word: firstWord,
+      clue: firstClue,
+      presentation: hangmanData.presentation
+    };
+
+    return {
+      gameInfo,
+      hangmanData: hangmanDataToSend
+    };
   }
 }
