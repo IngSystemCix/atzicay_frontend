@@ -18,9 +18,14 @@ export class GameService {
     'Solve the Word': 'assets/pupiletras.png',
   };
 
-  getAllGames() {
+  getAllGames(limit: number = 6, offset: number = 0) {
+    const token = sessionStorage.getItem('access_token');
+    const options = token ? {
+      headers: { Authorization: `Bearer ${token}` }
+    } : {};
+
     return this.http
-      .get<ApiResponse<Game[]>>(`${this.apiUrl}game-instances/all`)
+      .get<ApiResponse<Game[]>>(`${this.apiUrl}game-instances/all/${limit}?offset=${offset}`, options)
       .pipe(
         map((response) =>
           response.data.map((game) => ({

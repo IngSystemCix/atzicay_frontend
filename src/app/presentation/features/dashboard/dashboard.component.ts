@@ -38,9 +38,11 @@ export class DashboardComponent implements OnInit {
               next: (response) => {
                 sessionStorage.setItem('access_token', response.access_token);
                 sessionStorage.setItem('user', JSON.stringify(response.user));
-                this.gameService.getAllGames().subscribe({
+                this.gameService.getAllGames(this.PAGE_SIZE, 0).subscribe({
                   next: (games) => {
                     this.allGames = games;
+                    this.currentOffset = games.length;
+                    this.hasMoreGames = games.length === this.PAGE_SIZE; // Si trae menos del PAGE_SIZE, no hay más
                     this.applyFilters();
                   },
                   error: (err) => console.error('Error cargando juegos:', err),
@@ -179,17 +181,23 @@ export class DashboardComponent implements OnInit {
   toggleFilterDropdown(): void {
     this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
   }
-
+  totalGamesInDB = 0; // Total de juegos en la BD
+  currentOffset = 0; // Offset actual para la paginación
+  hasMoreGames = true;
   loadMoreGames(): void {
-    const startIndex = this.displayedGames.length;
-    const endIndex = startIndex + this.PAGE_SIZE;
-    const moreGames = this.filteredGames.slice(startIndex, endIndex);
-
-    if (moreGames.length > 0) {
-      this.displayedGames = [...this.displayedGames, ...moreGames];
-      this.currentPage++;
-      this.cdr.detectChanges();
-    }
+    this.gameService.getAllGames(this.PAGE_SIZE, this.currentOffset).subscribe({
+      next: (moreGames) => {
+        if (moreGames.length > 0) {
+          this.allGames = [...this.allGames, ...moreGames];
+          this.currentOffset += moreGames.length;
+          this.hasMoreGames = moreGames.length === this.PAGE_SIZE;
+          this.applyFilters();
+        } else {
+          this.hasMoreGames = false;
+        }
+      },
+      error: (err) => console.error('Error cargando más juegos:', err),
+    });
   }
 
   // Getter para el total de juegos

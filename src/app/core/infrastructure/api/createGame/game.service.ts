@@ -29,16 +29,30 @@ export class GameService {
     const url = `${this.baseUrl}${this.gameEndpoint}`;
     const headers = this.getHeaders();
 
-    return this.http.post<ApiResponse<GameInstance>>(url, gameData, { headers })
-      .pipe(
-        map(response => {
-          if (response.success) {
-            return response.data;
-          }
-          throw new Error(response.message || 'Error al crear el juego');
-        }),
-        catchError(this.handleError)
-      );
+    return this.http.post(url, gameData, { headers }).pipe(
+      map(response => {
+        console.log('📥 Respuesta completa del servidor:', response);
+
+        // Caso 1: Respuesta directa con Id (ej. { Id: 1, Name: 'Juego...' })
+        if (response && typeof (response as any).Id !== 'undefined') {
+          return response as GameInstance;
+        }
+
+        // Caso 2: Respuesta envuelta en ApiResponse personalizado (como el que muestras)
+        if ((response as any).status === 'success' && (response as any).data) {
+          return (response as any).data as GameInstance;
+        }
+
+        // Caso 3: Respuesta con propiedad success y data
+        if ((response as any).success && (response as any).data) {
+          return (response as any).data as GameInstance;
+        }
+
+        // Caso 4: No se encontró una estructura válida
+        throw new Error('Formato de respuesta del servidor no reconocido');
+      }),
+      catchError(this.handleError)
+    );
   }
 
   /**
@@ -136,11 +150,14 @@ export class GameService {
         if (!gameData.hangman) {
           errors.push('Los datos del juego Hangman son requeridos');
         } else {
-          if (!gameData.hangman.word || gameData.hangman.word.trim().length === 0) {
-            errors.push('La palabra del Hangman es requerida');
+          const { hangman } = gameData;
+
+          if (!hangman.word || hangman.word.trim().length < 2) {
+            errors.push('La palabra es requerida y debe tener al menos 2 caracteres');
           }
-          if (!gameData.hangman.clue || gameData.hangman.clue.trim().length === 0) {
-            errors.push('La pista del Hangman es requerida');
+
+          if (!hangman.presentation || !['A', 'F'].includes(hangman.presentation)) {
+            errors.push('El tipo de presentación es requerido (A o F)');
           }
         }
         break;
@@ -179,10 +196,17 @@ export class GameService {
    * Headers para las peticiones HTTP
    */
   private getHeaders(): HttpHeaders {
-    return new HttpHeaders({
+    const token = localStorage.getItem('auth_token'); // O como guardes el token
+    const headers: any = {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
-    });
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return new HttpHeaders(headers);
   }
 
   /**

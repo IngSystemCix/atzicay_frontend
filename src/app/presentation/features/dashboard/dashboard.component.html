@@ -212,14 +212,14 @@
 
 <!-- Botón "Ver más" o mensaje final -->
 <div class="text-center mt-8 m-6">
-  @if (displayedGames.length < filteredGames.length) {
-  <button
-    class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full sm:w-auto"
-    (click)="loadMoreGames()"
-  >
-    Ver más juegos ({{ filteredGames.length - displayedGames.length }})
-  </button>
-  } @else if (filteredGames.length > 0) {
-  <p class="text-gray-500">Se han cargado todos los juegos registrados :D</p>
+  @if (hasMoreGames && displayedGames.length > 0) {
+    <button
+      class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full sm:w-auto"
+      (click)="loadMoreGames()"
+    >
+      Ver más juegos
+    </button>
+  } @else if (allGames.length > 0) {
+    <p class="text-gray-500">Se han cargado todos los juegos registrados :D</p>
   }
 </div>

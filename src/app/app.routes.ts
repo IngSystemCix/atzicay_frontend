@@ -3,7 +3,6 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout.component
 import { DashboardComponent, LoginComponent } from './presentation';
 import { JuegosComponent } from './presentation/features/juegos/juegos.component';
 import { ProfileComponent } from './presentation/features/profile/profile.component';
-import {CreateHangmanComponent} from './presentation/features/hangman/create-hangman/create-hangman.component';
 import {GameHangmanComponent} from './presentation/features/hangman/game-hangman/game-hangman.component';
 import {
   GameSolveTheWordComponent
@@ -22,9 +21,6 @@ import {
 import {
   PreViewSolveTheWordComponent
 } from './presentation/features/solveTheWord/pre-view-solve-the-word/pre-view-solve-the-word.component';
-import {
-  ConfigurationHangmanComponent
-} from './presentation/features/hangman/configuration-hangman/configuration-hangman.component';
 import {PreViewHangmanComponent} from './presentation/features/hangman/pre-view-hangman/pre-view-hangman.component';
 import {MemoryGame} from './core/domain/model/memoryGame/memory-game';
 import {GameMemoryComponent} from './presentation/features/memory/game-memory/game-memory.component';
@@ -69,10 +65,8 @@ export const routes: Routes = [
         path: 'juegos/hangman',
         component: LayoutHangmanComponent,
         children: [
-          { path: 'content', component: CreateHangmanComponent },
-          { path: 'config', component: ConfigurationHangmanComponent },
           { path: 'preview', component: PreViewHangmanComponent },
-         
+
           { path: '', redirectTo: 'content', pathMatch: 'full' }
         ]
       }
