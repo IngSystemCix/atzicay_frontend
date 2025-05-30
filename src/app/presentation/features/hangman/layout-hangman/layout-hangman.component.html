@@ -107,7 +107,7 @@
               formControlName="visibility"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="P">Público</option>
+              <option value="P" selected>Público</option>
               <option value="R">Restringido</option>
             </select>
           </div>
@@ -120,7 +120,7 @@
               formControlName="presentation"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="A">Alfabético</option>
+              <option value="A" selected>Alfabético</option>
               <option value="F">Figura</option>
             </select>
           </div>
@@ -250,18 +250,10 @@
           </span>
         </div>
 
-        <!-- Tema -->
-        <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Tema</label>
-          <select formControlName="theme"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <option *ngFor="let theme of themes" [value]="theme">{{theme}}</option>
-          </select>
-        </div>
 
         <!-- Fuente -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Fuente</label>
+          <label class="block text-gray-900 mb-2 font-semibold">Tipo de Letra</label>
           <select formControlName="font"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
             <option *ngFor="let font of fonts" [value]="font">{{font}}</option>
@@ -305,7 +297,7 @@
 
         <!-- Color de Fuente -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Color de Fuente</label>
+          <label class="block text-gray-900 mb-2 font-semibold">Color de Letra</label>
           <div class="flex gap-2">
             <button type="button" (click)="onColorChange('fontColor', '#000000')"
                     class="w-8 h-8 rounded bg-black border-2"

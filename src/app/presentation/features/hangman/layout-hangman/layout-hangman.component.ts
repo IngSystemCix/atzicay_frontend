@@ -38,7 +38,6 @@ export class LayoutHangmanComponent implements OnInit {
   isLoading: boolean = false;
 
   // Opciones para configuración
-  themes = ['Claro', 'Oscuro', 'Azul', 'Verde'];
   fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
 
   constructor(
@@ -60,9 +59,9 @@ export class LayoutHangmanComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       professorId: [1, [Validators.required, Validators.min(1)]], // Aquí usas string '1' en lugar de número
-      difficulty: ['', Validators.required],
-      visibility: ['', Validators.required],
-      presentation: ['', Validators.required]
+      difficulty: ['M', Validators.required],
+      visibility: ['P', Validators.required],
+      presentation: ['A', Validators.required]
     });
 
     // Formulario de palabras

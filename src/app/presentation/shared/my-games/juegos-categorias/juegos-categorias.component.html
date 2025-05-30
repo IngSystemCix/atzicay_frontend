@@ -26,10 +26,10 @@
         'border': '1px solid ' + categoria.borde
       }"
     >
-      <div class="flex justify-between items-center mb-2">
-        <div class="flex items-center">
+      <div class="flex justify-between items-center mb-2 cursor-pointer">
+        <div class="flex items-center cursor-pointer">
           <div class="text-2xl mr-2">{{ categoria.icono }}</div>
-          <h3 class="text-lg text-gray-800 font-semibold">{{ categoria.nombre }}</h3>
+          <h3 class="text-lg text-gray-800 font-semibold cursor-pointer">{{ categoria.nombre }}</h3>
         </div>
         <div class="bg-white text-gray-700 border border-gray-300 px-2 rounded-full text-sm font-medium">
           {{ categoria.cantidad }}
@@ -37,7 +37,7 @@
       </div>
 
       <button
-        class="w-full py-2 border rounded-md font-bold transition duration-300"
+        class="w-full py-2 border rounded-md font-bold transition duration-300 cursor-pointer"
         [ngStyle]="{
     'background-color': '#FFFFFF',
     'border-color': '#CDC1FE',
