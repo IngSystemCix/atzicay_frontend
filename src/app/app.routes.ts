@@ -4,32 +4,14 @@ import { DashboardComponent, LoginComponent } from './presentation';
 import { JuegosComponent } from './presentation/features/juegos/juegos.component';
 import { ProfileComponent } from './presentation/features/profile/profile.component';
 import {GameHangmanComponent} from './presentation/features/hangman/game-hangman/game-hangman.component';
-import {
-  GameSolveTheWordComponent
-} from './presentation/features/solveTheWord/game-solve-the-word/game-solve-the-word.component';
 import {GamePuzzleComponent} from './presentation/features/Puzzle/game-puzzle/game-puzzle.component';
-import {CreatePuzzleComponent} from './presentation/features/Puzzle/create-puzzle/create-puzzle.component';
-import {
-  ConfigurationPuzzleComponent
-} from './presentation/features/Puzzle/configuration-puzzle/configuration-puzzle.component';
-import {
-  CreateSolveTheWordComponent
-} from './presentation/features/solveTheWord/create-solve-the-word/create-solve-the-word.component';
-import {
-  ConfigurationSolveTheWordComponent
-} from './presentation/features/solveTheWord/configuration-solve-the-word/configuration-solve-the-word.component';
-import {
-  PreViewSolveTheWordComponent
-} from './presentation/features/solveTheWord/pre-view-solve-the-word/pre-view-solve-the-word.component';
-import {PreViewHangmanComponent} from './presentation/features/hangman/pre-view-hangman/pre-view-hangman.component';
-import {MemoryGame} from './core/domain/model/memoryGame/memory-game';
 import {GameMemoryComponent} from './presentation/features/memory/game-memory/game-memory.component';
-import {PreViewMemoryComponent} from './presentation/features/memory/pre-view-memory/pre-view-memory.component';
-import {
-  ConfigurationMemoryComponent
-} from './presentation/features/memory/configuration-memory/configuration-memory.component';
-import {CreateMemoryComponent} from './presentation/features/memory/create-memory/create-memory.component';
 import {LayoutHangmanComponent} from './presentation/features/hangman/layout-hangman/layout-hangman.component';
+import {LayoutsPuzzleComponent} from './presentation/features/Puzzle/layouts-puzzle/layouts-puzzle.component';
+import {LayoutsMemoryComponent} from './presentation/features/memory/layouts-memory/layouts-memory.component';
+import {
+  LayoutsSolveTheWordComponent
+} from './presentation/features/solveTheWord/layouts-solve-the-word/layouts-solve-the-word.component';
 
 export const routes: Routes = [
   {
@@ -60,17 +42,10 @@ export const routes: Routes = [
 
 
 
-      // app.routes.ts o donde tengas tus rutas
       {
         path: 'juegos/hangman',
         component: LayoutHangmanComponent,
-        children: [
-          { path: 'preview', component: PreViewHangmanComponent },
-
-          { path: '', redirectTo: 'content', pathMatch: 'full' }
-        ]
-      }
-      ,
+      },
       {
         path: 'juegos/hangman/jugar',
          component: GameHangmanComponent
@@ -78,78 +53,39 @@ export const routes: Routes = [
 
 
 
+
       {
-        path: 'juegos/solve-the-word',
-        children: [
-          {
-            path: 'jugar',
-            component: GameSolveTheWordComponent
-          },
-          {
-            path: 'create',
-            component: CreateSolveTheWordComponent
-          },
-          {
-            path: 'configuration',
-            component: ConfigurationSolveTheWordComponent
-          },
-          {
-            path: 'view',
-            component: PreViewSolveTheWordComponent
-          }
-        ]
+        path: 'juegos/puzzle/jugar',
+        component: GamePuzzleComponent
+      },
+      {
+        path: 'juegos/puzzle/create',
+        component: LayoutsPuzzleComponent
       },
 
 
-      {
-        path: 'juegos/puzzle',
-        children: [
-          {
-            path: 'jugar',
-            component: GamePuzzleComponent
-          },
-          {
-            path: 'create',
-            component: CreatePuzzleComponent
-          },
-          {
-            path: 'configuration',
-            component: ConfigurationPuzzleComponent
-          },
-          {
-            path: 'view',
-            component: GamePuzzleComponent
-          }
-        ]
-      },
 
 
       {
-        path: 'juegos/memory',
-        children: [
-          {
-            path: '',
-            redirectTo: 'jugar',
-            pathMatch: 'full'
-          },
-          {
-            path: 'jugar',
-            component: GameMemoryComponent
-          },
-          {
-            path: 'view',
-            component: PreViewMemoryComponent
-          },
-          {
-            path: 'configuration',
-            component: ConfigurationMemoryComponent
-          },
-          {
-            path: 'create',
-            component: CreateMemoryComponent
-          }
-        ]
+        path: 'juegos/memory/jugar',
+        component: GameMemoryComponent
       },
+      {
+        path: 'juegos/memory/create',
+        component: LayoutsMemoryComponent
+      },
+
+
+
+
+      {
+        path: 'juegos/solve-The-Word/jugar',
+        component: GamePuzzleComponent
+      },
+      {
+        path: 'juegos/solve-The-Word/create',
+        component: LayoutsSolveTheWordComponent
+      }
     ]
   }
 ];

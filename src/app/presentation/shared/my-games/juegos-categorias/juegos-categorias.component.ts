@@ -59,7 +59,7 @@ export class JuegosCategoriasComponent implements OnInit {
       colorFondo: '#FEF9C2',
       borde: '#A294F8',
       hover: 'hover:bg-[#FDF5A8]',
-      ruta: 'juegos/solve-the-word/create'
+      ruta: 'juegos/solve-The-Word/create'
     }
   ];
 

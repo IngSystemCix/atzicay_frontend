@@ -15,7 +15,7 @@ export class ProgrammingGameService {
 
   getAllProgrammingGames(): Observable<ProgrammingGame[]> {
     return this.http.get<{ data: ProgrammingGame[] }>(this.apiUrl).pipe(
-      map(response => response.data)
+      map(response => response.data.map(pg => new ProgrammingGame(pg)))
     );
   }
 

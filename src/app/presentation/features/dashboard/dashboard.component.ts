@@ -1,14 +1,12 @@
-import { Component, inject, Signal, effect, OnInit } from '@angular/core';
-import { ChangeDetectorRef } from '@angular/core';
-import { GameCardComponent } from '../../shared/game-card/game-card.component';
-import { Game } from '../../../core/domain/model/game.model';
-import { GameService } from '../../../core/infrastructure/api/game.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { filter, switchMap } from 'rxjs';
+import { EMPTY, catchError, filter, switchMap, tap } from 'rxjs';
+import { Game } from '../../../core/domain/model/game.model';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
+import { GameService } from '../../../core/infrastructure/api/game.service';
+import { GameCardComponent } from '../../shared/game-card/game-card.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,7 +17,6 @@ import { AuthService } from '../../../core/infrastructure/api/auth.service';
 })
 export class DashboardComponent implements OnInit {
   private readonly gameService = inject(GameService);
-  private readonly cdr = inject(ChangeDetectorRef);
   private readonly PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
@@ -28,39 +25,44 @@ export class DashboardComponent implements OnInit {
     this.auth0.isAuthenticated$
       .pipe(
         filter((isAuth) => isAuth),
-        switchMap(() => this.auth0.idTokenClaims$) // obtener id_token claims
-      )
-      .subscribe({
-        next: (claims) => {
-          const idToken = claims?.__raw; // este es el id_token en formato JWT completo
-          if (idToken) {
-            this.backendAuthService.login(idToken).subscribe({
-              next: (response) => {
-                sessionStorage.setItem('access_token', response.access_token);
-                sessionStorage.setItem('user', JSON.stringify(response.user));
-                this.gameService.getAllGames(this.PAGE_SIZE, 0).subscribe({
-                  next: (games) => {
-                    this.allGames = games;
-                    this.currentOffset = games.length;
-                    this.hasMoreGames = games.length === this.PAGE_SIZE; // Si trae menos del PAGE_SIZE, no hay más
-                    this.applyFilters();
-                  },
-                  error: (err) => console.error('Error cargando juegos:', err),
-                });
-              },
-              error: (err) => {
-                console.error('Error en la autenticación con el backend:', err);
-              },
-            });
-          } else {
+        switchMap(() => this.auth0.idTokenClaims$),
+        switchMap((claims) => {
+          const idToken = claims?.__raw;
+          if (!idToken) {
             console.error('No se obtuvo id_token');
+            return EMPTY;
           }
-        },
-        error: (err) => {
-          console.error('Error obteniendo id_token:', err);
-        },
-      });
-
+          return this.backendAuthService.login(idToken).pipe(
+            tap((response) => {
+              sessionStorage.setItem('access_token', response.access_token);
+                const { Id, ...userWithoutId } = response.user;
+                sessionStorage.setItem('user', JSON.stringify(userWithoutId));
+            })
+          );
+        }),
+        switchMap(() =>
+          this.gameService.getAllGames(this.PAGE_SIZE).pipe(
+            tap((games) => {
+              this.allGames = games;
+              this.currentOffset = games.length;
+              this.hasMoreGames = games.length === this.PAGE_SIZE;
+              this.applyFilters();
+            }),
+            catchError((err) => {
+              console.error('Error cargando juegos:', err);
+              return EMPTY;
+            })
+          )
+        ),
+        catchError((err) => {
+          console.error(
+            'Error en la autenticación con el backend o id_token:',
+            err
+          );
+          return EMPTY;
+        })
+      )
+      .subscribe();
   }
 
   // Estado del componente
@@ -88,12 +90,6 @@ export class DashboardComponent implements OnInit {
   allGames: Game[] = [];
   filteredGames: Game[] = [];
   displayedGames: Game[] = [];
-
-  // Obtener juegos del servicio
-  games: Signal<Game[]> = toSignal(this.gameService.getAllGames(), {
-    initialValue: [],
-  });
-
 
   // Métodos para manejar filtros
   toggleTypeFilter(type: string): void {
@@ -181,11 +177,11 @@ export class DashboardComponent implements OnInit {
   toggleFilterDropdown(): void {
     this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
   }
-  totalGamesInDB = 0; // Total de juegos en la BD
-  currentOffset = 0; // Offset actual para la paginación
+  totalGamesInDB = 0;
+  currentOffset = 0;
   hasMoreGames = true;
   loadMoreGames(): void {
-    this.gameService.getAllGames(this.PAGE_SIZE, this.currentOffset).subscribe({
+    this.gameService.getAllGames(this.PAGE_SIZE).subscribe({
       next: (moreGames) => {
         if (moreGames.length > 0) {
           this.allGames = [...this.allGames, ...moreGames];

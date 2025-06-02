@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Auth, AuthResponse } from '../../domain/model/auth.model';
 import { map, Observable } from 'rxjs';
@@ -18,6 +18,7 @@ export class AuthService {
         const auth: Auth = {
           access_token: response.access_token,
           user: {
+            Id: response.user.Id,
             Name: response.user.Name,
             Email: response.user.Email,
           },
@@ -28,10 +29,8 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}auth/logout`, {
-      Headers: {
-        Authorization: `Bearer ${sessionStorage.getItem('access_token')}`,
-      }
-    });
+    sessionStorage.removeItem('access_token');
+    sessionStorage.removeItem('user');
+    return this.http.post<void>(`${this.apiUrl}auth/logout`, {});
   }
 }

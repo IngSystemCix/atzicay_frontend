@@ -40,7 +40,7 @@ export class LoginComponent {
         connection: 'google-oauth2',
       },
       appState: {
-        target: '/dashboard'
+        target: '/dashboard',
       },
     });
   }

@@ -1,5 +1,7 @@
 export interface HangmanData {
-  word: string;
-  clue: string;
   presentation: 'A' | 'F';
+  words: Array<{
+    word: string;
+    clue: string;
+  }>;
 }

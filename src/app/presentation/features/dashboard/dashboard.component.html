@@ -7,6 +7,7 @@
       Descubre juegos divertidos para aprender mientras juegas
     </p>
 
+    <!-- Buscador y filtros -->
     <div class="flex flex-col sm:flex-row gap-4">
       <!-- Barra de búsqueda -->
       <div class="relative flex-1">
@@ -29,19 +30,26 @@
           </svg>
         </div>
         <div class="w-full flex items-center justify-center space-x-2">
-        <input
-          type="search"
-          [(ngModel)]="searchTerm"
-          class="w-full ps-10 py-2 px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-atzicay-purple-500 focus:border-atzicay-purple-500 outline-none"
-          placeholder="Buscar juegos..."
-        />
-        <button class="cursor-pointer btn-atzicay text-white px-4 py-2 rounded-lg transition duration-200 flex items-center" (click)="applyFilters()">
-          Buscar
-        </button>
+          <label for="searchInput" class="sr-only">Buscar juegos</label>
+          <input
+            id="searchInput"
+            type="search"
+            [(ngModel)]="searchTerm"
+            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-atzicay-purple-500"
+            placeholder="Buscar juegos..."
+            title="Buscar juegos"
+            aria-label="Buscar juegos"
+          />
+          <button
+            class="cursor-pointer btn-atzicay text-white px-4 py-2 rounded-lg transition duration-200 flex items-center"
+            (click)="applyFilters()"
+          >
+            Buscar
+          </button>
         </div>
       </div>
 
-      <!-- Dropdown de filtros -->
+      <!-- Botón Filtros -->
       <div class="relative">
         <button
           (click)="toggleFilterDropdown()"
@@ -64,12 +72,11 @@
           Filtros
         </button>
 
-        <!-- Menú desplegable de filtros -->
+        <!-- Dropdown de filtros -->
         <div
           [class.hidden]="!isFilterDropdownOpen"
           class="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg py-1 z-10 w-64 border border-atzicay-dropdown-text"
         >
-          <!-- Filtros por tipo de juego -->
           <div
             class="px-4 py-2 text-sm text-atzicay-dropdown-text font-medium border-b border-gray-100"
           >
@@ -91,7 +98,6 @@
             }}</label>
           </div>
 
-          <!-- Filtros por nivel de dificultad -->
           <div
             class="px-4 py-2 text-sm text-atzicay-dropdown-text font-medium border-t border-gray-100 mt-1"
           >
@@ -115,7 +121,7 @@
             >
           </div>
 
-          <!-- Botón para limpiar filtros -->
+          <!-- Limpiar filtros -->
           <div class="border-t border-gray-100 mt-1 pt-1 px-4">
             <button
               (click)="clearFilters()"
@@ -128,12 +134,11 @@
       </div>
     </div>
 
-    <!-- Etiquetas de filtros activos -->
+    <!-- Filtros activos -->
     <div
       *ngIf="selectedTypes.length > 0 || selectedLevels.length > 0"
       class="mt-4 flex flex-wrap gap-2"
     >
-      <!-- Filtros de tipo activos -->
       <div
         *ngFor="let type of selectedTypes"
         class="bg-atzicay-purple-100 text-atzicay-purple-800 text-xs px-3 py-1 rounded-full flex items-center"
@@ -159,7 +164,6 @@
         </button>
       </div>
 
-      <!-- Filtros de nivel activos -->
       <div
         *ngFor="let level of selectedLevels"
         class="bg-atzicay-blue-100 text-atzicay-blue-800 text-xs px-3 py-1 rounded-full flex items-center"
@@ -188,7 +192,7 @@
   </div>
 </div>
 
-<!-- Games Grid -->
+<!-- Grid de juegos -->
 <div
   class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-8xl mx-auto"
 >
@@ -200,26 +204,29 @@
     [author]="game.author"
     [rating]="game.rating"
     [image]="game.image"
-  ></app-game-card>
+  >
+  </app-game-card>
   } } @empty {
   <div class="col-span-full text-center p-4">
     @if (selectedTypes.length > 0 || selectedLevels.length > 0 || searchTerm) {
-    No se encontraron juegos con los filtros aplicados. } @else { No hay juegos
-    disponibles. }
+    No se encontraron juegos con los filtros aplicados. } @else {
+      <div class="animate-spin w-8 h-8 border-4 border-atzicay-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+      Cargando juegos...
+    }
   </div>
   }
 </div>
 
-<!-- Botón "Ver más" o mensaje final -->
+<!-- Botón de carga o mensaje -->
 <div class="text-center mt-8 m-6">
   @if (hasMoreGames && displayedGames.length > 0) {
-    <button
-      class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full sm:w-auto"
-      (click)="loadMoreGames()"
-    >
-      Ver más juegos
-    </button>
-  } @else if (allGames.length > 0) {
-    <p class="text-gray-500">Se han cargado todos los juegos registrados :D</p>
+  <button
+    class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full sm:w-auto"
+    (click)="loadMoreGames()"
+  >
+    Ver más juegos
+  </button>
+  } @else if (!hasMoreGames && displayedGames.length > 0) {
+  <div class="text-sm text-gray-500">Has llegado al final de la lista.</div>
   }
 </div>
