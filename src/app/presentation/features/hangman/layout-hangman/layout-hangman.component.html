@@ -1,9 +1,15 @@
 <div class="min-h-screen bg-purple-50 p-4">
-  <div *ngIf="successMessage" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
+  <div
+    *ngIf="successMessage"
+    class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md"
+  >
     {{ successMessage }}
   </div>
 
-  <div *ngIf="errorMessage" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+  <div
+    *ngIf="errorMessage"
+    class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md"
+  >
     {{ errorMessage }}
   </div>
   <!-- Header con tabs -->
@@ -12,20 +18,35 @@
     <div class="flex">
       <button
         (click)="setActiveTab('content')"
-        [ngClass]="activeTab === 'content' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-        class="px-6 py-2 rounded-l-lg font-bold cursor-pointer transition-colors">
+        [ngClass]="
+          activeTab === 'content'
+            ? 'bg-atzicay-purple-500 text-white'
+            : 'bg-purple-200 text-gray-400'
+        "
+        class="px-6 py-2 rounded-l-lg font-bold cursor-pointer transition-colors"
+      >
         Contenido
       </button>
       <button
         (click)="setActiveTab('config')"
-        [ngClass]="activeTab === 'config' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-        class="px-6 py-2 font-bold cursor-pointer transition-colors">
+        [ngClass]="
+          activeTab === 'config'
+            ? 'bg-atzicay-purple-500 text-white'
+            : 'bg-purple-200 text-gray-400'
+        "
+        class="px-6 py-2 font-bold cursor-pointer transition-colors"
+      >
         Configuración
       </button>
       <button
         (click)="setActiveTab('preview')"
-        [ngClass]="activeTab === 'preview' ? 'bg-atzicay-purple-500 text-white' : 'bg-purple-200 text-gray-400'"
-        class="px-6 py-2 rounded-r-lg font-bold cursor-pointer transition-colors">
+        [ngClass]="
+          activeTab === 'preview'
+            ? 'bg-atzicay-purple-500 text-white'
+            : 'bg-purple-200 text-gray-400'
+        "
+        class="px-6 py-2 rounded-r-lg font-bold cursor-pointer transition-colors"
+      >
         Vista Previa
       </button>
     </div>
@@ -35,14 +56,17 @@
       <button
         (click)="onCancel()"
         [disabled]="isLoading"
-        class="bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-bold disabled:opacity-50 transition-colors">
+        class="bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-bold disabled:opacity-50 transition-colors"
+      >
         Cancelar
       </button>
       <button
         (click)="onSubmit()"
         [disabled]="isLoading"
-        class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md font-bold disabled:opacity-50 transition-colors">
-        {{ isLoading ? 'Guardando...' : 'Guardar Juego' }}
+        [attr.disabled]="isLoading ? 'true' : null"
+        class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md font-bold disabled:opacity-50 transition-colors"
+      >
+        {{ isLoading ? "Guardando..." : "Guardar Juego" }}
       </button>
     </div>
   </div>
@@ -54,8 +78,12 @@
     <div class="flex gap-4">
       <!-- Left panel - Game Information -->
       <div class="w-1/2 bg-white p-6 rounded-lg shadow-sm">
-        <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Información del juego</h2>
-        <p class="text-gray-500 mb-6 font-semibold">Configura los datos básicos del juego</p>
+        <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
+          Información del juego
+        </h2>
+        <p class="text-gray-500 mb-6 font-semibold">
+          Configura los datos básicos del juego
+        </p>
 
         <form [formGroup]="hangmanForm">
           <!-- Nombre del juego -->
@@ -63,31 +91,50 @@
             <label for="name" class="block text-gray-900 mb-2 font-semibold">
               Título del Juego <span class="text-red-500">*</span>
             </label>
-            <input id="name" formControlName="name" type="text" placeholder="Ej: Aprende Vocabulario"
-                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                   [class.border-red-500]="isNameInvalid" />
+            <input
+              id="name"
+              formControlName="name"
+              type="text"
+              placeholder="Ej: Aprende Vocabulario"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              [class.border-red-500]="isNameInvalid"
+            />
             <span *ngIf="isNameInvalid" class="text-red-500 text-sm mt-1 block">
-                El nombre debe tener al menos 3 caracteres
-          </span>
+              El nombre debe tener al menos 3 caracteres
+            </span>
           </div>
 
           <!-- Descripción -->
           <div class="mb-4">
-            <label for="description" class="block text-gray-900 mb-2 font-semibold">
+            <label
+              for="description"
+              class="block text-gray-900 mb-2 font-semibold"
+            >
               Descripción <span class="text-red-500">*</span>
             </label>
-            <textarea id="description" formControlName="description" rows="4"
-                      placeholder="Describe el objetivo y contenido del juego..."
-                      class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      [class.border-red-500]="isDescriptionInvalid"></textarea>
-            <span *ngIf="isDescriptionInvalid" class="text-red-500 text-sm mt-1 block">
-                La descripción debe tener al menos 10 caracteres
-           </span>
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="4"
+              placeholder="Describe el objetivo y contenido del juego..."
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+              [class.border-red-500]="isDescriptionInvalid"
+            ></textarea>
+            <span
+              *ngIf="isDescriptionInvalid"
+              class="text-red-500 text-sm mt-1 block"
+            >
+              La descripción debe tener al menos 10 caracteres
+            </span>
           </div>
 
           <!-- Dificultad -->
           <div class="mb-4">
-            <label for="difficulty" class="block text-gray-900 mb-2 font-semibold">Dificultad</label>
+            <label
+              for="difficulty"
+              class="block text-gray-900 mb-2 font-semibold"
+              >Dificultad</label
+            >
             <select
               id="difficulty"
               formControlName="difficulty"
@@ -101,27 +148,35 @@
 
           <!-- Visibilidad -->
           <div class="mb-4">
-            <label for="visibility" class="block text-gray-900 mb-2 font-semibold">Visibilidad</label>
+            <label
+              for="visibility"
+              class="block text-gray-900 mb-2 font-semibold"
+              >Visibilidad</label
+            >
             <select
               id="visibility"
               formControlName="visibility"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="P" selected>Público</option>
+              <option value="P">Público</option>
               <option value="R">Restringido</option>
             </select>
           </div>
 
           <!-- Presentación -->
           <div class="mb-4">
-            <label for="presentation" class="block text-gray-900 mb-2 font-semibold">Tipo de Presentación</label>
+            <label
+              for="presentation"
+              class="block text-gray-900 mb-2 font-semibold"
+              >Tipo de Presentación</label
+            >
             <select
               id="presentation"
               formControlName="presentation"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="A" selected>Alfabético</option>
-              <option value="F">Figura</option>
+              <option value="A" selected>Aleatorio</option>
+              <option value="F">Ordenado</option>
             </select>
           </div>
         </form>
@@ -131,8 +186,12 @@
       <div class="w-1/2 bg-white p-6 rounded-lg shadow-sm">
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Palabras y Pistas</h2>
-            <p class="text-gray-500 font-semibold">Agrega las palabras que los estudiantes deberán adivinar</p>
+            <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
+              Palabras y Pistas
+            </h2>
+            <p class="text-gray-500 font-semibold">
+              Agrega las palabras que los estudiantes deberán adivinar
+            </p>
           </div>
           <button
             type="button"
@@ -156,37 +215,68 @@
             ></div>
           </div>
           <div class="flex items-center text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
-            <span class="ml-1 text-sm">Se recomienda agregar al menos 2 palabras</span>
+            <span class="ml-1 text-sm"
+              >Se recomienda agregar al menos 2 palabras</span
+            >
           </div>
         </div>
 
         <form [formGroup]="wordsForm">
           <div class="max-h-96 overflow-y-auto space-y-4" formArrayName="words">
-            <div *ngFor="let wordForm of wordsArray.controls; let i = index"
-                 class="bg-purple-100 p-4 rounded-md relative"
-                 [formGroupName]="i">
+            <div
+              *ngFor="let wordForm of wordsArray.controls; let i = index"
+              class="bg-purple-100 p-4 rounded-md relative"
+              [formGroupName]="i"
+            >
               <div class="flex justify-between items-center mb-2">
-                <h3 class="text-white bg-atzicay-purple-500 font-medium rounded-full px-3 py-1 text-sm">
+                <h3
+                  class="text-white bg-atzicay-purple-500 font-medium rounded-full px-3 py-1 text-sm"
+                >
                   Palabra {{ i + 1 }}
                 </h3>
                 <button
+                  title="Eliminar Palabra"
                   type="button"
                   (click)="removeWord(i)"
                   class="text-red-500 hover:text-red-700 transition-colors"
                   [disabled]="wordsArray.length <= 1"
                   [class.opacity-50]="wordsArray.length <= 1"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
 
               <div class="mb-3">
-                <label class="block mb-1 text-gray-700 font-semibold">Palabra o Frase</label>
+                <label class="block mb-1 text-gray-700 font-semibold"
+                  >Palabra o Frase</label
+                >
                 <input
                   type="text"
                   formControlName="word"
@@ -194,8 +284,11 @@
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   [class.border-red-500]="isWordInvalid(i)"
                 />
-                <span *ngIf="isWordInvalid(i)" class="text-red-500 text-sm mt-1 block">
-                    La palabra es requerida (mínimo 2 caracteres)
+                <span
+                  *ngIf="isWordInvalid(i)"
+                  class="text-red-500 text-sm mt-1 block"
+                >
+                  La palabra es requerida (mínimo 2 caracteres)
                 </span>
               </div>
 
@@ -205,22 +298,33 @@
                   <span *ngIf="showClues" class="text-red-500">*</span>
                 </label>
                 <input
+                  title="Pista de la Palabra"
                   type="text"
                   formControlName="clue"
                   [disabled]="!showClues"
-                  [placeholder]="!showClues ? 'Habilitar para agregar pista' : 'Ingresa una pista...'"
+                  [placeholder]="
+                    !showClues
+                      ? 'Habilitar para agregar pista'
+                      : 'Ingresa una pista...'
+                  "
                   class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
                   [class.bg-gray-100]="!showClues"
                   [class.cursor-not-allowed]="!showClues"
                   [class.border-red-500]="isClueInvalid(i)"
                 />
-                <span *ngIf="isClueInvalid(i)" class="text-red-500 text-sm mt-1 block">
+                <span
+                  *ngIf="isClueInvalid(i)"
+                  class="text-red-500 text-sm mt-1 block"
+                >
                   La pista debe tener al menos 5 caracteres
                 </span>
               </div>
             </div>
 
-            <div *ngIf="wordsArray.length === 0" class="text-center text-gray-500 py-4">
+            <div
+              *ngIf="wordsArray.length === 0"
+              class="text-center text-gray-500 py-4"
+            >
               No hay palabras añadidas. Haga clic en "Agregar Palabra".
             </div>
           </div>
@@ -231,131 +335,124 @@
   <!-- CONFIGURACIÓN TAB -->
   <div *ngIf="activeTab === 'config'">
     <div class="bg-white p-6 rounded-lg shadow-sm">
-      <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Configuración del juego</h2>
-      <p class="text-gray-500 mb-6 font-semibold">Personaliza las reglas y opciones del juego</p>
+      <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
+        Configuración del juego
+      </h2>
+      <p class="text-gray-500 mb-6 font-semibold">
+        Personaliza las reglas y opciones del juego
+      </p>
 
-      <form [formGroup]="configForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form
+        [formGroup]="configForm"
+        class="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         <!-- Tiempo límite -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Tiempo Límite (segundos)</label>
+          <label class="block text-gray-900 mb-2 font-semibold"
+            >Tiempo Límite (segundos)</label
+          >
           <input
+            title="Tiempo Límite"
             type="number"
             formControlName="timeLimit"
             min="10"
             max="300"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-          <span *ngIf="timeLimit?.invalid && (timeLimit?.dirty || timeLimit?.touched)"
-                class="text-red-500 text-sm">
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          <span
+            *ngIf="
+              timeLimit?.invalid && (timeLimit?.dirty || timeLimit?.touched)
+            "
+            class="text-red-500 text-sm"
+          >
             El tiempo debe estar entre 10 y 300 segundos
           </span>
         </div>
 
-
         <!-- Fuente -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Tipo de Letra</label>
-          <select formControlName="font"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <option *ngFor="let font of fonts" [value]="font">{{font}}</option>
+          <label class="block text-gray-900 mb-2 font-semibold">Fuente</label>
+          <select
+            title="Fuente del Juego"
+            formControlName="font"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option *ngFor="let font of fonts" [value]="font">
+              {{ font }}
+            </option>
           </select>
         </div>
 
-        <!-- Fondo -->
-        <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Color de Fondo</label>
-          <div class="flex gap-2">
-            <button type="button" (click)="onColorChange('backgroundColor', '#ffffff')"
-                    class="w-8 h-8 rounded bg-white border-2"
-                    [class.border-purple-500]="backgroundColor?.value === '#ffffff'"></button>
-            <button type="button" (click)="onColorChange('backgroundColor', '#f3f4f6')"
-                    class="w-8 h-8 rounded bg-gray-100 border-2"
-                    [class.border-purple-500]="backgroundColor?.value === '#f3f4f6'"></button>
-            <button type="button" (click)="onColorChange('backgroundColor', '#1e40af')"
-                    class="w-8 h-8 rounded bg-blue-800 border-2"
-                    [class.border-purple-500]="backgroundColor?.value === '#1e40af'"></button>
-            <button type="button" (click)="onColorChange('backgroundColor', '#166534')"
-                    class="w-8 h-8 rounded bg-green-800 border-2"
-                    [class.border-purple-500]="backgroundColor?.value === '#166534'"></button>
-          </div>
-          <input type="text" formControlName="backgroundColor" class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md">
-        </div>
-
-        <!-- Comentarios de valoración -->
-        <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Comentarios de Valoración</label>
-          <input
-            type="text"
-            formControlName="assessmentComments"
-            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            [class.border-red-500]="assessmentComments?.invalid && (assessmentComments?.touched || assessmentComments?.dirty)"
-            />
-            <span *ngIf="assessmentComments?.invalid && (assessmentComments?.touched || assessmentComments?.dirty)"
-                  class="text-red-500 text-sm">
-              Los comentarios son requeridos y deben tener al menos 5 caracteres.
-            </span>
-          </div>
-
         <!-- Color de Fuente -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Color de Letra</label>
-          <div class="flex gap-2">
-            <button type="button" (click)="onColorChange('fontColor', '#000000')"
-                    class="w-8 h-8 rounded bg-black border-2"
-                    [class.border-purple-500]="fontColor?.value === '#000000'"></button>
-            <button type="button" (click)="onColorChange('fontColor', '#ffffff')"
-                    class="w-8 h-8 rounded bg-white border-2 border-gray-300"
-                    [class.border-purple-500]="fontColor?.value === '#ffffff'"></button>
-            <button type="button" (click)="onColorChange('fontColor', '#1e40af')"
-                    class="w-8 h-8 rounded bg-blue-800 border-2"
-                    [class.border-purple-500]="fontColor?.value === '#1e40af'"></button>
-            <button type="button" (click)="onColorChange('fontColor', '#166534')"
-                    class="w-8 h-8 rounded bg-green-800 border-2"
-                    [class.border-purple-500]="fontColor?.value === '#166534'"></button>
-          </div>
-          <input type="text" formControlName="fontColor" class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md">
+          <label class="block text-gray-900 mb-2 font-semibold"
+            >Color de Fuente</label
+          >
+          <input
+            title="Color de Fuente"
+            type="color"
+            formControlName="fontColor"
+            class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
         </div>
 
-        <!-- Tiempo límite -->
+        <!-- Color de Fondo -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Tiempo Límite (segundos)</label>
-          <input type="number" formControlName="timeLimit" min="10" max="300"
-                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-          @if (timeLimit?.invalid && (timeLimit?.dirty || timeLimit?.touched)) {
-            <span class="text-red-500 text-sm">El tiempo debe estar entre 10 y 300 segundos</span>
-          }
+          <label class="block text-gray-900 mb-2 font-semibold"
+            >Color de Fondo</label
+          >
+          <input
+            title="Color de Fondo"
+            type="color"
+            formControlName="backgroundColor"
+            class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
         </div>
 
         <!-- Mensaje de Éxito -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Éxito</label>
-          <input type="text" formControlName="successMessage"
-                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-          @if (successMessageControl?.invalid && (successMessageControl?.dirty || successMessageControl?.touched)) {
-            <span class="text-red-500 text-sm">El mensaje es requerido (mínimo 3 caracteres)</span>
-          }
+          <label class="block text-gray-900 mb-2 font-semibold"
+            >Mensaje de Éxito</label
+          >
+          <input
+            title="Mensaje de Éxito"
+            type="text"
+            formControlName="successMessage"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          <span
+            *ngIf="
+              successMessageControl?.invalid &&
+              (successMessageControl?.dirty || successMessageControl?.touched)
+            "
+            class="text-red-500 text-sm"
+          >
+            El mensaje es requerido (mínimo 3 caracteres)
+          </span>
         </div>
 
         <!-- Mensaje de Fracaso -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Fracaso</label>
-          <input type="text" formControlName="failureMessage"
-                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
-          @if (failureMessageControl?.invalid && (failureMessageControl?.dirty || failureMessageControl?.touched)) {
-            <span class="text-red-500 text-sm">El mensaje es requerido (mínimo 3 caracteres)</span>
-          }
-        </div>
-
-        <!-- Juego Público -->
-        <div class="flex items-center gap-2">
-          <span class="text-gray-900 font-semibold">Juego Público</span>
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" formControlName="publicGame" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-          </label>
-          <span class="text-gray-500 text-sm">Otros usuarios podrán usar este juego</span>
+          <label class="block text-gray-900 mb-2 font-semibold"
+            >Mensaje de Fracaso</label
+          >
+          <input
+            title="Mensaje de Fracaso"
+            type="text"
+            formControlName="failureMessage"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          <span
+            *ngIf="
+              failureMessageControl?.invalid &&
+              (failureMessageControl?.dirty || failureMessageControl?.touched)
+            "
+            class="text-red-500 text-sm"
+          >
+            El mensaje es requerido (mínimo 3 caracteres)
+          </span>
         </div>
       </form>
     </div>
   </div>
 </div>
-

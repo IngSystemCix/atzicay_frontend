@@ -1,6 +1,8 @@
-import {Component, HostListener} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ProgrammingGameService } from '../../../../core/infrastructure/api/ProgrammingGame/programming-game.service';
+import { ProgrammingGame } from '../../../../core/domain/model/programmingGame/programming-game';
 
 interface ActivityCard {
   id: number;
@@ -18,40 +20,51 @@ interface ActivityCard {
   templateUrl: './my-programmings.component.html',
   styleUrl: './my-programmings.component.css'
 })
-export class MyProgrammingsComponent {
+export class MyProgrammingsComponent implements OnInit {
+
+  activities: ActivityCard[] = [];
+
+  constructor(private programmingGameService: ProgrammingGameService) {}
+
+
+  ngOnInit() {
+    this.programmingGameService.getAllProgrammingGames().subscribe({
+      next: (games: ProgrammingGame[]) => {
+        this.activities = games.map(game => ({
+          id: game.Id,
+          type: this.mapType(game.Name),
+          title: game.Name,
+          group: `Grupo ${game.ProgrammerId}`,
+          status: game.Activated ? 'Activo' : 'Desactivado',
+          difficulty: this.mapDifficulty(game.MaximumTime)
+        }));
+      },
+      error: (err) => {
+        console.error('Error al cargar programaciones:', err);
+      }
+    });
+  }
+
+  mapType(name: string): string {
+    // Mapea el nombre del juego a un tipo si es necesario
+    if (name.includes('Ahorcado')) return 'Ahorcado';
+    if (name.includes('Rompecabezas')) return 'Rompecabezas';
+    if (name.includes('Memoria')) return 'Memoria';
+    if (name.includes('Pupiletras')) return 'Pupiletras';
+    return 'Otro';
+  }
+
+  mapDifficulty(maxTime: number): 'basico' | 'intermedio' | 'dificil' {
+    if (maxTime <= 60) return 'basico';
+    if (maxTime <= 180) return 'intermedio';
+    return 'dificil';
+  }
   selectedTab: string = 'Todos';
   startDate: string = '';
   endDate: string = '';
   menuAbierto: number | null = null;
 
   tabs: string[] = ['Todos', 'Ahorcado', 'Rompecabezas', 'Memoria', 'Pupiletras'];
-
-  activities: ActivityCard[] = [
-    {
-      id: 1,
-      type: 'Ahorcado',
-      title: 'Animales',
-      group: '4TO A',
-      status: 'Activo',
-      difficulty: 'basico'
-    },
-    {
-      id: 2,
-      type: 'Rompecabezas',
-      title: 'Sistema Solar',
-      group: '4TO A',
-      status: 'Activo',
-      difficulty: 'intermedio'
-    },
-    {
-      id: 3,
-      type: 'Memoria',
-      title: 'Capitales del Mundo',
-      group: '4TO A',
-      status: 'Desactivado',
-      difficulty: 'dificil'
-    }
-  ];
 
   getDifficultyClass(difficulty: string): string {
     switch(difficulty) {

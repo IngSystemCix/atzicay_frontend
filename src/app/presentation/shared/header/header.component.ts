@@ -1,6 +1,7 @@
-import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
+import {Component, OnInit, ElementRef, HostListener, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@auth0/auth0-angular';
+import {SidebarService} from '../../../core/infrastructure/api/sidebar/sidebar.service';
 
 @Component({
   selector: 'app-header',
@@ -13,6 +14,7 @@ export class HeaderComponent implements OnInit {
   userName: string = '';
   picture: string = '';
   menuOpen: boolean = false;
+  private sidebarService = inject(SidebarService);
 
   constructor(public auth: AuthService, private eRef: ElementRef) {}
 
@@ -23,6 +25,10 @@ export class HeaderComponent implements OnInit {
         this.picture = user.picture || '';
       }
     });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarService.toggleSidebar();
   }
 
   toggleMenu(): void {

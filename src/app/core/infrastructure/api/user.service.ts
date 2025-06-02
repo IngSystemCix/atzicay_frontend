@@ -15,15 +15,15 @@ export class UserService {
   constructor(private http: HttpClient, private auth: AuthService) {}
 
   // Buscar usuario por email
-  private findUserByEmail(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/users/find`, { Email: email }).pipe(
+  findUserByEmail(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}users/find`, { Email: email }).pipe(
       catchError(() => of(null))
     );
   }
 
   // Crear un nuevo usuario
   private createUser(userData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/users`, userData).pipe(
+    return this.http.post(`${this.apiUrl}users`, userData).pipe(
       catchError(error => {
         console.error('Error creating user:', error);
         return of(null);
@@ -67,7 +67,7 @@ export class UserService {
     return this.createUser(userDto);
   }
 
-  private updateUserIfNeeded(userId: number, auth0User: any): Observable<any> {
+  private updateUserIfNeeded(_userId: number, _auth0User: any): Observable<any> {
     // Aquí podrías implementar lógica para actualizar datos si es necesario
     return of({ success: true, message: 'User exists' });
   }

@@ -30,7 +30,7 @@
           <div class="relative">
             <button class="text-gray-600 text-2xl font-bold" (click)="toggleMenu(juego.id)">⋯</button>
             @if (menuAbierto === juego.id) {
-              <div class="absolute right-0 bg-white shadow-lg rounded-md py-2 w-50 z-10 border border-[#A091F9] rounded-lg">
+              <div class="absolute right-0 bg-white shadow-lg py-2 w-50 z-10 border border-[#A091F9] rounded-lg">
                 <button
                   class="flex items-center px-4 py-2 text-sm text-gray-700 w-full hover:bg-gray-100"
                   (click)="programarJuego(juego.id)"
@@ -59,22 +59,6 @@
           <div class="mt-3">
             <h6 class="text-[#7971AC] font-bold text-sm">Descripción</h6>
             <p class="text-gray-700">{{juego.descripcion}}</p>
-          </div>
-        }
-
-        <!-- Pista del juego -->
-        @if (juego.clue) {
-          <div class="mt-3">
-            <h6 class="text-[#7971AC] font-bold text-sm">Pista</h6>
-            <p class="text-gray-700">{{juego.clue}}</p>
-          </div>
-        }
-
-        <!-- Palabra del juego (podría estar oculta en producción) -->
-        @if (juego.word) {
-          <div class="mt-3">
-            <h6 class="text-[#7971AC] font-bold text-sm">Palabra</h6>
-            <p class="font-bold text-gray-800">{{juego.word}}</p>
           </div>
         }
 

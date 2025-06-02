@@ -27,6 +27,7 @@ export class GameService {
    */
   createGame(gameData: CreateGame): Observable<GameInstance> {
     const url = `${this.baseUrl}${this.gameEndpoint}`;
+    console.log('🌐 URL final:', url);
     const headers = this.getHeaders();
 
     return this.http.post(url, gameData, { headers }).pipe(
@@ -62,11 +63,17 @@ export class GameService {
     gameInfo: Omit<CreateGame, 'game_type' | 'hangman'>,
     hangmanData: HangmanData
   ): Observable<GameInstance> {
+    console.log('🎮 Creando juego Hangman con:', { gameInfo, hangmanData });
+
+    // ✅ CORRECCIÓN: Combinar correctamente los datos UNA SOLA VEZ
     const gameRequest: CreateGame = {
       ...gameInfo,
       game_type: GameType.HANGMAN,
       hangman: hangmanData
     };
+
+    console.log('📤 Datos finales enviados al servidor:', gameRequest);
+
     return this.createGame(gameRequest);
   }
 
@@ -99,8 +106,11 @@ export class GameService {
       puzzle: puzzleData
     };
 
+    console.log('🧩 Enviando puzzle al backend:', gameRequest);
+
     return this.createGame(gameRequest);
   }
+
 
   /**
    * Crea un juego de resolver palabras
@@ -152,8 +162,17 @@ export class GameService {
         } else {
           const { hangman } = gameData;
 
-          if (!hangman.word || hangman.word.trim().length < 2) {
-            errors.push('La palabra es requerida y debe tener al menos 2 caracteres');
+          if (!hangman.words || !Array.isArray(hangman.words) || hangman.words.length === 0) {
+            errors.push('Debe proporcionar al menos una palabra con una pista');
+          } else {
+            hangman.words.forEach(({ word, clue }, index) => {
+              if (!word || word.trim().length < 2) {
+                errors.push(`La palabra en la posición ${index + 1} es requerida y debe tener al menos 2 caracteres`);
+              }
+              if (!clue || clue.trim().length === 0) {
+                errors.push(`La pista para la palabra en la posición ${index + 1} es requerida`);
+              }
+            });
           }
 
           if (!hangman.presentation || !['A', 'F'].includes(hangman.presentation)) {
@@ -172,9 +191,14 @@ export class GameService {
         if (!gameData.puzzle) {
           errors.push('Los datos del puzzle son requeridos');
         } else {
-          if (!gameData.puzzle.pieces || gameData.puzzle.pieces <= 0) {
-            errors.push('El número de piezas del puzzle debe ser mayor a 0');
+          const { rows, columns } = gameData.puzzle;
+          if (!rows || !columns || rows <= 0 || columns <= 0) {
+            errors.push('Las filas y columnas del puzzle deben ser mayores a 0');
           }
+          // Si quieres validar el número total de piezas:
+          // if ((rows * columns) <= 0) {
+          //   errors.push('El número de piezas del puzzle debe ser mayor a 0');
+          // }
         }
         break;
 

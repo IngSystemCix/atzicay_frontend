@@ -1,3 +1,4 @@
+// src/app/core/infrastructure/api/game.service.ts
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ApiResponse } from '../../domain/model/api.response';
@@ -10,7 +11,7 @@ import { environment } from '../../../../environments/environment.development';
 })
 export class GameService {
   private apiUrl = environment.api_base_url;
-  private http= inject(HttpClient);
+  private http = inject(HttpClient);
   private imageMap: { [key: string]: string } = {
     Hangman: 'assets/ahorcado.png',
     Memory: 'assets/memoria.png',
@@ -18,14 +19,9 @@ export class GameService {
     'Solve the Word': 'assets/pupiletras.png',
   };
 
-  getAllGames(limit: number = 6, offset: number = 0) {
-    const token = sessionStorage.getItem('access_token');
-    const options = token ? {
-      headers: { Authorization: `Bearer ${token}` }
-    } : {};
-
+  getAllGames(limit: number = 6) {
     return this.http
-      .get<ApiResponse<Game[]>>(`${this.apiUrl}game-instances/all/${limit}?offset=${offset}`, options)
+      .get<ApiResponse<Game[]>>(`${this.apiUrl}game-instances/all/${limit}`)
       .pipe(
         map((response) =>
           response.data.map((game) => ({
@@ -35,5 +31,4 @@ export class GameService {
         )
       );
   }
-
 }

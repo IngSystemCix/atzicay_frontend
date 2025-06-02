@@ -1,4 +1,4 @@
 export enum Visibility {
   PRIVATE = 'P',
-  PUBLIC = 'U'
+  PUBLIC = 'R'
 }

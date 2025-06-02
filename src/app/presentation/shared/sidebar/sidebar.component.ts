@@ -1,36 +1,74 @@
-import { DOCUMENT } from '@angular/common';
+import {CommonModule, DOCUMENT} from '@angular/common';
 import { Component, Inject, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService as Auth0 } from '@auth0/auth0-angular';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
-
+import { Subscription } from 'rxjs';
+import {SidebarService} from '../../../core/infrastructure/api/sidebar/sidebar.service';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, CommonModule],
 })
 export class SidebarComponent {
   private document = inject(DOCUMENT);
   private auth = inject(Auth0);
   private backendAuth = inject(AuthService);
+  private sidebarService = inject(SidebarService);
 
+  isCollapsed = false;
+  private subscription: Subscription = new Subscription();
+
+  ngOnInit(): void {
+    this.subscription.add(
+      this.sidebarService.isCollapsed$.subscribe(collapsed => {
+        this.isCollapsed = collapsed;
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
   cerrarSesion() {
-    this.backendAuth.logout().subscribe({
-      next: () => {
-        sessionStorage.removeItem('access_token');
-        sessionStorage.removeItem('user');
-        this.auth.logout({
-          logoutParams: { returnTo: this.document.location.origin },
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¡No podrás revertir esto!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, cerrar sesión'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.backendAuth.logout().subscribe({
+          next: () => {
+            sessionStorage.removeItem('access_token');
+            sessionStorage.removeItem('user');
+            this.auth.logout({
+              logoutParams: { returnTo: this.document.location.origin },
+            });
+            Swal.fire({
+              title: '¡Sesión cerrada!',
+              text: 'Has cerrado sesión correctamente.',
+              icon: 'success'
+            });
+          },
+          error: (err) => {
+            console.error('Error al cerrar sesión en el backend', err);
+            this.auth.logout({
+              logoutParams: { returnTo: this.document.location.origin },
+            });
+            Swal.fire({
+              title: '¡Sesión cerrada!',
+              text: 'Has cerrado sesión correctamente.',
+              icon: 'success'
+            });
+          },
         });
-      },
-      error: (err) => {
-        console.error('Error al cerrar sesión en el backend', err);
-        // Aún así cerramos sesión en Auth0
-        this.auth.logout({
-          logoutParams: { returnTo: this.document.location.origin },
-        });
-      },
+      }
     });
   }
 }

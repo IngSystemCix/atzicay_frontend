@@ -25,10 +25,12 @@ export class GameInstanceService {
    * - Difficulty: 'E' | 'M' | 'D'
    * - Visibility: "P" | "R" (Private (R) or public (P))
    */
-  getAllGameInstances(): Observable<GameInstance[]> {
-    return this.http.get<{ data: GameInstance[] }>(this.apiUrl).pipe(
-      map(response => response.data)
-    );
+  getAllGameInstances(idProfessor: string): Observable<GameInstance[]> {
+    return this.http
+      .get<{ data: GameInstance[] }>(`${this.apiUrl}/personal/${idProfessor}`)
+      .pipe(
+        map(response => response.data)
+      );
   }
 
   /**
