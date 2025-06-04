@@ -13,6 +13,7 @@ import {
   LayoutsSolveTheWordComponent
 } from './presentation/features/solveTheWord/layouts-solve-the-word/layouts-solve-the-word.component';
 import { GameConfigurationComponent } from './presentation/shared/game-configuration/game-configuration.component';
+import { ConfigGameComponent } from './presentation/features/config-game/config-game.component';
 
 export const routes: Routes = [
   {
@@ -91,6 +92,12 @@ export const routes: Routes = [
       {
         path: 'juegos/configuracion/:id',
         component: GameConfigurationComponent
+      },
+
+
+      {
+        path: 'configuracion',
+        component: ConfigGameComponent
       }
     ]
   }

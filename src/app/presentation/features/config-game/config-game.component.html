@@ -1,39 +1,45 @@
 <div>
-    <h1>Programacion del Juego</h1>
-    <h6>Personaliza las reglas y operaciones del juego</h6>
-
-    <div class="flex border border-black">
-        <div class="col">
-            <div>
-                <label for="nombre">Nombre</label>
-                <input type="text" id="nombre" placeholder="Nombre del juego" required>
-            </div>
-            <div>
-                <label for="intentos">Intentos</label>
-               <select name="intentos" id="intentos" required>
-                <option value="1">1 intento</option>
-                <option value="2">2 intentos</option>
-                <option value="3">3 intentos</option>
-                <option value="4">4 intentos</option>
-                <option value="5">5 intentos</option>
-               </select>
-            </div>
+    <div class="bg-white border border-black m-8 rounded-2xl p-6 grid-cols-1">
+        <div class="row mb-10">
+            <h1 class="color-atzicay-heading font-bold text-2xl mb-6">Programación del Juego</h1>
+            <h6 class="color-atzicay-subheading">Personaliza las reglas y operaciones del juego</h6>
         </div>
-        <div class="col">
-            <div class="row">
-                <div class="row">
-                    <label for="inicio">Inicio</label>
-                    <input type="date" id="inicio" required>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="pt-3">
+                <div class="mb-10">
+                    <label for="nombre" class="font-bold">Nombres</label>
+                    <input type="text" id="nombre" class="w-full border border-gray-300 rounded-md p-2"/>
                 </div>
-                <div class="row">
-                    <label for="fin">Fin</label>
-                    <input type="date" id="fin" required>
+                <div class="">
+                    <label for="intentos" class="font-bold">Intentos</label>  
+                    <select class="w-full border border-gray-300 rounded-md p-2" name="intentos" id="intentos">
+                        <option value="1">1 intento</option>
+                        <option value="2">2 intentos</option>
+                        <option value="3">3 intentos</option>
+                        <option value="4">4 intentos</option>
+                    </select>
                 </div>
             </div>
-            <div>
-                <label for="tiempo">Tiempo maximo (minutos)</label>
-                <input type="number" id="tiempo" required>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-row gap-4 m-3">
+                    <div class="w-1/2">
+                        <label for="inicio" class="font-bold">Inicio</label>
+                        <input type="date" name="inicio" id="inicio" class="w-full border border-gray-300 rounded-md p-2">
+                    </div>
+                    <div class="w-1/2">
+                        <label for="fin" class="font-bold">Fin</label>
+                        <input type="date" name="fin" id="fin" class="w-full border border-gray-300 rounded-md p-2">
+                    </div>
+                </div>
+                <div class="m-4">
+                    <label for="tiempo" class="font-bold">Tiempo máximo (minutos)</label>
+                    <input type="number" name="tiempo" id="tiempo" class="w-full border border-gray-300 rounded-md p-2">
+                </div>
             </div>
         </div>
+    </div>
+    <div class="flex justify-between mx-8">
+        <button type="button" class="bg-white text-atzicay-heading px-8 py-4 rounded-md border border-atzicay-text-color text-lg w-48 font-bold">Cancelar</button>
+        <button type="submit" class="bg-atzicay-purple-500 text-white px-8 py-4 rounded-md text-lg w-48 font-bold">Guardar</button>
     </div>
 </div>

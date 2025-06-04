@@ -1,4 +1,11 @@
 export interface GameSetting {
-  ConfigKey: string;
-  ConfigValue: string;
+    id: number;
+    idGameInstance: number;
+    ProgrammerId: number;
+    Name: string;
+    Activated: string;
+    StarTime: Date;
+    EndTime: Date;
+    Attems: number;
+    MaximumTime: number;
 }
