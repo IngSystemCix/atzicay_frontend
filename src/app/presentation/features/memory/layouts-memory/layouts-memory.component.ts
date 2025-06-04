@@ -307,4 +307,6 @@ export class LayoutsMemoryComponent {
     this.gameSettings = { ...this.gameSettings, [setting]: value };
     this.logAction(`Setting updated: ${setting}`, value);
   }
+
+  
 }

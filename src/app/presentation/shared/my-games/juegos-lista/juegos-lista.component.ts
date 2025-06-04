@@ -32,7 +32,7 @@ interface Juego {
 @Component({
   selector: 'app-juegos-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ConfigGameComponent],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './juegos-lista.component.html',
   styleUrl: './juegos-lista.component.css',
 })

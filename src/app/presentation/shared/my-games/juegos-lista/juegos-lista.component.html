@@ -1,179 +1,170 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-4">
   @if (cargando) {
-    <div class="col-span-full text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#8571FB]"></div>
-      <p class="text-xl text-gray-500 mt-4">Cargando juegos...</p>
-    </div>
+  <div class="col-span-full text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#8571FB]"></div>
+    <p class="text-xl text-gray-500 mt-4">Cargando juegos...</p>
+  </div>
   } @else if (error) {
-    <div class="col-span-full text-center py-12">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6 mx-auto max-w-md">
-        <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
-          <span class="text-red-500 text-2xl">⚠️</span>
-        </div>
-        <p class="text-xl text-red-600 font-medium mb-2">Error al cargar</p>
-        <p class="text-red-500 mb-4">{{error}}</p>
-        <button 
-          class="px-6 py-2 bg-[#8571FB] text-white rounded-lg hover:bg-[#7161EB] font-medium transition-colors"
-          (click)="cargarJuegos()">
-          🔄 Reintentar
-        </button>
+  <div class="col-span-full text-center py-12">
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mx-auto max-w-md">
+      <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+        <span class="text-red-500 text-2xl">⚠️</span>
       </div>
+      <p class="text-xl text-red-600 font-medium mb-2">Error al cargar</p>
+      <p class="text-red-500 mb-4">{{error}}</p>
+      <button class="px-6 py-2 bg-[#8571FB] text-white rounded-lg hover:bg-[#7161EB] font-medium transition-colors"
+        (click)="cargarJuegos()">
+        🔄 Reintentar
+      </button>
     </div>
+  </div>
   } @else {
-    @for (juego of juegosFiltrados; track juego.id) {
-      <div
-        class="rounded-xl p-6 relative border-2 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-        [ngClass]="{
-          'bg-gradient-to-br from-green-50 to-green-100 border-green-200': juego.dificultad === 'basico',
-          'bg-gradient-to-br from-yellow-50 to-orange-100 border-orange-200': juego.dificultad === 'intermedio',
-          'bg-gradient-to-br from-red-50 to-red-100 border-red-200': juego.dificultad === 'dificil'
-        }"
-      >
-        <!-- Header del juego -->
-        <div class="flex justify-between items-start mb-4">
-          <div class="flex items-center flex-1">
-            <div class="text-3xl mr-3 p-2 bg-white rounded-lg shadow-sm">{{juego.icono}}</div>
-            <div class="flex-1">
-              <h3 class="text-xl font-bold text-[#8571FB] mb-1">{{juego.titulo}}</h3>
-              <div class="flex items-center space-x-2">
-                <span 
-                  class="px-2 py-1 rounded-full text-xs font-medium"
-                  [ngClass]="{
+  @for (juego of juegosFiltrados; track juego.id) {
+  <div
+    class="rounded-xl p-6 relative border-1 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-atzicay-bg-button"
+    [ngClass]="{
+          'bg-green-50': juego.dificultad === 'basico',
+          'bg-orange-50': juego.dificultad === 'intermedio',
+          'bg-red-100': juego.dificultad === 'dificil'
+        }">
+    <!-- Header del juego -->
+    <div class="flex justify-between items-start mb-4">
+      <div class="flex items-center flex-1">
+        <div class="text-3xl mr-3 p-2 bg-white rounded-lg shadow-sm">{{juego.icono}}</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-bold text-[#8571FB] mb-1">{{juego.titulo}}</h3>
+          <div class="flex items-center space-x-2">
+            <span class="px-2 py-1 rounded-full text-xs font-medium" [ngClass]="{
                     'bg-green-200 text-green-800': juego.dificultad === 'basico',
                     'bg-orange-200 text-orange-800': juego.dificultad === 'intermedio',
                     'bg-red-200 text-red-800': juego.dificultad === 'dificil'
                   }">
-                  {{ juego.dificultad | titlecase }}
-                </span>
-              </div>
-            </div>
+              {{ juego.dificultad | titlecase }}
+            </span>
           </div>
-          
-          <!-- Menú de opciones -->
-          <div class="relative">
-            <button 
-              class="text-gray-500 hover:text-gray-700 text-2xl font-bold p-2 rounded-lg hover:bg-white/50 transition-colors" 
-              (click)="toggleMenu(juego.id)">
-              ⋯
-            </button>
-            @if (menuAbierto === juego.id) {
-              <div class="absolute right-0 top-12 bg-white shadow-xl py-2 w-56 z-20 border border-gray-200 rounded-xl">
-                <a 
-                class="flex items-center px-4 py-3 text-sm text-gray-700 w-full hover:bg-[#8571FB]/10 transition-colors no-underline"
-                [routerLink]="['/juegos/configuracion', juego.id]">
-                <span class="mr-3 text-lg">⚙️</span> 
-                <div class="text-left">
-                  <div class="font-medium">Configurar juego</div>
-                  <div class="text-xs text-gray-500">Personalizar configuración</div>
-                </div>
-              </a>
-                <button
-                  class="flex items-center px-4 py-3 text-sm text-gray-700 w-full hover:bg-blue-50 transition-colors"
-                  [routerLink]="['/juegos/editar', juego.id]"
-                >
-                  <span class="mr-3 text-lg">✏️</span> 
-                  <div class="text-left">
-                    <div class="font-medium">Editar</div>
-                    <div class="text-xs text-gray-500">Modificar información</div>
-                  </div>
-                </button>
-                <hr class="my-1">
-                <button
-                  class="flex items-center px-4 py-3 text-sm text-red-600 w-full hover:bg-red-50 transition-colors"
-                  (click)="eliminarJuego(juego.id)"
-                >
-                  <span class="mr-3 text-lg">🗑️</span> 
-                  <div class="text-left">
-                    <div class="font-medium">Eliminar</div>
-                    <div class="text-xs text-red-400">Acción irreversible</div>
-                  </div>
-                </button>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- Descripción -->
-        @if (juego.descripcion) {
-          <div class="mb-4">
-            <p class="text-gray-700 text-sm leading-relaxed bg-white/50 p-3 rounded-lg">
-              {{juego.descripcion}}
-            </p>
-          </div>
-        }
-
-        <!-- Estadísticas -->
-        <div class="grid grid-cols-2 gap-4 mb-4">
-          <div class="bg-white/70 p-3 rounded-lg">
-            <h6 class="text-[#7971AC] font-bold text-xs uppercase tracking-wide mb-1">Veces Jugado</h6>
-            <p class="font-bold text-lg text-gray-800">{{juego.vecesJugado}}</p>
-          </div>
-          <div class="bg-white/70 p-3 rounded-lg">
-            <h6 class="text-[#7971AC] font-bold text-xs uppercase tracking-wide mb-1">Puntuación</h6>
-            <div class="flex items-center">
-              <p class="font-bold text-lg text-gray-800 mr-2">{{juego.puntuacion}}</p>
-              <div class="flex text-yellow-400">
-                @for (star of [1,2,3,4,5]; track $index) {
-                  <span class="text-sm" [class.text-gray-300]="$index >= juego.puntuacion">★</span>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estado y Visibilidad -->
-        <div class="flex justify-between items-center">
-          <div class="flex items-center space-x-3">
-            @switch (juego.estado) {
-              @case ('Activo') {
-                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center">
-                  <span class="w-2 h-2 bg-green-300 rounded-full mr-2"></span>
-                  Activo
-                </span>
-              }
-              @case ('Desactivado') {
-                <span class="bg-red-400 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center">
-                  <span class="w-2 h-2 bg-red-200 rounded-full mr-2"></span>
-                  Desactivado
-                </span>
-              }
-            }
-            
-            @switch (juego.visibilidad) {
-              @case ('P') {
-                <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                  🌐 Público
-                </span>
-              }
-              @case ('R') {
-                <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                  🔒 Restringido
-                </span>
-              }
-              @default {
-                <span class="bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-medium">
-                  ❓ No definido
-                </span>
-              }
-            }
-          </div>
-          
-        
         </div>
       </div>
-    } @empty {
-      <div class="col-span-full text-center py-16">
-        <div class="max-w-md mx-auto">
-          <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <span class="text-3xl text-gray-400">🎮</span>
-          </div>
-          <h3 class="text-xl font-medium text-gray-600 mb-2">No hay juegos disponibles</h3>
-          <p class="text-gray-500 mb-6">Aún no tienes juegos creados para este filtro.</p>
-          <button class="px-6 py-2 bg-[#8571FB] text-white rounded-lg hover:bg-[#7161EB] font-medium transition-colors">
-            + Crear nuevo juego
+
+      <!-- Menú de opciones -->
+      <div class="relative">
+        <button
+          class="text-gray-500 hover:text-gray-700 text-2xl font-bold p-2 rounded-lg hover:bg-white/50 transition-colors"
+          (click)="toggleMenu(juego.id)">
+          ⋯
+        </button>
+        @if (menuAbierto === juego.id) {
+        <div class="absolute right-0 top-12 bg-white shadow-xl py-2 w-56 z-20 border border-gray-200 rounded-xl">
+          <a class="flex items-center px-4 py-3 text-sm text-gray-700 w-full hover:bg-[#8571FB]/10 transition-colors no-underline"
+            [routerLink]="['/juegos/configuracion', juego.id]">
+            <i class="bi bi-nut p-3 text-lg"></i>
+            <div class="text-left">
+              <div class="font-medium">Programar Juego</div>
+              <div class="text-xs text-gray-500">Personaliza tu Programación del juego</div>
+            </div>
+          </a>
+          <button class="flex items-center px-4 py-3 text-sm text-gray-700 w-full hover:bg-[#8571FB]/10 transition-colors"
+            [routerLink]="['/juegos/editar', juego.id]">
+            <i class="bi bi-pencil p-3 text-lg"></i>
+            <div class="text-left">
+              <div class="font-medium">Editar</div>
+              <div class="text-xs text-gray-500">Modificar información</div>
+            </div>
+          </button>
+          <hr class="my-1">
+          <button class="flex items-center px-4 py-3 text-sm text-red-600 w-full hover:bg-red-50 transition-colors"
+            (click)="eliminarJuego(juego.id)">
+           <i class="bi bi-trash p-3 text-lg"></i>
+            <div class="text-left">
+              <div class="font-medium">Eliminar</div>
+              <div class="text-xs text-red-400">Acción irreversible</div>
+            </div>
           </button>
         </div>
+        }
       </div>
+    </div>
+
+    <!-- Descripción -->
+    @if (juego.descripcion) {
+    <div class="mb-4">
+      <p class="text-gray-700 text-sm leading-relaxed bg-white/50 p-3 rounded-lg">
+        {{juego.descripcion}}
+      </p>
+    </div>
     }
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div class="bg-white/70 p-3 rounded-lg">
+        <h6 class="text-[#7971AC] font-bold text-xs uppercase tracking-wide mb-1">Veces Jugado</h6>
+        <p class="font-bold text-lg text-gray-800">{{juego.vecesJugado}}</p>
+      </div>
+      <div class="bg-white/70 p-3 rounded-lg">
+        <h6 class="text-[#7971AC] font-bold text-xs uppercase tracking-wide mb-1">Puntuación</h6>
+        <div class="flex items-center">
+          <p class="font-bold text-lg text-gray-800 mr-2">{{juego.puntuacion}}</p>
+          <div class="flex text-yellow-400">
+            @for (star of [1,2,3,4,5]; track $index) {
+            <span class="text-sm" [class.text-gray-300]="$index >= juego.puntuacion">★</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado y Visibilidad -->
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        @switch (juego.estado) {
+        @case ('Activo') {
+        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center">
+          <span class="w-2 h-2 bg-green-300 rounded-full mr-2"></span>
+          Activo
+        </span>
+        }
+        @case ('Desactivado') {
+        <span class="bg-red-400 text-white px-3 py-1 rounded-full text-xs font-medium flex items-center">
+          <span class="w-2 h-2 bg-red-200 rounded-full mr-2"></span>
+          Desactivado
+        </span>
+        }
+        }
+
+        @switch (juego.visibilidad) {
+        @case ('P') {
+        <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+          🌐 Público
+        </span>
+        }
+        @case ('R') {
+        <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+          🔒 Restringido
+        </span>
+        }
+        @default {
+        <span class="bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-medium">
+          ❓ No definido
+        </span>
+        }
+        }
+      </div>
+
+
+    </div>
+  </div>
+  } @empty {
+  <div class="col-span-full text-center py-16">
+    <div class="max-w-md mx-auto">
+      <div class="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <span class="text-3xl text-gray-400">🎮</span>
+      </div>
+      <h3 class="text-xl font-medium text-gray-600 mb-2">No hay juegos disponibles</h3>
+      <p class="text-gray-500 mb-6">Aún no tienes juegos creados para este filtro.</p>
+      <button class="px-6 py-2 bg-[#8571FB] text-white rounded-lg hover:bg-[#7161EB] font-medium transition-colors">
+        + Crear nuevo juego
+      </button>
+    </div>
+  </div>
+  }
   }
 </div>

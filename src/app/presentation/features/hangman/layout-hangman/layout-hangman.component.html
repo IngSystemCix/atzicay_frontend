@@ -346,32 +346,10 @@
         [formGroup]="configForm"
         class="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        <!-- Tiempo límite -->
-        <div>
-          <label class="block text-gray-900 mb-2 font-semibold"
-            >Tiempo Límite (segundos)</label
-          >
-          <input
-            title="Tiempo Límite"
-            type="number"
-            formControlName="timeLimit"
-            min="10"
-            max="300"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-          <span
-            *ngIf="
-              timeLimit?.invalid && (timeLimit?.dirty || timeLimit?.touched)
-            "
-            class="text-red-500 text-sm"
-          >
-            El tiempo debe estar entre 10 y 300 segundos
-          </span>
-        </div>
 
         <!-- Fuente -->
         <div>
-          <label class="block text-gray-900 mb-2 font-semibold">Fuente</label>
+          <label class="block text-gray-900 mb-2 font-semibold">Tipo de Letra</label>
           <select
             title="Fuente del Juego"
             formControlName="font"
@@ -387,7 +365,7 @@
         <div class="flex items-center justify-around gap-6">
           <div class="text-center">
             <label class="block text-gray-900 mb-2 font-semibold"
-              >Color de Fuente</label
+              >Color de Letra</label
             >
             <input
               title="Color de Fuente"
