@@ -1,0 +1,39 @@
+<div>
+    <h1>Programacion del Juego</h1>
+    <h6>Personaliza las reglas y operaciones del juego</h6>
+
+    <div class="flex border border-black">
+        <div class="col">
+            <div>
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" placeholder="Nombre del juego" required>
+            </div>
+            <div>
+                <label for="intentos">Intentos</label>
+               <select name="intentos" id="intentos" required>
+                <option value="1">1 intento</option>
+                <option value="2">2 intentos</option>
+                <option value="3">3 intentos</option>
+                <option value="4">4 intentos</option>
+                <option value="5">5 intentos</option>
+               </select>
+            </div>
+        </div>
+        <div class="col">
+            <div class="row">
+                <div class="row">
+                    <label for="inicio">Inicio</label>
+                    <input type="date" id="inicio" required>
+                </div>
+                <div class="row">
+                    <label for="fin">Fin</label>
+                    <input type="date" id="fin" required>
+                </div>
+            </div>
+            <div>
+                <label for="tiempo">Tiempo maximo (minutos)</label>
+                <input type="number" id="tiempo" required>
+            </div>
+        </div>
+    </div>
+</div>
