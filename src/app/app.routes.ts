@@ -12,6 +12,7 @@ import {LayoutsMemoryComponent} from './presentation/features/memory/layouts-mem
 import {
   LayoutsSolveTheWordComponent
 } from './presentation/features/solveTheWord/layouts-solve-the-word/layouts-solve-the-word.component';
+import { GameConfigurationComponent } from './presentation/shared/game-configuration/game-configuration.component';
 
 export const routes: Routes = [
   {
@@ -47,7 +48,7 @@ export const routes: Routes = [
         component: LayoutHangmanComponent,
       },
       {
-        path: 'juegos/hangman/jugar',
+        path: 'juegos/jugar-hangman/:id',
          component: GameHangmanComponent
       },
 
@@ -85,6 +86,11 @@ export const routes: Routes = [
       {
         path: 'juegos/solve-The-Word/create',
         component: LayoutsSolveTheWordComponent
+      },
+
+      {
+        path: 'juegos/configuracion/:id',
+        component: GameConfigurationComponent
       }
     ]
   }

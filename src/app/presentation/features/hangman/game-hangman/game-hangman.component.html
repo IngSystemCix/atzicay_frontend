@@ -1,50 +1,78 @@
-<div class="flex flex-col items-center justify-center bg-atzicay-bg p-4">
-  <h1 class=" text-C3B5FA font-medium mb-4">
-    Adivina el nombre del animal antes de que se complete el ahorcado
-  </h1>
-
-  <!-- Información del juego -->
-  <div class="w-full p-4 m-2 ">
-    <div class="flex justify-between items-center mb-2">
-      <div class="text-C3B5FA">Intentos restantes: {{ state.vidasRestantes }}</div>
-      <div class="text-C3B5FA">Tiempo: {{ formatearTiempo() }}</div>
-    </div>
-    <div class="text-C3B5FA mb-4">Palabra: {{ state.numPalabra }} de {{ state.totalPalabras }}</div>
-
+<div class="flex flex-col items-center justify-center min-h-screen p-4" [ngStyle]="estilosJuego">
+  
+  <!-- Loading State -->
+  <div *ngIf="state.cargando" class="text-center">
+    <div class="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+    <p class="text-lg">Cargando juego...</p>
   </div>
 
+  <!-- Error State -->
+  <div *ngIf="state.error && !state.cargando" class="text-center">
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <p class="font-bold">Error</p>
+      <p>{{ state.error }}</p>
+    </div>
+    <button 
+      (click)="volverAlDashboard()"
+      class="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+      Volver al Dashboard
+    </button>
+  </div>
+
+  <!-- Game Content -->
+  <div *ngIf="!state.cargando && !state.error" class="w-full max-w-6xl">
+    
+    <!-- Título y descripción del juego -->
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-bold mb-2" [style.color]="state.colorTexto">
+        {{ tituloJuego }}
+      </h1>
+      <p class="text-lg" [style.color]="state.colorTexto">
+        {{ descripcionJuego }}
+      </p>
+    </div>
+
+    <!-- Información del juego -->
+    <div class="w-full p-4 mb-4 bg-white/10 rounded-lg backdrop-blur-sm">
+      <div class="flex justify-between items-center mb-2">
+        <div [style.color]="state.colorTexto">Intentos restantes: {{ state.intentosRestantes }}</div>
+        <div [style.color]="state.colorTexto">Tiempo: {{ formatearTiempo() }}</div>
+      </div>
+      <div [style.color]="state.colorTexto">Vidas restantes: {{ state.vidasRestantes }}</div>
+    </div>
 
     <!-- Área del juego -->
-    <div class="flex flex-col md:flex-row justify-between items-center">
+    <div class="flex flex-col lg:flex-row justify-between items-center gap-8">
+      
       <!-- Dibujo del ahorcado -->
-      <div class="w-full md:w-1/3 flex justify-center">
-        <svg width="200" height="250" viewBox="0 0 200 250" class="text-purple-300">
+      <div class="w-full lg:w-1/3 flex justify-center">
+        <svg width="200" height="250" viewBox="0 0 200 250" [style.color]="state.colorTexto">
           <!-- Base -->
           <line x1="20" y1="230" x2="180" y2="230" stroke="currentColor" stroke-width="4"/>
-
+          
           <!-- Poste vertical -->
           <line x1="60" y1="230" x2="60" y2="30" stroke="currentColor" stroke-width="4"/>
-
+          
           <!-- Poste horizontal -->
           <line x1="60" y1="30" x2="140" y2="30" stroke="currentColor" stroke-width="4"/>
-
+          
           <!-- Cuerda -->
           <line x1="140" y1="30" x2="140" y2="60" stroke="currentColor" stroke-width="4"/>
-
+          
           <!-- Cabeza -->
           <circle cx="140" cy="80" r="20" stroke="currentColor" stroke-width="4" fill="none"
                   [attr.visibility]="state.intentosRestantes < 6 ? 'visible' : 'hidden'"/>
-
+          
           <!-- Cuerpo -->
           <line x1="140" y1="100" x2="140" y2="150" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 5 ? 'visible' : 'hidden'"/>
-
+          
           <!-- Brazos -->
           <line x1="140" y1="120" x2="120" y2="100" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 4 ? 'visible' : 'hidden'"/>
           <line x1="140" y1="120" x2="160" y2="100" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 3 ? 'visible' : 'hidden'"/>
-
+          
           <!-- Piernas -->
           <line x1="140" y1="150" x2="120" y2="180" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 2 ? 'visible' : 'hidden'"/>
@@ -54,29 +82,31 @@
       </div>
 
       <!-- Palabra y teclado -->
-      <div class="w-full md:w-2/3 flex flex-col items-center">
+      <div class="w-full lg:w-2/3 flex flex-col items-center">
+        
         <!-- Palabra a adivinar -->
-        <div class="flex justify-center mb-8 mt-6 md:mt-0">
+        <div class="flex justify-center mb-8 flex-wrap">
           <ng-container *ngFor="let letra of state.palabraActual.split(''); let i = index">
-            <div class="mx-1 flex flex-col items-center">
-              <div class="text-xl text-purple-600 h-8 flex items-center justify-center">
+            <div class="mx-1 flex flex-col items-center mb-2">
+              <div class="text-2xl h-10 flex items-center justify-center min-w-[2rem]" 
+                   [style.color]="state.colorTexto">
                 <span *ngIf="state.palabraRevelada[i] !== ''">
                   {{ state.palabraRevelada[i] }}
                 </span>
               </div>
-              <div class="w-8 h-1 bg-purple-600"></div>
+              <div class="w-8 h-1" [style.background-color]="state.colorTexto"></div>
             </div>
           </ng-container>
         </div>
 
         <!-- Teclado -->
-        <div class="grid grid-cols-7 gap-2 mx-auto">
+        <div class="grid grid-cols-6 sm:grid-cols-7 gap-2 mx-auto max-w-lg">
           <button *ngFor="let letra of alfabeto"
-                  class="w-8 h-8 rounded-md flex items-center justify-center text-sm font-medium transition-colors"
+                  class="w-10 h-10 rounded-md flex items-center justify-center text-sm font-medium transition-colors"
                   [ngClass]="{
-                    'bg-purple-200 text-purple-600': !estaLetraSeleccionada(letra),
-                    'bg-purple-500 text-white': estaLetraSeleccionada(letra) && estaLetraEnPalabra(letra),
-                    'bg-gray-200 text-gray-500': estaLetraSeleccionada(letra) && !estaLetraEnPalabra(letra)
+                    'bg-purple-200 text-purple-600 hover:bg-purple-300': !estaLetraSeleccionada(letra),
+                    'bg-green-500 text-white': estaLetraSeleccionada(letra) && estaLetraEnPalabra(letra),
+                    'bg-red-500 text-white': estaLetraSeleccionada(letra) && !estaLetraEnPalabra(letra)
                   }"
                   [disabled]="estaLetraSeleccionada(letra) || state.juegoTerminado"
                   (click)="seleccionarLetra(letra)">
@@ -86,49 +116,60 @@
       </div>
     </div>
 
-  <!-- Mensaje de resultado -->
-  <div *ngIf="state.juegoTerminado"
-       class="mt-6 p-3 rounded-md text-center w-full max-w-md"
-       [ngClass]="state.juegoGanado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
-    <p *ngIf="state.juegoGanado" class="mb-2">¡Felicidades! Has adivinado la palabra.</p>
-    <p *ngIf="!state.juegoGanado" class="mb-2">¡Oh no! Has perdido.</p>
-  </div>
-
-  <!-- Pista -->
-  <div class="mt-4 text-purple-600">
-    Pista: {{ state.pistaPalabra }}
-  </div>
-
-  <!-- Mostrar botones al finalizar palabra -->
-  <div *ngIf="state.juegoTerminado" class="text-center mt-6">
-
-    <!-- Juego finalizado por vidas -->
-    <div *ngIf="state.juegoFinalizado">
-      <p class="text-red-600 text-lg font-bold mb-4">¡Juego terminado! Se acabaron tus intentos.</p>
-      <button (click)="reiniciarJuego()"
-              class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-        Reiniciar juego completo
-      </button>
+    <!-- Pista -->
+    <div class="mt-6 text-center p-4 bg-white/10 rounded-lg backdrop-blur-sm">
+      <p class="font-medium mb-2" [style.color]="state.colorTexto">Pista:</p>
+      <p class="text-lg" [style.color]="state.colorTexto">{{ state.pistaPalabra }}</p>
     </div>
 
-    <!-- Ganó la palabra -->
-    <div *ngIf="!state.juegoFinalizado && state.juegoGanado">
-      <button (click)="reiniciarJuego()"
-              class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-        Siguiente palabra
-      </button>
+    <!-- Mensaje de resultado -->
+    <div *ngIf="state.juegoTerminado"
+         class="mt-6 p-4 rounded-lg text-center w-full max-w-md mx-auto"
+         [ngClass]="state.juegoGanado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+      <p class="text-lg font-bold mb-2">
+        {{ state.juegoGanado ? state.mensajeExito : state.mensajeFallo }}
+      </p>
+      <p *ngIf="state.juegoGanado">¡Has adivinado la palabra!</p>
     </div>
 
-    <!-- Perdió la palabra pero aún tiene vidas -->
-    <div *ngIf="!state.juegoFinalizado && !state.juegoGanado">
-      <p class="text-yellow-600 font-medium mb-2">Perdiste esta palabra. Te quedan {{ state.vidasRestantes }} vidas.</p>
-      <button (click)="reiniciarJuego()"
-              class="px-6 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
-        Reintentar
-      </button>
+    <!-- Botones de acción -->
+    <div *ngIf="state.juegoTerminado" class="text-center mt-6 space-y-4">
+      
+      <!-- Juego finalizado por vidas -->
+      <div *ngIf="state.juegoFinalizado" class="space-y-4">
+        <p class="text-red-600 text-lg font-bold">¡Juego terminado! Se acabaron tus vidas.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button (click)="reiniciarJuego()"
+                  class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+            Reiniciar juego
+          </button>
+          <button (click)="volverAlDashboard()"
+                  class="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
+            Volver al menú
+          </button>
+        </div>
+      </div>
+
+      <!-- Juego en progreso -->
+      <div *ngIf="!state.juegoFinalizado" class="space-y-4">
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button (click)="reiniciarJuego()"
+                  class="px-6 py-2 rounded-md transition-colors"
+                  [ngClass]="state.juegoGanado ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-yellow-500 hover:bg-yellow-600 text-white'">
+            {{ state.juegoGanado ? 'Jugar de nuevo' : 'Reintentar' }}
+          </button>
+          <button (click)="volverAlDashboard()"
+                  class="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
+            Volver al menú
+          </button>
+        </div>
+        
+        <p *ngIf="!state.juegoGanado && state.vidasRestantes > 0" 
+           class="text-yellow-600 font-medium">
+          Te quedan {{ state.vidasRestantes }} vidas
+        </p>
+      </div>
     </div>
+
   </div>
-
-
-
 </div>

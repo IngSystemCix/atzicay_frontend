@@ -1,11 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { GameInstance } from '../../../../core/domain/model/gameInstance/game-instance';
 import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
 import { GameInstanceService } from '../../../../core/infrastructure/api/GameInstance/game-instance.service';
 import { UserService } from '../../../../core/infrastructure/api/user.service';
+import { GameConfiguration } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
 import { catchError, switchMap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
+import { GameConfigurationComponent } from '../../game-configuration/game-configuration.component';
+import { RouterLink } from '@angular/router';
+
 type Dificultad = 'basico' | 'intermedio' | 'dificil';
 
 interface Juego {
@@ -26,7 +31,7 @@ interface Juego {
 @Component({
   selector: 'app-juegos-lista',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, GameConfigurationComponent, RouterLink],
   templateUrl: './juegos-lista.component.html',
   styleUrl: './juegos-lista.component.css',
 })
@@ -38,6 +43,10 @@ export class JuegosListaComponent implements OnInit {
   cargando: boolean = true;
   error: string | null = null;
   gameInstances: Map<number, GameInstance> = new Map();
+
+  // Variables para el modal de configuración
+  showConfigModal = false;
+  selectedGameId: number | null = null;
 
   constructor(
     private hangmanService: HangmanService,
@@ -52,7 +61,7 @@ export class JuegosListaComponent implements OnInit {
   cargarJuegos(): void {
     this.cargando = true;
     this.error = null;
-    this.juegos = []; // Limpiar lista antes de cargar
+    this.juegos = [];
 
     try {
         const userString = sessionStorage.getItem('user');
@@ -75,11 +84,9 @@ export class JuegosListaComponent implements OnInit {
                 
                 return this.gameInstanceService.getAllGameInstances(response.data.Id).pipe(
                     catchError(error => {
-                        // Si es 404, significa que no hay juegos (no es realmente un error)
                         if (error.status === 404) {
-                            return of([]); // Devuelve array vacío
+                            return of([]);
                         }
-                        // Para otros errores, los propagamos
                         return throwError(() => error);
                     })
                 );
@@ -104,7 +111,7 @@ export class JuegosListaComponent implements OnInit {
                             if (!juegosUnicos.has(nombreNormalizado)) {
                                 juegosUnicos.set(nombreNormalizado, {
                                     id: juego.Id || '',
-                                    tipo: 'Otro',
+                                    tipo: 'Ahorcado',
                                     icono: '🎮',
                                     titulo: juego.Name || 'Sin nombre',
                                     descripcion: juego.Description || '',
@@ -155,26 +162,77 @@ export class JuegosListaComponent implements OnInit {
 
   programarJuego(id: number) {
     console.log(`Programar juego ${id}`);
+    this.selectedGameId = id;
+    this.showConfigModal = true;
     this.menuAbierto = null;
+    
+    // Cerrar el menú al hacer clic fuera
+    document.addEventListener('click', this.cerrarMenus.bind(this));
   }
 
   eliminarJuego(id: number) {
-    console.log(`Eliminar juego ${id}`);
-    this.hangmanService.deleteHangman(id).subscribe({
-      next: () => {
-        this.juegos = this.juegos.filter((juego) => juego.id !== id);
-        console.log('Juego eliminado con éxito');
-      },
-      error: (err) => {
-        console.error('Error al eliminar el juego', err);
-      },
-    });
+    if (confirm('¿Estás seguro de que deseas eliminar este juego? Esta acción no se puede deshacer.')) {
+      console.log(`Eliminar juego ${id}`);
+      this.hangmanService.deleteHangman(id).subscribe({
+        next: () => {
+          this.juegos = this.juegos.filter((juego) => juego.id !== id);
+          console.log('Juego eliminado con éxito');
+          // Mostrar mensaje de éxito
+          this.mostrarMensaje('Juego eliminado correctamente', 'success');
+        },
+        error: (err) => {
+          console.error('Error al eliminar el juego', err);
+          this.mostrarMensaje('Error al eliminar el juego', 'error');
+        },
+      });
+    }
     this.menuAbierto = null;
   }
 
   editarJuego(id: number) {
     console.log(`Editar juego ${id}`);
+    // Aquí puedes implementar la lógica para editar el juego
+    // Por ejemplo, navegar a una página de edición
     this.menuAbierto = null;
+  }
+
+  cerrarModalConfiguracion() {
+    this.showConfigModal = false;
+    this.selectedGameId = null;
+    
+    // Remover el event listener
+    document.removeEventListener('click', this.cerrarMenus.bind(this));
+  }
+
+  onConfigurationSaved(config: GameConfiguration) {
+    console.log('Configuración guardada:', config);
+    
+    // Mostrar mensaje de éxito
+    this.mostrarMensaje('Configuración guardada correctamente', 'success');
+    
+    // Actualizar la lista de juegos
+    this.cargarJuegos();
+    
+    // Cerrar el modal
+    this.cerrarModalConfiguracion();
+  }
+
+  // Método auxiliar para cerrar menús
+  private cerrarMenus() {
+    this.menuAbierto = null;
+  }
+
+  // Método auxiliar para mostrar mensajes
+  private mostrarMensaje(mensaje: string, tipo: 'success' | 'error') {
+    // Aquí puedes implementar un sistema de notificaciones
+    // Por ahora, solo usamos alert o console.log
+    if (tipo === 'success') {
+      console.log('✅ ' + mensaje);
+      // alert('✅ ' + mensaje);
+    } else {
+      console.error('❌ ' + mensaje);
+      // alert('❌ ' + mensaje);
+    }
   }
 
   private convertirDificultad(valor: string): Dificultad {

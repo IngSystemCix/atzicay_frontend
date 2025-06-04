@@ -17,7 +17,7 @@ import { GameCardComponent } from '../../shared/game-card/game-card.component';
 })
 export class DashboardComponent implements OnInit {
   private readonly gameService = inject(GameService);
-  private readonly PAGE_SIZE = 6;
+  protected  PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
 
@@ -41,7 +41,7 @@ export class DashboardComponent implements OnInit {
           );
         }),
         switchMap(() =>
-          this.gameService.getAllGames(this.PAGE_SIZE).pipe(
+          this.gameService.getAllGames().pipe(
             tap((games) => {
               this.allGames = games;
               this.currentOffset = games.length;
@@ -180,8 +180,14 @@ export class DashboardComponent implements OnInit {
   totalGamesInDB = 0;
   currentOffset = 0;
   hasMoreGames = true;
+
+  onChangeLimit(newLimit: number) {
+    this.gameService.setLimit(newLimit);
+    this.PAGE_SIZE=this.PAGE_SIZE+1;
+  }
   loadMoreGames(): void {
-    this.gameService.getAllGames(this.PAGE_SIZE).subscribe({
+    this.gameService.getAllGames().subscribe({
+
       next: (moreGames) => {
         if (moreGames.length > 0) {
           this.allGames = [...this.allGames, ...moreGames];

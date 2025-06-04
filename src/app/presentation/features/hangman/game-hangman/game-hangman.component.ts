@@ -1,5 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { GameConfiguration, GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
 
 interface JuegoState {
   palabraActual: string;
@@ -9,12 +11,20 @@ interface JuegoState {
   intentosRestantes: number;
   vidasRestantes: number;
   tiempoRestante: number;
-  numPalabra: number;
-  totalPalabras: number;
+  tiempoInicial: number;
   juegoTerminado: boolean;
   juegoGanado: boolean;
-  juegoFinalizado: boolean; // nuevo: fin completo
+  juegoFinalizado: boolean;
   timerInterval: any;
+  // Configuración del juego
+  gameConfig: GameConfiguration | null;
+  mensajeExito: string;
+  mensajeFallo: string;
+  colorFondo: string;
+  colorTexto: string;
+  fuente: string;
+  cargando: boolean;
+  error: string;
 }
 
 @Component({
@@ -25,37 +35,45 @@ interface JuegoState {
   styleUrls: ['./game-hangman.component.css']
 })
 export class GameHangmanComponent implements OnInit, OnDestroy {
-  readonly INTENTOS_INICIALES = 5;
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private gameConfigService = inject(GameConfigurationService);
+
+  readonly INTENTOS_INICIALES = 6;
 
   state: JuegoState = {
     palabraActual: '',
     pistaPalabra: '',
     palabraRevelada: [],
     letrasSeleccionadas: new Set<string>(),
-    intentosRestantes: 6, // intentos por palabra
-    vidasRestantes: 5,
-    tiempoRestante: 120,
-    numPalabra: 1,
-    totalPalabras: 5,
+    intentosRestantes: 6,
+    vidasRestantes: 3,
+    tiempoRestante: 60,
+    tiempoInicial: 60,
     juegoTerminado: false,
     juegoGanado: false,
-    juegoFinalizado: false, // nuevo: fin completo
-    timerInterval: null
+    juegoFinalizado: false,
+    timerInterval: null,
+    gameConfig: null,
+    mensajeExito: '¡Excelente trabajo!',
+    mensajeFallo: 'Inténtalo de nuevo',
+    colorFondo: '#ffffff',
+    colorTexto: '#000000',
+    fuente: 'Arial',
+    cargando: true,
+    error: ''
   };
-
-
-  palabras = [
-    { palabra: 'ELEFANTE', pista: 'Animal grande con trompa' },
-    { palabra: 'JIRAFA', pista: 'Animal con cuello largo' },
-    { palabra: 'TIGRE', pista: 'Felino con rayas' },
-    { palabra: 'BALLENA', pista: 'Mamífero marino de gran tamaño' },
-    { palabra: 'COCODRILO', pista: 'Reptil acuático con grandes mandíbulas' }
-  ];
 
   alfabeto: string[] = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
 
   ngOnInit(): void {
-    this.iniciarJuego();
+    const gameId = this.route.snapshot.params['id'];
+    if (gameId) {
+      this.cargarConfiguracionJuego(+gameId);
+    } else {
+      this.state.error = 'No se proporcionó un ID de juego válido';
+      this.state.cargando = false;
+    }
   }
 
   ngOnDestroy(): void {
@@ -64,32 +82,90 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     }
   }
 
+  cargarConfiguracionJuego(id: number): void {
+    this.state.cargando = true;
+    this.state.error = '';
+
+    this.gameConfigService.getGameConfiguration(id).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.state.gameConfig = response.data;
+          this.aplicarConfiguracion();
+          this.iniciarJuego();
+        } else {
+          this.state.error = response.message || 'No se pudo cargar la configuración del juego';
+        }
+        this.state.cargando = false;
+      },
+      error: (error) => {
+        console.error('Error cargando configuración:', error);
+        this.state.error = 'Error al cargar la configuración del juego';
+        this.state.cargando = false;
+      }
+    });
+  }
+
+  aplicarConfiguracion(): void {
+    if (!this.state.gameConfig) return;
+
+    const config = this.state.gameConfig;
+    
+    // Aplicar configuraciones desde settings
+    config.settings.forEach(setting => {
+      switch (setting.key) {
+        case 'TiempoLimite':
+          this.state.tiempoInicial = parseInt(setting.value) || 60;
+          this.state.tiempoRestante = this.state.tiempoInicial;
+          break;
+        case 'MensajeExito':
+          this.state.mensajeExito = setting.value;
+          break;
+        case 'MensajeFallo':
+          this.state.mensajeFallo = setting.value;
+          break;
+        case 'ColorFondo':
+          this.state.colorFondo = setting.value;
+          break;
+        case 'ColorTexto':
+          this.state.colorTexto = setting.value;
+          break;
+        case 'Fuente':
+          this.state.fuente = setting.value;
+          break;
+      }
+    });
+
+    // Aplicar palabra y pista desde game_data
+    if (config.game_data) {
+      this.state.palabraActual = config.game_data.word.toUpperCase();
+      this.state.pistaPalabra = config.game_data.clue;
+    }
+  }
+
   iniciarJuego(): void {
-    const randomIndex = Math.floor(Math.random() * this.palabras.length);
-    const palabraSeleccionada = this.palabras[randomIndex];
+    if (!this.state.gameConfig || !this.state.palabraActual) {
+      this.state.error = 'No se pudo inicializar el juego';
+      return;
+    }
 
     if (this.state.timerInterval) {
       clearInterval(this.state.timerInterval);
     }
 
+    // Resetear estado del juego pero mantener configuración
     this.state = {
       ...this.state,
-      palabraActual: palabraSeleccionada.palabra,
-      pistaPalabra: palabraSeleccionada.pista,
-      palabraRevelada: Array(palabraSeleccionada.palabra.length).fill(''),
+      palabraRevelada: Array(this.state.palabraActual.length).fill(''),
       letrasSeleccionadas: new Set<string>(),
-      intentosRestantes: 6,
-      tiempoRestante: 120,
+      intentosRestantes: this.INTENTOS_INICIALES,
+      tiempoRestante: this.state.tiempoInicial,
       juegoTerminado: false,
       juegoGanado: false,
       timerInterval: null
     };
 
-
     this.iniciarTimer();
   }
-
-
 
   seleccionarLetra(letra: string): void {
     if (this.state.juegoTerminado || this.state.letrasSeleccionadas.has(letra)) {
@@ -99,16 +175,19 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     this.state.letrasSeleccionadas.add(letra);
 
     if (this.state.palabraActual.includes(letra)) {
+      // Letra correcta
       for (let i = 0; i < this.state.palabraActual.length; i++) {
         if (this.state.palabraActual[i] === letra) {
           this.state.palabraRevelada[i] = letra;
         }
       }
 
+      // Verificar si se completó la palabra
       if (!this.state.palabraRevelada.includes('')) {
         this.finalizarJuego(true);
       }
     } else {
+      // Letra incorrecta
       this.state.intentosRestantes--;
 
       if (this.state.intentosRestantes <= 0) {
@@ -116,7 +195,6 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       }
     }
   }
-
 
   finalizarJuego(ganado: boolean): void {
     this.state.juegoTerminado = true;
@@ -128,37 +206,31 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
 
     if (!ganado) {
       this.state.vidasRestantes--;
-
+      
       if (this.state.vidasRestantes <= 0) {
         this.state.juegoFinalizado = true;
       }
     }
-  }
 
-
-  siguientePalabra(): void {
-    if (this.state.numPalabra >= this.palabras.length) {
-      // Si ya se jugó la última palabra, reinicia desde el principio
-      this.state.numPalabra = 1;
-    } else {
-      this.state.numPalabra++;
+    // Revelar toda la palabra al finalizar
+    for (let i = 0; i < this.state.palabraActual.length; i++) {
+      this.state.palabraRevelada[i] = this.state.palabraActual[i];
     }
-
-    this.iniciarJuego();
   }
-
 
   reiniciarJuego(): void {
     if (this.state.juegoFinalizado) {
-      // reiniciar todo desde cero
-      this.state.vidasRestantes = 5;
-      this.state.numPalabra = 1;
+      // Reiniciar completamente
+      this.state.vidasRestantes = 3;
       this.state.juegoFinalizado = false;
     }
 
     this.iniciarJuego();
   }
 
+  volverAlDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
 
   formatearTiempo(): string {
     const minutos = Math.floor(this.state.tiempoRestante / 60);
@@ -184,10 +256,20 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     return this.state.palabraActual.includes(letra);
   }
 
-  obtenerClaseLetra(letra: string): string {
-    if (!this.estaLetraSeleccionada(letra)) {
-      return 'bg-white hover:bg-purple-100';
-    }
-    return this.estaLetraEnPalabra(letra) ? 'bg-green-100' : 'bg-red-100';
+  // Getters para aplicar estilos dinámicos
+  get estilosJuego() {
+    return {
+      'background-color': this.state.colorFondo,
+      'color': this.state.colorTexto,
+      'font-family': this.state.fuente
+    };
+  }
+
+  get tituloJuego(): string {
+    return this.state.gameConfig?.title || 'Juego del Ahorcado';
+  }
+
+  get descripcionJuego(): string {
+    return this.state.gameConfig?.description || 'Adivina la palabra antes de que se complete el ahorcado';
   }
 }

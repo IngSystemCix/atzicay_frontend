@@ -1,3 +1,4 @@
+// game-card.component.ts
 import { Component, Input, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -12,6 +13,7 @@ import { RouterLink } from '@angular/router';
   templateUrl: './game-card.component.html'
 })
 export class GameCardComponent {
+  @Input() id: number = 0; // Nuevo input para el ID
   @Input() title: string = '';
   @Input() description: string = '';
   @Input() level: string = '';
@@ -28,12 +30,12 @@ export class GameCardComponent {
   get gameRoute(): string {
     switch(this.gameType.toLowerCase()) {
       case 'hangman':
-        return '/juegos/jugar-hangman';
+        return `/juegos/jugar-hangman/${this.id}`; // Incluye el ID en la ruta
       case 'sopa-de-letras':
       case 'solve-the-word':
-        return '/juegos/solve-the-word';
+        return `/juegos/solve-the-word/${this.id}`;
       default:
-        return '/juegos'; // Ruta por defecto si no coincide con ningún tipo
+        return '/juegos';
     }
   }
 
@@ -61,7 +63,6 @@ export class GameCardComponent {
     }
   }
 
-  // Close dropdown when clicking outside
   closeDropdown() {
     this.isDropdownOpen = false;
   }

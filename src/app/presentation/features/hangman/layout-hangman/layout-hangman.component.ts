@@ -54,7 +54,7 @@ export class LayoutHangmanComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    await this.loadUserData(); // Cargar datos del usuario primero
+    await this.loadUserData(); 
     this.addNewWord();
   }
 
@@ -96,9 +96,9 @@ export class LayoutHangmanComponent implements OnInit {
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       professorId: [professorId, [Validators.required, Validators.min(1)]],
-      difficulty: ['', Validators.required],
-      visibility: ['', Validators.required],
-      presentation: ['', Validators.required],
+      difficulty: ['E', Validators.required],
+      visibility: ['P', Validators.required],
+      presentation: ['A', Validators.required],
     });
 
     // Formulario de palabras
@@ -166,7 +166,7 @@ export class LayoutHangmanComponent implements OnInit {
     const wordForm = this.fb.group({
       word: ['', [Validators.required, Validators.minLength(2)]],
       clue: [
-        { value: '', disabled: !this.showClues }, // Usar la sintaxis correcta para disabled
+        { value: '', disabled: !this.showClues }, 
         this.showClues ? [Validators.required, Validators.minLength(5)] : [],
       ],
     });

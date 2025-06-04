@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,6 +8,7 @@ import { CreateGame } from '../../../../core/domain/interface/create-game';
 import { Visibility } from '../../../../core/domain/enum/visibility';
 import { SolveTheWordData } from '../../../../core/domain/interface/solve-the-word-data';
 import { Orientation } from '../../../../core/domain/enum/orientacion';
+import { UserService } from '../../../../core/infrastructure/api/user.service';
 
 @Component({
   selector: 'app-layouts-solve-the-word',
@@ -15,7 +16,7 @@ import { Orientation } from '../../../../core/domain/enum/orientacion';
   templateUrl: './layouts-solve-the-word.component.html',
   styleUrl: './layouts-solve-the-word.component.css'
 })
-export class LayoutsSolveTheWordComponent {
+export class LayoutsSolveTheWordComponent implements OnInit {
   activeTab: string = 'contenido';
 
   // Contenido tab data
@@ -23,12 +24,12 @@ export class LayoutsSolveTheWordComponent {
   gameDescription: string = '';
   gridSize: string = '10 x 10';
 
-  // Palabras data - CORRECCIÓN: Cambiar orientación por valores correctos
+  // Palabras data
   words: Array<{id: number, word: string, orientation: Orientation}> = [
     {id: 1, word: '', orientation: Orientation.HORIZONTAL_LEFT} 
   ];
 
-  // Configuración data
+  // Variables para configuración
   fontFamily: string = '';
   backgroundColor: string = 'gray';
   fontColor: string = 'gray';
@@ -36,9 +37,9 @@ export class LayoutsSolveTheWordComponent {
   failureMessage: string = '';
   isPublicGame: boolean = true;
 
-  // Variables para dificultad - AGREGAR ESTAS
+  // Variables para dificultad y profesor - CORREGIDO: Solo una variable para el ID
   difficulty: Difficulty = Difficulty.MEDIUM;
-  professorId: number = 4; // Obtener del servicio de auth o context
+  professorId: number = 0; // Inicializar en 0, se cargará en ngOnInit
 
   // Available colors
   colorOptions = [
@@ -50,8 +51,44 @@ export class LayoutsSolveTheWordComponent {
 
   constructor(
     private gameService: GameService,
-    private router: Router
+    private router: Router,
+    private usuarioService: UserService
   ) {}
+
+  async ngOnInit(): Promise<void> {
+    await this.loadUserData();
+  }
+
+  private async loadUserData(): Promise<void> {
+    try {
+      const userString = sessionStorage.getItem('user');
+      if (!userString) {
+        throw new Error('No hay usuario en sesión');
+      }
+      
+      const user = JSON.parse(userString);
+      const email = user?.Email;
+      if (!email) {
+        throw new Error('El usuario no tiene email registrado');
+      }
+
+      // Obtener el ID del usuario desde el servicio
+      const userResponse = await this.usuarioService.findUserByEmail(email).toPromise();
+      if (!userResponse?.data?.Id) {
+        throw new Error('ID de usuario no válido');
+      }
+      
+      // CORREGIDO: Asignar a la variable correcta
+      this.professorId = userResponse.data.Id;
+      console.log('ID del profesor obtenido:', this.professorId);
+      
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+      // Valor por defecto si falla la carga
+      this.professorId = 1;
+      console.warn('Usando ID de profesor por defecto:', this.professorId);
+    }
+  }
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
@@ -83,12 +120,18 @@ export class LayoutsSolveTheWordComponent {
       return;
     }
 
+    // CORREGIDO: Verificar que el professorId esté cargado
+    if (!this.professorId || this.professorId === 0) {
+      alert('Error: No se pudo obtener el ID del usuario. Por favor, recarga la página.');
+      return;
+    }
+
     const [rows, cols] = this.gridSize.split(' x ').map(size => parseInt(size.trim()));
 
     const gameInfo: Omit<CreateGame, 'game_type' | 'solve_the_word'> = {
       Name: this.gameTitle,
       Description: this.gameDescription,
-      ProfessorId: this.professorId,
+      ProfessorId: this.professorId, // CORREGIDO: Usar la variable correcta
       Activated: true,
       Difficulty: this.difficulty,
       Visibility: this.isPublicGame ? Visibility.PUBLIC : Visibility.PRIVATE,
@@ -164,7 +207,7 @@ export class LayoutsSolveTheWordComponent {
     const debugData = {
       Name: this.gameTitle,
       Description: this.gameDescription,
-      ProfessorId: this.professorId,
+      ProfessorId: this.professorId, // CORREGIDO: Usar la variable correcta
       Activated: true,
       Difficulty: this.difficulty,
       Visibility: this.isPublicGame ? Visibility.PUBLIC : Visibility.PRIVATE,
