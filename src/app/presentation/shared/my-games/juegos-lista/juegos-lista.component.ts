@@ -10,6 +10,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
 import { GameConfigurationComponent } from '../../game-configuration/game-configuration.component';
 import { RouterLink } from '@angular/router';
+import { ConfigGameComponent } from '../../../features/config-game/config-game.component';
 
 type Dificultad = 'basico' | 'intermedio' | 'dificil';
 
@@ -31,7 +32,7 @@ interface Juego {
 @Component({
   selector: 'app-juegos-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, ConfigGameComponent],
   templateUrl: './juegos-lista.component.html',
   styleUrl: './juegos-lista.component.css',
 })
@@ -160,7 +161,7 @@ export class JuegosListaComponent implements OnInit {
     this.menuAbierto = this.menuAbierto === id ? null : id;
   }
 
-  programarJuego(id: number) {
+  pprogramarJuego(id: number) {
     console.log(`Programar juego ${id}`);
     this.selectedGameId = id;
     this.showConfigModal = true;
@@ -169,6 +170,7 @@ export class JuegosListaComponent implements OnInit {
     // Cerrar el menú al hacer clic fuera
     document.addEventListener('click', this.cerrarMenus.bind(this));
   }
+  
 
   eliminarJuego(id: number) {
     if (confirm('¿Estás seguro de que deseas eliminar este juego? Esta acción no se puede deshacer.')) {
@@ -204,8 +206,8 @@ export class JuegosListaComponent implements OnInit {
     document.removeEventListener('click', this.cerrarMenus.bind(this));
   }
 
-  onConfigurationSaved(config: GameConfiguration) {
-    console.log('Configuración guardada:', config);
+  onConfigurationSaved() {
+    console.log('Configuración guardada');
     
     // Mostrar mensaje de éxito
     this.mostrarMensaje('Configuración guardada correctamente', 'success');

@@ -456,4 +456,108 @@
       </form>
     </div>
   </div>
+  <!-- VISTA PREVIA TAB - Agregar después del tab de configuración -->
+  <div *ngIf="activeTab === 'preview'">
+    <div class="bg-white p-6 rounded-lg shadow-sm">
+      <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
+        Vista Previa del Juego
+      </h2>
+      <p class="text-gray-500 mb-6 font-semibold">
+        Así es como se verá tu juego de hangman
+      </p>
+
+      <!-- Información del juego -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-purple-50 p-4 rounded-lg">
+          <h3 class="font-bold text-lg text-atzicay-purple-500 mb-3">📋 Información del Juego</h3>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-semibold">Título:</span> {{ hangmanForm.get('name')?.value || 'Sin título' }}</p>
+            <p><span class="font-semibold">Descripción:</span> {{ hangmanForm.get('description')?.value || 'Sin descripción' }}</p>
+            <p><span class="font-semibold">Dificultad:</span> 
+              {{ hangmanForm.get('difficulty')?.value === 'E' ? 'Fácil' : 
+                hangmanForm.get('difficulty')?.value === 'M' ? 'Medio' : 'Difícil' }}
+            </p>
+            <p><span class="font-semibold">Visibilidad:</span> 
+              {{ hangmanForm.get('visibility')?.value === 'P' ? 'Público' : 'Restringido' }}
+            </p>
+            <p><span class="font-semibold">Presentación:</span> 
+              {{ hangmanForm.get('presentation')?.value === 'A' ? 'Aleatoria' : 'Ordenada' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 p-4 rounded-lg">
+          <h3 class="font-bold text-lg text-blue-600 mb-3">⚙️ Configuración</h3>
+          <div class="space-y-2 text-sm">
+            <p><span class="font-semibold">Tiempo límite:</span> {{ configForm.get('timeLimit')?.value || 60 }} segundos</p>
+            <p><span class="font-semibold">Fuente:</span> {{ configForm.get('font')?.value || 'Arial' }}</p>
+            <p><span class="font-semibold">Pistas habilitadas:</span> {{ showClues ? 'Sí' : 'No' }}</p>
+            <p><span class="font-semibold">Juego público:</span> {{ configForm.get('publicGame')?.value ? 'Sí' : 'No' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulación visual del juego -->
+      <div class="bg-gray-100 p-6 rounded-lg mb-6" 
+          [ngStyle]="{
+            'background-color': configForm.get('backgroundColor')?.value,
+            'color': configForm.get('fontColor')?.value,
+            'font-family': configForm.get('font')?.value
+          }">
+        <h3 class="font-bold text-xl mb-4 text-center">🎮 Simulación del Juego</h3>
+        
+        <div *ngIf="wordsArray.length > 0" class="text-center">
+          <div class="mb-4">
+            <h4 class="font-semibold mb-2">Palabra de ejemplo:</h4>
+            <div class="text-2xl font-mono tracking-widest mb-2">
+              <span *ngFor="let letter of getPreviewWord(0); let i = index" 
+                    class="inline-block w-8 h-8 border-b-2 border-current mx-1 text-center">
+                {{ i < 2 ? letter : '_' }}
+              </span>
+            </div>
+            <div *ngIf="showClues && getPreviewClue(0)" class="text-sm mt-2 italic">
+              💡 Pista: {{ getPreviewClue(0) }}
+            </div>
+          </div>
+
+          <!-- Ahorcado visual -->
+          <div class="flex justify-center mb-4">
+            <div class="text-6xl">🎯</div>
+          </div>
+
+          <!-- Alfabeto simulado -->
+          <div class="grid grid-cols-6 sm:grid-cols-8 gap-2 max-w-md mx-auto">
+            <button *ngFor="let letter of ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P']" 
+                    class="w-8 h-8 border rounded text-sm font-bold"
+                    [class.bg-gray-300]="['A','E','I'].includes(letter)"
+                    disabled>
+              {{ letter }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="wordsArray.length === 0" class="text-center text-gray-500 py-8">
+          Agrega palabras para ver la simulación del juego
+        </div>
+      </div>
+
+      <!-- Lista de palabras -->
+      <div class="bg-green-50 p-4 rounded-lg">
+        <h3 class="font-bold text-lg text-green-600 mb-3">📝 Palabras del Juego ({{ wordsArray.length }})</h3>
+        <div *ngIf="wordsArray.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div *ngFor="let wordControl of wordsArray.controls; let i = index" 
+              class="bg-white p-3 rounded border-l-4 border-green-400">
+            <div class="font-semibold">{{ i + 1 }}. {{ wordControl.get('word')?.value || 'Sin palabra' }}</div>
+            <div *ngIf="showClues && wordControl.get('clue')?.value" 
+                class="text-sm text-gray-600 italic mt-1">
+              💡 {{ wordControl.get('clue')?.value }}
+            </div>
+          </div>
+        </div>
+        <div *ngIf="wordsArray.length === 0" class="text-center text-gray-500 py-4">
+          No hay palabras agregadas aún
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

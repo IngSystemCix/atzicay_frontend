@@ -90,13 +90,13 @@ export const routes: Routes = [
       },
 
       {
-        path: 'juegos/configuracion/:id',
+        path: 'juegos/editar/:id',
         component: GameConfigurationComponent
       },
 
 
       {
-        path: 'configuracion',
+        path: 'juegos/configuracion/:id',
         component: ConfigGameComponent
       }
     ]

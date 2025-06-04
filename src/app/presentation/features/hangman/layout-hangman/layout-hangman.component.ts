@@ -181,6 +181,7 @@ export class LayoutHangmanComponent implements OnInit {
     }
   }
 
+
   toggleShowClues(): void {
     this.showClues = !this.showClues;
 
@@ -196,19 +197,19 @@ export class LayoutHangmanComponent implements OnInit {
         } else {
           clueControl.disable();
           clueControl.clearValidators();
-          clueControl.setValue('');
+          clueControl.setValue(''); 
         }
         clueControl.updateValueAndValidity();
       }
     });
+
+    this.wordsForm.updateValueAndValidity();
   }
 
-  // Métodos para configuración
   onColorChange(field: string, color: string): void {
     this.configForm.get(field)?.setValue(color);
   }
 
-  // Validaciones
   private isFormValid(): boolean {
     const isHangmanValid = this.hangmanForm.valid;
     const isWordsValid = this.wordsForm.valid && this.wordsArray.length > 0;
@@ -364,34 +365,29 @@ export class LayoutHangmanComponent implements OnInit {
       const hangmanFormData = this.hangmanForm.value;
       const configData = this.configForm.value;
 
-      // ✅ CORRECCIÓN: Crear gameInfo SIN los datos específicos de hangman
-      const gameInfo: Omit<CreateGame, 'game_type' | 'hangman'> = {
-        Name: hangmanFormData.name.trim(),
-        Description: hangmanFormData.description.trim(),
-        ProfessorId: hangmanFormData.professorId,
-        Activated: false,
-        Difficulty: hangmanFormData.difficulty as Difficulty,
-        Visibility: hangmanFormData.visibility as Visibility,
-        settings: [
-          {
-            ConfigKey: 'TiempoLimite',
-            ConfigValue: configData.timeLimit.toString(),
-          },
-          { ConfigKey: 'Fuente', ConfigValue: configData.font },
-          { ConfigKey: 'ColorFondo', ConfigValue: configData.backgroundColor },
-          { ConfigKey: 'ColorTexto', ConfigValue: configData.fontColor },
-          { ConfigKey: 'MensajeExito', ConfigValue: configData.successMessage },
-          { ConfigKey: 'MensajeFallo', ConfigValue: configData.failureMessage },
-          {
-            ConfigKey: 'JuegoPublico',
-            ConfigValue: configData.publicGame.toString(),
-          },
-        ],
-        assessment: {
-          value: configData.assessmentValue,
-          comments: configData.assessmentComments.trim(),
+    const gameInfo: Omit<CreateGame, 'game_type' | 'hangman'> = {
+      Name: hangmanFormData.name.trim(),
+      Description: hangmanFormData.description.trim(),
+      ProfessorId: this.currentProfessorId, 
+      Activated: false,
+      Difficulty: hangmanFormData.difficulty as Difficulty,
+      Visibility: hangmanFormData.visibility as Visibility,
+      settings: [
+        {
+          ConfigKey: 'TiempoLimite',
+          ConfigValue: configData.timeLimit.toString(),
         },
-      };
+        { ConfigKey: 'Fuente', ConfigValue: configData.font },
+        { ConfigKey: 'ColorFondo', ConfigValue: configData.backgroundColor },
+        { ConfigKey: 'ColorTexto', ConfigValue: configData.fontColor },
+        { ConfigKey: 'MensajeExito', ConfigValue: configData.successMessage },
+        { ConfigKey: 'MensajeFallo', ConfigValue: configData.failureMessage },
+      ],
+      assessment: {
+        value: configData.assessmentValue,
+        comments: configData.assessmentComments.trim(),
+      },
+    };
 
       // ✅ CORRECCIÓN: Crear SOLO los datos específicos de hangman
       const hangmanSpecificData: HangmanData = {
@@ -476,5 +472,32 @@ export class LayoutHangmanComponent implements OnInit {
 
     this.activeTab = 'content';
     this.showClues = true;
+  }
+
+  getPreviewWord(index: number): string {
+    const wordControl = this.wordsArray.at(index);
+    if (!wordControl) return '';
+    
+    const word = wordControl.get('word')?.value || '';
+    return word.toUpperCase().replace(/\s+/g, ''); // Remover espacios y convertir a mayúsculas
+  }
+  
+  /**
+   * Obtiene una pista para mostrar en la vista previa
+   */
+  getPreviewClue(index: number): string {
+    const wordControl = this.wordsArray.at(index);
+    if (!wordControl) return '';
+    
+    return wordControl.get('clue')?.value || '';
+  }
+  
+  /**
+   * Valida si la vista previa puede mostrarse
+   */
+  canShowPreview(): boolean {
+    return this.wordsArray.length > 0 && 
+           this.hangmanForm.get('name')?.value?.trim() &&
+           this.hangmanForm.get('description')?.value?.trim();
   }
 }
