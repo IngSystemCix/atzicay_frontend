@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
 import { Hangman } from '../../../../core/domain/model/hangman/hangman';
+import { UserService } from '../../../../core/infrastructure/api/user.service';
 
 @Component({
   selector: 'app-juegos-categorias',
@@ -27,8 +28,8 @@ export class JuegosCategoriasComponent implements OnInit {
   categorias = [
     {
       nombre: 'Ahorcado',
-      icono: ' ',
-      cantidad: 0, // Se actualizará con datos reales
+      icono: '🎯',
+      cantidad: 0, 
       colorFondo: '#F4E8FE',
       borde: '#A294F8',
       hover: 'hover:bg-[#EADDFD]',
@@ -36,8 +37,8 @@ export class JuegosCategoriasComponent implements OnInit {
     },
     {
       nombre: 'Rompecabezas',
-      icono: ' ',
-      cantidad: 0, // Se actualizará con datos reales
+      icono: '🧩',
+      cantidad: 0, 
       colorFondo: '#DBEAFF',
       borde: '#A294F8',
       hover: 'hover:bg-[#CFE1FF]',
@@ -45,8 +46,8 @@ export class JuegosCategoriasComponent implements OnInit {
     },
     {
       nombre: 'Memoria',
-      icono: ' ',
-      cantidad: 0, // Se actualizará con datos reales
+      icono: '🧠',
+      cantidad: 0,
       colorFondo: '#DCFCE7',
       borde: '#A294F8',
       hover: 'hover:bg-[#CFFAD9]',
@@ -54,8 +55,8 @@ export class JuegosCategoriasComponent implements OnInit {
     },
     {
       nombre: 'Pupiletras',
-      icono: ' ',
-      cantidad: 0, // Se actualizará con datos reales
+      icono: '📝',
+      cantidad: 0,
       colorFondo: '#FEF9C2',
       borde: '#A294F8',
       hover: 'hover:bg-[#FDF5A8]',
@@ -63,43 +64,109 @@ export class JuegosCategoriasComponent implements OnInit {
     }
   ];
 
+  private currentProfessorId: number = 0;
+
   constructor(
     private router: Router,
     private hangmanService: HangmanService,
-    // private puzzleService: PuzzleService,
-    // private memoryService: MemoryGameService,
-    // private wordSearchService: SolveTheWordService
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
-    this.cargarDatosJuegos();
+    this.loadUserData();
+  }
+
+  private async loadUserData(): Promise<void> {
+    try {
+      const userString = sessionStorage.getItem('user');
+      if (!userString) {
+        throw new Error('No hay usuario en sesión');
+      }
+      
+      const user = JSON.parse(userString);
+      const email = user?.Email;
+      if (!email) {
+        throw new Error('El usuario no tiene email registrado');
+      }
+
+      // Usar Promise para esperar la respuesta del servicio
+      this.userService.findUserByEmail(email).subscribe({
+        next: (response) => {
+          if (response?.data?.Id) {
+            this.currentProfessorId = response.data.Id;
+            console.log('ID del profesor obtenido:', this.currentProfessorId);
+            // Cargar datos de juegos DESPUÉS de obtener el ID
+            this.cargarDatosJuegos();
+          } else {
+            throw new Error('ID de usuario no válido');
+          }
+        },
+        error: (error) => {
+          console.error('Error al obtener usuario:', error);
+          this.error = true;
+          this.cargando = false;
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+      this.error = true;
+      this.cargando = false;
+    }
   }
 
   cargarDatosJuegos(): void {
+    if (this.currentProfessorId === 0) {
+      console.error('ID del profesor no válido');
+      this.error = true;
+      this.cargando = false;
+      return;
+    }
+
     this.cargando = true;
+    this.error = false;
 
     // Cargar datos de Ahorcado
-    this.hangmanService.getAllHangman().subscribe({
+    this.hangmanService.getAllHangman(this.currentProfessorId).subscribe({
       next: (response) => {
-        // Verificar si la respuesta viene en formato API
+        console.log('Respuesta completa del servicio hangman:', response);
+        
         let juegos: Hangman[] = [];
+        let cantidadJuegos = 0;
 
+        // Manejar diferentes formatos de respuesta
         if (response && response.status === 'success' && response.data) {
-          // Si viene en el formato API que mostraste
-          juegos = response.data;
+          juegos = Array.isArray(response.data) ? response.data : [];
+          cantidadJuegos = juegos.length;
+        } else if (Array.isArray(response)) {
+          juegos = response;
+          cantidadJuegos = juegos.length;
+        } else if (response && typeof response === 'object') {
+          // Si viene como objeto, intentar extraer la data
+          cantidadJuegos = response.length || 0;
         } else {
-          // Si viene directamente como array de Hangman
-          juegos = response as Hangman[];
+          console.warn('Formato de respuesta inesperado:', response);
+          cantidadJuegos = 0;
         }
 
-        this.contadores.Ahorcado = juegos.length;
+        console.log('Cantidad de juegos detectada:', cantidadJuegos);
 
-        // Actualizar la categoría correspondiente
-        const categoriaAhorcado = this.categorias.find(c => c.nombre === 'Ahorcado');
-        if (categoriaAhorcado) {
-          categoriaAhorcado.cantidad = juegos.length;
+        // Actualizar contador
+        this.contadores.Ahorcado = cantidadJuegos;
+
+        // Actualizar la categoría correspondiente usando el índice
+        const indiceAhorcado = this.categorias.findIndex(c => c.nombre === 'Ahorcado');
+        if (indiceAhorcado !== -1) {
+          this.categorias[indiceAhorcado].cantidad = cantidadJuegos;
+          console.log('Categoría Ahorcado actualizada:', this.categorias[indiceAhorcado]);
         }
 
+        // Forzar detección de cambios
+        this.categorias = [...this.categorias];
+
+        console.log('Estado final de categorias:', this.categorias);
+        console.log('Estado final de contadores:', this.contadores);
+        
         this.cargando = false;
       },
       error: (err) => {
@@ -109,86 +176,10 @@ export class JuegosCategoriasComponent implements OnInit {
       }
     });
 
-    //   // Cargar datos de Rompecabezas
-    //   this.puzzleService.getAllPuzzles().subscribe({
-    //     next: (puzzles) => {
-    //       this.contadores.Rompecabezas = puzzles.length;
-    //       const categoriaPuzzle = this.categorias.find(c => c.nombre === 'Rompecabezas');
-    //       if (categoriaPuzzle) {
-    //         categoriaPuzzle.cantidad = puzzles.length;
-    //       }
-    //     },
-    //     error: (err) => {
-    //       console.error('Error al cargar Rompecabezas:', err);
-    //     }
-    //   });
-    //
-    //   // Cargar datos de Memoria
-    //   this.memoryService.getAllMemoryGames().subscribe({
-    //     next: (memoryGames) => {
-    //       this.contadores.Memoria = memoryGames.length;
-    //       const categoriaMemoria = this.categorias.find(c => c.nombre === 'Memoria');
-    //       if (categoriaMemoria) {
-    //         categoriaMemoria.cantidad = memoryGames.length;
-    //       }
-    //     },
-    //     error: (err) => {
-    //       console.error('Error al cargar Memoria:', err);
-    //     }
-    //   });
-    //
-    //   // Cargar datos de Pupiletras
-    //   this.wordSearchService.getAllSolveTheWords().subscribe({
-    //     next: (solveTheWords) => {
-    //       this.contadores.Pupiletras = solveTheWords.length;
-    //       const categoriaPupiletras = this.categorias.find(c => c.nombre === 'Pupiletras');
-    //       if (categoriaPupiletras) {
-    //         categoriaPupiletras.cantidad = solveTheWords.length;
-    //       }
-    //     },
-    //     error: (err) => {
-    //       console.error('Error al cargar Pupiletras:', err);
-    //     }
-    //   });
-    // }
-
-    // getColor(colorVar: string): string {
-    //   return `var(--tw-${colorVar})`;
-    // }
-    //
-    // getTextColor(color: string): string {
-    //   const map: Record<string, string> = {
-    //     purple: '#7B5FEA',
-    //     blue: '#3B82F6',
-    //     green: '#16A34A',
-    //     yellow: '#EAB308',
-    //   };
-    //   return map[color] ?? '#000';
-    // }
-    //
-    // getColorTone(color: string, tone: string): string {
-    //   const map: Record<string, Record<string, string>> = {
-    //     purple: { '200': '#DDD6FE', '700': '#7B5FEA' },
-    //     blue: { '200': '#BFDBFE', '700': '#1D4ED8' },
-    //     green: { '200': '#BBF7D0', '700': '#15803D' },
-    //     yellow: { '200': '#FEF9C3', '700': '#A16207' },
-    //   };
-    //   return map[color]?.[tone] ?? '#CCC';
-    // }
-    //
-    // crearJuego(tipo: string) {
-    //   console.log(`Crear juego de tipo: ${tipo}`);
-
-    // Encuentra la categoría correspondiente
-    // const categoria = this.categorias.find(cat => cat.nombre === tipo);
-
-    // Si la categoría tiene una ruta definida, navega a ella
-    // if (categoria && categoria.ruta) {
-    //   this.router.navigate([categoria.ruta]);
-    // } else {
-    //   // Aquí podría ir la lógica para otros tipos de juegos
-    //   console.log('Ruta no definida para este tipo de juego');
-    // }
+    // Aquí puedes agregar llamadas para cargar los otros tipos de juegos
+    // this.loadPuzzleGames();
+    // this.loadMemoryGames();
+    // this.loadWordSearchGames();
   }
 
   crearJuego(ruta: string) {
@@ -197,6 +188,17 @@ export class JuegosCategoriasComponent implements OnInit {
     } else {
       console.error('No se definió ruta para este juego');
     }
+  }
 
+  // Método para recargar datos manualmente
+  recargarDatos(): void {
+    this.loadUserData();
+  }
+
+  // Método de prueba para verificar que el binding funciona
+  probarContador(): void {
+    this.categorias[0].cantidad = Math.floor(Math.random() * 10) + 1;
+    this.contadores.Ahorcado = this.categorias[0].cantidad;
+    console.log('Contador de prueba actualizado:', this.categorias[0].cantidad);
   }
 }
