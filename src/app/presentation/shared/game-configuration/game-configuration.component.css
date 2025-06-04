@@ -1,0 +1,146 @@
+/* Custom animations for modal */
+.modal-enter {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  
+  .modal-enter-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+  }
+  
+  /* Custom scrollbar for modal */
+  .modal-content::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  .modal-content::-webkit-scrollbar-thumb {
+    background: #8571FB;
+    border-radius: 4px;
+  }
+  
+  .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #7161EB;
+  }
+  
+  /* Custom focus styles */
+  .form-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(133, 113, 251, 0.2);
+  }
+  
+  /* Gradient backgrounds for sections */
+  .gradient-section {
+    background: linear-gradient(135deg, rgba(133, 113, 251, 0.1) 0%, rgba(205, 193, 254, 0.2) 100%);
+  }
+  
+  /* Enhanced button styles */
+  .btn-primary {
+    background: linear-gradient(135deg, #8571FB 0%, #7161EB 100%);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(133, 113, 251, 0.3);
+  }
+  
+  .btn-secondary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Loading spinner */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  /* Star rating hover effect */
+  .star-rating span {
+    transition: color 0.2s ease-in-out;
+    cursor: pointer;
+  }
+  
+  .star-rating span:hover {
+    color: #fbbf24;
+  }
+  
+  /* Custom input styles */
+  .custom-input {
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+  }
+  
+  .custom-input:focus {
+    border-color: #8571FB;
+    box-shadow: 0 0 0 3px rgba(133, 113, 251, 0.1);
+  }
+  
+  /* Color picker custom styles */
+  input[type="color"] {
+    appearance: none;
+    background-color: transparent;
+    width: 48px;
+    height: 40px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+  
+  input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 6px;
+  }
+  
+  /* Settings list animations */
+  .settings-item {
+    transition: all 0.3s ease;
+  }
+  
+  .settings-item:hover {
+    background-color: rgba(133, 113, 251, 0.05);
+    border-radius: 8px;
+  }
+  
+  /* Enhanced backdrop */
+  .modal-backdrop {
+    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Responsive improvements */
+  @media (max-width: 768px) {
+    .modal-content {
+      margin: 1rem;
+      max-height: calc(100vh - 2rem);
+    }
+    
+    .grid-cols-1.md\\:grid-cols-2 {
+      grid-template-columns: 1fr;
+    }
+    
+    .grid-cols-1.md\\:grid-cols-3 {
+      grid-template-columns: 1fr;
+    }
+  }
