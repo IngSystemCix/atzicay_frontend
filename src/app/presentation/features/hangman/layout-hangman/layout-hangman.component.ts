@@ -15,11 +15,12 @@ import { CreateGame } from '../../../../core/domain/interface/create-game';
 import { HangmanData } from '../../../../core/domain/interface/hangman-data';
 import { GameService } from '../../../../core/infrastructure/api/createGame/game.service';
 import { UserService } from '../../../../core/infrastructure/api/user.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-layout-hangman',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './layout-hangman.component.html',
   styleUrls: ['./layout-hangman.component.css'],
 })
@@ -29,6 +30,10 @@ export class LayoutHangmanComponent implements OnInit {
 
   // Control de pistas
   showClues: boolean = true;
+
+  // Estado del juego
+  juegoPublico: boolean = true;
+
 
   // Forms
   hangmanForm!: FormGroup;
@@ -42,6 +47,7 @@ export class LayoutHangmanComponent implements OnInit {
 
   // Opciones para configuración
   fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
+  fuenteSeleccionada: string = this.fonts[0];
 
   private currentProfessorId: number = 0;
   constructor(
@@ -113,7 +119,7 @@ export class LayoutHangmanComponent implements OnInit {
         [Validators.required, Validators.min(10), Validators.max(300)],
       ],
       theme: ['Claro', Validators.required],
-      font: ['Arial', Validators.required],
+      font: ['this.fonts[0]', Validators.required],
       backgroundColor: ['#ffffff', Validators.required],
       fontColor: ['#000000', Validators.required],
       successMessage: [

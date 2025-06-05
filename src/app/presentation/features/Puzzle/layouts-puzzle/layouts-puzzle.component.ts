@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import {FormGroup, FormsModule} from '@angular/forms';
 import {Difficulty} from '../../../../core/domain/enum/difficulty';
 import {GameService} from '../../../../core/infrastructure/api/createGame/game.service';
 import {CreateGame} from '../../../../core/domain/interface/create-game';
@@ -36,14 +36,20 @@ export class LayoutsPuzzleComponent {
   selectedFile: File | null = null; // El archivo seleccionado
 
   // Propiedades para la configuración
-  fuente: string = '';
+  fuente: string = 'Arial';
   fondo: string = 'gray';
   colorFuente: string = 'gray';
-  mensajeExito: string = '';
-  mensajeFracaso: string = '';
-  juegoPublico: boolean = false;
+  mensajeExito: string = '¡Excelente trabajo!';
+  mensajeFracaso: string = 'Inténtalo de nuevo';
+  juegoPublico: boolean = true;
   tiempo: number = 180;
   dificultad: Difficulty = Difficulty.EASY;
+
+  // Opciones para configuración
+  fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
+
+  // Forms
+  configForm!: FormGroup;
 
   // Opciones de colores
   colores = [
@@ -53,6 +59,14 @@ export class LayoutsPuzzleComponent {
     { name: 'rainbow', class: 'bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400' }
   ];
 
+
+  // Getters para los controles del formulario
+  get successMessageControl() {
+    return this.configForm.get('successMessage');
+  }
+  get failureMessageControl() {
+    return this.configForm.get('failureMessage');
+  }
   // Enums para el template
   Difficulty = Difficulty;
 
