@@ -4,7 +4,7 @@
   </div>
 </div>
 
-<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md space-y-4">
+<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg space-y-4">
   <div class="flex flex-col items-center justify-center space-y-4">
     <div class="flex items-center justify-center space-x-2">
       <img src="assets/logo.png" alt="logo" class="size-9">
@@ -15,7 +15,7 @@
     </span>
   </div>
 
-  <form method="post" class="flex flex-col items-center justify-center space-y-4 bg-white p-6 rounded-2xl mx-6">
+  <form method="post" class="flex flex-col items-center justify-center space-y-4 bg-white p-6 rounded-2xl mx-0">
     <div class="w-full flex flex-col items-center justify-center space-y-2">
       <h2 class="font-bold text-atzicay-purple-500 text-2xl">Bienvenido</h2>
       <span class="text-atzicay-purple-500">Inicia sesión para acceder a tu cuenta</span>
@@ -30,12 +30,12 @@
       <span>Iniciar sesión con Google</span>
     </button>
 
-    <div class="flex flex-col items-center justify-center">
+    <div class="flex flex-col items-center space-y-2 text-center text-atzicay-purple-500">
       <div class="flex items-center space-x-2">
-      <input type="checkbox" id="acceptData" [(ngModel)]="acceptData" name="acceptData" class="accent-atzicay-purple-500">
-      <label for="acceptData" class="text-atzicay-purple-500">Acepto el uso de mis datos para operar todas las funcionalidades de esta plataforma</label>
-    </div>
-      <button (click)="handleOpenModal()" type="button" class="text-atzicay-purple-500 font-bold hover:underline cursor-pointer">
+        <input type="checkbox" id="acceptData" [(ngModel)]="acceptData" name="acceptData" class="accent-atzicay-purple-500">
+        <label for="acceptData">Autorizo el uso de mis datos para utilizar esta plataforma</label>
+      </div>
+      <button (click)="handleOpenModal()" type="button" class="font-bold hover:underline cursor-pointer">
         Términos y Condiciones
       </button>
     </div>
