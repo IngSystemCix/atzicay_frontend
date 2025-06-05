@@ -387,47 +387,80 @@
           </div>
         </div>
       </div>
-
-      <!-- Tab Vista Previa -->
+    </div>
+    <!-- Tab Vista Previa -->
       <div
-        *ngIf="activeTab === 'vista-previa'"
-        class="bg-white rounded-xl shadow-lg p-6 lg:col-span-2"
+      *ngIf="activeTab === 'vista-previa'"
+      class="bg-white rounded-xl shadow-lg p-6 lg:col-span-2"
       >
-        <h2 class="text-2xl font-bold text-purple-600 mb-2">Vista Previa</h2>
-        <p class="text-gray-600 mb-6">Previsualiza cómo se verá tu juego</p>
+      <h2 class="text-2xl font-bold text-purple-600 mb-2">Vista Previa</h2>
+      <p class="text-gray-600 mb-6">Previsualiza cómo se verá tu juego</p>
 
-        <div class="bg-gray-50 rounded-lg p-8 text-center">
-          <div class="text-gray-400 text-6xl mb-4">🧩</div>
+      <div class="bg-gray-50 rounded-lg p-8">
+        <!-- Información del juego -->
+        <div class="text-center mb-6">
           <h3 class="text-xl font-semibold text-gray-700 mb-2">
             {{ tituloJuego || "Tu Rompecabezas" }}
           </h3>
           <p class="text-gray-600 mb-4">
             {{ descripcion || "Descripción del juego aparecerá aquí" }}
           </p>
-          <div class="flex justify-center space-x-4 mb-4">
-            <div
-              class="inline-block bg-purple-100 px-4 py-2 rounded-lg text-purple-700 font-medium"
-            >
-              {{ filas || 0 }} x {{ columnas || 0 }} piezas
-            </div>
-            <div
-              class="inline-block bg-blue-100 px-4 py-2 rounded-lg text-blue-700 font-medium"
-            >
-              {{ tiempo || 0 }}s
-            </div>
-          </div>
-          <div
-            *ngIf="mostrarPista && pista"
-            class="bg-yellow-100 p-3 rounded-lg text-yellow-800"
+        </div>
+
+        <!-- Simulador de puzzle -->
+        <div class="max-w-md mx-auto mb-6">
+          <div 
+            *ngIf="selectedImage; else noImagePlaceholder"
+            class="grid gap-1 p-4 bg-white rounded-lg shadow-inner"
+            [style.grid-template-columns]="'repeat(' + (columnas || 4) + ', 1fr)'"
           >
-            <strong>Pista:</strong> {{ pista }}
+            <div 
+              *ngFor="let piece of getPuzzlePieces()" 
+              class="aspect-square bg-gray-200 border border-gray-300 rounded-sm relative overflow-hidden"
+              [style.background-image]="'url(' + selectedImage + ')'"
+              [style.background-size]="(columnas || 4) * 100 + '% ' + (filas || 4) * 100 + '%'"
+              [style.background-position]="piece.bgPosition"
+              class="hover:opacity-80 cursor-pointer transition-opacity"
+            >
+              <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+            </div>
           </div>
-          <div *ngIf="ayudaAutomatica" class="mt-2 text-sm text-green-600">
+          
+          <ng-template #noImagePlaceholder>
+            <div class="text-center py-12 bg-white rounded-lg shadow-inner">
+              <div class="text-6xl mb-4">🧩</div>
+              <p class="text-gray-500">Selecciona una imagen para ver el preview del puzzle</p>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="flex justify-center space-x-4 mb-4">
+          <div class="inline-block bg-purple-100 px-4 py-2 rounded-lg text-purple-700 font-medium">
+            {{ filas || 4 }} x {{ columnas || 4 }} piezas
+          </div>
+          <div class="inline-block bg-blue-100 px-4 py-2 rounded-lg text-blue-700 font-medium">
+            {{ tiempo || 180 }}s
+          </div>
+          <div class="inline-block bg-green-100 px-4 py-2 rounded-lg text-green-700 font-medium">
+            {{ getDifficultyText() }}
+          </div>
+        </div>
+
+        <div *ngIf="mostrarPista && pista" class="bg-yellow-100 p-3 rounded-lg text-yellow-800 mb-4">
+          <strong>💡 Pista:</strong> {{ pista }}
+        </div>
+
+        <div class="flex justify-center space-x-4 text-sm">
+          <div *ngIf="ayudaAutomatica" class="text-green-600">
             ✓ Ayuda automática activada
+          </div>
+          <div class="text-gray-600">
+            Visibilidad: {{ juegoPublico ? 'Público' : 'Privado' }}
           </div>
         </div>
       </div>
-    </div>
+      </div>
 
     <!-- Buttons -->
     <div class="flex justify-between mt-4">
@@ -438,34 +471,97 @@
       >
         Cancelar
       </button>
-      <button
-        (click)="guardar()"
-        [disabled]="isLoading"
-        class="px-8 py-3 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-600 transition-colors disabled:opacity-50 flex items-center"
-      >
-        <svg
-          *ngIf="isLoading"
-          class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
+      
+      <div class="flex space-x-4">
+        <button
+          (click)="mostrarDebugJson()"
+          class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center"
         >
-          <circle
-            class="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            stroke-width="4"
-          ></circle>
-          <path
-            class="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-        {{ isLoading ? "Guardando..." : "Guardar" }}
-      </button>
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+          </svg>
+          {{ mostrarJsonDebug ? 'Ocultar JSON' : 'Ver JSON' }}
+        </button>
+        
+        <button
+          (click)="guardar()"
+          [disabled]="isLoading"
+          class="px-8 py-3 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-600 transition-colors disabled:opacity-50 flex items-center"
+        >
+          <svg
+            *ngIf="isLoading"
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          {{ isLoading ? "Guardando..." : "Guardar Puzzle" }}
+        </button>
+      </div>
+    </div>
+    
+    <!-- Modal JSON Debug mejorado -->
+    <div *ngIf="mostrarJsonDebug" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden">
+        <!-- Header del modal -->
+        <div class="bg-gray-100 px-6 py-4 border-b flex justify-between items-center">
+          <h3 class="text-lg font-semibold text-gray-800">JSON que se enviará al Backend</h3>
+          <button 
+            (click)="mostrarJsonDebug = false"
+            class="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+          >
+            ×
+          </button>
+        </div>
+        
+        <!-- Contenido del modal -->
+        <div class="p-6 overflow-auto max-h-[60vh]">
+          <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto">
+            <pre>{{ jsonDebug | json }}</pre>
+          </div>
+          
+          <!-- Información adicional -->
+          <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+            <h4 class="font-semibold text-blue-800 mb-2">Información del envío:</h4>
+            <ul class="text-sm text-blue-700 space-y-1">
+              <li><strong>Endpoint:</strong> POST /api/atzicay/v1/game-instances/game</li>
+              <li><strong>Content-Type:</strong> application/json</li>
+              <li><strong>Imagen URL:</strong> {{ imagenUrl || 'No seleccionada' }}</li>
+              <li><strong>Total de piezas:</strong> {{ (filas || 4) * (columnas || 4) }}</li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- Footer del modal -->
+        <div class="bg-gray-100 px-6 py-3 border-t flex justify-end space-x-3">
+          <button 
+            (click)="copiarJson()"
+            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          >
+            Copiar JSON
+          </button>
+          <button 
+            (click)="mostrarJsonDebug = false"
+            class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

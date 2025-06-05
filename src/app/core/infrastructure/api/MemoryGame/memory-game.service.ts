@@ -13,7 +13,7 @@ export class MemoryGameService {
 
   constructor(private http: HttpClient) { }
 
-  getAllMemoryGames(): Observable<MemoryGame[]> {
+  getAllMemoryGames(professorId:number): Observable<MemoryGame[]> {
     return this.http.get<MemoryGame[]>(this.apiUrl);
   }
 

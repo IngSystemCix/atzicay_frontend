@@ -187,20 +187,30 @@ export class GameService {
         }
         break;
 
-      case GameType.PUZZLE:
-        if (!gameData.puzzle) {
-          errors.push('Los datos del puzzle son requeridos');
-        } else {
-          const { rows, columns } = gameData.puzzle;
-          if (!rows || !columns || rows <= 0 || columns <= 0) {
-            errors.push('Las filas y columnas del puzzle deben ser mayores a 0');
+        case GameType.PUZZLE:
+          if (!gameData.puzzle) {
+            errors.push('Los datos del puzzle son requeridos');
+          } else {
+            const { rows, columns, image_url } = gameData.puzzle;
+            
+            // Validar que exista la URL de la imagen
+            if (!image_url || image_url.trim() === '') {
+              errors.push('La URL de la imagen del puzzle es requerida');
+            }
+            
+            // Validar filas y columnas con valores por defecto
+            const numRows = rows || 4;
+            const numColumns = columns || 4;
+            
+            if (numRows < 2 || numRows > 10) {
+              errors.push('Las filas del puzzle deben estar entre 2 y 10');
+            }
+            
+            if (numColumns < 2 || numColumns > 10) {
+              errors.push('Las columnas del puzzle deben estar entre 2 y 10');
+            }
           }
-          // Si quieres validar el número total de piezas:
-          // if ((rows * columns) <= 0) {
-          //   errors.push('El número de piezas del puzzle debe ser mayor a 0');
-          // }
-        }
-        break;
+          break;
 
       case GameType.SOLVE_THE_WORD:
         if (!gameData.solve_the_word) {

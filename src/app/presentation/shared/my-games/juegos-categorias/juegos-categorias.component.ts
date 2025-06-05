@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
 import { Hangman } from '../../../../core/domain/model/hangman/hangman';
 import { UserService } from '../../../../core/infrastructure/api/user.service';
-
 @Component({
   selector: 'app-juegos-categorias',
   standalone: true,
@@ -130,24 +129,8 @@ export class JuegosCategoriasComponent implements OnInit {
     this.hangmanService.getAllHangman(this.currentProfessorId).subscribe({
       next: (response) => {
         console.log('Respuesta completa del servicio hangman:', response);
-        
-        let juegos: Hangman[] = [];
-        let cantidadJuegos = 0;
 
-        // Manejar diferentes formatos de respuesta
-        if (response && response.status === 'success' && response.data) {
-          juegos = Array.isArray(response.data) ? response.data : [];
-          cantidadJuegos = juegos.length;
-        } else if (Array.isArray(response)) {
-          juegos = response;
-          cantidadJuegos = juegos.length;
-        } else if (response && typeof response === 'object') {
-          // Si viene como objeto, intentar extraer la data
-          cantidadJuegos = response.length || 0;
-        } else {
-          console.warn('Formato de respuesta inesperado:', response);
-          cantidadJuegos = 0;
-        }
+        let cantidadJuegos = response.data.length;
 
         console.log('Cantidad de juegos detectada:', cantidadJuegos);
 

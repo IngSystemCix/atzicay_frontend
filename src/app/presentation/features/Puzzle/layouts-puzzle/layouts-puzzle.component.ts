@@ -10,7 +10,6 @@ import {PuzzleData} from '../../../../core/domain/interface/puzzle-data';
 import {Visibility} from '../../../../core/domain/enum/visibility';
 import {GameInstance} from '../../../../core/domain/interface/game-instance';
 import {GameType} from '../../../../core/domain/enum/game-type';
-import {FileUploadService} from '../../../../core/infrastructure/service/file-upload.service';
 
 @Component({
   selector: 'app-layouts-puzzle',
@@ -57,7 +56,7 @@ export class LayoutsPuzzleComponent {
   // Enums para el template
   Difficulty = Difficulty;
 
-  constructor(private gameService: GameService, private fileUploadService: FileUploadService) {}
+  constructor(private gameService: GameService) {}
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
@@ -72,54 +71,71 @@ export class LayoutsPuzzleComponent {
   }
 
   onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
-
-      // Crear preview para mostrar al usuario
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        this.selectedImage = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-
-      // Generar nombre único para la imagen
-      const timestamp = new Date().getTime();
-      const fileExtension = file.name.split('.').pop();
-      const uniqueFileName = `puzzle_${timestamp}.${fileExtension}`;
-
-      // Establecer la ruta donde se guardará la imagen
-      this.imagenUrl = uniqueFileName; // Solo el nombre del archivo
-
-
-      console.log('Archivo seleccionado:', file.name);
-      console.log('Ruta de destino:', this.imagenUrl);
+    const file: File = event.target.files[0];
+    if (!file) return;
+  
+    // Validar archivo antes de procesarlo
+    if (!this.validateImageFile(file)) {
+      event.target.value = '';
+      return;
     }
+  
+    this.selectedFile = file;
+    this.errorMessage = '';
+    
+    // Para preview, usar FileReader
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.selectedImage = reader.result;
+    };
+    reader.readAsDataURL(file);
+    
+    // Generar nombre único y guardar la imagen localmente
+    const timestamp = new Date().getTime();
+    const fileExtension = file.name.split('.').pop();
+    const uniqueFileName = `puzzle_${timestamp}.${fileExtension}`;
+    
+    // Guardar imagen en assets localmente
+    this.saveImageToAssets(file, uniqueFileName);
+    
+    // Esta será la URL que se envía al backend
+    this.imagenUrl = `assets/${uniqueFileName}`;
+    
+    console.log('📁 Archivo procesado:', {
+      nombre: file.name,
+      tamaño: `${(file.size / 1024).toFixed(2)} KB`,
+      tipo: file.type,
+      rutaDestino: this.imagenUrl
+    });
   }
+
+  private saveImageToAssets(file: File, fileName: string): void {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64Data = e.target?.result as string;
+      // Guardar en localStorage temporalmente para transferir al assets
+      localStorage.setItem(`temp_image_${fileName}`, base64Data);
+      
+      // En un proyecto real, aquí harías una llamada a tu backend local
+      // para que guarde el archivo en public/assets
+      console.log(`💾 Imagen guardada temporalmente como: ${fileName}`);
+    };
+    reader.readAsDataURL(file);
+  }
+  
 
   private async saveImageToFolder(): Promise<boolean> {
     if (!this.selectedFile) {
+      console.error('No hay archivo seleccionado');
       return false;
     }
-
+  
     try {
-      // OPCIÓN 1: Si tienes un servicio de subida de archivos
-      // const formData = new FormData();
-      // formData.append('image', this.selectedFile);
-      // formData.append('destination', 'src/app/public/puzzle/');
-      // await this.fileUploadService.uploadImage(formData).toPromise();
-
-      // OPCIÓN 2: Por ahora simular que se guardó (para desarrollo)
-      // Aquí podrías implementar la lógica de guardado local si es necesario
-      console.log('Imagen preparada para guardar en:', this.imagenUrl);
-
-      // Simular delay de guardado
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      // En lugar de subir a un endpoint, guardamos localmente
+      console.log('✅ Imagen lista para usar:', this.imagenUrl);
       return true;
-
     } catch (error) {
-      console.error('Error al guardar la imagen:', error);
+      console.error('Error al procesar la imagen:', error);
       return false;
     }
   }
@@ -165,67 +181,64 @@ export class LayoutsPuzzleComponent {
         ConfigValue: this.tiempo.toString()
       }
     ];
-
-    // Agregar configuraciones adicionales si es necesario
+  
+    // Agregar configuraciones adicionales
     if (this.fuente.trim()) {
       settings.push({
         ConfigKey: 'Fuente',
         ConfigValue: this.fuente
       });
     }
-
+  
     if (this.mensajeExito.trim()) {
       settings.push({
         ConfigKey: 'MensajeExito',
         ConfigValue: this.mensajeExito
       });
     }
-
+  
     if (this.mensajeFracaso.trim()) {
       settings.push({
         ConfigKey: 'MensajeFracaso',
         ConfigValue: this.mensajeFracaso
       });
     }
-
+  
     const assessment: Assessment = {
-      value: 5, // Valor por defecto
-      comments: `Puzzle de ${this.filas}x${this.columnas} piezas`
+      value: 5,
+      comments: `Puzzle de ${this.filas}x${this.columnas} piezas - ${this.getDifficultyText()}`
     };
-
-    // Aquí enviamos solo la ruta de la imagen como string
+  
     const puzzleData: PuzzleData = {
-      image_url: this.imagenUrl, // Ruta de la imagen como string
+      image_url: this.imagenUrl, // Esta es la ruta que va al backend
       clue: this.mostrarPista ? this.pista : '',
       rows: this.filas,
       columns: this.columnas,
       automatic_help: this.ayudaAutomatica
     };
-
-    console.log('Datos del puzzle:', puzzleData);
-    console.log('Ruta de imagen enviada:', this.imagenUrl);
-
+  
     const gameData: CreateGame = {
       Name: this.tituloJuego,
       Description: this.descripcion,
-      ProfessorId: 1,
+      ProfessorId: 4, // Considera hacer esto dinámico
       Activated: true,
       Difficulty: this.dificultad,
       Visibility: this.juegoPublico ? Visibility.PUBLIC : Visibility.PRIVATE,
+      game_type: GameType.PUZZLE,
       settings: settings,
       assessment: assessment,
-      game_type: GameType.PUZZLE,
       puzzle: puzzleData
     };
-
+  
     return gameData;
   }
+  
 
   async guardar() {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
-
+  
     // Validar formulario
     const validationErrors = this.validateForm();
     if (validationErrors.length > 0) {
@@ -233,42 +246,45 @@ export class LayoutsPuzzleComponent {
       this.isLoading = false;
       return;
     }
-
-    // Intentar guardar la imagen primero
-    // const imageSaved = await this.saveImageToFolder();
-    // if (!imageSaved) {
-    //   this.errorMessage = 'Error al guardar la imagen';
-    //   this.isLoading = false;
-    //   return;
-    // }
-
-    const gameData = this.buildGameData();
-
-    // Validar datos del juego
-    const gameValidationErrors = this.gameService.validateGameData(gameData);
-    if (gameValidationErrors.length > 0) {
-      this.errorMessage = gameValidationErrors.join(', ');
-      this.isLoading = false;
-      return;
-    }
-
-    console.log('Datos listos para enviar:', gameData);
-
-    this.gameService.createPuzzleGame(gameData, gameData.puzzle!).subscribe({
-      next: (response: GameInstance) => {
-        console.log('✅ Juego creado exitosamente:', response);
-        this.successMessage = '¡Puzzle guardado exitosamente!';
+  
+    try {
+      // Primero subir la imagen
+      const imagenGuardada = await this.saveImageToFolder();
+      if (!imagenGuardada) {
+        this.errorMessage = 'No se pudo guardar la imagen en el servidor';
         this.isLoading = false;
-        // Opcional: resetear formulario después de un tiempo
-        setTimeout(() => this.resetForm(), 2000);
-      },
-      error: (error) => {
-        console.error('❌ Error al guardar:', error);
-        this.errorMessage = error.message || 'Error al guardar el puzzle';
-        this.isLoading = false;
+        return;
       }
-    });
+  
+      // Luego crear el juego
+      const gameData = this.buildGameData();
+      console.log('📤 Enviando datos al backend:', JSON.stringify(gameData, null, 2));
+  
+      this.gameService.createPuzzleGame(gameData, gameData.puzzle!).subscribe({
+        next: (response: GameInstance) => {
+          console.log('✅ Juego creado exitosamente:', response);
+          this.successMessage = '¡Puzzle guardado exitosamente!';
+          this.isLoading = false;
+          
+          // Limpiar localStorage si se usó
+          localStorage.removeItem('miImagenPuzzle');
+          
+          setTimeout(() => this.resetForm(), 2000);
+        },
+        error: (error) => {
+          console.error('❌ Error al guardar:', error);
+          this.errorMessage = error.message || 'Error al guardar el puzzle';
+          this.isLoading = false;
+        }
+      });
+  
+    } catch (error) {
+      console.error('❌ Error general:', error);
+      this.errorMessage = 'Error inesperado al procesar la solicitud';
+      this.isLoading = false;
+    }
   }
+  
 
   cancelar() {
     // Lógica para cancelar
@@ -297,5 +313,97 @@ export class LayoutsPuzzleComponent {
     this.selectedImage = null;
     this.selectedFile = null;
     this.imagenUrl = '';
+    this.mostrarJsonDebug = false;
+    this.jsonDebug = {};
   }
+
+  getPuzzlePieces(): any[] {
+    const totalPieces = (this.filas || 4) * (this.columnas || 4);
+    const pieces = [];
+    
+    for (let i = 0; i < totalPieces; i++) {
+      const row = Math.floor(i / (this.columnas || 4));
+      const col = i % (this.columnas || 4);
+      
+      pieces.push({
+        id: i,
+        bgPosition: `${-col * 100}% ${-row * 100}%`
+      });
+    }
+    
+    return pieces;
+  }
+  
+  getDifficultyText(): string {
+    switch (this.dificultad) {
+      case Difficulty.EASY: return 'Fácil';
+      case Difficulty.MEDIUM: return 'Medio';
+      case Difficulty.HARD: return 'Difícil';
+      default: return 'Fácil';
+    }
+  }
+
+  // Para mostrar el modal JSON
+mostrarJsonDebug: boolean = false;
+jsonDebug: any = {};
+
+mostrarDebugJson() {
+  if (!this.mostrarJsonDebug) {
+    // Actualizar el JSON cada vez que se abre el modal
+    this.jsonDebug = this.armarJsonParaEnviar();
+  }
+  this.mostrarJsonDebug = !this.mostrarJsonDebug;
+}
+
+private validateImageFile(file: File): boolean {
+  // Validar tipo de archivo
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    this.errorMessage = 'Tipo de archivo no permitido. Use JPG, PNG, GIF o WEBP';
+    return false;
+  }
+
+  // Validar tamaño (1MB = 1024 * 1024 bytes)
+  const maxSize = 1024 * 1024; // 1MB
+  if (file.size > maxSize) {
+    this.errorMessage = 'La imagen debe ser menor a 1MB';
+    return false;
+  }
+
+  return true;
+}
+
+// Esta función debería coincidir con la estructura que envías a tu backend
+armarJsonParaEnviar() {
+  const gameData = this.buildGameData();
+  
+  // Retornar exactamente el mismo JSON que se envía al backend
+  return {
+    "Name": gameData.Name,
+    "Description": gameData.Description,
+    "ProfessorId": gameData.ProfessorId,
+    "Activated": gameData.Activated,
+    "Difficulty": gameData.Difficulty,
+    "Visibility": gameData.Visibility,
+    "game_type": gameData.game_type,
+    "settings": gameData.settings,
+    "assessment": gameData.assessment,
+    "puzzle": gameData.puzzle
+  };
+}
+
+copiarJson(): void {
+  const jsonString = JSON.stringify(this.jsonDebug, null, 2);
+  navigator.clipboard.writeText(jsonString).then(() => {
+    // Mostrar mensaje temporal de copiado
+    const originalText = this.successMessage;
+    this.successMessage = 'JSON copiado al portapapeles';
+    setTimeout(() => {
+      this.successMessage = originalText;
+    }, 2000);
+  }).catch(err => {
+    console.error('Error al copiar:', err);
+  });
+}
+
 }

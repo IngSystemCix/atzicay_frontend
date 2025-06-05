@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { GameInstance } from '../../../domain/model/gameInstance/game-instance';
 import { environment } from '../../../../../environments/environment.development';
+import { GameType } from '../../../domain/enum/game-type';
 
 @Injectable({
   providedIn: 'root'
