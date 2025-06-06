@@ -12,23 +12,25 @@
     </div>
 
     <div class="bg-[#E5D8F2] rounded-lg p-2 mx-4 my-4 flex flex-wrap w-fit gap-x-2">
-      <span class="text-sm text-gray-600 px-2">Fecha Inicio</span>
+      <label class=" text-center text-sm text-gray-600 px-2 py-3" for="fechaInicio">Fecha Inicio</label>
       <input
         title="Fecha de inicio"
         type="date"
+        id="fechaInicio"
         [(ngModel)]="startDate"
         class="bg-purple-200 rounded-lg px-2 py-1 text-sm"/>
 
-      <span class="text-sm text-gray-600 px-2">Fecha Fin</span>
+      <label class="text-sm text-gray-600 px-2 py-3" for="fechaFin">Fecha Fin</label>
       <input
         title="Fecha de fin"
         type="date"
+        id="fechaFin"
         [(ngModel)]="endDate"
         class="bg-purple-200 rounded-lg px-2 py-1 text-sm"/>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
     @for (activity of getFilteredActivities(); track activity.id) {
       <div
         [class]="'rounded-lg p-6 relative ' + getDifficultyClass(activity.difficulty)">

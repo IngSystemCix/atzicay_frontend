@@ -1,6 +1,6 @@
 <div class="bg-atzicay-bg border-r border-gray-200">
   <div class="bg-[#F2EEFD] rounded-lg p-6 mb-1">
-    <h1 class="text-atzicay-heading text-2xl font-semibold mb-2">
+    <h1 class="text-atzicay-heading text-2xl font-semibold mb-1">
       Explora Juegos Educativos
     </h1>
     <p class="text-atzicay-subheading mb-8">
@@ -192,10 +192,8 @@
   </div>
 </div>
 
-<!-- Grid de juegos -->
-<!-- En el grid de juegos, actualiza para incluir el ID -->
 <div
-  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 max-w-8xl mx-auto"
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6 max-w-8xl"
 >
   @for (game of displayedGames; track game.id) { @defer {
   <app-game-card
@@ -221,10 +219,10 @@
 </div>
 
 <!-- Botón de carga o mensaje -->
-<div class="text-center mt-8 m-6">
+<div class="text-center mt-4 mb-4 max-w-full">
   @if (hasMoreGames && displayedGames.length > 0) {
   <button
-    class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 w-full sm:w-auto"
+    class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 max-w-full sm:w-auto"
     (click)="onChangeLimit(PAGE_SIZE)"
   >
     Ver más juegos

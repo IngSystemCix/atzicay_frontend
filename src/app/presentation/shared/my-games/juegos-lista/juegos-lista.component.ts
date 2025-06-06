@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GameInstance } from '../../../../core/domain/model/gameInstance/game-instance';
@@ -11,9 +11,7 @@ import { of, throwError } from 'rxjs';
 import { GameConfigurationComponent } from '../../game-configuration/game-configuration.component';
 import { RouterLink } from '@angular/router';
 import { ConfigGameComponent } from '../../../features/config-game/config-game.component';
-
 type Dificultad = 'basico' | 'intermedio' | 'dificil';
-
 interface Juego {
   id: number;
   tipo: string;
@@ -28,7 +26,6 @@ interface Juego {
   profesorId?: number;
   visibilidad?: string;
 }
-
 @Component({
   selector: 'app-juegos-lista',
   standalone: true,
@@ -37,6 +34,18 @@ interface Juego {
   styleUrl: './juegos-lista.component.css',
 })
 export class JuegosListaComponent implements OnInit {
+
+  filtroSeleccionado: string = 'Todos';
+  filtros: string[] = ['Todos', 'Ahorcado', 'Rompecabezas', 'Memoria', 'Pupiletras'];
+
+  @Output() filtroChange = new EventEmitter<string>();
+
+  filtrar(tipo: string) {
+    this.filtroSeleccionado = tipo;
+    console.log(`Filtrando por: ${tipo}`);
+    this.filtroChange.emit(tipo);
+  }
+
   @Input() filtroActual: string = 'Ahorcado';
 
   menuAbierto: number | null = null;
@@ -136,6 +145,9 @@ export class JuegosListaComponent implements OnInit {
                     }
                     
                     this.cargando = false;
+
+
+                    //Agregar de los demas juegos el tipo 
                 },
                 error: (err) => {
                     console.error('Error en la carga de juegos:', err);
