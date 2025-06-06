@@ -8,7 +8,6 @@ interface ActivityCard {
   id: number;
   type: string;
   title: string;
-  group: string;
   status: 'Activo' | 'Desactivado';
   difficulty: 'basico' | 'intermedio' | 'dificil';
 }
@@ -34,7 +33,6 @@ export class MyProgrammingsComponent implements OnInit {
           id: game.Id,
           type: this.mapType(game.Name),
           title: game.Name,
-          group: `Grupo ${game.ProgrammerId}`,
           status: game.Activated ? 'Activo' : 'Desactivado',
           difficulty: this.mapDifficulty(game.MaximumTime)
         }));
