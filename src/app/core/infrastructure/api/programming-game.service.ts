@@ -5,10 +5,6 @@ import { environment } from '../../../../environments/environment.development';
 import { GameSetting } from '../../domain/interface/game-setting';
 
 export interface ProgrammingGameConfig {
-  Name: string;
-  Description: string;
-  Activated: boolean;
-  settings: GameSetting[];
   ProgrammerId: number;
   ProgrammingGameName: string;
   StartTime: string;
@@ -27,6 +23,6 @@ export class ProgrammingGameService {
   constructor(private http: HttpClient) { }
 
   updateProgrammingGame(gameId: number, config: ProgrammingGameConfig): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${gameId}`, config);
+    return this.http.post(`${this.apiUrl}/${gameId}`, config);
   }
 }

@@ -13,7 +13,7 @@ import { RouterLink } from '@angular/router';
   templateUrl: './game-card.component.html'
 })
 export class GameCardComponent {
-  @Input() id: number = 0; // Nuevo input para el ID
+  @Input() id: number = 0; 
   @Input() title: string = '';
   @Input() description: string = '';
   @Input() level: string = '';

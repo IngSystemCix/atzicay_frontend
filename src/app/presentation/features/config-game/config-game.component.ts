@@ -83,15 +83,6 @@ export class ConfigGameComponent implements OnInit {
     this.error = '';
 
     const programmingConfig: ProgrammingGameConfig = {
-      Name: this.config.nombre,
-      Description: `Juego de programación configurado - ${this.config.nombre}`,
-      Activated: true,
-      settings: [
-        {
-          ConfigKey: "Filtros",
-          ConfigValue: "Python, JavaScript"
-        }
-      ],
       ProgrammerId: this.currentUserId,
       ProgrammingGameName: this.config.nombre,
       StartTime: this.formatDateTime(this.config.fechaInicio, '09:00:00'),
