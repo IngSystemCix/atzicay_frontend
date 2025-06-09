@@ -119,7 +119,7 @@ export class LayoutHangmanComponent implements OnInit {
         [Validators.required, Validators.min(10), Validators.max(300)],
       ],
       theme: ['Claro', Validators.required],
-      font: ['this.fonts[0]', Validators.required],
+      font: [this.fonts[0], Validators.required], 
       backgroundColor: ['#ffffff', Validators.required],
       fontColor: ['#000000', Validators.required],
       successMessage: [
@@ -140,6 +140,7 @@ export class LayoutHangmanComponent implements OnInit {
       ],
       publicGame: [false],
     });
+    this.fuenteSeleccionada = this.fonts[0];
   }
   // Getters para formularios
   get wordsArray(): FormArray {
@@ -162,9 +163,16 @@ export class LayoutHangmanComponent implements OnInit {
     return this.configForm.get('failureMessage');
   }
 
-  // Métodos para tabs
   setActiveTab(tab: 'content' | 'config' | 'preview'): void {
     this.activeTab = tab;
+    
+    if (tab === 'config') {
+      setTimeout(() => {
+        this.configForm.updateValueAndValidity();
+        // Asegurar que el valor de fuente esté sincronizado
+        this.fuenteSeleccionada = this.configForm.get('font')?.value || this.fonts[0];
+      }, 0);
+    }
   }
 
   // Métodos para palabras
@@ -480,23 +488,23 @@ export class LayoutHangmanComponent implements OnInit {
     this.showClues = true;
   }
 
-  getPreviewWord(index: number): string {
+  getPreviewWord(index: number): string[] {
     const wordControl = this.wordsArray.at(index);
-    if (!wordControl) return '';
+    if (!wordControl) return [];
     
     const word = wordControl.get('word')?.value || '';
-    return word.toUpperCase().replace(/\s+/g, ''); // Remover espacios y convertir a mayúsculas
+    return word.toUpperCase().split('');
   }
   
   /**
    * Obtiene una pista para mostrar en la vista previa
    */
   getPreviewClue(index: number): string {
-    const wordControl = this.wordsArray.at(index);
-    if (!wordControl) return '';
-    
-    return wordControl.get('clue')?.value || '';
-  }
+  const wordControl = this.wordsArray.at(index);
+  if (!wordControl) return 'Ejemplo de pista';
+  
+  return wordControl.get('clue')?.value || 'Ejemplo de pista';
+}
   
   /**
    * Valida si la vista previa puede mostrarse
@@ -506,4 +514,6 @@ export class LayoutHangmanComponent implements OnInit {
            this.hangmanForm.get('name')?.value?.trim() &&
            this.hangmanForm.get('description')?.value?.trim();
   }
+
+  
 }

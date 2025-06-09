@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import {JuegosHeaderComponent} from '../../shared/my-games/juegos-header/juegos-header.component';
 import {JuegosCategoriasComponent} from '../../shared/my-games/juegos-categorias/juegos-categorias.component';
 import {JuegosTabsComponent} from '../../shared/my-games/juegos-tabs/juegos-tabs.component';
-import {JuegosFiltrosComponent} from '../../shared/my-games/juegos-filtros/juegos-filtros.component';
 import {JuegosListaComponent} from '../../shared/my-games/juegos-lista/juegos-lista.component';
 import {MyProgrammingsComponent} from '../../shared/my-games/my-programmings/my-programmings.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -15,7 +14,6 @@ import { HttpClientModule } from '@angular/common/http';
     JuegosHeaderComponent,
     JuegosCategoriasComponent,
     JuegosTabsComponent,
-    JuegosFiltrosComponent,
     JuegosListaComponent,
     MyProgrammingsComponent
   ],

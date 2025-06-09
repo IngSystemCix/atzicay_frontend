@@ -8,6 +8,7 @@ export class ProgrammingGame {
   EndTime: Date;
   Attempts: number;
   MaximumTime: number;
+  TipoDeJuego?: string; 
 
   constructor(data: any) {
     this.Id = data.Id;
@@ -19,5 +20,6 @@ export class ProgrammingGame {
     this.EndTime = new Date(data.EndTime);
     this.Attempts = data.Attempts;
     this.MaximumTime = data.MaximumTime;
+    this.TipoDeJuego = data.TipoDeJuego; 
   }
 }

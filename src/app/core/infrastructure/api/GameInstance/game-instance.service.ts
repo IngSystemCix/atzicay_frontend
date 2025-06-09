@@ -4,6 +4,8 @@ import { map, Observable } from 'rxjs';
 import { GameInstance } from '../../../domain/model/gameInstance/game-instance';
 import { environment } from '../../../../../environments/environment.development';
 import { GameType } from '../../../domain/enum/game-type';
+import { GameCountResponse, GameCounts } from '../../../domain/interface/game-count-response';
+
 
 @Injectable({
   providedIn: 'root'
@@ -26,9 +28,16 @@ export class GameInstanceService {
    * - Difficulty: 'E' | 'M' | 'D'
    * - Visibility: "P" | "R" (Private (R) or public (P))
    */
-  getAllGameInstances(idProfessor: string): Observable<GameInstance[]> {
+  getAllGameInstances(idProfessor: string, gameType?: string): Observable<GameInstance[]> {
+    let url = `${this.apiUrl}/personal/${idProfessor}`;
+    
+    // Agregar el parámetro gameType si se proporciona
+    if (gameType && gameType !== 'all') {
+      url += `?gameType=${gameType}`;
+    }
+    
     return this.http
-      .get<{ data: GameInstance[] }>(`${this.apiUrl}/personal/${idProfessor}`)
+      .get<{ data: GameInstance[] }>(url)
       .pipe(
         map(response => response.data)
       );
@@ -79,5 +88,18 @@ export class GameInstanceService {
    */
   deleteGameInstance(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  /**
+ * Obtiene el conteo de juegos por tipo para un profesor específico
+ * @param idProfessor ID del profesor
+ * @returns Observable con el conteo de juegos por tipo
+ */
+  getGameCountsByProfessor(idProfessor: number): Observable<GameCounts> {
+    return this.http
+      .get<GameCountResponse>(`${this.apiUrl}/personal/count/${idProfessor}`)
+      .pipe(
+        map(response => response.data)
+      );
   }
 }

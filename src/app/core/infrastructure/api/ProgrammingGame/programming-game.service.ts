@@ -23,6 +23,22 @@ export class ProgrammingGameService {
     return this.http.get<ProgrammingGame>(`${this.apiUrl}/${id}`);
   }
 
+  filterProgrammingGamesByDateAndGame(gameId: number, startDate?: string, endDate?: string): Observable<ProgrammingGame[]> {
+    let url = `${environment.api_base_url}game-instances/programming/filter/${gameId}`;
+    
+    const params: string[] = [];
+    if (startDate) params.push(`start=${startDate}`);
+    if (endDate) params.push(`end=${endDate}`);
+    
+    if (params.length > 0) {
+      url += `?${params.join('&')}`;
+    }
+
+    return this.http.get<{ data: any[] }>(url).pipe(
+      map(response => response.data.map(game => new ProgrammingGame(game)))
+    );
+  }
+
   createProgrammingGame(programmingGame: ProgrammingGame): Observable<ProgrammingGame> {
     return this.http.post<ProgrammingGame>(this.apiUrl, programmingGame);
   }

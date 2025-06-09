@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
-import { Hangman } from '../../../../core/domain/model/hangman/hangman';
 import { UserService } from '../../../../core/infrastructure/api/user.service';
+import { GameInstanceService } from '../../../../core/infrastructure/api/GameInstance/game-instance.service';
+import { GameCounts } from '../../../../core/domain/interface/game-count-response';
 @Component({
   selector: 'app-juegos-categorias',
   standalone: true,
@@ -68,7 +69,8 @@ export class JuegosCategoriasComponent implements OnInit {
   constructor(
     private router: Router,
     private hangmanService: HangmanService,
-    private userService: UserService
+    private userService: UserService,
+    private gameInstanceService: GameInstanceService
   ) {}
 
   ngOnInit(): void {
@@ -115,55 +117,60 @@ export class JuegosCategoriasComponent implements OnInit {
   }
 
   cargarDatosJuegos(): void {
-    if (this.currentProfessorId === 0) {
-      console.error('ID del profesor no válido');
+  if (this.currentProfessorId === 0) {
+    console.error('ID del profesor no válido');
+    this.error = true;
+    this.cargando = false;
+    return;
+  }
+
+  this.cargando = true;
+  this.error = false;
+
+  // Usar el nuevo servicio para obtener todos los contadores de una vez
+  this.gameInstanceService.getGameCountsByProfessor(this.currentProfessorId).subscribe({
+    next: (counts: GameCounts) => {
+      console.log('Conteos obtenidos:', counts);
+
+      // Actualizar contadores
+      this.contadores.Ahorcado = counts.hangman;
+      this.contadores.Rompecabezas = counts.puzzle;
+      this.contadores.Memoria = counts.memory;
+      this.contadores.Pupiletras = counts.solve_the_word;
+
+      // Actualizar categorías
+      this.categorias.forEach(categoria => {
+        switch(categoria.nombre) {
+          case 'Ahorcado':
+            categoria.cantidad = counts.hangman;
+            break;
+          case 'Rompecabezas':
+            categoria.cantidad = counts.puzzle;
+            break;
+          case 'Memoria':
+            categoria.cantidad = counts.memory;
+            break;
+          case 'Pupiletras':
+            categoria.cantidad = counts.solve_the_word;
+            break;
+        }
+      });
+
+      // Forzar detección de cambios
+      this.categorias = [...this.categorias];
+
+      console.log('Categorías actualizadas:', this.categorias);
+      console.log('Contadores actualizados:', this.contadores);
+      
+      this.cargando = false;
+    },
+    error: (err) => {
+      console.error('Error al cargar conteos de juegos:', err);
       this.error = true;
       this.cargando = false;
-      return;
     }
-
-    this.cargando = true;
-    this.error = false;
-
-    // Cargar datos de Ahorcado
-    this.hangmanService.getAllHangman(this.currentProfessorId).subscribe({
-      next: (response) => {
-        console.log('Respuesta completa del servicio hangman:', response);
-
-        let cantidadJuegos = response.data.length;
-
-        console.log('Cantidad de juegos detectada:', cantidadJuegos);
-
-        // Actualizar contador
-        this.contadores.Ahorcado = cantidadJuegos;
-
-        // Actualizar la categoría correspondiente usando el índice
-        const indiceAhorcado = this.categorias.findIndex(c => c.nombre === 'Ahorcado');
-        if (indiceAhorcado !== -1) {
-          this.categorias[indiceAhorcado].cantidad = cantidadJuegos;
-          console.log('Categoría Ahorcado actualizada:', this.categorias[indiceAhorcado]);
-        }
-
-        // Forzar detección de cambios
-        this.categorias = [...this.categorias];
-
-        console.log('Estado final de categorias:', this.categorias);
-        console.log('Estado final de contadores:', this.contadores);
-        
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar juegos de Ahorcado:', err);
-        this.error = true;
-        this.cargando = false;
-      }
-    });
-
-    // Aquí puedes agregar llamadas para cargar los otros tipos de juegos
-    // this.loadPuzzleGames();
-    // this.loadMemoryGames();
-    // this.loadWordSearchGames();
-  }
+  });
+}
 
   crearJuego(ruta: string) {
     if (ruta) {
