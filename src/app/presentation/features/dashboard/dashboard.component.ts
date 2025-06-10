@@ -1,25 +1,47 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { EMPTY, catchError, filter, switchMap, tap } from 'rxjs';
 import { Game } from '../../../core/domain/model/game.model';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { GameService } from '../../../core/infrastructure/api/game.service';
-import { GameCardComponent } from '../../shared/game-card/game-card.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [GameCardComponent, FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
+
+
 export class DashboardComponent implements OnInit {
   private readonly gameService = inject(GameService);
   protected  PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
+
+   @ViewChild('dropdownMenu') dropdownMenu!: ElementRef;
+    isDropdownOpen = false;
+    activeDropdownId: number | null = null;
+    ratingArray: number[] = [1, 2, 3, 4, 5];
+
+    getGameRoute(gameType: string, id: number): string {
+      switch(gameType.toLowerCase()) {
+        case 'hangman':
+          return `/juegos/jugar-hangman/${id}`;
+        case 'puzzle':
+          return `/juegos/jugar-puzzle/${id}`;
+        case 'memory':
+          return `/juegos/jugar-memory/${id}`;
+        case 'solve-the-word':
+          return `/juegos/solve-the-word/${id}`;
+        default:
+          return '/juegos';
+      }
+    }
 
   ngOnInit() {
     this.auth0.isAuthenticated$
@@ -160,6 +182,55 @@ export class DashboardComponent implements OnInit {
       0,
       this.PAGE_SIZE * this.currentPage
     );
+  }
+
+  getLevelClasses(level: string): string {
+    switch(level.toLowerCase()) {
+      case 'e':
+        return 'bg-[#C9FFD0] text-green-800';
+      case 'm':
+        return 'bg-[#FFFEC2] text-yellow-800';
+      case 'd':
+        return 'bg-[#FFB4B4] text-red-800';
+      default:
+        return 'bg-gray-200 text-gray-800';
+    }
+  }
+
+  getLevelText(level: string): string {
+    switch(level) {
+      case 'E':
+        return 'Fácil';
+      case 'M':
+        return 'Intermedio';
+      case 'D':
+        return 'Difícil';
+      default:
+        return 'Desconocido';
+    }
+  }
+
+  dropdownToggle(gameId: number) {
+    if (this.activeDropdownId === gameId) {
+      this.activeDropdownId = null;
+    } else {
+      this.activeDropdownId = gameId;
+    }
+  }
+
+  isDropdownActive(gameId: number): boolean {
+    return this.activeDropdownId === gameId;
+  }
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: Event) {
+    if (this.dropdownMenu && !this.dropdownMenu.nativeElement.contains(event.target)) {
+      this.closeDropdown();
+    }
+  }
+
+  closeDropdown() {
+    this.activeDropdownId = null;
   }
 
   // Métodos auxiliares
