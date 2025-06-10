@@ -22,8 +22,57 @@ interface ActivityCard {
 export class MyProgrammingsComponent implements OnInit {
 
   activities: ActivityCard[] = [];
+  mobileMenuOpen = false;
+  private activitiesPerPage = 6;
+  private currentPage = 1;
 
   constructor(private programmingGameService: ProgrammingGameService) {}
+
+
+  //Esto es para el diseño responsivo
+  toggleMobileMenu() {
+    this.
+    mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+
+
+  getPaginatedActivities() {
+    const filteredActivities = this.getFilteredActivities();
+    const startIndex = 0;
+    const endIndex = this.currentPage * this.activitiesPerPage;
+    
+    return filteredActivities.slice(startIndex, endIndex);
+  }
+
+
+   hasMoreActivities(): boolean {
+    const filteredActivities = this.getFilteredActivities();
+    const totalShown = this.currentPage * this.activitiesPerPage;
+    
+    return filteredActivities.length > totalShown;
+  }
+
+  loadMore(): void {
+    this.currentPage++;
+  }
+
+   /**
+   * Resetea la paginación cuando cambian los filtros
+   */
+  resetPagination(): void {
+    this.currentPage = 1;
+  }
+
+  onTabChange(tab: string): void {
+    this.selectedTab = tab;
+    this.resetPagination(); // Agrega esta línea
+  }
+
+  onDateChange(): void {
+    this.resetPagination(); // Agrega esta línea cuando cambien las fechas
+  }
+
 
 
   ngOnInit() {
@@ -84,6 +133,7 @@ export class MyProgrammingsComponent implements OnInit {
   }
 
   getFilteredActivities() {
+
     if (this.selectedTab === 'Todos') {
       return this.activities;
     }
