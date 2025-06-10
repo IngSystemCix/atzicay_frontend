@@ -5,14 +5,17 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { GameInstanceService } from '../../../core/infrastructure/api/GameInstance/game-instance.service';
 import { UserService } from '../../../core/infrastructure/api/user.service';
 import { ConfigGame } from '../../../core/domain/interface/config-game';
-import { ProgrammingGameConfig, ProgrammingGameService } from '../../../core/infrastructure/api/programming-game.service';
+import {
+  ProgrammingGameConfig,
+  ProgrammingGameService,
+} from '../../../core/infrastructure/api/programming-game.service';
 
 @Component({
   selector: 'app-config-game',
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './config-game.component.html',
-  styleUrl: './config-game.component.css'
+  styleUrl: './config-game.component.css',
 })
 export class ConfigGameComponent implements OnInit {
   gameId: number | null = null;
@@ -22,7 +25,7 @@ export class ConfigGameComponent implements OnInit {
     intentos: 3,
     fechaInicio: '',
     fechaFin: '',
-    tiempoMaximo: 120
+    tiempoMaximo: 120,
   };
 
   isLoading = false;
@@ -38,7 +41,7 @@ export class ConfigGameComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       this.gameId = +params['id'];
     });
     this.getCurrentUser();
@@ -55,21 +58,33 @@ export class ConfigGameComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al obtener usuario:', err);
-        }
+        },
       });
     }
   }
 
   private setDefaultDates() {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    this.config.fechaInicio = today.toISOString().split('T')[0];
-    this.config.fechaFin = tomorrow.toISOString().split('T')[0];
+    const now = new Date();
+    const later = new Date(now);
+    later.setHours(later.getHours() + 1); // una hora después
+
+    this.config.fechaInicio = this.formatDateTimeLocal(now);
+    this.config.fechaFin = this.formatDateTimeLocal(later);
+  }
+
+  private formatDateTimeLocal(date: Date): string {
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+    return localDate.toISOString().slice(0, 16); // 'YYYY-MM-DDTHH:mm'
   }
 
   onSubmit() {
+    // Validar que fecha de inicio < fecha de fin
+    if (new Date(this.config.fechaInicio) >= new Date(this.config.fechaFin)) {
+      this.error = 'La fecha y hora de fin debe ser posterior a la de inicio';
+      return;
+    }
+
     if (!this.gameId || !this.currentUserId) {
       this.error = 'Datos necesarios no disponibles';
       return;
@@ -85,25 +100,27 @@ export class ConfigGameComponent implements OnInit {
     const programmingConfig: ProgrammingGameConfig = {
       ProgrammerId: this.currentUserId,
       ProgrammingGameName: this.config.nombre,
-      StartTime: this.formatDateTime(this.config.fechaInicio, '09:00:00'),
-      EndTime: this.formatDateTime(this.config.fechaFin, '17:00:00'),
+      StartTime: this.config.fechaInicio,
+      EndTime: this.config.fechaFin,
       Attempts: this.config.intentos,
-      MaximumTime: this.config.tiempoMaximo
+      MaximumTime: this.config.tiempoMaximo,
     };
 
-    this.programmingGameService.updateProgrammingGame(this.gameId, programmingConfig).subscribe({
-      next: (response) => {
-        console.log('Configuración guardada exitosamente:', response);
-        this.isLoading = false;
-        // Navegar de vuelta a la lista de juegos
-        this.router.navigate(['/juegos']);
-      },
-      error: (err) => {
-        console.error('Error al guardar configuración:', err);
-        this.error = 'Error al guardar la configuración';
-        this.isLoading = false;
-      }
-    });
+    this.programmingGameService
+      .updateProgrammingGame(this.gameId, programmingConfig)
+      .subscribe({
+        next: (response) => {
+          console.log('Configuración guardada exitosamente:', response);
+          this.isLoading = false;
+          // Navegar de vuelta a la lista de juegos
+          this.router.navigate(['/juegos']);
+        },
+        error: (err) => {
+          console.error('Error al guardar configuración:', err);
+          this.error = 'Error al guardar la configuración';
+          this.isLoading = false;
+        },
+      });
   }
 
   private validateForm(): boolean {

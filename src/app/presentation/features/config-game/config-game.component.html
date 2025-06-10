@@ -15,7 +15,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="pt-3">
                     <div class="mb-10">
-                        <label for="nombre" class="font-bold">Nombres</label>
+                        <label for="nombre" class="font-bold">Nombre</label>
                         <input 
                             type="text" 
                             id="nombre" 
@@ -27,17 +27,15 @@
                     </div>
                     <div class="">
                         <label for="intentos" class="font-bold">Intentos</label>  
-                        <select 
-                            class="w-full border border-gray-300 rounded-md p-2" 
+                        <input 
+                            class="w-full border border-gray-300 rounded-md p-2 text-right"
+                            type="number"
                             name="intentos" 
                             id="intentos"
                             [(ngModel)]="config.intentos"
-                        >
-                            <option value="1">1 intento</option>
-                            <option value="2">2 intentos</option>
-                            <option value="3">3 intentos</option>
-                            <option value="4">4 intentos</option>
-                        </select>
+                            min="1"
+                            max="10"
+                        />
                     </div>
                 </div>
                 <div class="flex flex-col gap-4">
@@ -45,22 +43,22 @@
                         <div class="w-1/2">
                             <label for="inicio" class="font-bold">Inicio</label>
                             <input 
-                                type="date" 
+                                type="datetime-local" 
                                 name="inicio" 
                                 id="inicio" 
                                 [(ngModel)]="config.fechaInicio"
-                                class="w-full border border-gray-300 rounded-md p-2"
+                                class="w-full border border-gray-300 rounded-md p-2 flex align-end justify-end"
                                 required
                             >
                         </div>
                         <div class="w-1/2">
                             <label for="fin" class="font-bold">Fin</label>
                             <input 
-                                type="date" 
+                                type="datetime-local" 
                                 name="fin" 
                                 id="fin" 
                                 [(ngModel)]="config.fechaFin"
-                                class="w-full border border-gray-300 rounded-md p-2"
+                                class="w-full border border-gray-300 rounded-md p-2 flex align-end justify-end"
                                 required
                             >
                         </div>
@@ -73,7 +71,7 @@
                             id="tiempo" 
                             [(ngModel)]="config.tiempoMaximo"
                             min="1"
-                            class="w-full border border-gray-300 rounded-md p-2"
+                            class="w-full border border-gray-300 rounded-md p-2 text-right"
                             required
                         >
                     </div>
@@ -102,3 +100,4 @@
         </div>
     </div>
 </form>
+
