@@ -31,9 +31,9 @@ export class LayoutsPuzzleComponent {
   mostrarPista: boolean = false;
   pista: string = '';
   ayudaAutomatica: boolean = false;
-  imagenUrl: string = ''; // Aquí se guardará la ruta de la imagen
-  selectedImage: string | ArrayBuffer | null = null; // Para preview
-  selectedFile: File | null = null; // El archivo seleccionado
+  imagenUrl: string = ''; 
+  selectedImage: string | ArrayBuffer | null = null; 
+  selectedFile: File | null = null; 
 
   // Propiedades para la configuración
   fuente: string = 'Arial';
@@ -87,13 +87,12 @@ export class LayoutsPuzzleComponent {
   onFileSelected(event: any): void {
     const file: File = event.target.files[0];
     if (!file) return;
-  
-    // Validar archivo antes de procesarlo
+
     if (!this.validateImageFile(file)) {
       event.target.value = '';
       return;
     }
-  
+
     this.selectedFile = file;
     this.errorMessage = '';
     
@@ -104,22 +103,19 @@ export class LayoutsPuzzleComponent {
     };
     reader.readAsDataURL(file);
     
-    // Generar nombre único y guardar la imagen localmente
+    // IMPORTANTE: La ruta debe ser la ruta COMPLETA del dispositivo como solicitas
+    // La construcción de la ruta completa basada en tu PATH_UPLOAD_FILES
     const timestamp = new Date().getTime();
     const fileExtension = file.name.split('.').pop();
     const uniqueFileName = `puzzle_${timestamp}.${fileExtension}`;
     
-    // Guardar imagen en assets localmente
-    this.saveImageToAssets(file, uniqueFileName);
-    
-    // Esta será la URL que se envía al backend
-    this.imagenUrl = `assets/${uniqueFileName}`;
-    
+    // Esta es la ruta completa que se enviará al backend
+    this.imagenUrl = `/storage/puzzles/${uniqueFileName}`;    
     console.log('📁 Archivo procesado:', {
       nombre: file.name,
       tamaño: `${(file.size / 1024).toFixed(2)} KB`,
       tipo: file.type,
-      rutaDestino: this.imagenUrl
+      rutaCompleta: this.imagenUrl
     });
   }
 
@@ -157,12 +153,18 @@ export class LayoutsPuzzleComponent {
   private validateForm(): string[] {
     const errors: string[] = [];
 
-    if (!this.tituloJuego.trim()) {
-      errors.push('El título del juego es requerido');
+    // ⭐ Validación más estricta del título
+    if (!this.tituloJuego || !this.tituloJuego.trim()) {
+      errors.push('El título del juego es requerido y no puede estar vacío');
+    } else if (this.tituloJuego.trim().length < 3) {
+      errors.push('El título debe tener al menos 3 caracteres');
     }
 
-    if (!this.descripcion.trim()) {
-      errors.push('La descripción es requerida');
+    // ⭐ Validación más estricta de la descripción
+    if (!this.descripcion || !this.descripcion.trim()) {
+      errors.push('La descripción es requerida y no puede estar vacía');
+    } else if (this.descripcion.trim().length < 10) {
+      errors.push('La descripción debe tener al menos 10 caracteres');
     }
 
     if (!this.selectedFile) {
@@ -177,13 +179,28 @@ export class LayoutsPuzzleComponent {
       errors.push('Las columnas deben estar entre 2 y 10');
     }
 
-    if (this.mostrarPista && !this.pista.trim()) {
-      errors.push('Si activa mostrar pista, debe escribir una pista');
+    if (this.mostrarPista && (!this.pista || !this.pista.trim())) {
+      errors.push('Si activa mostrar pista, debe escribir una pista válida');
     }
 
     if (this.tiempo < 30) {
       errors.push('El tiempo mínimo es de 30 segundos');
     }
+
+    // Validar que la imagen no exceda 1MB
+    if (this.selectedFile && this.selectedFile.size > 1024 * 1024) {
+      errors.push('La imagen debe ser menor a 1MB');
+    }
+
+    // ⭐ Debug de validación
+    console.log('🔍 Validación de campos:', {
+      tituloJuego: this.tituloJuego,
+      tituloJuegoTrimmed: this.tituloJuego?.trim(),
+      descripcion: this.descripcion,
+      descripcionTrimmed: this.descripcion?.trim(),
+      selectedFile: !!this.selectedFile,
+      errorsFound: errors.length
+    });
 
     return errors;
   }
@@ -193,48 +210,46 @@ export class LayoutsPuzzleComponent {
       {
         ConfigKey: 'Tiempo',
         ConfigValue: this.tiempo.toString()
-      }
-    ];
-  
-    // Agregar configuraciones adicionales
-    if (this.fuente.trim()) {
-      settings.push({
+      },
+      {
         ConfigKey: 'Fuente',
         ConfigValue: this.fuente
-      });
-    }
-  
-    if (this.mensajeExito.trim()) {
-      settings.push({
+      },
+      {
+        ConfigKey: 'ColorFuente',
+        ConfigValue: this.colorFuente
+      },
+      {
+        ConfigKey: 'ColorFondo',
+        ConfigValue: this.fondo
+      },
+      {
         ConfigKey: 'MensajeExito',
         ConfigValue: this.mensajeExito
-      });
-    }
-  
-    if (this.mensajeFracaso.trim()) {
-      settings.push({
+      },
+      {
         ConfigKey: 'MensajeFracaso',
         ConfigValue: this.mensajeFracaso
-      });
-    }
-  
+      }
+    ];
+
     const assessment: Assessment = {
       value: 5,
       comments: `Puzzle de ${this.filas}x${this.columnas} piezas - ${this.getDifficultyText()}`
     };
-  
+
     const puzzleData: PuzzleData = {
-      image_url: this.imagenUrl, // Esta es la ruta que va al backend
+      image_url: this.imagenUrl,
       clue: this.mostrarPista ? this.pista : '',
       rows: this.filas,
       columns: this.columnas,
       automatic_help: this.ayudaAutomatica
     };
-  
+
     const gameData: CreateGame = {
       Name: this.tituloJuego,
       Description: this.descripcion,
-      ProfessorId: 4, // Considera hacer esto dinámico
+      ProfessorId: 4, //Falta implementar la lógica para obtener el ID del profesor
       Activated: true,
       Difficulty: this.dificultad,
       Visibility: this.juegoPublico ? Visibility.PUBLIC : Visibility.PRIVATE,
@@ -243,46 +258,41 @@ export class LayoutsPuzzleComponent {
       assessment: assessment,
       puzzle: puzzleData
     };
-  
+
     return gameData;
   }
   
 
-  async guardar() {
+ async guardar() {
     this.isLoading = true;
     this.errorMessage = '';
     this.successMessage = '';
-  
+
+    // ⭐ Debug inicial
+    console.log('🚀 Iniciando guardado con valores:', {
+      tituloJuego: this.tituloJuego,
+      descripcion: this.descripcion,
+      selectedFile: this.selectedFile?.name
+    });
+
     // Validar formulario
     const validationErrors = this.validateForm();
     if (validationErrors.length > 0) {
       this.errorMessage = validationErrors.join(', ');
       this.isLoading = false;
+      console.error('❌ Errores de validación:', validationErrors);
       return;
     }
-  
+
     try {
-      // Primero subir la imagen
-      const imagenGuardada = await this.saveImageToFolder();
-      if (!imagenGuardada) {
-        this.errorMessage = 'No se pudo guardar la imagen en el servidor';
-        this.isLoading = false;
-        return;
-      }
-  
-      // Luego crear el juego
+      // Construir el objeto de datos del juego (JSON plano)
       const gameData = this.buildGameData();
-      console.log('📤 Enviando datos al backend:', JSON.stringify(gameData, null, 2));
-  
-      this.gameService.createPuzzleGame(gameData, gameData.puzzle!).subscribe({
+      // Llamar al servicio que envía el JSON plano
+      this.gameService.createGame(gameData).subscribe({
         next: (response: GameInstance) => {
           console.log('✅ Juego creado exitosamente:', response);
           this.successMessage = '¡Puzzle guardado exitosamente!';
           this.isLoading = false;
-          
-          // Limpiar localStorage si se usó
-          localStorage.removeItem('miImagenPuzzle');
-          
           setTimeout(() => this.resetForm(), 2000);
         },
         error: (error) => {
@@ -291,13 +301,78 @@ export class LayoutsPuzzleComponent {
           this.isLoading = false;
         }
       });
-  
     } catch (error) {
       console.error('❌ Error general:', error);
       this.errorMessage = 'Error inesperado al procesar la solicitud';
       this.isLoading = false;
     }
   }
+
+
+  private buildGameDataWithoutImageUrl(): CreateGame {
+  const settings: GameSetting[] = [
+    {
+      ConfigKey: 'Tiempo',
+      ConfigValue: this.tiempo.toString()
+    },
+    {
+      ConfigKey: 'Fuente',
+      ConfigValue: this.fuente || 'Arial' // Valor por defecto
+    },
+    {
+      ConfigKey: 'ColorFuente',
+      ConfigValue: this.colorFuente
+    },
+    {
+      ConfigKey: 'ColorFondo',
+      ConfigValue: this.fondo
+    },
+    {
+      ConfigKey: 'MensajeExito',
+      ConfigValue: this.mensajeExito || '¡Excelente trabajo!' // Valor por defecto
+    },
+    {
+      ConfigKey: 'MensajeFracaso',
+      ConfigValue: this.mensajeFracaso || 'Inténtalo de nuevo' // Valor por defecto
+    }
+  ];
+
+  const assessment: Assessment = {
+    value: 5,
+    comments: `Puzzle de ${this.filas}x${this.columnas} piezas - ${this.getDifficultyText()}`
+  };
+
+  const puzzleData: PuzzleData = {
+    image_url: '', // Se llenará en el backend
+    clue: this.mostrarPista ? this.pista : '',
+    rows: this.filas,
+    columns: this.columnas,
+    automatic_help: this.ayudaAutomatica
+  };
+
+  const gameData: CreateGame = {
+    Name: this.tituloJuego.trim(), // ⭐ ASEGURAR QUE NO ESTÉ VACÍO
+    Description: this.descripcion.trim(), // ⭐ ASEGURAR QUE NO ESTÉ VACÍO
+    ProfessorId: 4,
+    Activated: true,
+    Difficulty: this.dificultad,
+    Visibility: this.juegoPublico ? Visibility.PUBLIC : Visibility.PRIVATE,
+    game_type: GameType.PUZZLE,
+    settings: settings,
+    assessment: assessment,
+    puzzle: puzzleData
+  };
+
+  // ⭐ DEBUG: Verificar que Name no sea null/undefined/vacío
+  console.log('🔍 Datos del juego construidos:', {
+    Name: gameData.Name,
+    Description: gameData.Description,
+    completeData: gameData
+  });
+
+  return gameData;
+}
+
   
 
   cancelar() {
@@ -341,7 +416,7 @@ export class LayoutsPuzzleComponent {
       
       pieces.push({
         id: i,
-        bgPosition: `${-col * 100}% ${-row * 100}%`
+        bgPosition: `${-col * (100 / (this.columnas || 4))}% ${-row * (100 / (this.filas || 4))}%`
       });
     }
     
@@ -355,6 +430,25 @@ export class LayoutsPuzzleComponent {
       case Difficulty.HARD: return 'Difícil';
       default: return 'Fácil';
     }
+  }
+
+  getDifficultyIcon(): string {
+    switch (this.dificultad) {
+      case Difficulty.EASY: return '🟢';
+      case Difficulty.MEDIUM: return '🟡';
+      case Difficulty.HARD: return '🔴';
+      default: return '🟢';
+    }
+  }
+
+  formatTime(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    
+    if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    }
+    return `${seconds}s`;
   }
 
   // Para mostrar el modal JSON
@@ -417,6 +511,48 @@ copiarJson(): void {
     }, 2000);
   }).catch(err => {
     console.error('Error al copiar:', err);
+  });
+}
+
+
+// Método para enviar el formulario con el archivo
+enviarFormularioConArchivo() {
+  // Validar que haya un archivo seleccionado
+  if (!this.selectedFile) {
+    this.errorMessage = 'Debe seleccionar un archivo para enviar';
+    return;
+  }
+
+  // Construir el objeto de datos del juego
+  const gameData = this.buildGameData();
+
+  // Crear un FormData para enviar el archivo y los datos del juego
+  const formData = new FormData();
+  formData.append('files', this.selectedFile);
+  formData.append('Name', gameData.Name);
+  formData.append('Description', gameData.Description);
+  formData.append('ProfessorId', gameData.ProfessorId.toString());
+  formData.append('Activated', gameData.Activated.toString());
+  formData.append('Difficulty', gameData.Difficulty.toString());
+  formData.append('Visibility', gameData.Visibility.toString());
+  formData.append('game_type', gameData.game_type.toString());
+  formData.append('settings', JSON.stringify(gameData.settings));
+  formData.append('assessment', JSON.stringify(gameData.assessment));
+  formData.append('puzzle', JSON.stringify(gameData.puzzle));
+
+  // Enviar los datos usando el servicio de juego
+this.gameService.createPuzzleGameWithFile(formData).subscribe({
+      next: (response: GameInstance) => {
+      console.log('✅ Juego creado exitosamente:', response);
+      this.successMessage = '¡Puzzle guardado exitosamente!';
+      this.isLoading = false;
+      setTimeout(() => this.resetForm(), 2000);
+    },
+    error: (error) => {
+      console.error('❌ Error al guardar:', error);
+      this.errorMessage = error.message || 'Error al guardar el puzzle';
+      this.isLoading = false;
+    }
   });
 }
 
