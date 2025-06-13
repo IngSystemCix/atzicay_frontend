@@ -7,7 +7,7 @@ import { BehaviorSubject, map, Observable, switchMap } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GameService {
   private apiUrl = environment.api_base_url;
@@ -20,25 +20,24 @@ export class GameService {
     'Solve the Word': 'assets/pupiletras.png',
   };
 
-
- // Método para actualizar el limit
+  // Método para actualizar el limit
   setLimit(limit: number) {
     this.limitSubject.next(limit);
   }
 
   // Observable que se actualiza automáticamente cuando cambia el limit
-  getAllGames(): Observable<Game[]> {
-    return this.limitSubject.asObservable().pipe(
-      switchMap(limit =>
-        this.http.get<ApiResponse<Game[]>>(`${this.apiUrl}game-instances/all/${limit}`).pipe(
-          map(response =>
-            response.data.map(game => ({
-              ...game,
-              image: this.imageMap[game.type] || 'assets/default-game.png',
-            }))
-          )
-        )
+  getAllGames(limit: number, offset: number): Observable<Game[]> {
+    return this.http
+      .get<ApiResponse<Game[]>>(
+        `${this.apiUrl}game-instances/all?limit=${limit}&offset=${offset}`
       )
-    );
+      .pipe(
+        map((response) =>
+          response.data.map((game) => ({
+            ...game,
+            image: this.imageMap[game.type] || 'assets/default-game.png',
+          }))
+        )
+      );
   }
 }
