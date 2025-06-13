@@ -92,7 +92,7 @@ export class JuegosCategoriasComponent implements OnInit {
 
         console.log('Conteos actualizados:', this.contadores);
       }),
-      tap(() => {this.cargando = false}),
+      tap(() => { this.cargando = false }),
       catchError((err) => {
         console.error('Error al cargar datos:', err);
         this.error = true;
