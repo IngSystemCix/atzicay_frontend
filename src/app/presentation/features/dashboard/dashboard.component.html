@@ -193,7 +193,7 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6 max-w-8xl">
-  @for (game of displayedGames; track game.id) { 
+  @for (game of displayedGames; track game.id) {
     @defer {
       <!-- Inline Game Card -->
       <div class="bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex flex-col h-[460px]">
@@ -225,7 +225,7 @@
               />
             </svg>
           </button>
-          
+
           <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-md">
             Autor: {{ game.author }}
           </div>
@@ -312,11 +312,11 @@
         </div>
       </div>
     }
-  } 
+  }
   @empty {
     <div class="col-span-full text-center p-4">
       @if (selectedTypes.length > 0 || selectedLevels.length > 0 || searchTerm) {
-        No se encontraron juegos con los filtros aplicados. 
+        No se encontraron juegos con los filtros aplicados.
       } @else {
         <div class="animate-spin w-8 h-8 border-4 border-atzicay-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
         Cargando juegos...
@@ -330,7 +330,7 @@
   @if (hasMoreGames && displayedGames.length > 0) {
   <button
     class="btn-atzicay px-4 py-2 rounded-lg transition duration-200 max-w-full sm:w-auto"
-    (click)="onChangeLimit(PAGE_SIZE)"
+    (click)="loadMoreGames()"
   >
     Ver más juegos
   </button>

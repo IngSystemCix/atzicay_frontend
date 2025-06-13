@@ -39,7 +39,7 @@ export class JuegosListaComponent implements OnInit {
   filtros: string[] = ['all', 'hangman', 'memory', 'puzzle', 'solve_the_word'];
   filtroLabels: { [key: string]: string } = {
     'all': 'Todos',
-    'hangman': 'Ahorcado', 
+    'hangman': 'Ahorcado',
     'memory': 'Memoria',
     'puzzle': 'Rompecabezas',
     'solve_the_word': 'Pupiletras'
@@ -50,7 +50,7 @@ export class JuegosListaComponent implements OnInit {
   filtrar(tipo: string) {
     this.filtroSeleccionado = tipo;
     console.log(`Filtrando por: ${tipo}`);
-    this.cargarJuegos(); 
+    this.cargarJuegos();
     this.filtroChange.emit(tipo);
   }
 
@@ -70,111 +70,107 @@ export class JuegosListaComponent implements OnInit {
     private hangmanService: HangmanService,
     private gameInstanceService: GameInstanceService,
     private usuarioService: UserService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarJuegos();
   }
 
   cargarJuegos(): void {
-  this.cargando = true;
-  this.error = null;
-  this.juegos = [];
+    this.cargando = true;
+    this.error = null;
+    this.juegos = [];
 
-  try {
-    const userString = sessionStorage.getItem('user');
-    if (!userString) {
-      throw new Error('No hay usuario en sesión');
-    }
-
-    const user = JSON.parse(userString);
-    const email = user?.Email;
-    
-    if (!email) {
-      throw new Error('El usuario no tiene email registrado');
-    }
-
-    this.usuarioService.findUserByEmail(email).pipe(
-      switchMap(response => {
-        if (!response.data?.Id) {
-          throw new Error('ID de usuario no válido');
-        }
-        
-        // Usar el filtro seleccionado
-        return this.gameInstanceService.getAllGameInstances(
-          response.data.Id, 
-          this.filtroSeleccionado
-        ).pipe(
-          catchError(error => {
-            if (error.status === 404) {
-              return of([]);
-            }
-            return throwError(() => error);
-          })
-        );
-      })
-    ).subscribe({
-      next: (juegosData: any[]) => {
-        if (!Array.isArray(juegosData)) {
-          console.error('Datos de juegos no es un array:', juegosData);
-          juegosData = [];
-        }
-
-        const juegosUnicos = new Map<string, Juego>();
-        
-        juegosData.forEach(juego => {
-          try {
-            if (!juego?.Name) {
-              console.warn('Juego sin nombre:', juego);
-              return;
-            }
-            
-            const nombreNormalizado = juego.Name.trim().toLowerCase();
-            if (!juegosUnicos.has(nombreNormalizado)) {
-              juegosUnicos.set(nombreNormalizado, {
-                id: juego.Id || '',
-                tipo: this.mapearTipoJuego(this.filtroSeleccionado), // Mapear el tipo según el filtro
-                icono: this.obtenerIconoJuego(this.filtroSeleccionado),
-                titulo: juego.Name || 'Sin nombre',
-                descripcion: juego.Description || '',
-                profesorId: juego.ProfessorId || '',
-                dificultad: this.convertirDificultad(juego.Difficulty),
-                visibilidad: juego.Visibility || 'privado',
-                estado: juego.Activated ? 'Activo' : 'Desactivado',
-                vecesJugado: 0,
-                puntuacion: 0,
-              });
-            }
-          } catch (e) {
-            console.error('Error procesando juego:', juego, e);
-          }
-        });
-
-        this.juegos = Array.from(juegosUnicos.values());
-        
-        if (this.juegos.length === 0) {
-          this.error = `No tienes juegos de tipo ${this.filtroLabels[this.filtroSeleccionado]} disponibles`;
-        }
-        
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error en la carga de juegos:', err);
-        this.error = err.message || 'Error al cargar los juegos';
-        this.cargando = false;
+    try {
+      const userString = sessionStorage.getItem('user');
+      if (!userString) {
+        throw new Error('No hay usuario en sesión');
       }
-    });
-  } catch (error) {
-    console.error('Error inicial:', error);
-    this.error = error instanceof Error ? error.message : 'Error desconocido';
+
+      const user = JSON.parse(userString);
+      const email = user?.Email;
+
+      if (!email) {
+        throw new Error('El usuario no tiene email registrado');
+      }
+
+      this.usuarioService.findUserByEmail(email).pipe(
+        switchMap(({ data }) => {
+          const userId = data?.Id;
+          if (!userId) {
+            return throwError(() => new Error('ID de usuario no válido'));
+          }
+
+          return this.gameInstanceService.getAllGameInstances(userId, this.filtroSeleccionado).pipe(
+            catchError(error =>
+              error.status === 404 ? of([]) : throwError(() => error)
+            )
+          );
+        })
+      ).subscribe({
+        next: juegosData => this.procesarJuegos(juegosData),
+        error: err => {
+          console.error('Error en la carga de juegos:', err);
+          this.error = err.message || 'Error al cargar los juegos';
+          this.cargando = false;
+        }
+      });
+
+    } catch (error) {
+      console.error('Error inicial:', error);
+      this.error = error instanceof Error ? error.message : 'Error desconocido';
+      this.cargando = false;
+    }
+  }
+
+  private procesarJuegos(juegosData: any[]): void {
+    this.juegos = [];
+
+    if (!Array.isArray(juegosData)) {
+      console.error('Datos de juegos no es un array:', juegosData);
+      juegosData = [];
+    }
+
+    const juegosUnicos = new Map<string, Juego>();
+
+    for (const juego of juegosData) {
+      if (!juego?.Name) {
+        console.warn('Juego sin nombre:', juego);
+        continue;
+      }
+
+      const nombreKey = juego.Name.trim().toLowerCase();
+      if (juegosUnicos.has(nombreKey)) continue;
+
+      juegosUnicos.set(nombreKey, {
+        id: juego.Id ?? '',
+        tipo: this.mapearTipoJuego(this.filtroSeleccionado),
+        icono: this.obtenerIconoJuego(this.filtroSeleccionado),
+        titulo: juego.Name,
+        descripcion: juego.Description ?? '',
+        profesorId: juego.ProfessorId ?? '',
+        dificultad: this.convertirDificultad(juego.Difficulty),
+        visibilidad: juego.Visibility ?? 'privado',
+        estado: juego.Activated ? 'Activo' : 'Desactivado',
+        vecesJugado: 0,
+        puntuacion: 0,
+      });
+    }
+
+    this.juegos = Array.from(juegosUnicos.values());
+
+    if (this.juegos.length === 0) {
+      this.error = `No tienes juegos de tipo ${this.filtroLabels[this.filtroSeleccionado]} disponibles`;
+    }
+
     this.cargando = false;
   }
-}
+
 
   private mapearTipoJuego(gameType: string): string {
     const tipoMap: { [key: string]: string } = {
       'hangman': 'Ahorcado',
-      'memory': 'Memoria', 
+      'memory': 'Memoria',
       'puzzle': 'Rompecabezas',
       'solve_the_word': 'Pupiletras',
       'all': 'Mixto'
@@ -185,7 +181,7 @@ export class JuegosListaComponent implements OnInit {
     const iconoMap: { [key: string]: string } = {
       'hangman': '🎯',
       'memory': '🧠',
-      'puzzle': '🧩', 
+      'puzzle': '🧩',
       'solve_the_word': '🔤',
       'all': '🎮'
     };
@@ -193,7 +189,7 @@ export class JuegosListaComponent implements OnInit {
   }
 
   get juegosFiltrados(): Juego[] {
-    return this.juegos; 
+    return this.juegos;
   }
 
   toggleMenu(id: number) {
@@ -205,11 +201,11 @@ export class JuegosListaComponent implements OnInit {
     this.selectedGameId = id;
     this.showConfigModal = true;
     this.menuAbierto = null;
-    
+
     // Cerrar el menú al hacer clic fuera
     document.addEventListener('click', this.cerrarMenus.bind(this));
   }
-  
+
 
   eliminarJuego(id: number) {
     if (confirm('¿Estás seguro de que deseas eliminar este juego? Esta acción no se puede deshacer.')) {
@@ -232,28 +228,26 @@ export class JuegosListaComponent implements OnInit {
 
   editarJuego(id: number) {
     console.log(`Editar juego ${id}`);
-    // Aquí puedes implementar la lógica para editar el juego
-    // Por ejemplo, navegar a una página de edición
     this.menuAbierto = null;
   }
 
   cerrarModalConfiguracion() {
     this.showConfigModal = false;
     this.selectedGameId = null;
-    
+
     // Remover el event listener
     document.removeEventListener('click', this.cerrarMenus.bind(this));
   }
 
   onConfigurationSaved() {
     console.log('Configuración guardada');
-    
+
     // Mostrar mensaje de éxito
     this.mostrarMensaje('Configuración guardada correctamente', 'success');
-    
+
     // Actualizar la lista de juegos
     this.cargarJuegos();
-    
+
     // Cerrar el modal
     this.cerrarModalConfiguracion();
   }

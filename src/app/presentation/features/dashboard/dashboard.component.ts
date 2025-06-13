@@ -60,6 +60,7 @@ export class DashboardComponent implements OnInit {
               sessionStorage.setItem('access_token', response.access_token);
               const { Id, ...userWithoutId } = response.user;
               sessionStorage.setItem('user', JSON.stringify(userWithoutId));
+
             })
           );
         }),
@@ -73,28 +74,26 @@ export class DashboardComponent implements OnInit {
       )
       .subscribe();
 
-    this.limitSubject
-      .asObservable()
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(
-          (prev, curr) =>
-            prev.limit === curr.limit && prev.offset === curr.offset
-        ),
-        switchMap((params) =>
-          this.gameService.getAllGames(params.limit, params.offset)
-        ),
-        tap((games) => {
-          this.allGames = [...this.allGames, ...games]; // acumular
-          this.currentOffset += games.length;
-          this.hasMoreGames = games.length === this.PAGE_SIZE;
-          this.applyFilters();
-        }),
-        catchError((err) => {
-          console.error('Error cargando juegos:', err);
-          return EMPTY;
-        })
-      )
+    this.limitSubject.asObservable().pipe(
+      debounceTime(300),
+      distinctUntilChanged(
+        (prev, curr) =>
+          prev.limit === curr.limit && prev.offset === curr.offset
+      ),
+      switchMap((params) =>
+        this.gameService.getAllGames(params.limit, params.offset)
+      ),
+      tap((games) => {
+        this.allGames = [...this.allGames, ...games]; // acumular
+        this.currentOffset += games.length;
+        this.hasMoreGames = games.length === this.PAGE_SIZE;
+        this.applyFilters();
+      }),
+      catchError((err) => {
+        console.error('Error cargando juegos:', err);
+        return EMPTY;
+      })
+    )
       .subscribe();
   }
 
