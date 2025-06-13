@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {environment} from '../../../../../environments/environment.development';
@@ -230,7 +230,7 @@ export class GameService {
    * Headers para las peticiones HTTP
    */
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('auth_token'); // O como guardes el token
+    const token = localStorage.getItem('auth_token'); 
     const headers: any = {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
@@ -266,4 +266,67 @@ export class GameService {
     console.error('GameService Error:', error);
     return throwError(() => new Error(errorMessage));
   };
+
+
+  createPuzzleGameWithFile(formData: FormData): Observable<GameInstance> {
+  const url = `${this.baseUrl}${this.gameEndpoint}`;
+  console.log('🌐 URL final para puzzle con archivo:', url);
+
+  const headers = this.getFormDataHeaders(); // Asegúrate que NO incluya Content-Type explícito
+
+  return this.http.post(url, formData, {
+    headers,
+    observe: 'response' // Ver toda la respuesta (incluye status, headers, body)
+  }).pipe(
+    map(response => {
+      console.log('📥 Respuesta completa del servidor:', response);
+
+      const body = (response as HttpResponse<GameInstance>).body;
+
+      if (!body) {
+        throw new Error('La respuesta del servidor está vacía.');
+      }
+
+      // Si el backend retorna directamente el objeto GameInstance
+      if ('Id' in body) {
+        return body;
+      }
+
+      // Si usa un formato como { success: true, data: GameInstance }
+      if ((body as any).success && (body as any).data) {
+        return (body as any).data as GameInstance;
+      }
+
+      // Si usa un formato como { status: 'success', data: GameInstance }
+      if ((body as any).status === 'success' && (body as any).data) {
+        return (body as any).data as GameInstance;
+      }
+
+      // Si llega hasta aquí, el formato no es válido
+      console.error('❌ Formato de respuesta desconocido:', body);
+      throw new Error('Formato de respuesta del servidor no reconocido');
+    }),
+    catchError(error => {
+      console.error('🚨 Error al enviar formulario con archivo:', error);
+      return throwError(() => new Error('Error al crear el juego desde createPuzzleGameWithFile'));
+    })
+  );
 }
+
+  /**
+   * Headers especiales para FormData
+   */
+  private getFormDataHeaders(): HttpHeaders {
+    const token = localStorage.getItem('auth_token');
+    const headers: any = {
+      'Accept': 'application/json'
+      // NO incluir Content-Type para FormData
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return new HttpHeaders(headers);
+  }
+  }

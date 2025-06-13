@@ -1,0 +1,95 @@
+/* Estilos para el puzzle preview */
+.puzzle-grid {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.puzzle-piece {
+  aspect-ratio: 1;
+  min-height: 40px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.puzzle-piece:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  position: relative;
+}
+
+/* Animaciones suaves */
+.puzzle-piece {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Efecto glassmorphism para los elementos de información */
+.bg-opacity-20 {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Responsividad para el grid del puzzle */
+@media (max-width: 768px) {
+  .puzzle-grid {
+    max-width: 300px;
+  }
+  
+  .puzzle-piece {
+    min-height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .puzzle-grid {
+    max-width: 250px;
+  }
+  
+  .puzzle-piece {
+    min-height: 25px;
+  }
+}
+
+/* Estilos para diferentes fondos */
+.preview-container {
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Mejorar la legibilidad del texto sobre fondos oscuros */
+.text-with-shadow {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Efecto hover para las piezas numeradas */
+.puzzle-piece .absolute {
+  transition: opacity 0.2s ease;
+}
+
+/* Animación de entrada para los elementos de información */
+.info-badge {
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
