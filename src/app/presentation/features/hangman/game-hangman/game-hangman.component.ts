@@ -65,6 +65,9 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   };
 
   alfabeto: string[] = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
+  mostrarModalTiempoAgotado = false;
+  mostrarModalJuegoFinalizado = false;
+  mostrarModalFallo = false;
 
   ngOnInit(): void {
     const gameId = this.route.snapshot.params['id'];
@@ -206,29 +209,37 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
 
     if (!ganado) {
       this.state.vidasRestantes--;
-      
       if (this.state.vidasRestantes <= 0) {
         this.state.juegoFinalizado = true;
+        this.mostrarModalJuegoFinalizado = true;
+      } else {
+        this.mostrarModalFallo = true;
       }
-    }
-
-    // Revelar toda la palabra al finalizar
-    for (let i = 0; i < this.state.palabraActual.length; i++) {
-      this.state.palabraRevelada[i] = this.state.palabraActual[i];
+      // No revelar la palabra si perdió
+    } else {
+      // Revelar toda la palabra solo si ganó
+      for (let i = 0; i < this.state.palabraActual.length; i++) {
+        this.state.palabraRevelada[i] = this.state.palabraActual[i];
+      }
     }
   }
 
   reiniciarJuego(): void {
+    this.mostrarModalTiempoAgotado = false;
+    this.mostrarModalJuegoFinalizado = false;
+    this.mostrarModalFallo = false;
     if (this.state.juegoFinalizado) {
       // Reiniciar completamente
       this.state.vidasRestantes = 3;
       this.state.juegoFinalizado = false;
     }
-
     this.iniciarJuego();
   }
 
   volverAlDashboard(): void {
+    this.mostrarModalTiempoAgotado = false;
+    this.mostrarModalJuegoFinalizado = false;
+    this.mostrarModalFallo = false;
     this.router.navigate(['/dashboard']);
   }
 
@@ -244,6 +255,7 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
         this.state.tiempoRestante--;
       } else {
         this.finalizarJuego(false);
+        this.mostrarModalTiempoAgotado = true;
       }
     }, 1000);
   }

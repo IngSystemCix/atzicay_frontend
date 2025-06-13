@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { catchError, EMPTY, switchMap, tap } from 'rxjs';
-import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
 import { UserService } from '../../../../core/infrastructure/api/user.service';
 import { GameInstanceService } from '../../../../core/infrastructure/api/GameInstance/game-instance.service';
 import { GameCounts } from '../../../../core/domain/interface/game-count-response';
@@ -34,7 +33,6 @@ export class JuegosCategoriasComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private hangmanService: HangmanService,
     private userService: UserService,
     private gameInstanceService: GameInstanceService
   ) { }

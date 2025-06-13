@@ -1,16 +1,12 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GameInstance } from '../../../../core/domain/model/gameInstance/game-instance';
-import { HangmanService } from '../../../../core/infrastructure/api/Hangman/hangman.service';
 import { GameInstanceService } from '../../../../core/infrastructure/api/GameInstance/game-instance.service';
 import { UserService } from '../../../../core/infrastructure/api/user.service';
-import { GameConfiguration } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
 import { catchError, switchMap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
-import { GameConfigurationComponent } from '../../game-configuration/game-configuration.component';
 import { RouterLink } from '@angular/router';
-import { ConfigGameComponent } from '../../../features/config-game/config-game.component';
+import { GameInstance } from '../../../../core/domain/interface/game-instance';
 type Dificultad = 'basico' | 'intermedio' | 'dificil';
 interface Juego {
   id: number;
@@ -67,7 +63,6 @@ export class JuegosListaComponent implements OnInit {
   selectedGameId: number | null = null;
 
   constructor(
-    private hangmanService: HangmanService,
     private gameInstanceService: GameInstanceService,
     private usuarioService: UserService
   ) { }
@@ -208,22 +203,7 @@ export class JuegosListaComponent implements OnInit {
 
 
   eliminarJuego(id: number) {
-    if (confirm('¿Estás seguro de que deseas eliminar este juego? Esta acción no se puede deshacer.')) {
-      console.log(`Eliminar juego ${id}`);
-      this.hangmanService.deleteHangman(id).subscribe({
-        next: () => {
-          this.juegos = this.juegos.filter((juego) => juego.id !== id);
-          console.log('Juego eliminado con éxito');
-          // Mostrar mensaje de éxito
-          this.mostrarMensaje('Juego eliminado correctamente', 'success');
-        },
-        error: (err) => {
-          console.error('Error al eliminar el juego', err);
-          this.mostrarMensaje('Error al eliminar el juego', 'error');
-        },
-      });
-    }
-    this.menuAbierto = null;
+  
   }
 
   editarJuego(id: number) {

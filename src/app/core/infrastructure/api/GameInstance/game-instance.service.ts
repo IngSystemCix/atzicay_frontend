@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import { GameInstance } from '../../../domain/model/gameInstance/game-instance';
 import { environment } from '../../../../../environments/environment.development';
 import { GameType } from '../../../domain/enum/game-type';
 import { GameCountResponse, GameCounts } from '../../../domain/interface/game-count-response';
+import { GameInstance } from '../../../domain/interface/game-instance';
 
 
 @Injectable({

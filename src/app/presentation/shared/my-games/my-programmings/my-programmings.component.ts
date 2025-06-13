@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProgrammingGameService } from '../../../../core/infrastructure/api/ProgrammingGame/programming-game.service';
-import { ProgrammingGame } from '../../../../core/domain/model/programmingGame/programming-game';
+import { ProgrammingGame } from '../../../../core/domain/interface/programming-game';
 
 interface ActivityCard {
   id: number;

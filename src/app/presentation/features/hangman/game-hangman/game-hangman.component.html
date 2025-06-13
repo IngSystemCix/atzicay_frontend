@@ -1,4 +1,4 @@
-<div class="flex flex-col items-center justify-center min-h-screen p-4" [ngStyle]="estilosJuego">
+<div class="flex flex-col items-center min-h-screen h-screen p-4 overflow-hidden" style="background-color: var(--color-atzicay-bg);">
   
   <!-- Loading State -->
   <div *ngIf="state.cargando" class="text-center">
@@ -23,22 +23,21 @@
   <div *ngIf="!state.cargando && !state.error" class="w-full max-w-6xl">
     
     <!-- Título y descripción del juego -->
-    <div class="text-center mb-6">
+    <div class="text-center mb-2">
       <h1 class="text-3xl font-bold mb-2" [style.color]="state.colorTexto">
         {{ tituloJuego }}
       </h1>
-      <p class="text-lg" [style.color]="state.colorTexto">
-        {{ descripcionJuego }}
-      </p>
     </div>
 
     <!-- Información del juego -->
     <div class="w-full p-4 mb-4 bg-white/10 rounded-lg backdrop-blur-sm">
-      <div class="flex justify-between items-center mb-2">
-        <div [style.color]="state.colorTexto">Intentos restantes: {{ state.intentosRestantes }}</div>
-        <div [style.color]="state.colorTexto">Tiempo: {{ formatearTiempo() }}</div>
+      <div class="flex items-center mb-2 gap-2">
+        <div class="text-left flex-shrink-0 w-1/5 min-w-[110px]" [style.color]="state.colorTexto">Vidas restantes: {{ state.vidasRestantes }}</div>
+        <div class="text-center flex-grow px-2">
+          <p class="text-lg font-medium break-words" [style.color]="state.colorTexto">{{ descripcionJuego }}</p>
+        </div>
+        <div class="text-right flex-shrink-0 w-1/5 min-w-[110px]" [style.color]="state.colorTexto">Tiempo: {{ formatearTiempo() }}</div>
       </div>
-      <div [style.color]="state.colorTexto">Vidas restantes: {{ state.vidasRestantes }}</div>
     </div>
 
     <!-- Área del juego -->
@@ -88,8 +87,8 @@
         <div class="flex justify-center mb-8 flex-wrap">
           <ng-container *ngFor="let letra of state.palabraActual.split(''); let i = index">
             <div class="mx-1 flex flex-col items-center mb-2">
-              <div class="text-2xl h-10 flex items-center justify-center min-w-[2rem]" 
-                   [style.color]="state.colorTexto">
+              <div class="text-2xl h-10 flex items-center justify-center min-w-[2rem]"
+                   [style.color]="state.palabraRevelada[i] !== '' ? 'var(--color-atzicay-purple-500)' : state.colorTexto">
                 <span *ngIf="state.palabraRevelada[i] !== ''">
                   {{ state.palabraRevelada[i] }}
                 </span>
@@ -122,54 +121,106 @@
       <p class="text-lg" [style.color]="state.colorTexto">{{ state.pistaPalabra }}</p>
     </div>
 
-    <!-- Mensaje de resultado -->
-    <div *ngIf="state.juegoTerminado"
-         class="mt-6 p-4 rounded-lg text-center w-full max-w-md mx-auto"
-         [ngClass]="state.juegoGanado ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
-      <p class="text-lg font-bold mb-2">
-        {{ state.juegoGanado ? state.mensajeExito : state.mensajeFallo }}
-      </p>
-      <p *ngIf="state.juegoGanado">¡Has adivinado la palabra!</p>
-    </div>
-
-    <!-- Botones de acción -->
-    <div *ngIf="state.juegoTerminado" class="text-center mt-6 space-y-4">
-      
-      <!-- Juego finalizado por vidas -->
-      <div *ngIf="state.juegoFinalizado" class="space-y-4">
-        <p class="text-red-600 text-lg font-bold">¡Juego terminado! Se acabaron tus vidas.</p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button (click)="reiniciarJuego()"
-                  class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
-            Reiniciar juego
-          </button>
-          <button (click)="volverAlDashboard()"
-                  class="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
-            Volver al menú
-          </button>
-        </div>
-      </div>
-
-      <!-- Juego en progreso -->
-      <div *ngIf="!state.juegoFinalizado" class="space-y-4">
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <button (click)="reiniciarJuego()"
-                  class="px-6 py-2 rounded-md transition-colors"
-                  [ngClass]="state.juegoGanado ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-yellow-500 hover:bg-yellow-600 text-white'">
-            {{ state.juegoGanado ? 'Jugar de nuevo' : 'Reintentar' }}
-          </button>
-          <button (click)="volverAlDashboard()"
-                  class="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
-            Volver al menú
-          </button>
-        </div>
-        
-        <p *ngIf="!state.juegoGanado && state.vidasRestantes > 0" 
-           class="text-yellow-600 font-medium">
-          Te quedan {{ state.vidasRestantes }} vidas
-        </p>
-      </div>
-    </div>
-
   </div>
+
+  <!-- Modal de tiempo agotado -->
+  <div *ngIf="mostrarModalTiempoAgotado" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn">
+      <div class="mb-6">
+        <svg class="mx-auto mb-4" width="64" height="64" fill="none" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="22" stroke="#A293FA" stroke-width="4" fill="#F4EEFD"/>
+          <path d="M24 14v10l6 6" stroke="#A293FA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="text-2xl font-bold mb-3 text-purple-600">¡Se acabó el tiempo!</h2>
+        <p class="text-gray-700 mb-6">No lograste adivinar la palabra a tiempo.<br>¿Quieres intentarlo de nuevo?</p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <button (click)="reiniciarJuego()" class="btn-atzicay w-full py-3 text-lg font-semibold">Reintentar</button>
+        <button (click)="volverAlDashboard()" class="w-full bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-semibold transition-colors">Volver al menú</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de juego finalizado por vidas -->
+  <div *ngIf="mostrarModalJuegoFinalizado" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn">
+      <div class="mb-6">
+        <svg class="mx-auto mb-4" width="64" height="64" fill="none" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="22" stroke="#FE6161" stroke-width="4" fill="#FFF0F0"/>
+          <path d="M16 32l16-16M32 32L16 16" stroke="#FE6161" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="text-2xl font-bold mb-3" style="color: #FE6161">¡Juego terminado!</h2>
+        <p class="text-gray-700 mb-6">Se acabaron tus vidas.<br>¿Quieres intentarlo de nuevo?</p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <button (click)="reiniciarJuego()" class="btn-atzicay w-full py-3 text-lg font-semibold">Reintentar</button>
+        <button (click)="volverAlDashboard()" class="w-full bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-semibold transition-colors">Volver al menú</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de éxito al adivinar la palabra -->
+  <div *ngIf="mostrarModalExito" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+    <!-- Fondo de confeti animado mejorado -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+      <!-- Confeti con texto emoji -->
+      <div class="absolute inset-0 text-6xl">
+        <div class="absolute animate-bounce" style="left: 10%; top: 5%; animation-delay: 0s; animation-duration: 1.5s;">🎉</div>
+        <div class="absolute animate-bounce" style="left: 20%; top: 15%; color: #A293FA; animation-delay: 0.2s; animation-duration: 1.8s;">🎊</div>
+        <div class="absolute animate-bounce" style="left: 80%; top: 10%; animation-delay: 0.4s; animation-duration: 1.6s;">🎉</div>
+        <div class="absolute animate-bounce" style="left: 70%; top: 20%; color: #A293FA; animation-delay: 0.6s; animation-duration: 2s;">🎊</div>
+        <div class="absolute animate-bounce" style="left: 15%; top: 80%; animation-delay: 0.8s; animation-duration: 1.7s;">🎉</div>
+        <div class="absolute animate-bounce" style="left: 85%; top: 75%; color: #A293FA; animation-delay: 1s; animation-duration: 1.9s;">🎊</div>
+        <div class="absolute animate-bounce" style="left: 30%; top: 85%; animation-delay: 1.2s; animation-duration: 1.4s;">🎉</div>
+        <div class="absolute animate-bounce" style="left: 60%; top: 90%; color: #A293FA; animation-delay: 1.4s; animation-duration: 1.6s;">🎊</div>
+        <div class="absolute animate-bounce" style="left: 5%; top: 40%; animation-delay: 1.6s; animation-duration: 2.1s;">🎉</div>
+        <div class="absolute animate-bounce" style="left: 90%; top: 45%; color: #A293FA; animation-delay: 1.8s; animation-duration: 1.3s;">🎊</div>
+        <div class="absolute animate-bounce" style="left: 45%; top: 5%; animation-delay: 2s; animation-duration: 1.8s;">🎉</div>
+        <div class="absolute animate-bounce" style="left: 25%; top: 50%; color: #A293FA; animation-delay: 2.2s; animation-duration: 1.5s;">🎊</div>
+      </div>
+
+      <!-- Confeti cayendo -->
+      <div class="absolute inset-0">
+        <div class="absolute text-2xl animate-pulse" style="left: 40%; top: 0%; animation: confeti-fall-1 3s infinite;">🎉</div>
+        <div class="absolute text-2xl animate-pulse" style="left: 60%; top: 0%; color: #A293FA; animation: confeti-fall-2 2.5s infinite;">🎊</div>
+        <div class="absolute text-2xl animate-pulse" style="left: 30%; top: 0%; animation: confeti-fall-3 2.8s infinite;">🎉</div>
+        <div class="absolute text-2xl animate-pulse" style="left: 70%; top: 0%; color: #A293FA; animation: confeti-fall-4 3.2s infinite;">🎊</div>
+        <div class="absolute text-2xl animate-pulse" style="left: 50%; top: 0%; animation: confeti-fall-5 2.7s infinite;">🎉</div>
+        <div class="absolute text-2xl animate-pulse" style="left: 20%; top: 0%; color: #A293FA; animation: confeti-fall-6 2.9s infinite;">🎊</div>
+      </div>
+    </div>
+
+    <!-- Modal centrado -->
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn relative z-10">
+      <div class="mb-6">
+        <!-- Emoji grande de celebración -->
+        <div class="text-6xl mb-4 animate-bounce">🎉</div>
+        <h2 class="text-2xl font-bold mb-3 text-green-600">¡{{ state.mensajeExito }}!</h2>
+        <p class="text-gray-700 mb-6">¡Has adivinado la palabra correctamente!</p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <button (click)="reiniciarJuego()" class="btn-atzicay w-full py-3 text-lg font-semibold">Jugar de nuevo</button>
+        <button (click)="volverAlDashboard()" class="w-full bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-semibold transition-colors">Volver al menú</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de fallo al no adivinar la palabra (pero aún quedan vidas) -->
+  <div *ngIf="mostrarModalFallo" class="fixed inset-0 z-50 flex items-start justify-center pt-12 backdrop-blur-sm animate-fadeIn overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn">
+      <div class="mb-4">
+        <svg class="mx-auto mb-2" width="48" height="48" fill="none" viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="22" stroke="#FE6161" stroke-width="4" fill="#FFF0F0"/>
+          <path d="M16 32l16-16M32 32L16 16" stroke="#FE6161" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="text-2xl font-bold mb-2" style="color: var(--color-atzicay-red-300)">¡{{ state.mensajeFallo }}!</h2>
+        <p class="text-gray-700 mb-4">No lograste adivinar la palabra.<br>Te quedan {{ state.vidasRestantes }} vidas.</p>
+      </div>
+      <div class="flex flex-col gap-3">
+        <button (click)="reiniciarJuego()" class="btn-atzicay w-full">Reintentar</button>
+        <button (click)="volverAlDashboard()" class="w-full bg-gray-500 hover:bg-gray-700 text-white px-6 py-2 rounded-md font-bold transition-colors">Volver al menú</button>
+      </div>
+    </div>
+  </div>
+
 </div>

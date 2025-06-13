@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
-import {ProgrammingGame} from '../../../domain/model/programmingGame/programming-game';
 import { environment } from '../../../../../environments/environment.development';
+import { ProgrammingGame } from '../../../domain/interface/programming-game';
 
 @Injectable({
   providedIn: 'root'
