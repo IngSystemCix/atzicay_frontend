@@ -14,6 +14,7 @@ import {
 } from './presentation/features/solveTheWord/layouts-solve-the-word/layouts-solve-the-word.component';
 import { GameConfigurationComponent } from './presentation/shared/game-configuration/game-configuration.component';
 import { ConfigGameComponent } from './presentation/features/config-game/config-game.component';
+import { GameSolveTheWordComponent } from './presentation/features/solveTheWord/game-solve-the-word/game-solve-the-word.component';
 
 export const routes: Routes = [
   {
@@ -83,6 +84,10 @@ export const routes: Routes = [
       {
         path: 'juegos/solve-The-Word/jugar',
         component: GamePuzzleComponent
+      },
+      {
+        path: 'juegos/jugar-solve-the-word/:id',
+        component: GameSolveTheWordComponent
       },
       {
         path: 'juegos/solve-The-Word/create',

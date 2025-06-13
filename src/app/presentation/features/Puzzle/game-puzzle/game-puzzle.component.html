@@ -25,13 +25,15 @@
   <!-- Área de juego principal -->
   <div class="flex flex-row gap-4 w-full max-w-6xl">
     <!-- Sidebar con piezas disponibles -->
-    <div *ngIf="gameStarted && !gameCompleted"
+    @if (gameStarted && !gameCompleted) {
+    <div
          class="w-64 bg-purple-100 rounded-lg p-3 border-2 border-purple-300 overflow-y-auto"
          style="min-height: 500px; max-height: 600px;">
       <h3 class="text-purple-700 font-bold mb-2 text-center">Piezas disponibles</h3>
       <div class="flex flex-wrap justify-center gap-2">
         @for (piece of pieces; track piece.id) {
-          <div *ngIf="isInSidebar(piece)"
+          @if (isInSidebar(piece)) {
+          <div
                [ngStyle]="getPieceStyle(piece)"
                class="sidebar-piece transition-all duration-300 hover:shadow-md m-1"
                [class.selected]="selectedPiece?.id === piece.id"
@@ -39,79 +41,81 @@
                (click)="onPieceClick(piece)"
                (dragstart)="onDragStart(piece, $event)">
           </div>
+          }
         }
       </div>
     </div>
+    }
 
     <!-- Contenedor principal del puzzle -->
     <div class="relative border-2 border-purple-300 rounded shadow-lg"
          [ngClass]="{'border-0': !gameStarted}"
          [style.width.px]="imageWidth"
          [style.height.px]="imageHeight">
-
-      <!-- Imagen completa antes de iniciar el juego -->
-      <!-- <div *ngIf="!gameStarted" class="absolute top-0 left-0 w-full h-full">
-        <img src="assets/sistema_solar.jpeg" [style.width.px]="imageWidth" [style.height.px]="imageHeight"
-             alt="Sistema Solar" class="object-cover">
-      </div> -->
-
-
       <!-- Juego activo -->
-      <div *ngIf="gameStarted"
+      @if (gameStarted) {
+      <div
            class="w-full h-full grid relative"
            [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
            [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'">
-
         <!-- Zonas para soltar piezas -->
-        @for (row of Array(rows).fill(0); track row; let rowIndex = $index) {
-          @for (col of Array(cols).fill(0); track col; let colIndex = $index) {
+        @for (row of Array(rows).fill(0); let rowIndex = $index; track $index) {
+          @for (col of Array(cols).fill(0); let colIndex = $index; track $index) {
             <div class="drop-zone bg-purple-100/30 border border-dashed border-gray-300"
                  [ngStyle]="getDropZoneStyle()"
                  (dragover)="onDragOver($event)"
                  (drop)="onDrop(rowIndex, colIndex, $event)">
-
               <!-- Piezas colocadas en el tablero - Ahora dentro de la zona de drop -->
-              <ng-container *ngIf="getPieceAt(rowIndex, colIndex) as piece">
+              @if (getPieceAt(rowIndex, colIndex)) {
                 <div
-                  [ngStyle]="getPieceStyle(piece)"
+                  [ngStyle]="getPieceStyle(getPieceAt(rowIndex, colIndex)!)"
                   class="piece-in-board transition-all duration-300 hover:shadow-md"
-                  [class.selected]="selectedPiece?.id === piece.id"
-                  [class.correct]="piece.correctPos"
+                  [class.selected]="selectedPiece?.id === getPieceAt(rowIndex, colIndex)!.id"
+                  [class.correct]="getPieceAt(rowIndex, colIndex)!.correctPos"
                   [draggable]="gameStarted && !gameCompleted"
-                  (click)="onPieceClick(piece)"
-                  (dragstart)="onDragStart(piece, $event)"
-                  (dblclick)="returnToSidebar(piece)">
+                  (click)="onPieceClick(getPieceAt(rowIndex, colIndex)!)"
+                  (dragstart)="onDragStart(getPieceAt(rowIndex, colIndex)!, $event)"
+                  (dblclick)="returnToSidebar(getPieceAt(rowIndex, colIndex)!)">
                 </div>
-              </ng-container>
-
+              }
             </div>
           }
         }
       </div>
+      }
     </div>
   </div>
 
   <div class="mt-4 flex space-x-4">
-    <button *ngIf="gameStarted && !gameCompleted"
+    @if (gameStarted && !gameCompleted) {
+    <button
             (click)="startGame()"
             class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
       Reiniciar
     </button>
-
-    <button *ngIf="gameStarted && !gameCompleted"
+    <button
             (click)="toggleHelp()"
             class="bg-purple-200 hover:bg-purple-300 text-purple-800 font-bold py-2 px-6 rounded-full shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
       {{ allowWrongPlacements ? 'Activar ayuda' : 'Desactivar ayuda' }}
     </button>
+    }
   </div>
 
-  <div class="mt-2 text-center" *ngIf="gameStarted && gameCompleted">
+  @if (gameStarted && gameCompleted) {
+  <div class="mt-2 text-center">
     <p class="text-lg text-green-600 font-bold">¡Felicidades! Has completado el rompecabezas en {{ formatTime(timeElapsed) }}</p>
   </div>
+  }
 
-  <div class="mt-4 text-sm text-gray-600" *ngIf="gameStarted && !gameCompleted">
+  @if (gameStarted && !gameCompleted) {
+  <div class="mt-4 text-sm text-gray-600">
     <p>Arrastra las piezas desde el panel izquierdo al tablero. Haz doble clic en una pieza para devolverla.</p>
-    <p *ngIf="!allowWrongPlacements">Modo ayuda: Las piezas solo se colocarán en su posición correcta.</p>
-    <p *ngIf="allowWrongPlacements">Modo libre: Las piezas pueden colocarse en cualquier posición.</p>
+    @if (!allowWrongPlacements) {
+    <p>Modo ayuda: Las piezas solo se colocarán en su posición correcta.</p>
+    }
+    @if (allowWrongPlacements) {
+    <p>Modo libre: Las piezas pueden colocarse en cualquier posición.</p>
+    }
   </div>
+  }
 </div>

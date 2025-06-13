@@ -14,8 +14,12 @@
       <p class="text-gray-500 mb-4">{{ user?.email || 'Correo no disponible' }}</p>
 
       <div class="text-sm text-gray-700 text-left space-y-2">
-        <p *ngIf="user?.birthdate"><strong>Fecha de nacimiento:</strong><br>{{ user?.birthdate }}</p>
-        <p *ngIf="user?.country"><strong>País:</strong><br>{{ user?.country }}</p>
+        @if (user?.birthdate) {
+        <p><strong>Fecha de nacimiento:</strong><br>{{ user?.birthdate }}</p>
+        }
+        @if (user?.country) {
+        <p><strong>País:</strong><br>{{ user?.country }}</p>
+        }
         <p><strong>Miembro desde:</strong><br>{{ user?.created_at || 'Fecha no disponible' }}</p>
       </div>
 
@@ -36,11 +40,11 @@
         </div>
       </div>
     </div>
+    @if (showModal) {
     <app-modal-edit-users
-      *ngIf="showModal"
       [userData]="user"
       (close)="cerrarModal()"
     ></app-modal-edit-users>
-
+    }
   </div>
 </div>

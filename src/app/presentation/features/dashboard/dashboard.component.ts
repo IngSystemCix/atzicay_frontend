@@ -27,15 +27,16 @@ export class DashboardComponent implements OnInit {
   ratingArray: number[] = [1, 2, 3, 4, 5];
 
   getGameRoute(gameType: string, id: number): string {
-    switch (gameType.toLowerCase()) {
+    const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
+    switch (normalizedType) {
       case 'hangman':
         return `/juegos/jugar-hangman/${id}`;
       case 'puzzle':
         return `/juegos/jugar-puzzle/${id}`;
       case 'memory':
         return `/juegos/jugar-memory/${id}`;
-      case 'solve-the-word':
-        return `/juegos/solve-the-word/${id}`;
+      case 'solvetheword':
+        return `/juegos/jugar-solve-the-word/${id}`;
       default:
         return '/juegos';
     }

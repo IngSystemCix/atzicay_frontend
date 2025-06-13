@@ -29,9 +29,12 @@ export interface GameSetting {
 }
 
 export interface GameData {
-  word: string;
-  clue: string;
-  presentation: string;
+  word?: string;
+  clue?: string;
+  presentation?: string;
+  rows?: number;
+  columns?: number | null;
+  words?: { word: string; orientation: string }[];
 }
 
 export interface ApiResponse<T> {
@@ -55,13 +58,21 @@ export class GameConfigurationService {
           console.warn('Se recibió data a pesar del 404:', error.error.data);
           // Devuelve los datos aunque haya un 404
           return of({
-            success: error.error.status === 'success',
+            success: error.error.status === 'success', // ✅ Esto está bien
             message: error.error.message || 'Datos recuperados aunque hubo 404',
             data: error.error.data
           });
         }
 
-        // Otros errores — lanzar excepción
+        // Para respuestas exitosas con status "success"
+        if (error.error?.status === 'success') {
+          return of({
+            success: true,
+            message: error.error.message || 'Configuración cargada',
+            data: error.error.data
+          });
+        }
+
         console.error('Error real:', error);
         return throwError(() => new Error('No se pudo cargar la configuración.'));
       })

@@ -74,7 +74,7 @@
             <div class="p-2 rounded-lg text-center bg-purple-100"
                  [class.bg-purple-300]="word.found"
                  [class.line-through]="word.found">
-              {{word.text}}
+              {{word.text}} <span class="text-xs text-purple-400">({{word.orientation}})</span>
             </div>
           }
         </div>

@@ -2,18 +2,17 @@
   <div class="">
     <!-- Mensajes de estado -->
     <div class="mb-4">
-      <div
-        *ngIf="errorMessage"
-        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4"
-      >
-        {{ errorMessage }}
-      </div>
-      <div
-        *ngIf="successMessage"
-        class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4"
-      >
-        {{ successMessage }}
-      </div>
+      <!-- Buenas prácticas: Usar @if para control de flujo moderno -->
+      @if (errorMessage) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+          {{ errorMessage }}
+        </div>
+      }
+      @if (successMessage) {
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
+          {{ successMessage }}
+        </div>
+      }
     </div>
 
     <div class="flex mb-6 p-4 justify-between items-center">
@@ -21,33 +20,21 @@
       <div class="flex">
         <button
           (click)="setActiveTab('contenido')"
-          [class]="
-            activeTab === 'contenido'
-              ? 'bg-purple-500 text-white'
-              : 'text-gray-500 bg-purple-200'
-          "
+          [class]="activeTab === 'contenido' ? 'bg-purple-500 text-white' : 'text-gray-500 bg-purple-200'"
           class="px-6 py-2 rounded-l-lg font-bold cursor-pointer transition-colors"
         >
           Contenido
         </button>
         <button
           (click)="setActiveTab('configuracion')"
-          [class]="
-            activeTab === 'configuracion'
-              ? 'bg-purple-500 text-white'
-              : 'text-gray-500  bg-purple-200'
-          "
+          [class]="activeTab === 'configuracion' ? 'bg-purple-500 text-white' : 'text-gray-500  bg-purple-200'"
           class="px-6 py-2 font-bold cursor-pointer transition-colors"
         >
           Configuración
         </button>
         <button
           (click)="setActiveTab('vista-previa')"
-          [class]="
-            activeTab === 'vista-previa'
-              ? 'bg-purple-500 text-white'
-              : 'text-gray-500 bg-purple-200'
-          "
+          [class]="activeTab === 'vista-previa' ? 'bg-purple-500 text-white' : 'text-gray-500 bg-purple-200'"
           class="px-6 py-2 rounded-r-lg font-bold cursor-pointer transition-colors"
         >
           Vista Previa
@@ -78,565 +65,323 @@
   <!-- Content Tabs -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
     <!-- Tab Contenido -->
-    <div
-      *ngIf="activeTab === 'contenido'"
-      class="bg-white rounded-xl shadow-lg p-6"
-    >
-      <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
-        Información del juego
-      </h2>
-      <p class="text-gray-600 mb-6">Configura los datos básicos del puzzle</p>
+    @if (activeTab === 'contenido') {
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
+          Información del juego
+        </h2>
+        <p class="text-gray-600 mb-6">Configura los datos básicos del puzzle</p>
 
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Título del Juego *</label
-          >
-          <input
-            type="text"
-            [(ngModel)]="tituloJuego"
-            placeholder="Ej: Rompecabezas de monumentos"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Descripción *</label
-          >
-          <textarea
-            [(ngModel)]="descripcion"
-            rows="4"
-            placeholder="Describe tu juego de puzzle..."
-            class="w-full px-4 py-2 pr-6 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-          ></textarea>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2"
-              >Filas (2-10) *</label
-            >
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Título del Juego *</label>
             <input
-              title="Número de filas"
+              type="text"
+              [(ngModel)]="tituloJuego"
+              placeholder="Ej: Rompecabezas de monumentos"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción *</label>
+            <textarea
+              [(ngModel)]="descripcion"
+              rows="4"
+              placeholder="Describe tu juego de puzzle..."
+              class="w-full px-4 py-2 pr-6 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Filas (2-10) *</label>
+              <input
+                title="Número de filas"
+                type="number"
+                [(ngModel)]="filas"
+                min="2"
+                max="10"
+                class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Columnas (2-10) *</label>
+              <input
+                title="Número de columnas"
+                type="number"
+                [(ngModel)]="columnas"
+                min="2"
+                max="10"
+                class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Dificultad</label>
+            <select
+              title="Dificultad del juego"
+              [(ngModel)]="dificultad"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            >
+              <option [value]="Difficulty.EASY">Fácil</option>
+              <option [value]="Difficulty.MEDIUM">Medio</option>
+              <option [value]="Difficulty.HARD">Difícil</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Tiempo límite (segundos)</label>
+            <input
+              title="Tiempo límite en segundos"
               type="number"
-              [(ngModel)]="filas"
-              min="2"
-              max="10"
+              [(ngModel)]="tiempo"
+              min="30"
+              max="3600"
               class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
             />
           </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2"
-              >Columnas (2-10) *</label
-            >
-            <input
-              title="Número de columnas"
-              type="number"
-              [(ngModel)]="columnas"
-              min="2"
-              max="10"
-              class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+
+          <div class="flex items-center space-x-3">
+            <label class="flex items-center cursor-pointer">
+              <input type="checkbox" [(ngModel)]="mostrarPista" class="sr-only" />
+              <div class="relative">
+                <div
+                  [class]="mostrarPista ? 'bg-purple-500' : 'bg-gray-300'"
+                  class="w-11 h-6 rounded-full transition-colors duration-200"
+                ></div>
+                <div
+                  [class]="mostrarPista ? 'translate-x-6' : 'translate-x-1'"
+                  class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
+                ></div>
+              </div>
+              <span class="ml-3 text-sm font-semibold text-gray-700">Mostrar pista</span>
+            </label>
+          </div>
+
+          <!-- Buenas prácticas: Usar @if para mostrar campos condicionales -->
+          @if (mostrarPista) {
+            <div>
+              <textarea
+                [(ngModel)]="pista"
+                placeholder="Escriba aquí su pista"
+                rows="2"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              ></textarea>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Imagen del Rompecabezas (Solo en contenido) -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-atzicay-purple-500 mb-2">Imagen del Rompecabezas</h2>
+        <p class="text-gray-600 mb-6">Sube la imagen que se convertirá en rompecabezas</p>
+
+        <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+          <div class="mx-auto w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <p class="text-gray-500 mb-4">Subir imagen no mayor a 1 Mb</p>
+          <input
+            title="Subir imagen del rompecabezas"
+            type="file"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            class="hidden"
+            #fileInput
+          />
+          <button
+            (click)="fileInput.click()"
+            class="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-atzicay-purple-700 transition-colors"
+          >
+            Seleccionar archivo
+          </button>
+        </div>
+
+        <!-- Buenas prácticas: Usar @if para mostrar imagen seleccionada -->
+        @if (selectedImage) {
+          <div class="mt-4">
+            <img
+              [src]="selectedImage"
+              alt="Imagen seleccionada"
+              class="max-h-40 mx-auto rounded-lg shadow-md"
             />
           </div>
-        </div>
+        }
 
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Dificultad</label
-          >
-          <select
-            title="Dificultad del juego"
-            [(ngModel)]="dificultad"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          >
-            <option [value]="Difficulty.EASY">Fácil</option>
-            <option [value]="Difficulty.MEDIUM">Medio</option>
-            <option [value]="Difficulty.HARD">Difícil</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-2"
-            >Tiempo límite (segundos)</label
-          >
-          <input
-            title="Tiempo límite en segundos"
-            type="number"
-            [(ngModel)]="tiempo"
-            min="30"
-            max="3600"
-            class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-          />
-        </div>
-
-        <div class="flex items-center space-x-3">
+        <div class="mt-6 flex items-center space-x-3">
           <label class="flex items-center cursor-pointer">
-            <input type="checkbox" [(ngModel)]="mostrarPista" class="sr-only" />
+            <input type="checkbox" [(ngModel)]="ayudaAutomatica" class="sr-only" />
             <div class="relative">
               <div
-                [class]="mostrarPista ? 'bg-purple-500' : 'bg-gray-300'"
+                [class]="ayudaAutomatica ? 'bg-purple-500' : 'bg-gray-300'"
                 class="w-11 h-6 rounded-full transition-colors duration-200"
               ></div>
               <div
-                [class]="mostrarPista ? 'translate-x-6' : 'translate-x-1'"
+                [class]="ayudaAutomatica ? 'translate-x-6' : 'translate-x-1'"
                 class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
               ></div>
             </div>
-            <span class="ml-3 text-sm font-semibold text-gray-700"
-              >Mostrar pista</span
-            >
+            <span class="ml-3 text-sm font-semibold text-gray-700">Ayuda Automática</span>
           </label>
         </div>
-
-        <div *ngIf="mostrarPista">
-          <textarea
-            [(ngModel)]="pista"
-            placeholder="Escriba aquí su pista"
-            rows="2"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-          ></textarea>
-        </div>
       </div>
-    </div>
-
-    <!-- Imagen del Rompecabezas (Solo en contenido) -->
-    <div
-      *ngIf="activeTab === 'contenido'"
-      class="bg-white rounded-xl shadow-lg p-6"
-    >
-      <h2 class="text-2xl font-bold text-atzicay-purple-500 mb-2">
-        Imagen del Rompecabezas
-      </h2>
-      <p class="text-gray-600 mb-6">
-        Sube la imagen que se convertirá en rompecabezas
-      </p>
-
-      <div
-        class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center"
-      >
-        <div
-          class="mx-auto w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-4"
-        >
-          <svg
-            class="w-8 h-8 text-purple-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            ></path>
-          </svg>
-        </div>
-        <p class="text-gray-500 mb-4">Subir imagen no mayor a 1 Mb</p>
-        <input
-          title="Subir imagen del rompecabezas"
-          type="file"
-          (change)="onFileSelected($event)"
-          accept="image/*"
-          class="hidden"
-          #fileInput
-        />
-        <button
-          (click)="fileInput.click()"
-          class="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-atzicay-purple-700 transition-colors"
-        >
-          Seleccionar archivo
-        </button>
-      </div>
-
-      <div *ngIf="selectedImage" class="mt-4">
-        <img
-          [src]="selectedImage"
-          alt="Imagen seleccionada"
-          class="max-h-40 mx-auto rounded-lg shadow-md"
-        />
-      </div>
-
-      <div class="mt-6 flex items-center space-x-3">
-        <label class="flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            [(ngModel)]="ayudaAutomatica"
-            class="sr-only"
-          />
-          <div class="relative">
-            <div
-              [class]="ayudaAutomatica ? 'bg-purple-500' : 'bg-gray-300'"
-              class="w-11 h-6 rounded-full transition-colors duration-200"
-            ></div>
-            <div
-              [class]="ayudaAutomatica ? 'translate-x-6' : 'translate-x-1'"
-              class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
-            ></div>
-          </div>
-          <span class="ml-3 text-sm font-semibold text-gray-700"
-            >Ayuda Automática</span
-          >
-        </label>
-      </div>
-    </div>
+    }
 
     <!-- CONFIGURACIÓN TAB -->
-    <div
-      *ngIf="activeTab === 'configuracion'"
-      class="bg-white rounded-xl shadow-lg p-6 lg:col-span-2"
-    >
-      <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
-        Configuración del juego
-      </h2>
-      <p class="text-gray-600 mb-6 font-semibold">
-        Personaliza las reglas y opciones del juego
-      </p>
+    @if (activeTab === 'configuracion') {
+      <div class="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
+        <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Configuración del juego</h2>
+        <p class="text-gray-600 mb-6 font-semibold">Personaliza las reglas y opciones del juego</p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Fuente -->
-        <div>
-          <label class="block text-gray-900 mb-2 font-semibold"
-            >Tipo de Letra</label
-          >
-          <select
-            title="Fuente del Juego"
-            [(ngModel)]="fuente"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option *ngFor="let font of fonts" [value]="font">
-              {{ font }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Color de Fuente y Fondo -->
-        <div class="flex items-center justify-around gap-6">
-          <div class="text-center">
-            <label class="block text-gray-900 mb-2 font-semibold"
-              >Color de Letra</label
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Fuente -->
+          <div>
+            <label class="block text-gray-900 mb-2 font-semibold">Tipo de Letra</label>
+            <select
+              title="Fuente del Juego"
+              [(ngModel)]="fuente"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-            <input
-              title="Color de Fuente"
-              type="color"
-              [(ngModel)]="colorFuente"
-              class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
-            />
+              <!-- Buenas prácticas: Usar @for para iterar fuentes -->
+              @for (font of fonts; track $index) {
+                <option [value]="font">{{ font }}</option>
+              }
+            </select>
           </div>
 
-          <div class="text-center">
-            <label class="block text-gray-900 mb-2 font-semibold"
-              >Color de Fondo</label
-            >
-            <input
-              title="Color de Fondo"
-              type="color"
-              [(ngModel)]="fondo"
-              class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
-            />
-          </div>
-        </div>
+          <!-- Color de Fuente y Fondo -->
+          <div class="flex items-center justify-around gap-6">
+            <div class="text-center">
+              <label class="block text-gray-900 mb-2 font-semibold">Color de Letra</label>
+              <input
+                title="Color de Fuente"
+                type="color"
+                [(ngModel)]="colorFuente"
+                class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
+              />
+            </div>
 
-        <!-- Mensaje de Éxito -->
-        <div>
-          <label class="block text-gray-900 mb-2 font-semibold"
-            >Mensaje de Éxito</label
-          >
-          <input
-            title="Mensaje de Éxito"
-            type="text"
-            [(ngModel)]="mensajeExito"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-
-        <!-- Mensaje de Fracaso -->
-        <div>
-          <label class="block text-gray-900 mb-2 font-semibold"
-            >Mensaje de Fracaso</label
-          >
-          <input
-            title="Mensaje de Fracaso"
-            type="text"
-            [(ngModel)]="mensajeFracaso"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          />
-        </div>
-      </div>
-
-      <!-- Juego Público -->
-      <div class="mt-6">
-        <label class="flex items-center cursor-not-allowed">
-          <input [(ngModel)]="juegoPublico" class="sr-only" />
-          <div class="relative">
-            <div
-              [class]="juegoPublico ? 'bg-purple-500' : 'bg-gray-300'"
-              class="w-11 h-6 rounded-full transition-colors duration-200"
-            ></div>
-            <div
-              [class]="juegoPublico ? 'translate-x-6' : 'translate-x-1'"
-              class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
-            ></div>
-          </div>
-          <span class="ml-3 text-sm font-semibold text-gray-700"
-            >Juego Público</span
-          >
-          <span class="ml-2 text-xs text-gray-500">
-            Otros usuarios podrán usar este juego
-          </span>
-        </label>
-      </div>
-
-    </div>
-  </div>
-  <!-- Tab Vista Previa -->
-  <div
-    *ngIf="activeTab === 'vista-previa'"
-    class="bg-white rounded-xl shadow-lg p-6 lg:col-span-2"
-  >
-    <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Vista Previa</h2>
-    <p class="text-gray-600 mb-6">Previsualiza cómo se verá tu juego</p>
-
-    <div 
-      class="rounded-lg p-8"
-      [style.background-color]="fondo"
-      [style.font-family]="fuente"
-      [style.color]="colorFuente"
-    >
-      <!-- Información del juego -->
-      <div class="text-center mb-6">
-        <h3 
-          class="text-2xl font-bold mb-2"
-          [style.color]="colorFuente"
-          [style.font-family]="fuente"
-        >
-          {{ tituloJuego || "Tu Rompecabezas" }}
-        </h3>
-        <p 
-          class="mb-4 opacity-80"
-          [style.color]="colorFuente"
-          [style.font-family]="fuente"
-        >
-          {{ descripcion || "Descripción del juego aparecerá aquí" }}
-        </p>
-      </div>
-
-      <!-- Simulador de puzzle -->
-      <div class="max-w-lg mx-auto mb-6">
-        <div
-          *ngIf="selectedImage; else noImagePlaceholder"
-          class="puzzle-grid gap-1 p-4 bg-white bg-opacity-20 rounded-lg shadow-inner backdrop-blur-sm"
-          [style.display]="'grid'"
-          [style.grid-template-columns]="'repeat(' + (columnas || 4) + ', 1fr)'"
-          [style.aspect-ratio]="'1'"
-        >
-          <div
-            *ngFor="let piece of getPuzzlePieces()"
-            class="puzzle-piece border-2 border-white border-opacity-30 rounded-sm relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:border-opacity-60"
-            [style.background-image]="'url(' + selectedImage + ')'"
-            [style.background-size]="(columnas || 4) * 100 + '% ' + (filas || 4) * 100 + '%'"
-            [style.background-position]="piece.bgPosition"
-            [style.background-repeat]="'no-repeat'"
-          >
-            <!-- Overlay sutil para simular profundidad -->
-            <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-black/10 pointer-events-none"></div>
-            
-            <!-- Número de pieza (opcional, para debug) -->
-            <div class="absolute top-1 left-1 text-xs bg-black bg-opacity-50 text-white px-1 rounded opacity-0 hover:opacity-100 transition-opacity">
-              {{ piece.id + 1 }}
+            <div class="text-center">
+              <label class="block text-gray-900 mb-2 font-semibold">Color de Fondo</label>
+              <input
+                title="Color de Fondo"
+                type="color"
+                [(ngModel)]="fondo"
+                class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
+              />
             </div>
           </div>
+
+          <!-- Mensaje de Éxito -->
+          <div>
+            <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Éxito</label>
+            <input
+              title="Mensaje de Éxito"
+              type="text"
+              [(ngModel)]="mensajeExito"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <!-- Mensaje de Fracaso -->
+          <div>
+            <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Fracaso</label>
+            <input
+              title="Mensaje de Fracaso"
+              type="text"
+              [(ngModel)]="mensajeFracaso"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
         </div>
 
-        <ng-template #noImagePlaceholder>
-          <div 
-            class="text-center py-16 bg-white bg-opacity-20 rounded-lg shadow-inner backdrop-blur-sm"
-            [style.color]="colorFuente"
-          >
-            <div class="text-6xl mb-4 opacity-50">🧩</div>
-            <p class="opacity-70">
-              Selecciona una imagen para ver el preview del puzzle
+        <!-- Juego Público -->
+        <div class="mt-6">
+          <label class="flex items-center cursor-not-allowed">
+            <input [(ngModel)]="juegoPublico" class="sr-only" />
+            <div class="relative">
+              <div
+                [class]="juegoPublico ? 'bg-purple-500' : 'bg-gray-300'"
+                class="w-11 h-6 rounded-full transition-colors duration-200"
+              ></div>
+              <div
+                [class]="juegoPublico ? 'translate-x-6' : 'translate-x-1'"
+                class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
+              ></div>
+            </div>
+            <span class="ml-3 text-sm font-semibold text-gray-700">Juego Público</span>
+            <span class="ml-2 text-xs text-gray-500">Otros usuarios podrán usar este juego</span>
+          </label>
+        </div>
+      </div>
+    }
+
+    <!-- Tab Vista Previa -->
+    @if (activeTab === 'vista-previa') {
+      <div class="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
+        <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Vista Previa</h2>
+        <p class="text-gray-600 mb-6">Previsualiza cómo se verá tu juego</p>
+
+        <div 
+          class="rounded-lg p-8"
+          [style.background-color]="fondo"
+          [style.font-family]="fuente"
+          [style.color]="colorFuente"
+        >
+          <!-- Información del juego -->
+          <div class="text-center mb-6">
+            <h3 
+              class="text-2xl font-bold mb-2"
+              [style.color]="colorFuente"
+              [style.font-family]="fuente"
+            >
+              {{ tituloJuego || "Tu Rompecabezas" }}
+            </h3>
+            <p 
+              class="mb-4 opacity-80"
+              [style.color]="colorFuente"
+              [style.font-family]="fuente"
+            >
+              {{ descripcion || "Descripción del juego aparecerá aquí" }}
             </p>
           </div>
-        </ng-template>
-      </div>
 
-      <!-- Información adicional con estilo personalizado -->
-      <div class="flex flex-wrap justify-center gap-3 mb-4">
-        <div
-          class="inline-block px-4 py-2 rounded-lg font-medium bg-white bg-opacity-20 backdrop-blur-sm"
-          [style.color]="colorFuente"
-          [style.border]="'1px solid ' + colorFuente + '40'"
-        >
-          {{ filas || 4 }} × {{ columnas || 4 }} piezas
-        </div>
-        <div
-          class="inline-block px-4 py-2 rounded-lg font-medium bg-white bg-opacity-20 backdrop-blur-sm"
-          [style.color]="colorFuente"
-          [style.border]="'1px solid ' + colorFuente + '40'"
-        >
-          ⏱️ {{ formatTime(tiempo || 180) }}
-        </div>
-        <div
-          class="inline-block px-4 py-2 rounded-lg font-medium bg-white bg-opacity-20 backdrop-blur-sm"
-          [style.color]="colorFuente"
-          [style.border]="'1px solid ' + colorFuente + '40'"
-        >
-          {{ getDifficultyIcon() }} {{ getDifficultyText() }}
-        </div>
-      </div>
-
-      <!-- Pista con estilo personalizado -->
-      <div
-        *ngIf="mostrarPista && pista"
-        class="bg-white bg-opacity-25 backdrop-blur-sm p-4 rounded-lg mb-4 border border-white border-opacity-30"
-        [style.color]="colorFuente"
-      >
-        <div class="flex items-start gap-2">
-          <span class="text-xl">💡</span>
-          <div>
-            <strong>Pista:</strong>
-            <p class="mt-1 opacity-90">{{ pista }}</p>
+          <!-- Simulador de puzzle -->
+          <div class="max-w-lg mx-auto mb-6">
+            @if (selectedImage) {
+              <div
+                class="puzzle-grid gap-1 p-4 bg-white bg-opacity-20 rounded-lg shadow-inner backdrop-blur-sm"
+                [style.display]="'grid'"
+                [style.grid-template-columns]="'repeat(' + (columnas || 4) + ', 1fr)'"
+                [style.aspect-ratio]="'1'"
+              >
+                <!-- Buenas prácticas: Usar @for para renderizar piezas del puzzle -->
+                @for (piece of getPuzzlePieces(); track $index) {
+                  <div
+                    class="puzzle-piece border-2 border-white border-opacity-30 rounded-sm relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:border-opacity-60"
+                    [style.background-image]="'url(' + selectedImage + ')'"
+                    [style.background-size]="(columnas || 4) * 100 + '% ' + (filas || 4) * 100 + '%'"
+                    [style.background-position]="piece.bgPosition"
+                    [style.background-repeat]="'no-repeat'"
+                  >
+                    <!-- Overlay sutil para simular profundidad -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-black/10 pointer-events-none"></div>
+                    <!-- Número de pieza (opcional, para debug) -->
+                    <div class="absolute top-1 left-1 text-xs bg-black bg-opacity-50 text-white px-1 rounded opacity-0 hover:opacity-100 transition-opacity">
+                      {{ piece.id + 1 }}
+                    </div>
+                  </div>
+                }
+              </div>
+            }
           </div>
         </div>
       </div>
-
-      <!-- Configuraciones adicionales -->
-      <div class="flex flex-wrap justify-center gap-4 text-sm opacity-75">
-        <div *ngIf="ayudaAutomatica" class="flex items-center gap-1">
-          <span class="text-green-400">✓</span>
-          <span>Ayuda automática</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <span>👁️</span>
-          <span>{{ juegoPublico ? "Público" : "Privado" }}</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <span>🎨</span>
-          <span>{{ fuente }}</span>
-        </div>
-      </div>
-
-      <!-- Mensajes de éxito y fracaso preview -->
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div 
-          class="bg-green-500 bg-opacity-20 backdrop-blur-sm p-3 rounded-lg border border-green-400 border-opacity-30"
-          [style.color]="colorFuente"
-        >
-          <div class="flex items-center gap-2">
-            <span class="text-green-400">🎉</span>
-            <span class="font-medium">Éxito:</span>
-          </div>
-          <p class="mt-1 text-sm opacity-90">{{ mensajeExito || "¡Excelente trabajo!" }}</p>
-        </div>
-        
-        <div 
-          class="bg-red-500 bg-opacity-20 backdrop-blur-sm p-3 rounded-lg border border-red-400 border-opacity-30"
-          [style.color]="colorFuente"
-        >
-          <div class="flex items-center gap-2">
-            <span class="text-red-400">❌</span>
-            <span class="font-medium">Fracaso:</span>
-          </div>
-          <p class="mt-1 text-sm opacity-90">{{ mensajeFracaso || "Inténtalo de nuevo" }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Buttons -->
-  <div class="flex justify-between mt-4">
-    <div class="flex space-x-4">
-      <button
-        (click)="mostrarDebugJson()"
-        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center"
-      >
-        <svg
-          class="w-4 h-4 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-          ></path>
-        </svg>
-        {{ mostrarJsonDebug ? "Ocultar JSON" : "Ver JSON" }}
-      </button>
-    </div>
-  </div>
-
-  <!-- Modal JSON Debug mejorado -->
-  <div
-    *ngIf="mostrarJsonDebug"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-  >
-    <div
-      class="bg-white rounded-lg max-w-4xl w-full max-h-[80vh] overflow-hidden"
-    >
-      <!-- Header del modal -->
-      <div
-        class="bg-gray-100 px-6 py-4 border-b flex justify-between items-center"
-      >
-        <h3 class="text-lg font-semibold text-gray-800">
-          JSON que se enviará al Backend
-        </h3>
-        <button
-          (click)="mostrarJsonDebug = false"
-          class="text-gray-500 hover:text-gray-700 text-2xl font-bold"
-        >
-          ×
-        </button>
-      </div>
-
-      <!-- Contenido del modal -->
-      <div class="p-6 overflow-auto max-h-[60vh]">
-        <div
-          class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm overflow-auto"
-        >
-          <pre>{{ jsonDebug | json }}</pre>
-        </div>
-
-        <!-- Información adicional -->
-        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
-          <h4 class="font-semibold text-blue-800 mb-2">
-            Información del envío:
-          </h4>
-          <ul class="text-sm text-blue-700 space-y-1">
-            <li>
-              <strong>Endpoint:</strong> POST
-              /api/atzicay/v1/game-instances/game
-            </li>
-            <li><strong>Content-Type:</strong> application/json</li>
-            <li>
-              <strong>Imagen URL:</strong> {{ imagenUrl || "No seleccionada" }}
-            </li>
-            <li>
-              <strong>Total de piezas:</strong>
-              {{ (filas || 4) * (columnas || 4) }}
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Footer del modal -->
-      <div class="bg-gray-100 px-6 py-3 border-t flex justify-end space-x-3">
-        <button
-          (click)="copiarJson()"
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-        >
-          Copiar JSON
-        </button>
-        <button
-          (click)="mostrarJsonDebug = false"
-          class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-        >
-          Cerrar
-        </button>
-      </div>
-    </div>
+    }
   </div>
 </div>

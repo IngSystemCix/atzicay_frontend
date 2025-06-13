@@ -1,13 +1,16 @@
 <div class="flex flex-col items-center min-h-screen h-screen p-4 overflow-hidden" style="background-color: var(--color-atzicay-bg);">
   
   <!-- Loading State -->
-  <div *ngIf="state.cargando" class="text-center">
+  @if (state.cargando) {
+  <div class="text-center">
     <div class="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"></div>
     <p class="text-lg">Cargando juego...</p>
   </div>
+  }
 
   <!-- Error State -->
-  <div *ngIf="state.error && !state.cargando" class="text-center">
+  @if (state.error && !state.cargando) {
+  <div class="text-center">
     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
       <p class="font-bold">Error</p>
       <p>{{ state.error }}</p>
@@ -18,10 +21,11 @@
       Volver al Dashboard
     </button>
   </div>
+  }
 
   <!-- Game Content -->
-  <div *ngIf="!state.cargando && !state.error" class="w-full max-w-6xl">
-    
+  @if (!state.cargando && !state.error) {
+  <div class="w-full max-w-6xl">
     <!-- Título y descripción del juego -->
     <div class="text-center mb-2">
       <h1 class="text-3xl font-bold mb-2" [style.color]="state.colorTexto">
@@ -42,36 +46,28 @@
 
     <!-- Área del juego -->
     <div class="flex flex-col lg:flex-row justify-between items-center gap-8">
-      
       <!-- Dibujo del ahorcado -->
       <div class="w-full lg:w-1/3 flex justify-center">
         <svg width="200" height="250" viewBox="0 0 200 250" [style.color]="state.colorTexto">
           <!-- Base -->
           <line x1="20" y1="230" x2="180" y2="230" stroke="currentColor" stroke-width="4"/>
-          
           <!-- Poste vertical -->
           <line x1="60" y1="230" x2="60" y2="30" stroke="currentColor" stroke-width="4"/>
-          
           <!-- Poste horizontal -->
           <line x1="60" y1="30" x2="140" y2="30" stroke="currentColor" stroke-width="4"/>
-          
           <!-- Cuerda -->
           <line x1="140" y1="30" x2="140" y2="60" stroke="currentColor" stroke-width="4"/>
-          
           <!-- Cabeza -->
           <circle cx="140" cy="80" r="20" stroke="currentColor" stroke-width="4" fill="none"
                   [attr.visibility]="state.intentosRestantes < 6 ? 'visible' : 'hidden'"/>
-          
           <!-- Cuerpo -->
           <line x1="140" y1="100" x2="140" y2="150" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 5 ? 'visible' : 'hidden'"/>
-          
           <!-- Brazos -->
           <line x1="140" y1="120" x2="120" y2="100" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 4 ? 'visible' : 'hidden'"/>
           <line x1="140" y1="120" x2="160" y2="100" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 3 ? 'visible' : 'hidden'"/>
-          
           <!-- Piernas -->
           <line x1="140" y1="150" x2="120" y2="180" stroke="currentColor" stroke-width="4"
                 [attr.visibility]="state.intentosRestantes < 2 ? 'visible' : 'hidden'"/>
@@ -82,25 +78,24 @@
 
       <!-- Palabra y teclado -->
       <div class="w-full lg:w-2/3 flex flex-col items-center">
-        
         <!-- Palabra a adivinar -->
         <div class="flex justify-center mb-8 flex-wrap">
-          <ng-container *ngFor="let letra of state.palabraActual.split(''); let i = index">
+          @for (letra of state.palabraActual.split(''); let i = $index; track $index) {
             <div class="mx-1 flex flex-col items-center mb-2">
               <div class="text-2xl h-10 flex items-center justify-center min-w-[2rem]"
-                   [style.color]="state.palabraRevelada[i] !== '' ? 'var(--color-atzicay-purple-500)' : state.colorTexto">
-                <span *ngIf="state.palabraRevelada[i] !== ''">
-                  {{ state.palabraRevelada[i] }}
-                </span>
+                   [style.color]="state.palabraRevelada[$index] !== '' ? 'var(--color-atzicay-purple-500)' : state.colorTexto">
+                @if (state.palabraRevelada[$index] !== '') {
+                  {{ state.palabraRevelada[$index] }}
+                }
               </div>
               <div class="w-8 h-1" [style.background-color]="state.colorTexto"></div>
             </div>
-          </ng-container>
+          }
         </div>
-
         <!-- Teclado -->
         <div class="grid grid-cols-6 sm:grid-cols-7 gap-2 mx-auto max-w-lg">
-          <button *ngFor="let letra of alfabeto"
+          @for (letra of alfabeto; track letra) {
+          <button
                   class="w-10 h-10 rounded-md flex items-center justify-center text-sm font-medium transition-colors"
                   [ngClass]="{
                     'bg-purple-200 text-purple-600 hover:bg-purple-300': !estaLetraSeleccionada(letra),
@@ -111,20 +106,21 @@
                   (click)="seleccionarLetra(letra)">
             {{ letra }}
           </button>
+          }
         </div>
       </div>
     </div>
-
     <!-- Pista -->
     <div class="mt-6 text-center p-4 bg-white/10 rounded-lg backdrop-blur-sm">
       <p class="font-medium mb-2" [style.color]="state.colorTexto">Pista:</p>
       <p class="text-lg" [style.color]="state.colorTexto">{{ state.pistaPalabra }}</p>
     </div>
-
   </div>
+  }
 
   <!-- Modal de tiempo agotado -->
-  <div *ngIf="mostrarModalTiempoAgotado" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+  @if (mostrarModalTiempoAgotado) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn">
       <div class="mb-6">
         <svg class="mx-auto mb-4" width="64" height="64" fill="none" viewBox="0 0 48 48">
@@ -140,9 +136,11 @@
       </div>
     </div>
   </div>
+  }
 
   <!-- Modal de juego finalizado por vidas -->
-  <div *ngIf="mostrarModalJuegoFinalizado" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+  @if (mostrarModalJuegoFinalizado) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn">
       <div class="mb-6">
         <svg class="mx-auto mb-4" width="64" height="64" fill="none" viewBox="0 0 48 48">
@@ -158,9 +156,11 @@
       </div>
     </div>
   </div>
+  }
 
   <!-- Modal de éxito al adivinar la palabra -->
-  <div *ngIf="mostrarModalExito" class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
+  @if (mostrarModalExito) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn">
     <!-- Fondo de confeti animado mejorado -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden">
       <!-- Confeti con texto emoji -->
@@ -204,9 +204,11 @@
       </div>
     </div>
   </div>
+  }
 
   <!-- Modal de fallo al no adivinar la palabra (pero aún quedan vidas) -->
-  <div *ngIf="mostrarModalFallo" class="fixed inset-0 z-50 flex items-start justify-center pt-12 backdrop-blur-sm animate-fadeIn overflow-hidden">
+  @if (mostrarModalFallo) {
+  <div class="fixed inset-0 z-50 flex items-start justify-center pt-12 backdrop-blur-sm animate-fadeIn overflow-hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn">
       <div class="mb-4">
         <svg class="mx-auto mb-2" width="48" height="48" fill="none" viewBox="0 0 48 48">
@@ -222,5 +224,5 @@
       </div>
     </div>
   </div>
-
+  }
 </div>

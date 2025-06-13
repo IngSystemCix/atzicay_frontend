@@ -23,9 +23,11 @@
     </div>
   </div>
 
-  <div *ngIf="menuOpen" class="absolute right-6 top-16 bg-white shadow-md rounded-md py-2 w-40 z-10">
+  @if (menuOpen) {
+  <div class="absolute right-6 top-16 bg-white shadow-md rounded-md py-2 w-40 z-10">
     <button (click)="switchAccount()" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
       Cambiar de cuenta
     </button>
   </div>
+  }
 </header>

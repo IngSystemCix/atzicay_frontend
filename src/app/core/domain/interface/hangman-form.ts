@@ -11,7 +11,6 @@ export interface HangmanFormData {
     clue: string;
   }>;
 
-  // Configuraciones opcionales
   timeLimit?: number;
   theme?: string;
   font?: string;

@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { GameConfigurationService, GameConfiguration } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
 
 interface WordCell {
   letter: string;
@@ -11,6 +13,7 @@ interface Word {
   text: string;
   found: boolean;
   positions?: { row: number; col: number }[];
+  orientation?: string;
 }
 
 @Component({
@@ -21,21 +24,16 @@ interface Word {
   styleUrl: './game-solve-the-word.component.css'
 })
 export class GameSolveTheWordComponent implements OnInit {
-  grid: WordCell[][] = [];
-  words: Word[] = [
-    { text: 'ELEFANTE', found: false },
-    { text: 'JIRAFA', found: false },
-    { text: 'TIGRE', found: false },
-    { text: 'LEON', found: false },
-    { text: 'CEBRA', found: false },
-    { text: 'MONO', found: false },
-    { text: 'HIPOPOTAMO', found: false }
-  ];
+  private route = inject(ActivatedRoute);
+  private gameConfigService = inject(GameConfigurationService);
 
-  gridSize = 12;
+  grid: WordCell[][] = [];
+  words: Word[] = [];
+  gridRows = 12;
+  gridCols = 12;
   wordsFound = 0;
-  totalWords = this.words.length;
-  timeLeft = 347; // 5:47 en segundos
+  totalWords = 0;
+  timeLeft = 347; // default
   timer: any;
   selection: WordCell[] = [];
   directions = [
@@ -48,21 +46,72 @@ export class GameSolveTheWordComponent implements OnInit {
     { row: 0, col: -1 },  // izquierda
     { row: -1, col: -1 }  // arriba-izquierda
   ];
+  isSelecting = false;
+  loading = true;
+  error = '';
+  title = '';
+  description = '';
 
   ngOnInit() {
-    this.initializeGrid();
-    this.placeWordsOnGrid();
-    this.fillRemainingCells();
-    this.startTimer();
+    const id = Number(this.route.snapshot.params['id']);
+    if (id) {
+      this.loading = true;
+      this.gameConfigService.getGameConfiguration(id).subscribe({
+        next: (response) => {
+          console.log('Respuesta completa:', response); // Para debug
+          
+          if ((response.success || response.data) && response.data) {
+            this.title = response.data.title;
+            this.description = response.data.description;
+            
+            const timeSetting = response.data.settings?.find((s: any) => 
+              s.key.toLowerCase() === 'time_limit'
+            );
+            this.timeLeft = timeSetting ? parseInt(timeSetting.value, 10) : 347;
+            
+            const rows = response.data.game_data?.rows || 12;
+            const cols = response.data.game_data?.columns || rows || 12;
+            this.gridRows = rows;
+            this.gridCols = cols;
+            
+            const wordsArr = response.data.game_data?.words || [];
+            this.words = wordsArr.map((w: any) => ({ 
+              text: w.word.toUpperCase(), 
+              found: false, 
+              orientation: w.orientation 
+            }));
+            this.totalWords = this.words.length;
+            this.wordsFound = 0;
+            
+            this.initializeGrid();
+            this.placeWordsOnGrid();
+            this.fillRemainingCells();
+            this.startTimer();
+            this.loading = false;
+          } else {
+            this.error = response.message || 'No se pudo cargar la configuración del juego';
+            this.loading = false;
+          }
+        },
+        error: (err) => {
+          console.error('Error en suscripción:', err);
+          this.error = 'Error al cargar la configuración del juego';
+          this.loading = false;
+        }
+      });
+    } else {
+      this.error = 'No se proporcionó un ID de juego válido';
+      this.loading = false;
+    }
   }
 
-  isSelecting = false;
+  originalTimeLimit = 347;
 
   initializeGrid() {
     this.grid = [];
-    for (let i = 0; i < this.gridSize; i++) {
+    for (let i = 0; i < this.gridRows; i++) {
       const row: WordCell[] = [];
-      for (let j = 0; j < this.gridSize; j++) {
+      for (let j = 0; j < this.gridCols; j++) {
         row.push({
           letter: '',
           isFound: false,
@@ -74,24 +123,40 @@ export class GameSolveTheWordComponent implements OnInit {
   }
 
   placeWordsOnGrid() {
+    console.log('Colocando palabras:', this.words); // Debug
+    
     for (const word of this.words) {
       let placed = false;
       let attempts = 0;
 
+      // ✅ MAPEAR ORIENTACIONES DEL JSON A DIRECCIONES CORRECTAS
+      const orientationMap: { [key: string]: { row: number; col: number } } = {
+        'HL': { row: 0, col: 1 },   // Horizontal Left to Right (normal)
+        'HR': { row: 0, col: 1 },   // Horizontal Right (igual que HL)
+        'VU': { row: 1, col: 0 },   // Vertical Up to Down (normal)
+        'VD': { row: 1, col: 0 },   // Vertical Down (igual que VU)
+        'DU': { row: 1, col: 1 },   // Diagonal Down-Right
+        'DD': { row: 1, col: 1 }    // Diagonal Down (igual que DU)
+      };
+
+      const direction = orientationMap[word.orientation || 'HL'] || { row: 0, col: 1 };
+
       while (!placed && attempts < 100) {
         attempts++;
 
-        // Seleccionar una posición y dirección aleatoria
-        const startRow = Math.floor(Math.random() * this.gridSize);
-        const startCol = Math.floor(Math.random() * this.gridSize);
-        const directionIndex = Math.floor(Math.random() * this.directions.length);
-        const direction = this.directions[directionIndex];
+        // ✅ CALCULAR POSICIÓN INICIAL CONSIDERANDO EL TAMAÑO DE LA PALABRA
+        const maxStartRow = direction.row === 0 ? this.gridRows - 1 : 
+                          this.gridRows - word.text.length;
+        const maxStartCol = direction.col === 0 ? this.gridCols - 1 : 
+                          this.gridCols - word.text.length;
 
-        // Comprobar si la palabra cabe en esa dirección
+        const startRow = Math.floor(Math.random() * (maxStartRow + 1));
+        const startCol = Math.floor(Math.random() * (maxStartCol + 1));
+
         if (this.canPlaceWord(word.text, startRow, startCol, direction)) {
           const positions = [];
 
-          // Colocar la palabra
+          // ✅ COLOCAR CADA LETRA DE LA PALABRA
           for (let i = 0; i < word.text.length; i++) {
             const row = startRow + i * direction.row;
             const col = startCol + i * direction.col;
@@ -101,42 +166,49 @@ export class GameSolveTheWordComponent implements OnInit {
 
           word.positions = positions;
           placed = true;
+          console.log(`Palabra "${word.text}" colocada en:`, positions); // Debug
         }
       }
 
-      // Si no se pudo colocar después de 100 intentos, colocarla en posiciones disponibles
       if (!placed) {
+        console.log(`No se pudo colocar "${word.text}", usando fallback`); // Debug
         this.placeFallbackWord(word);
       }
     }
   }
 
-  canPlaceWord(word: string, startRow: number, startCol: number, direction: { row: number; col: number }) {
+  canPlaceWord(word: string, startRow: number, startCol: number, direction: { row: number; col: number }): boolean {
     for (let i = 0; i < word.length; i++) {
       const row = startRow + i * direction.row;
       const col = startCol + i * direction.col;
 
-      // Verificar que la posición esté dentro de los límites de la cuadrícula
-      if (row < 0 || row >= this.gridSize || col < 0 || col >= this.gridSize) {
+      // ✅ VERIFICAR LÍMITES DE LA GRILLA
+      if (row < 0 || row >= this.gridRows || col < 0 || col >= this.gridCols) {
         return false;
       }
 
-      // Verificar que la celda esté vacía o tenga la misma letra
-      if (this.grid[row][col].letter !== '' && this.grid[row][col].letter !== word[i]) {
+      // ✅ VERIFICAR QUE LA CELDA ESTÉ VACÍA O TENGA LA MISMA LETRA
+      const currentLetter = this.grid[row][col].letter;
+      if (currentLetter !== '' && currentLetter !== word[i]) {
         return false;
       }
     }
     return true;
   }
 
-  placeFallbackWord(word: Word) {
-    // Esta es una solución de respaldo por si no se puede colocar la palabra
-    // Simplemente la colocamos horizontalmente donde encontremos espacio
-    for (let row = 0; row < this.gridSize; row++) {
-      for (let col = 0; col <= this.gridSize - word.text.length; col++) {
+
+ placeFallbackWord(word: Word) {
+    console.log(`Colocando palabra fallback: ${word.text}`);
+    
+    // ✅ BUSCAR PRIMERA POSICIÓN HORIZONTAL DISPONIBLE
+    for (let row = 0; row < this.gridRows; row++) {
+      for (let col = 0; col <= this.gridCols - word.text.length; col++) {
         let canPlace = true;
+        
+        // Verificar si se puede colocar horizontalmente
         for (let i = 0; i < word.text.length; i++) {
-          if (this.grid[row][col + i].letter !== '' && this.grid[row][col + i].letter !== word.text[i]) {
+          const currentLetter = this.grid[row][col + i].letter;
+          if (currentLetter !== '' && currentLetter !== word.text[i]) {
             canPlace = false;
             break;
           }
@@ -149,6 +221,33 @@ export class GameSolveTheWordComponent implements OnInit {
             positions.push({ row, col: col + i });
           }
           word.positions = positions;
+          console.log(`Palabra fallback "${word.text}" colocada en:`, positions);
+          return;
+        }
+      }
+    }
+    
+    // ✅ SI NO SE PUEDE COLOCAR HORIZONTALMENTE, INTENTAR VERTICALMENTE
+    for (let col = 0; col < this.gridCols; col++) {
+      for (let row = 0; row <= this.gridRows - word.text.length; row++) {
+        let canPlace = true;
+        
+        for (let i = 0; i < word.text.length; i++) {
+          const currentLetter = this.grid[row + i][col].letter;
+          if (currentLetter !== '' && currentLetter !== word.text[i]) {
+            canPlace = false;
+            break;
+          }
+        }
+
+        if (canPlace) {
+          const positions = [];
+          for (let i = 0; i < word.text.length; i++) {
+            this.grid[row + i][col].letter = word.text[i];
+            positions.push({ row: row + i, col });
+          }
+          word.positions = positions;
+          console.log(`Palabra fallback vertical "${word.text}" colocada en:`, positions);
           return;
         }
       }
@@ -157,8 +256,8 @@ export class GameSolveTheWordComponent implements OnInit {
 
   fillRemainingCells() {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    for (let i = 0; i < this.gridSize; i++) {
-      for (let j = 0; j < this.gridSize; j++) {
+    for (let i = 0; i < this.gridRows; i++) {
+      for (let j = 0; j < this.gridCols; j++) {
         if (this.grid[i][j].letter === '') {
           const randomIndex = Math.floor(Math.random() * letters.length);
           this.grid[i][j].letter = letters[randomIndex];
@@ -168,6 +267,10 @@ export class GameSolveTheWordComponent implements OnInit {
   }
 
   startTimer() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+    
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
@@ -328,21 +431,23 @@ export class GameSolveTheWordComponent implements OnInit {
 
 
   resetGame() {
-    // Reiniciar todas las variables del juego
     this.wordsFound = 0;
-    this.timeLeft = 347;
+    
+    // ✅ RESTAURAR EL TIEMPO ORIGINAL CONFIGURADO
+    const timeSetting = this.gameConfigService.getGameConfiguration(
+      Number(this.route.snapshot.params['id'])
+    );
+    // Alternativamente, guardar el tiempo original en una variable
+    
     this.selection = [];
     this.isSelecting = false;
 
-    // Reiniciar el estado de las palabras
     this.words.forEach(word => word.found = false);
 
-    // Reiniciar el tablero
     this.initializeGrid();
     this.placeWordsOnGrid();
     this.fillRemainingCells();
 
-    // Reiniciar el temporizador
     if (this.timer) {
       clearInterval(this.timer);
     }

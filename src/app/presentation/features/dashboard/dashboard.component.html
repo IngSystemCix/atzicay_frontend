@@ -82,8 +82,8 @@
           >
             Tipo de Juego
           </div>
+          @for (type of gameTypes; track type.value) {
           <div
-            *ngFor="let type of gameTypes"
             class="flex items-center px-4 py-1 text-sm text-atzicay-dropdown-text hover:bg-gray-50"
           >
             <input
@@ -93,18 +93,17 @@
               (change)="toggleTypeFilter(type.value)"
               class="mr-2 rounded text-atzicay-purple-500 focus:ring-atzicay-purple-500"
             />
-            <label [for]="'filterType_' + type.value" class="cursor-pointer">{{
-              type.label
-            }}</label>
+            <label [for]="'filterType_' + type.value" class="cursor-pointer">{{ type.label }}</label>
           </div>
+          }
 
           <div
             class="px-4 py-2 text-sm text-atzicay-dropdown-text font-medium border-t border-gray-100 mt-1"
           >
             Nivel de Dificultad
           </div>
+          @for (level of difficultyLevels; track level.value) {
           <div
-            *ngFor="let level of difficultyLevels"
             class="flex items-center px-4 py-1 text-sm text-atzicay-dropdown-text hover:bg-gray-50"
           >
             <input
@@ -114,12 +113,9 @@
               (change)="toggleLevelFilter(level.value)"
               class="mr-2 rounded text-atzicay-purple-500 focus:ring-atzicay-purple-500"
             />
-            <label
-              [for]="'filterLevel_' + level.value"
-              class="cursor-pointer"
-              >{{ level.label }}</label
-            >
+            <label [for]="'filterLevel_' + level.value" class="cursor-pointer">{{ level.label }}</label>
           </div>
+          }
 
           <!-- Limpiar filtros -->
           <div class="border-t border-gray-100 mt-1 pt-1 px-4">
@@ -135,14 +131,10 @@
     </div>
 
     <!-- Filtros activos -->
-    <div
-      *ngIf="selectedTypes.length > 0 || selectedLevels.length > 0"
-      class="mt-4 flex flex-wrap gap-2"
-    >
-      <div
-        *ngFor="let type of selectedTypes"
-        class="bg-atzicay-purple-100 text-atzicay-purple-800 text-xs px-3 py-1 rounded-full flex items-center"
-      >
+    @if (selectedTypes.length > 0 || selectedLevels.length > 0) {
+    <div class="mt-4 flex flex-wrap gap-2">
+      @for (type of selectedTypes; track type) {
+      <div class="bg-atzicay-purple-100 text-atzicay-purple-800 text-xs px-3 py-1 rounded-full flex items-center">
         {{ getTypeLabel(type) }}
         <button
           title="boton de filtro"
@@ -163,11 +155,9 @@
           </svg>
         </button>
       </div>
-
-      <div
-        *ngFor="let level of selectedLevels"
-        class="bg-atzicay-blue-100 text-atzicay-blue-800 text-xs px-3 py-1 rounded-full flex items-center"
-      >
+      }
+      @for (level of selectedLevels; track level) {
+      <div class="bg-atzicay-blue-100 text-atzicay-blue-800 text-xs px-3 py-1 rounded-full flex items-center">
         {{ getLevelLabel(level) }}
         <button
           title="boton de filtro"
@@ -188,7 +178,9 @@
           </svg>
         </button>
       </div>
+      }
     </div>
+    }
   </div>
 </div>
 

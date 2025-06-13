@@ -141,8 +141,8 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
 
     // Aplicar palabra y pista desde game_data
     if (config.game_data) {
-      this.state.palabraActual = config.game_data.word.toUpperCase();
-      this.state.pistaPalabra = config.game_data.clue;
+      this.state.palabraActual = (config.game_data.word ?? '').toUpperCase();
+      this.state.pistaPalabra = config.game_data.clue ?? '';
     }
   }
 
