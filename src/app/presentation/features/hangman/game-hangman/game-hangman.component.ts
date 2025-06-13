@@ -68,6 +68,7 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   mostrarModalTiempoAgotado = false;
   mostrarModalJuegoFinalizado = false;
   mostrarModalFallo = false;
+  mostrarModalExito = false;
 
   ngOnInit(): void {
     const gameId = this.route.snapshot.params['id'];
@@ -221,6 +222,7 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       for (let i = 0; i < this.state.palabraActual.length; i++) {
         this.state.palabraRevelada[i] = this.state.palabraActual[i];
       }
+      this.mostrarModalExito = true;
     }
   }
 
@@ -228,6 +230,7 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     this.mostrarModalTiempoAgotado = false;
     this.mostrarModalJuegoFinalizado = false;
     this.mostrarModalFallo = false;
+    this.mostrarModalExito = false;
     if (this.state.juegoFinalizado) {
       // Reiniciar completamente
       this.state.vidasRestantes = 3;
