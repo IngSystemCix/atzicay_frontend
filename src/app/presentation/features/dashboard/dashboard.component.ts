@@ -3,7 +3,7 @@ import { Component, OnInit, inject, ElementRef, ViewChild, HostListener } from '
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { BehaviorSubject, EMPTY, catchError, debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap } from 'rxjs';
 import { Game } from '../../../core/domain/model/game.model';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { GameService } from '../../../core/infrastructure/api/game.service';
@@ -48,29 +48,30 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.auth0.isAuthenticated$
       .pipe(
-        filter((isAuth) => isAuth),
+        filter(isAuth => isAuth),
         switchMap(() => this.auth0.idTokenClaims$),
-        switchMap((claims) => {
-          const idToken = claims?.__raw;
-          if (!idToken) {
-            console.error('No se obtuvo id_token');
-            return EMPTY;
-          }
+        filter(claims => !!claims?.__raw),
+        switchMap(claims => {
+          const idToken = claims!.__raw;
           return this.backendAuthService.login(idToken).pipe(
-            tap((response) => {
-              sessionStorage.setItem('access_token', response.access_token);
-              const { Id, ...userWithoutId } = response.user;
-              sessionStorage.setItem('user', JSON.stringify(userWithoutId));
-
+            tap(authResponse => {
+              if (authResponse) {
+                sessionStorage.setItem('access_token', authResponse.access_token);
+                sessionStorage.setItem('user', JSON.stringify(authResponse.user));
+              }
+            }),
+            switchMap(() => this.gameService.getAllGames(this.PAGE_SIZE, 0)),
+            catchError(err => {
+              console.error('Error autenticando backend o cargando juegos:', err);
+              return of([] as Game[]);
             })
           );
         }),
-        catchError((err) => {
-          console.error(
-            'Error en la autenticación con el backend o id_token:',
-            err
-          );
-          return EMPTY;
+        tap((games) => {
+          this.allGames = games || [];
+          this.filteredGames = games || [];
+          this.displayedGames = (games || []).slice(0, this.PAGE_SIZE);
+          (this as any).isLoading = false;
         })
       )
       .subscribe();
@@ -81,31 +82,31 @@ export class DashboardComponent implements OnInit {
         (prev, curr) =>
           prev.limit === curr.limit && prev.offset === curr.offset
       ),
-      switchMap((params) =>
-        this.gameService.getAllGames(params.limit, params.offset)
-      ),
+      switchMap((params) => {
+        const token = sessionStorage.getItem('access_token');
+        if (!token) return of([] as Game[]); 
+        return this.gameService.getAllGames(params.limit, params.offset);
+      }),
       tap((games) => {
-        this.allGames = [...this.allGames, ...games]; // acumular
+        this.allGames = [...this.allGames, ...games]; 
         this.currentOffset += games.length;
         this.hasMoreGames = games.length === this.PAGE_SIZE;
         this.applyFilters();
       }),
       catchError((err) => {
         console.error('Error cargando juegos:', err);
-        return EMPTY;
+        return of([]);
       })
     )
       .subscribe();
   }
 
-  // Estado del componente
   currentPage = 1;
   isFilterDropdownOpen = false;
   searchTerm = '';
   selectedTypes: string[] = [];
   selectedLevels: string[] = [];
 
-  // Opciones de filtros
   gameTypes = [
     { value: 'Memory', label: 'Memoria' },
     { value: 'Hangman', label: 'Ahorcado' },
@@ -119,12 +120,10 @@ export class DashboardComponent implements OnInit {
     { value: 'D', label: 'Difícil' },
   ];
 
-  // Datos de juegos
   allGames: Game[] = [];
   filteredGames: Game[] = [];
   displayedGames: Game[] = [];
 
-  // Métodos para manejar filtros
   toggleTypeFilter(type: string): void {
     const index = this.selectedTypes.indexOf(type);
     if (index === -1) {
@@ -167,7 +166,7 @@ export class DashboardComponent implements OnInit {
     this.currentPage = 1;
 
     this.filteredGames = this.allGames.filter((game) => {
-      // Filtro por texto de búsqueda
+
       const matchesSearch =
         this.searchTerm === '' ||
         game.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -176,12 +175,10 @@ export class DashboardComponent implements OnInit {
           .includes(this.searchTerm.toLowerCase()) ||
         game.author.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-      // Filtro por tipo
       const matchesType =
         this.selectedTypes.length === 0 ||
         this.selectedTypes.includes(game.type);
 
-      // Filtro por nivel
       const matchesLevel =
         this.selectedLevels.length === 0 ||
         this.selectedLevels.includes(game.level);
@@ -247,7 +244,6 @@ export class DashboardComponent implements OnInit {
     this.activeDropdownId = null;
   }
 
-  // Métodos auxiliares
   getTypeLabel(typeValue: string): string {
     const type = this.gameTypes.find((t) => t.value === typeValue);
     return type ? type.label : typeValue;
@@ -258,7 +254,6 @@ export class DashboardComponent implements OnInit {
     return level ? level.label : levelValue;
   }
 
-  // Métodos de UI
   toggleFilterDropdown(): void {
     this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
   }
@@ -286,7 +281,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  // Getter para el total de juegos
   get totalGames(): number {
     return this.filteredGames.length;
   }
