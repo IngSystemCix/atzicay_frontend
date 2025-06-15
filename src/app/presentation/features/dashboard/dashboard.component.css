@@ -9,3 +9,10 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
 }
+
+/* Scroll solo en el contenido del dashboard */
+.dashboard-scroll-content {
+  height: calc(100vh - 120px); /* Ajusta según header/margins */
+  overflow-y: auto;
+  padding-bottom: 2rem;
+}

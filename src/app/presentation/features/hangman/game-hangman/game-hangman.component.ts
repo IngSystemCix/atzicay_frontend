@@ -69,6 +69,9 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   mostrarModalJuegoFinalizado = false;
   mostrarModalFallo = false;
   mostrarModalExito = false;
+  mostrarPista = false;
+  palabrasCanvasVisible = true;
+  palabrasAdivinadas: string[] = [];
 
   ngOnInit(): void {
     const gameId = this.route.snapshot.params['id'];
@@ -144,6 +147,15 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       this.state.palabraActual = (config.game_data.word ?? '').toUpperCase();
       this.state.pistaPalabra = config.game_data.clue ?? '';
     }
+
+    // Palabras del juego (para canvas)
+    if (config.game_data && Array.isArray(config.game_data.words)) {
+      this.palabrasAdivinadas = config.game_data.words.map(w => w.word.toUpperCase());
+    } else if (config.game_data && config.game_data.word) {
+      this.palabrasAdivinadas = [config.game_data.word.toUpperCase()];
+    } else {
+      this.palabrasAdivinadas = [];
+    }
   }
 
   iniciarJuego(): void {
@@ -186,8 +198,9 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
         }
       }
 
-      // Verificar si se completó la palabra
+      // Si la palabra fue completada, táchala en el canvas
       if (!this.state.palabraRevelada.includes('')) {
+        this.tacharPalabraCanvas(this.state.palabraActual);
         this.finalizarJuego(true);
       }
     } else {
@@ -197,6 +210,13 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       if (this.state.intentosRestantes <= 0) {
         this.finalizarJuego(false);
       }
+    }
+  }
+
+  tacharPalabraCanvas(palabra: string) {
+    const idx = this.palabrasAdivinadas.indexOf(palabra);
+    if (idx !== -1) {
+      this.palabrasAdivinadas[idx] = '~~' + this.palabrasAdivinadas[idx] + '~~';
     }
   }
 
@@ -263,12 +283,20 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  togglePalabrasCanvas() {
+    this.palabrasCanvasVisible = !this.palabrasCanvasVisible;
+  }
+
   estaLetraSeleccionada(letra: string): boolean {
     return this.state.letrasSeleccionadas.has(letra);
   }
 
   estaLetraEnPalabra(letra: string): boolean {
     return this.state.palabraActual.includes(letra);
+  }
+
+  limpiarPalabra(palabra: string): string {
+    return palabra.replace(/~~/g, '');
   }
 
   // Getters para aplicar estilos dinámicos

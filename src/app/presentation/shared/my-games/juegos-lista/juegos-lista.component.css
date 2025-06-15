@@ -1,0 +1,6 @@
+/* Elimino el scroll vertical de la lista de juegos individual */
+.juegos-lista-scroll-content {
+  height: auto !important;
+  overflow-y: visible !important;
+  padding-bottom: 0 !important;
+}

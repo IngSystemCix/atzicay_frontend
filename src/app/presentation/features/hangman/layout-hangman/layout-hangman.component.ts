@@ -322,21 +322,33 @@ export class LayoutHangmanComponent implements OnInit {
     };
   }
 
-  // Métodos de mensajes
+  // Métodos de mensajes usando SweetAlert2
   private showSuccess(message: string): void {
-    this.successMessage = message;
+    Swal.fire({
+      icon: 'success',
+      title: '¡Éxito!',
+      text: message,
+      confirmButtonColor: '#A293FA',
+      timer: 2500,
+      timerProgressBar: true,
+      showConfirmButton: false
+    });
+    this.successMessage = '';
     this.errorMessage = '';
-    setTimeout(() => {
-      this.successMessage = '';
-    }, 5000);
   }
 
   private showError(message: string): void {
-    this.errorMessage = message;
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: message,
+      confirmButtonColor: '#A293FA',
+      timer: 3500,
+      timerProgressBar: true,
+      showConfirmButton: false
+    });
     this.successMessage = '';
-    setTimeout(() => {
-      this.errorMessage = '';
-    }, 8000);
+    this.errorMessage = '';
   }
 
   onSubmit(): void {

@@ -89,6 +89,20 @@
   }
 }
 
+/* Scrollbar custom para dashboard-scroll-content */
+.dashboard-scroll-content::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+.dashboard-scroll-content::-webkit-scrollbar-thumb {
+  background: var(--color-atzicay-purple-500);
+  border-radius: 4px;
+}
+.dashboard-scroll-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-atzicay-purple-500) transparent;
+}
+
 @layer utilities {
 
 }
