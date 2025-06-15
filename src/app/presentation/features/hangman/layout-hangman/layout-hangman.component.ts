@@ -322,7 +322,6 @@ export class LayoutHangmanComponent implements OnInit {
     };
   }
 
-  // Métodos de mensajes usando SweetAlert2
   private showSuccess(message: string): void {
     Swal.fire({
       icon: 'success',
@@ -395,7 +394,7 @@ export class LayoutHangmanComponent implements OnInit {
       Name: hangmanFormData.name.trim(),
       Description: hangmanFormData.description.trim(),
       ProfessorId: this.currentProfessorId, 
-      Activated: false,
+      Activated: true, 
       Difficulty: hangmanFormData.difficulty as Difficulty,
       Visibility: hangmanFormData.visibility as Visibility,
       settings: [

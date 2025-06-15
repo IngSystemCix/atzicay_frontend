@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GameInstanceService } from '../../../../core/infrastructure/api/GameInstance/game-instance.service';
 import { UserService } from '../../../../core/infrastructure/api/user.service';
-import { catchError, switchMap } from 'rxjs/operators';
+import { ProgrammingGameService } from '../../../../core/infrastructure/api/ProgrammingGame/programming-game.service';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { GameInstance } from '../../../../core/domain/interface/game-instance';
@@ -21,6 +22,7 @@ interface Juego {
   descripcion?: string;
   profesorId?: number;
   visibilidad?: string;
+  programado?: boolean; 
 }
 @Component({
   selector: 'app-juegos-lista',
@@ -64,7 +66,8 @@ export class JuegosListaComponent implements OnInit {
 
   constructor(
     private gameInstanceService: GameInstanceService,
-    private usuarioService: UserService
+    private usuarioService: UserService,
+    private programmingGameService: ProgrammingGameService 
   ) { }
 
   ngOnInit(): void {
@@ -96,14 +99,21 @@ export class JuegosListaComponent implements OnInit {
             return throwError(() => new Error('ID de usuario no válido'));
           }
 
+          // Obtener juegos y programaciones en paralelo
           return this.gameInstanceService.getAllGameInstances(userId, this.filtroSeleccionado).pipe(
+            switchMap(juegosData =>
+              this.programmingGameService.getAllProgrammingGames().pipe(
+                // Pasar ambos resultados
+                map(programaciones => ({ juegosData, programaciones }))
+              )
+            ),
             catchError(error =>
-              error.status === 404 ? of([]) : throwError(() => error)
+              error.status === 404 ? of({ juegosData: [], programaciones: [] }) : throwError(() => error)
             )
           );
         })
       ).subscribe({
-        next: juegosData => this.procesarJuegos(juegosData),
+        next: ({ juegosData, programaciones }) => this.procesarJuegos(juegosData, programaciones),
         error: err => {
           console.error('Error en la carga de juegos:', err);
           this.error = err.message || 'Error al cargar los juegos';
@@ -118,7 +128,8 @@ export class JuegosListaComponent implements OnInit {
     }
   }
 
-  private procesarJuegos(juegosData: any[]): void {
+  // Ahora recibe también programaciones
+  private procesarJuegos(juegosData: any[], programaciones: any[] = []): void {
     this.juegos = [];
 
     if (!Array.isArray(juegosData)) {
@@ -126,21 +137,34 @@ export class JuegosListaComponent implements OnInit {
       juegosData = [];
     }
 
+    // Obtener los IDs de GameInstances que están programados
+    const idsProgramados = new Set<number>(
+      Array.isArray(programaciones)
+        ? programaciones.map((p: any) => p.GameInstancesId)
+        : []
+    );
+
     const juegosUnicos = new Map<string, Juego>();
 
     for (const juego of juegosData) {
       if (!juego?.Name) {
-        console.warn('Juego sin nombre:', juego);
         continue;
       }
 
       const nombreKey = juego.Name.trim().toLowerCase();
       if (juegosUnicos.has(nombreKey)) continue;
 
+      // Si el filtro es distinto de 'all', ese es el tipo de juego; si es 'all', usa el icono genérico
+      let tipoJuego = this.filtroSeleccionado;
+      if (this.filtroSeleccionado === 'all') {
+        tipoJuego = 'all';
+      }
+      const programado = idsProgramados.has(juego.Id);
+
       juegosUnicos.set(nombreKey, {
         id: juego.Id ?? '',
-        tipo: this.mapearTipoJuego(this.filtroSeleccionado),
-        icono: this.obtenerIconoJuego(this.filtroSeleccionado),
+        tipo: this.mapearTipoJuego(tipoJuego),
+        icono: this.obtenerIconoJuego(tipoJuego),
         titulo: juego.Name,
         descripcion: juego.Description ?? '',
         profesorId: juego.ProfessorId ?? '',
@@ -149,6 +173,7 @@ export class JuegosListaComponent implements OnInit {
         estado: juego.Activated ? 'Activo' : 'Desactivado',
         vecesJugado: 0,
         puntuacion: 0,
+        programado
       });
     }
 

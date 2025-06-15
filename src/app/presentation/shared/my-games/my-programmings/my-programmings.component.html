@@ -7,7 +7,7 @@
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-xl font-bold text-gray-900">Actividades</h1>
         <button 
-          class="p-2 rounded-lg bg-[#E5D8F2] hover:bg-purple-300 transition-colors"
+          class="p-2 rounded-lg bg-[#E5D8F2] hover:bg-purple-300 transition-colors cursor-pointer"
           (click)="toggleMobileMenu()">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             @if (!mobileMenuOpen) {
@@ -19,7 +19,6 @@
         </button>
       </div>
 
-      <!-- Mobile Menu Expandible (menos de 800px) -->
       @if (mobileMenuOpen) {
         <div class="bg-[#E5D8F2] rounded-lg p-4 mb-4 space-y-4 animate-in slide-in-from-top duration-200 mx-2">
           <!-- Tabs para móvil - Columna vertical -->
@@ -28,8 +27,8 @@
             <div class="flex flex-col gap-2">
               @for (tab of tabs; track tab) {
                 <button
-                  class="px-4 py-3 rounded-lg font-medium transition-colors text-sm text-left w-full"
-                  [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white' : 'text-gray-600 hover:bg-gray-200'"
+                  class="px-4 py-3 rounded-lg font-medium transition-colors text-sm text-left w-full cursor-pointer"
+                  [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white cursor-pointer' : 'text-gray-600 hover:bg-gray-200 cursor-pointer'"
                   (click)="selectedTab = tab; mobileMenuOpen = false; resetPagination()">
                   {{ tab }}
                 </button>
@@ -73,8 +72,8 @@
       <div class="bg-[#E5D8F2] rounded-lg p-3 flex flex-wrap gap-2 w-fit max-w-full">
         @for (tab of tabs; track tab) {
           <button
-            class="px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-sm"
-            [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white' : 'text-gray-600 hover:bg-gray-200'"
+            class="px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-sm cursor-pointer"
+            [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white cursor-pointer' : 'text-gray-600 hover:bg-gray-200 cursor-pointer'"
             (click)="selectedTab = tab; resetPagination()">
             {{ tab }}
           </button>
@@ -129,7 +128,7 @@
           <!-- Menú de opciones -->
           <div class="relative flex-shrink-0 ml-2">
             <button
-              class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/40 hover:bg-white/60 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm"
+              class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/40 hover:bg-white/60 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm cursor-pointer"
               (click)="showOptions($event, activity.id)">
               <span class="text-lg sm:text-xl text-gray-800">⋯</span>
             </button>
@@ -137,17 +136,17 @@
             @if (menuAbierto === activity.id) {
               <div class="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl py-2 w-40 sm:w-48 z-20 border border-purple-200 animate-in slide-in-from-top-2 duration-200">
                 <button
-                  class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200"
+                  class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer"
                   (click)="eliminarActividad(activity.id)">
                   <span class="mr-2 sm:mr-3 text-sm sm:text-lg">🗑️</span> Eliminar
                 </button>
                 <button
-                  class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200"
+                  class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer"
                   (click)="editarActividad(activity.id)">
                   <span class="mr-2 sm:mr-3 text-sm sm:text-lg">✏️</span> Editar
                 </button>
                 <button
-                  class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200"
+                  class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer"
                   (click)="verReporte(activity.id)">
                   <span class="mr-2 sm:mr-3 text-sm sm:text-lg">📊</span> Ver Reporte
                 </button>
@@ -176,7 +175,7 @@
             </div>
           </div>
           
-          <button class="bg-white/40 hover:bg-white/60 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-900 transition-all duration-300 hover:scale-105 border border-white/50 shadow-sm whitespace-nowrap">
+          <button class="bg-white/40 hover:bg-white/60 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-900 transition-all duration-300 hover:scale-105 border border-white/50 shadow-sm whitespace-nowrap cursor-pointer">
             🔗 <span class="hidden sm:inline">Obtener </span>URL
           </button>
         </div>
@@ -188,7 +187,7 @@
   @if (hasMoreActivities()) {
     <div class="flex justify-center mt-8 mx-2">
       <button 
-        class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base"
+        class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base cursor-pointer"
         (click)="loadMore()">
         <span>Ver más actividades</span>
         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
