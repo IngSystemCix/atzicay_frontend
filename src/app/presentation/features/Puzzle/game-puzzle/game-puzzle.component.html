@@ -1,16 +1,25 @@
-<div class="flex flex-col items-center justify-top min-h-screen bg-purple-50 p-4">
-  <h1 class="text-2xl font-bold text-purple-700 mb-2">Rompecabezas del Sistema Solar</h1>
+<div class="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 p-4">
+  <!-- Header Section -->
+  <div class="w-full max-w-4xl mx-auto mb-8">
+    <h1 class="text-3xl font-bold text-purple-700 mb-6 text-center glow-text">Rompecabezas del Sistema Solar</h1>
 
-  <div class="flex flex-col w-full max-w-xl mb-2 space-y-2">
-    <div class="flex justify-between w-full text-purple-700">
-      <div>
-        Piezas correctas:
-        <span class="font-bold">{{ correctPieces }}/{{ totalPieces }}</span>
+    <div class="flex flex-col bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+      <div class="flex justify-between w-full text-purple-700">
+        <div class="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Piezas correctas:
+            <span class="font-bold">{{ correctPieces }}/{{ totalPieces }}</span>
+          </span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Tiempo: <span class="font-bold">{{ formatTime(timeLeft) }}</span></span>
+        </div>
       </div>
-      <div>
-        Tiempo: <span class="font-bold">{{ formatTime(timeLeft) }}</span>
-      </div>
-    </div>
 
     <!-- Barra de progreso -->
     <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -21,37 +30,47 @@
     </div>
   </div>
 
-
   <!-- Área de juego principal -->
-  <div class="flex flex-row gap-4 w-full max-w-6xl">
-    <!-- Sidebar con piezas disponibles -->
+  <div class="flex-1 flex justify-center items-center relative w-full my-8">
+    <!-- Panel lateral flotante con piezas disponibles -->
     @if (gameStarted && !gameCompleted) {
-    <div
-         class="w-64 bg-purple-100 rounded-lg p-3 border-2 border-purple-300 overflow-y-auto"
-         style="min-height: 500px; max-height: 600px;">
-      <h3 class="text-purple-700 font-bold mb-2 text-center">Piezas disponibles</h3>
-      <div class="flex flex-wrap justify-center gap-2">
+    <div class="floating-panel" [class.open]="isPanelOpen">
+      <div class="panel-toggle" (click)="togglePanel()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" [class.rotate-180]="!isPanelOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </div>
+      
+      <h3 class="text-purple-700 font-bold mb-4 text-center flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+        </svg>
+        Piezas disponibles
+      </h3>
+      
+      <div class="pieces-container">
         @for (piece of pieces; track piece.id) {
-          @if (isInSidebar(piece)) {
+         @if (isInSidebar(piece)) {
           <div
-               [ngStyle]="getPieceStyle(piece)"
-               class="sidebar-piece transition-all duration-300 hover:shadow-md m-1"
-               [class.selected]="selectedPiece?.id === piece.id"
-               [draggable]="gameStarted && !gameCompleted"
-               (click)="onPieceClick(piece)"
-               (dragstart)="onDragStart(piece, $event)">
+              [ngStyle]="getPieceStyle(piece)"
+              [class]="'sidebar-piece transition-all duration-300 hover:shadow-lg ' + getPuzzleShapeClasses(piece)"
+              [class.selected]="selectedPiece?.id === piece.id"
+              [draggable]="gameStarted && !gameCompleted"
+              (click)="onPieceClick(piece)"
+              (dragstart)="onDragStart(piece, $event)"
+              (dragend)="onDragEnd($event)">
+            <div class="piece-overlay"></div>
           </div>
           }
         }
       </div>
     </div>
-    }
-
-    <!-- Contenedor principal del puzzle -->
-    <div class="relative border-2 border-purple-300 rounded shadow-lg"
+    }    <!-- Contenedor principal del puzzle -->
+    <div class="relative border-2 border-purple-300 rounded-xl shadow-2xl bg-white/30 backdrop-blur-sm p-6"
          [ngClass]="{'border-0': !gameStarted}"
          [style.width.px]="imageWidth"
-         [style.height.px]="imageHeight">
+         [style.height.px]="imageHeight"
+         style="margin: 0 auto;">
       <!-- Juego activo -->
       @if (gameStarted) {
       <div
@@ -66,18 +85,18 @@
                  (dragover)="onDragOver($event)"
                  (drop)="onDrop(rowIndex, colIndex, $event)">
               <!-- Piezas colocadas en el tablero - Ahora dentro de la zona de drop -->
-              @if (getPieceAt(rowIndex, colIndex)) {
-                <div
-                  [ngStyle]="getPieceStyle(getPieceAt(rowIndex, colIndex)!)"
-                  class="piece-in-board transition-all duration-300 hover:shadow-md"
-                  [class.selected]="selectedPiece?.id === getPieceAt(rowIndex, colIndex)!.id"
-                  [class.correct]="getPieceAt(rowIndex, colIndex)!.correctPos"
-                  [draggable]="gameStarted && !gameCompleted"
-                  (click)="onPieceClick(getPieceAt(rowIndex, colIndex)!)"
-                  (dragstart)="onDragStart(getPieceAt(rowIndex, colIndex)!, $event)"
-                  (dblclick)="returnToSidebar(getPieceAt(rowIndex, colIndex)!)">
-                </div>
-              }
+             @if (getPieceAt(rowIndex, colIndex)) {
+              <div
+                [ngStyle]="getPieceStyle(getPieceAt(rowIndex, colIndex)!)"
+                [class]="'piece-in-board transition-all duration-300 hover:shadow-md ' + getPuzzleShapeClasses(getPieceAt(rowIndex, colIndex)!)"
+                [class.selected]="selectedPiece?.id === getPieceAt(rowIndex, colIndex)!.id"
+                [class.correct]="getPieceAt(rowIndex, colIndex)!.correctPos"
+                [draggable]="gameStarted && !gameCompleted"
+                (click)="onPieceClick(getPieceAt(rowIndex, colIndex)!)"
+                (dragstart)="onDragStart(getPieceAt(rowIndex, colIndex)!, $event)"
+                (dblclick)="returnToSidebar(getPieceAt(rowIndex, colIndex)!)">
+              </div>
+            }
             </div>
           }
         }
@@ -85,20 +104,31 @@
       }
     </div>
   </div>
-
-  <div class="mt-4 flex space-x-4">
-    @if (gameStarted && !gameCompleted) {
-    <button
-            (click)="startGame()"
-            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
-      Reiniciar
-    </button>
-    <button
-            (click)="toggleHelp()"
-            class="bg-purple-200 hover:bg-purple-300 text-purple-800 font-bold py-2 px-6 rounded-full shadow-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
-      {{ allowWrongPlacements ? 'Activar ayuda' : 'Desactivar ayuda' }}
-    </button>
-    }
+  <!-- Footer con botones y mensajes -->
+  <div class="w-full max-w-4xl mx-auto mt-auto">
+    <div class="flex justify-center space-x-4 mb-4">
+      @if (gameStarted && !gameCompleted) {
+      <button
+              (click)="startGame()"
+              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
+        <span class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Reiniciar
+        </span>
+      </button>
+      <button
+              (click)="toggleHelp()"
+              class="bg-purple-200 hover:bg-purple-300 text-purple-800 font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50">
+        <span class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {{ allowWrongPlacements ? 'Activar ayuda' : 'Desactivar ayuda' }}
+        </span>
+      </button>
+      }
   </div>
 
   @if (gameStarted && gameCompleted) {

@@ -12,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrl: './game-configuration.component.css'
 })
 export class GameConfigurationComponent implements OnInit, OnChanges {
-  @Input() gameId: number | null = null;
+  @Input() gameId: number | null = null; // Volver a number
   @Input() isVisible: boolean = false;
   @Output() onClose = new EventEmitter<void>();
   @Output() onSave = new EventEmitter<GameConfiguration>();
@@ -49,13 +49,8 @@ export class GameConfigurationComponent implements OnInit, OnChanges {
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
       if (idParam) {
-        const id = parseInt(idParam, 10);
-        if (!isNaN(id)) {
-          this.gameId = id;
-          this.loadGameConfiguration();
-        } else {
-          this.error = 'ID inválido';
-        }
+        this.gameId = Number(idParam);
+        this.loadGameConfiguration();
       } else {
         this.error = 'No se proporcionó un ID';
       }
@@ -64,7 +59,7 @@ export class GameConfigurationComponent implements OnInit, OnChanges {
   
 
   ngOnChanges() {
-    if (this.gameId && this.isVisible && !this.gameConfig) {
+    if (this.gameId !== null && this.isVisible && !this.gameConfig) {
       this.loadGameConfiguration();
     }
   }
@@ -93,7 +88,7 @@ export class GameConfigurationComponent implements OnInit, OnChanges {
   }
 
   saveConfiguration() {
-    if (!this.gameConfig || !this.gameId) return;
+    if (!this.gameConfig || this.gameId === null) return;
 
     this.isSaving = true;
     this.error = null;
@@ -169,16 +164,16 @@ export class GameConfigurationComponent implements OnInit, OnChanges {
 
   getDifficultyLabel(value: string): string {
     const option = this.difficultyOptions.find(opt => opt.value === value);
-    return option?.label || value;
+    return option && option.label ? option.label : value;
   }
 
   getVisibilityLabel(value: string): string {
     const option = this.visibilityOptions.find(opt => opt.value === value);
-    return option?.label || value;
+    return option && option.label ? option.label : value;
   }
 
   getPresentationLabel(value: string): string {
     const option = this.presentationOptions.find(opt => opt.value === value);
-    return option?.label || value;
+    return option && option.label ? option.label : value;
   }
 }

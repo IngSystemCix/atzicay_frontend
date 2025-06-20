@@ -7,7 +7,7 @@ import { Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserService {
   private apiUrl = environment.api_base_url;
@@ -16,17 +16,15 @@ export class UserService {
 
   // Buscar usuario por email
   findUserByEmail(email: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}users/find`, { Email: email }).pipe(
-      catchError(() => of(null))
-    );
+    return this.http
+      .post(`${this.apiUrl}users/find`, { Email: email })
+      .pipe(catchError(() => of(null)));
   }
-
-  
 
   // Crear un nuevo usuario
   private createUser(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}users`, userData).pipe(
-      catchError(error => {
+      catchError((error) => {
         console.error('Error creating user:', error);
         return of(null);
       })
@@ -63,26 +61,48 @@ export class UserService {
       CountryId: 1,
       City: 'Desconocida',
       Birthdate: '2000-01-01',
-      CreatedAt: new Date().toISOString()
+      CreatedAt: new Date().toISOString(),
     };
 
     return this.createUser(userDto);
   }
 
-  private updateUserIfNeeded(_userId: number, _auth0User: any): Observable<any> {
+  private updateUserIfNeeded(
+    _userId: number,
+    _auth0User: any
+  ): Observable<any> {
     // Aquí podrías implementar lógica para actualizar datos si es necesario
     return of({ success: true, message: 'User exists' });
   }
 
   private getFirstName(auth0User: any): string {
-    return auth0User.given_name ||
-      auth0User.name?.split(' ')[0] ||
-      'Usuario';
+    return auth0User.given_name || auth0User.name?.split(' ')[0] || 'Usuario';
   }
 
   private getLastName(auth0User: any): string {
-    return auth0User.family_name ||
+    return (
+      auth0User.family_name ||
       auth0User.name?.split(' ').slice(1).join(' ') ||
-      '';
+      ''
+    );
+  }
+
+  // Obtener usuario por ID
+  getUserById(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}users/${id}`).pipe(
+      catchError((error) => {
+        console.error('Error getting user by ID:', error);
+        return of(null);
+      })
+    );
+  }
+
+  updateUser(id: number, userData: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}users/${id}`, userData).pipe(
+      catchError((error) => {
+        console.error('Error updating user:', error);
+        return of(null);
+      })
+    );
   }
 }

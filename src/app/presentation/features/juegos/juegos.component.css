@@ -1,19 +1,31 @@
-/* Scroll solo en el área de tabs + lista de juegos o programaciones */
+/* Contenedor principal */
+.juegos-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* O la altura que necesites */
+}
+
+/* Tabs fijos */
+.juegos-tabs-fixed {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: text-atzicay-purple-500; /* Para que no se vea transparente */
+}
+
+/* Área de scroll para el contenido */
 .juegos-scroll-area {
-  height: calc(100vh - 220px); /* Ajusta según header/categorías */
+  flex: 1;
   overflow-y: auto;
   padding-bottom: 2rem;
 }
 
-.juegos-scroll-area::-webkit-scrollbar {
-  width: 6px;
-  background: transparent;
+.dropdown-menu {
+  position: absolute !important;
+  z-index: 9999 !important;
 }
-.juegos-scroll-area::-webkit-scrollbar-thumb {
-  background: var(--color-atzicay-purple-500);
-  border-radius: 4px;
-}
-.juegos-scroll-area {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-atzicay-purple-500) transparent;
+
+.card-container {
+  transform-style: preserve-3d;
 }

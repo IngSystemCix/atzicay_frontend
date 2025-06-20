@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
 
   getGameRoute(gameType: string, id: number): string {
     const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
+    // Usa el ID numérico directamente en la URL
     switch (normalizedType) {
       case 'hangman':
         return `/juegos/jugar-hangman/${id}`;
@@ -42,8 +43,8 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  private limitSubject = new BehaviorSubject<{ limit: number; offset: number }>(
-    { limit: 10, offset: 0 }
+  private limitSubject = new BehaviorSubject<{ limit: number }>(
+    { limit: 6}
   );
   ngOnInit() {
     this.auth0.isAuthenticated$
@@ -60,7 +61,7 @@ export class DashboardComponent implements OnInit {
                 sessionStorage.setItem('user', JSON.stringify(authResponse.user));
               }
             }),
-            switchMap(() => this.gameService.getAllGames(this.PAGE_SIZE, 0)),
+            switchMap(() => this.gameService.getAllGames(this.PAGE_SIZE)),
             catchError(err => {
               console.error('Error autenticando backend o cargando juegos:', err);
               return of([] as Game[]);
@@ -71,33 +72,11 @@ export class DashboardComponent implements OnInit {
           this.allGames = games || [];
           this.filteredGames = games || [];
           this.displayedGames = (games || []).slice(0, this.PAGE_SIZE);
+          this.currentOffset = games?.length || 0; // Línea cambiada
+          this.hasMoreGames = games.length === this.PAGE_SIZE;
           (this as any).isLoading = false;
-        })
+        }),
       )
-      .subscribe();
-
-    this.limitSubject.asObservable().pipe(
-      debounceTime(300),
-      distinctUntilChanged(
-        (prev, curr) =>
-          prev.limit === curr.limit && prev.offset === curr.offset
-      ),
-      switchMap((params) => {
-        const token = sessionStorage.getItem('access_token');
-        if (!token) return of([] as Game[]); 
-        return this.gameService.getAllGames(params.limit, params.offset);
-      }),
-      tap((games) => {
-        this.allGames = [...this.allGames, ...games]; 
-        this.currentOffset += games.length;
-        this.hasMoreGames = games.length === this.PAGE_SIZE;
-        this.applyFilters();
-      }),
-      catchError((err) => {
-        console.error('Error cargando juegos:', err);
-        return of([]);
-      })
-    )
       .subscribe();
   }
 
@@ -267,19 +246,36 @@ export class DashboardComponent implements OnInit {
     this.allGames = [];
     this.hasMoreGames = true;
     this.limitSubject.next({
-      limit: this.PAGE_SIZE,
-      offset: this.currentOffset,
+      limit: this.PAGE_SIZE
     });
   }
 
   loadMoreGames(): void {
-    if (!this.hasMoreGames) return;
+  if (!this.hasMoreGames) return;
+  
+  const newLimit = this.PAGE_SIZE + 6; 
+  
+  this.gameService.getAllGames(newLimit)
+    .pipe(
+      tap((allGames) => {
+        if (allGames.length > this.allGames.length) {
+          this.allGames = allGames; 
+          this.currentOffset = allGames.length;
+          this.hasMoreGames = allGames.length === newLimit;
+          this.PAGE_SIZE = newLimit; 
+        } else {
+          this.hasMoreGames = false;
+        }
+        this.applyFilters();
+      }),
+      catchError((err) => {
+        console.error('Error cargando más juegos:', err);
+        return of([]);
+      })
+    )
+    .subscribe();
+}
 
-    this.limitSubject.next({
-      limit: this.PAGE_SIZE,
-      offset: this.currentOffset,
-    });
-  }
 
   get totalGames(): number {
     return this.filteredGames.length;

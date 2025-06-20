@@ -1,68 +1,98 @@
-<div class="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-md flex items-center justify-center z-50">
+<div
+  class="fixed inset-0 bg-transparent bg-opacity-50 backdrop-blur-md flex items-center justify-center z-50"
+>
   <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
-    <button (click)="cerrar()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+    <button
+      (click)="cerrar()"
+      class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+    >
       ✕
     </button>
 
-    <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">Editar Usuario</h2>
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">
+      Editar Usuario
+    </h2>
 
     <form (ngSubmit)="onSubmit()">
       <div class="grid grid-cols-1 gap-6">
         <label class="block">
           <span class="text-gray-700">Nombre</span>
-          <input type="text" class="mt-1 block w-full h-10 border border-gray-300" [(ngModel)]="user.Name" name="Name" required />
+          <input
+            type="text"
+            class="mt-1 block w-full h-10 border border-gray-300"
+            [(ngModel)]="user.name"
+            name="name"
+            required
+          />
         </label>
 
         <label class="block">
           <span class="text-gray-700">Apellido</span>
-          <input type="text" class="mt-1 block w-full h-10 border border-gray-300" [(ngModel)]="user.LastName" name="LastName" required />
+          <input
+            type="text"
+            class="mt-1 block w-full h-10 border border-gray-300"
+            [(ngModel)]="user.lastName"
+            name="lastName"
+            required
+          />
         </label>
 
         <label class="block">
           <span class="text-gray-700">Email</span>
-          <input type="email" class="mt-1 block w-full h-10 border border-gray-300" [(ngModel)]="user.Email" name="Email" required />
+          <input
+            type="email"
+            class="mt-1 block w-full h-10 border border-gray-300"
+            [(ngModel)]="user.email"
+            name="email"
+            required
+          />
         </label>
 
         <label class="block">
           <span class="text-gray-700">Género</span>
-          <select class="mt-1 block w-full h-10 border border-gray-300" [(ngModel)]="user.Gender" name="Gender" required>
-            @for (gender of ['M', 'F', 'O']; track $index) {
-              <option [value]="gender">
-                @if (gender === 'M') {
-                  Masculino
-                } @else if (gender === 'F') {
-                  Femenino
-                } @else {
-                  Otro
-                }
-              </option>
-            }
+          <select [(ngModel)]="user.gender" name="gender" required>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+            <option value="O">Otro</option>
           </select>
         </label>
 
         <label class="block">
           <span class="text-gray-700">País</span>
-          <select class="mt-1 block w-full h-10 border border-gray-300" [(ngModel)]="user.CountryId" name="CountryId" required>
-            @for (country of countries; track country.Id) {
-              <option [value]="country.Id">{{ country.Name }}</option>
-            } @empty {
-              <option disabled selected>No hay países disponibles</option>
-            }
+          <select [(ngModel)]="user.countryId" name="countryId" required>
+            <option *ngFor="let country of countries" [value]="country.Id">
+              {{ country.name }}
+            </option>
           </select>
         </label>
 
         <label class="block">
           <span class="text-gray-700">Ciudad</span>
-          <input type="text" class="mt-1 block w-full h-10 border border-gray-300" [(ngModel)]="user.City" name="City" required />
+          <input
+            type="text"
+            class="mt-1 block w-full h-10 border border-gray-300"
+            [(ngModel)]="user.city"
+            name="city"
+            required
+          />
         </label>
 
         <label class="block">
           <span class="text-gray-700">Fecha de nacimiento</span>
-          <input type="date" class="mt-1 block w-full h-10 border border-gray-300" [(ngModel)]="user.Birthdate" name="Birthdate" required />
+          <input
+            type="date"
+            class="mt-1 block w-full h-10 border border-gray-300"
+            [(ngModel)]="user.birthdate"
+            name="birthdate"
+            required
+          />
         </label>
       </div>
 
-      <button type="submit" class="mt-4 w-full bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+      <button
+        type="submit"
+        class="mt-4 w-full bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+      >
         Actualizar
       </button>
     </form>

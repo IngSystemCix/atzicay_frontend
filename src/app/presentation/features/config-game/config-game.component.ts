@@ -9,7 +9,7 @@ import {
   ProgrammingGameConfig,
   ProgrammingGameService,
 } from '../../../core/infrastructure/api/programming-game.service';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-config-game',
   standalone: true,
@@ -112,8 +112,16 @@ export class ConfigGameComponent implements OnInit {
         next: (response) => {
           console.log('Configuración guardada exitosamente:', response);
           this.isLoading = false;
-          // Navegar de vuelta a la lista de juegos
-          this.router.navigate(['/juegos']);
+
+          Swal.fire({
+            title: '¡Éxito!',
+            text: 'La programación del juego se ha creado correctamente',
+            icon: 'success',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#3085d6',
+          }).then(() => {
+            this.router.navigate(['/juegos']);
+          });
         },
         error: (err) => {
           console.error('Error al guardar configuración:', err);

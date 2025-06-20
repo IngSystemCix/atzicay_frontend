@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 
 interface Tab {
   id: string;
@@ -13,14 +13,14 @@ interface Tab {
   styleUrl: './juegos-tabs.component.css'
 })
 export class JuegosTabsComponent {
-  tabActiva: string = 'misJuegos';
   totalJuegos: number = 8;
 
-  tabs: Tab[] = [
+   tabs: Tab[] = [
     { id: 'misJuegos', nombre: 'Mis juegos' },
     { id: 'misProgramaciones', nombre: 'Mis Programaciones' }
   ];
 
+  @Input() tabActiva: string = 'misJuegos';
   @Output() tabChanged = new EventEmitter<string>();
 
   cambiarTab(tab: string) {

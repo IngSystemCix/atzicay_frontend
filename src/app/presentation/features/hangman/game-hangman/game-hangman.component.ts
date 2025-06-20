@@ -1,7 +1,11 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameConfiguration, GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import {
+  GameConfiguration,
+  GameConfigurationService,
+  HangmanData,
+} from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
 
 interface JuegoState {
   palabraActual: string;
@@ -25,6 +29,10 @@ interface JuegoState {
   fuente: string;
   cargando: boolean;
   error: string;
+  palabrasJuego: HangmanData[];
+  indicePalabraActual: number;
+  palabrasCompletadas: number;
+  totalPalabras: number;
 }
 
 @Component({
@@ -32,7 +40,7 @@ interface JuegoState {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './game-hangman.component.html',
-  styleUrls: ['./game-hangman.component.css']
+  styleUrls: ['./game-hangman.component.css'],
 })
 export class GameHangmanComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -61,7 +69,11 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     colorTexto: '#000000',
     fuente: 'Arial',
     cargando: true,
-    error: ''
+    error: '',
+    palabrasJuego: [],
+    indicePalabraActual: 0,
+    palabrasCompletadas: 0,
+    totalPalabras: 0,
   };
 
   alfabeto: string[] = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
@@ -72,13 +84,14 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   mostrarPista = false;
   palabrasCanvasVisible = true;
   palabrasAdivinadas: string[] = [];
+  tiempoRestanteModal = 3;
 
   ngOnInit(): void {
-    const gameId = this.route.snapshot.params['id'];
-    if (gameId) {
-      this.cargarConfiguracionJuego(+gameId);
+    const id = Number(this.route.snapshot.params['id']);
+    if (id && !isNaN(id)) {
+      this.cargarConfiguracionJuego(id);
     } else {
-      this.state.error = 'No se proporcionó un ID de juego válido';
+      this.state.error = 'ID de juego inválido';
       this.state.cargando = false;
     }
   }
@@ -100,7 +113,8 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
           this.aplicarConfiguracion();
           this.iniciarJuego();
         } else {
-          this.state.error = response.message || 'No se pudo cargar la configuración del juego';
+          this.state.error =
+            response.message || 'No se pudo cargar la configuración del juego';
         }
         this.state.cargando = false;
       },
@@ -108,7 +122,7 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
         console.error('Error cargando configuración:', error);
         this.state.error = 'Error al cargar la configuración del juego';
         this.state.cargando = false;
-      }
+      },
     });
   }
 
@@ -116,9 +130,9 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     if (!this.state.gameConfig) return;
 
     const config = this.state.gameConfig;
-    
+
     // Aplicar configuraciones desde settings
-    config.settings.forEach(setting => {
+    config.settings.forEach((setting) => {
       switch (setting.key) {
         case 'TiempoLimite':
           this.state.tiempoInicial = parseInt(setting.value) || 60;
@@ -142,24 +156,39 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Aplicar palabra y pista desde game_data
-    if (config.game_data) {
-      this.state.palabraActual = (config.game_data.word ?? '').toUpperCase();
-      this.state.pistaPalabra = config.game_data.clue ?? '';
-    }
+    // Cargar palabras del hangman_data
+    if (
+      config.game_data?.hangman_data &&
+      Array.isArray(config.game_data.hangman_data)
+    ) {
+      this.state.palabrasJuego = config.game_data.hangman_data;
+      this.state.totalPalabras = this.state.palabrasJuego.length;
 
-    // Palabras del juego (para canvas)
-    if (config.game_data && Array.isArray(config.game_data.words)) {
-      this.palabrasAdivinadas = config.game_data.words.map(w => w.word.toUpperCase());
-    } else if (config.game_data && config.game_data.word) {
-      this.palabrasAdivinadas = [config.game_data.word.toUpperCase()];
+      // Configurar la primera palabra
+      if (this.state.palabrasJuego.length > 0) {
+        this.configurarPalabraActual();
+      }
+
+      // Configurar palabras para el canvas
+      this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
+        item.word.toUpperCase()
+      );
     } else {
-      this.palabrasAdivinadas = [];
+      this.state.error =
+        'No se encontraron palabras en la configuración del juego';
+    }
+  }
+  configurarPalabraActual(): void {
+    if (this.state.indicePalabraActual < this.state.palabrasJuego.length) {
+      const palabraData =
+        this.state.palabrasJuego[this.state.indicePalabraActual];
+      this.state.palabraActual = palabraData.word.toUpperCase();
+      this.state.pistaPalabra = palabraData.clue;
     }
   }
 
   iniciarJuego(): void {
-    if (!this.state.gameConfig || !this.state.palabraActual) {
+    if (!this.state.gameConfig || this.state.palabrasJuego.length === 0) {
       this.state.error = 'No se pudo inicializar el juego';
       return;
     }
@@ -167,6 +196,9 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     if (this.state.timerInterval) {
       clearInterval(this.state.timerInterval);
     }
+
+    // Configurar la palabra actual
+    this.configurarPalabraActual();
 
     // Resetear estado del juego pero mantener configuración
     this.state = {
@@ -177,14 +209,17 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       tiempoRestante: this.state.tiempoInicial,
       juegoTerminado: false,
       juegoGanado: false,
-      timerInterval: null
+      timerInterval: null,
     };
 
     this.iniciarTimer();
   }
 
   seleccionarLetra(letra: string): void {
-    if (this.state.juegoTerminado || this.state.letrasSeleccionadas.has(letra)) {
+    if (
+      this.state.juegoTerminado ||
+      this.state.letrasSeleccionadas.has(letra)
+    ) {
       return;
     }
 
@@ -198,10 +233,22 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
         }
       }
 
-      // Si la palabra fue completada, táchala en el canvas
+      // Verificar si la palabra está completa
       if (!this.state.palabraRevelada.includes('')) {
         this.tacharPalabraCanvas(this.state.palabraActual);
-        this.finalizarJuego(true);
+        this.state.palabrasCompletadas++;
+
+        // Verificar si hay más palabras
+        if (
+          this.state.indicePalabraActual + 1 <
+          this.state.palabrasJuego.length
+        ) {
+          // Pasar a la siguiente palabra
+          this.pasarSiguientePalabra();
+        } else {
+          // Juego completado
+          this.finalizarJuego(true);
+        }
       }
     } else {
       // Letra incorrecta
@@ -212,11 +259,37 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       }
     }
   }
+  pasarSiguientePalabra(): void {
+    this.tacharPalabraCanvas(this.state.palabraActual);
 
+    this.mostrarModalExito = true;
+    setTimeout(() => {
+      this.mostrarModalExito = false;
+
+      this.state.indicePalabraActual++;
+      this.configurarPalabraActual();
+      this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
+        ''
+      );
+      this.state.letrasSeleccionadas = new Set<string>();
+      this.state.intentosRestantes = this.INTENTOS_INICIALES;
+
+      this.state.tiempoRestante = this.state.tiempoInicial;
+      if (this.state.timerInterval) {
+        clearInterval(this.state.timerInterval);
+      }
+      this.iniciarTimer();
+    }, 1500);
+  }
   tacharPalabraCanvas(palabra: string) {
-    const idx = this.palabrasAdivinadas.indexOf(palabra);
+    const palabraUpper = palabra.toUpperCase();
+    const idx = this.palabrasAdivinadas.findIndex(
+      (p) => this.limpiarPalabra(p) === palabraUpper
+    );
+
     if (idx !== -1) {
-      this.palabrasAdivinadas[idx] = '~~' + this.palabrasAdivinadas[idx] + '~~';
+      this.palabrasAdivinadas[idx] =
+        '~~' + this.limpiarPalabra(this.palabrasAdivinadas[idx]) + '~~';
     }
   }
 
@@ -246,17 +319,53 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     }
   }
 
-  reiniciarJuego(): void {
-    this.mostrarModalTiempoAgotado = false;
-    this.mostrarModalJuegoFinalizado = false;
-    this.mostrarModalFallo = false;
-    this.mostrarModalExito = false;
-    if (this.state.juegoFinalizado) {
-      // Reiniciar completamente
-      this.state.vidasRestantes = 3;
-      this.state.juegoFinalizado = false;
-    }
-    this.iniciarJuego();
+
+  reiniciarPalabraActual(): void {
+  this.mostrarModalFallo = false;
+  
+  // Solo reiniciar la palabra actual, NO las vidas
+  this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+  this.state.letrasSeleccionadas = new Set<string>();
+  this.state.intentosRestantes = this.INTENTOS_INICIALES;
+  this.state.tiempoRestante = this.state.tiempoInicial;
+  this.state.juegoTerminado = false;
+  this.state.juegoGanado = false;
+
+  if (this.state.timerInterval) {
+    clearInterval(this.state.timerInterval);
+  }
+  this.iniciarTimer();
+}
+
+reiniciarJuego(): void {
+  this.mostrarModalTiempoAgotado = false;
+  this.mostrarModalJuegoFinalizado = false;
+  this.mostrarModalFallo = false;
+  this.mostrarModalExito = false;
+
+  // Resetear completamente el estado del juego
+  this.state.indicePalabraActual = 0;
+  this.state.palabrasCompletadas = 0;
+  this.state.vidasRestantes = 3; // Solo aquí se resetean las vidas a 3
+  this.state.juegoFinalizado = false;
+
+  // Restaurar todas las palabras en el canvas
+  this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
+    item.word.toUpperCase()
+  );
+
+  this.iniciarJuego();
+}
+
+  /**
+   * Obtiene el progreso actual del juego como una cadena de la forma
+   * "Palabra X de Y", donde X es el índice actual de la palabra en el
+   * array de palabras y Y es el total de palabras en el juego.
+   */
+  get progresoJuego(): string {
+    return `Palabra ${this.state.indicePalabraActual + 1} de ${
+      this.state.totalPalabras
+    }`;
   }
 
   volverAlDashboard(): void {
@@ -303,8 +412,8 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   get estilosJuego() {
     return {
       'background-color': this.state.colorFondo,
-      'color': this.state.colorTexto,
-      'font-family': this.state.fuente
+      color: this.state.colorTexto,
+      'font-family': this.state.fuente,
     };
   }
 
@@ -313,6 +422,9 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   }
 
   get descripcionJuego(): string {
-    return this.state.gameConfig?.description || 'Adivina la palabra antes de que se complete el ahorcado';
+    return (
+      this.state.gameConfig?.description ||
+      'Adivina la palabra antes de que se complete el ahorcado'
+    );
   }
 }

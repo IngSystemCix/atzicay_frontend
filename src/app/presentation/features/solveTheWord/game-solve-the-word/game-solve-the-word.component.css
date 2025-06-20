@@ -1,4 +1,4 @@
-/* Si necesitamos estilos específicos no cubiertos por Tailwind */
+/* Reemplaza todo el contenido del CSS */
 .highlighted {
   background-color: rgba(139, 92, 246, 0.3);
 }
@@ -6,4 +6,37 @@
 :host {
   display: block;
   width: 100%;
+  overflow-y: auto;
 }
+
+/* Evitar selección de texto en la grilla */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Animación suave para las celdas */
+.grid > div {
+  transition: all 0.2s ease-in-out;
+}
+
+.grid > div:hover {
+  transform: scale(1.05);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+  .grid {
+    gap: 0.125rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Estilo para celdas seleccionadas */
+.bg-yellow-200 {
+  background-color: rgb(254 240 138);
+  border-color: rgb(245 158 11);
+}
+

@@ -8,6 +8,8 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { of, throwError } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { GameInstance } from '../../../../core/domain/interface/game-instance';
+import { Router } from '@angular/router';
+
 type Dificultad = 'basico' | 'intermedio' | 'dificil';
 interface Juego {
   id: number;
@@ -22,7 +24,7 @@ interface Juego {
   descripcion?: string;
   profesorId?: number;
   visibilidad?: string;
-  programado?: boolean; 
+  programado?: boolean;
 }
 @Component({
   selector: 'app-juegos-lista',
@@ -32,15 +34,14 @@ interface Juego {
   styleUrl: './juegos-lista.component.css',
 })
 export class JuegosListaComponent implements OnInit {
-
   filtroSeleccionado: string = 'all';
   filtros: string[] = ['all', 'hangman', 'memory', 'puzzle', 'solve_the_word'];
   filtroLabels: { [key: string]: string } = {
-    'all': 'Todos',
-    'hangman': 'Ahorcado',
-    'memory': 'Memoria',
-    'puzzle': 'Rompecabezas',
-    'solve_the_word': 'Pupiletras'
+    all: 'Todos',
+    hangman: 'Ahorcado',
+    memory: 'Memoria',
+    puzzle: 'Rompecabezas',
+    solve_the_word: 'Pupiletras',
   };
 
   @Output() filtroChange = new EventEmitter<string>();
@@ -67,8 +68,9 @@ export class JuegosListaComponent implements OnInit {
   constructor(
     private gameInstanceService: GameInstanceService,
     private usuarioService: UserService,
-    private programmingGameService: ProgrammingGameService 
-  ) { }
+    private programmingGameService: ProgrammingGameService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cargarJuegos();
@@ -92,35 +94,42 @@ export class JuegosListaComponent implements OnInit {
         throw new Error('El usuario no tiene email registrado');
       }
 
-      this.usuarioService.findUserByEmail(email).pipe(
-        switchMap(({ data }) => {
-          const userId = data?.Id;
-          if (!userId) {
-            return throwError(() => new Error('ID de usuario no válido'));
-          }
+      this.usuarioService
+        .findUserByEmail(email)
+        .pipe(
+          switchMap(({ data }) => {
+            const userId = data?.Id;
+            if (!userId) {
+              return throwError(() => new Error('ID de usuario no válido'));
+            }
 
-          // Obtener juegos y programaciones en paralelo
-          return this.gameInstanceService.getAllGameInstances(userId, this.filtroSeleccionado).pipe(
-            switchMap(juegosData =>
-              this.programmingGameService.getAllProgrammingGames().pipe(
-                // Pasar ambos resultados
-                map(programaciones => ({ juegosData, programaciones }))
-              )
-            ),
-            catchError(error =>
-              error.status === 404 ? of({ juegosData: [], programaciones: [] }) : throwError(() => error)
-            )
-          );
-        })
-      ).subscribe({
-        next: ({ juegosData, programaciones }) => this.procesarJuegos(juegosData, programaciones),
-        error: err => {
-          console.error('Error en la carga de juegos:', err);
-          this.error = err.message || 'Error al cargar los juegos';
-          this.cargando = false;
-        }
-      });
-
+            // Obtener juegos y programaciones en paralelo
+            return this.gameInstanceService
+              .getAllGameInstances(userId, this.filtroSeleccionado)
+              .pipe(
+                switchMap((juegosData) =>
+                  this.programmingGameService.getAllProgrammingGames().pipe(
+                    // Pasar ambos resultados
+                    map((programaciones) => ({ juegosData, programaciones }))
+                  )
+                ),
+                catchError((error) =>
+                  error.status === 404
+                    ? of({ juegosData: [], programaciones: [] })
+                    : throwError(() => error)
+                )
+              );
+          })
+        )
+        .subscribe({
+          next: ({ juegosData, programaciones }) =>
+            this.procesarJuegos(juegosData, programaciones),
+          error: (err) => {
+            console.error('Error en la carga de juegos:', err);
+            this.error = err.message || 'Error al cargar los juegos';
+            this.cargando = false;
+          },
+        });
     } catch (error) {
       console.error('Error inicial:', error);
       this.error = error instanceof Error ? error.message : 'Error desconocido';
@@ -173,37 +182,38 @@ export class JuegosListaComponent implements OnInit {
         estado: juego.Activated ? 'Activo' : 'Desactivado',
         vecesJugado: 0,
         puntuacion: 0,
-        programado
+        programado,
       });
     }
 
     this.juegos = Array.from(juegosUnicos.values());
 
     if (this.juegos.length === 0) {
-      this.error = `No tienes juegos de tipo ${this.filtroLabels[this.filtroSeleccionado]} disponibles`;
+      this.error = `No tienes juegos de tipo ${
+        this.filtroLabels[this.filtroSeleccionado]
+      } disponibles`;
     }
 
     this.cargando = false;
   }
 
-
   private mapearTipoJuego(gameType: string): string {
     const tipoMap: { [key: string]: string } = {
-      'hangman': 'Ahorcado',
-      'memory': 'Memoria',
-      'puzzle': 'Rompecabezas',
-      'solve_the_word': 'Pupiletras',
-      'all': 'Mixto'
+      hangman: 'Ahorcado',
+      memory: 'Memoria',
+      puzzle: 'Rompecabezas',
+      solve_the_word: 'Pupiletras',
+      all: 'Mixto',
     };
     return tipoMap[gameType] || 'Desconocido';
   }
   private obtenerIconoJuego(gameType: string): string {
     const iconoMap: { [key: string]: string } = {
-      'hangman': '🎯',
-      'memory': '🧠',
-      'puzzle': '🧩',
-      'solve_the_word': '🔤',
-      'all': '🎮'
+      hangman: '🎯',
+      memory: '🧠',
+      puzzle: '🧩',
+      solve_the_word: '🔤',
+      all: '🎮',
     };
     return iconoMap[gameType] || '🎮';
   }
@@ -216,7 +226,16 @@ export class JuegosListaComponent implements OnInit {
     this.menuAbierto = this.menuAbierto === id ? null : id;
   }
 
-  pprogramarJuego(id: number) {
+  verProgramaciones(id: number) {
+    console.log(`Ver programaciones del juego ${id}`);
+    this.menuAbierto = null;
+
+    this.router.navigate(['/juegos'], {
+      queryParams: { gameId: id },
+    });
+  }
+
+  programarJuego(id: number) {
     console.log(`Programar juego ${id}`);
     this.selectedGameId = id;
     this.showConfigModal = true;
@@ -226,10 +245,7 @@ export class JuegosListaComponent implements OnInit {
     document.addEventListener('click', this.cerrarMenus.bind(this));
   }
 
-
-  eliminarJuego(id: number) {
-  
-  }
+  eliminarJuego(id: number) {}
 
   editarJuego(id: number) {
     console.log(`Editar juego ${id}`);

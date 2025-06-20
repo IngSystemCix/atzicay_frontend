@@ -2,17 +2,21 @@
   <app-juegos-header></app-juegos-header>
   <app-juegos-categorias></app-juegos-categorias>
 
+  <!-- Tabs fijos -->
+  <div class="juegos-tabs-fixed">
+    <app-juegos-tabs
+      [tabActiva]="activeTab"
+      (tabChanged)="cambiarVista($event)"
+    >
+    </app-juegos-tabs>
+  </div>
+
+  <!-- Área de scroll para el contenido -->
   <div class="juegos-scroll-area">
-    <app-juegos-tabs (tabChanged)="cambiarVista($event)"></app-juegos-tabs>
-
-    @switch (activeTab) {
-      @case ('misJuegos') {
-        <app-juegos-lista [filtroActual]="filtroSeleccionado"></app-juegos-lista>
-      }
-
-      @case ('misProgramaciones') {
-        <app-my-programmings></app-my-programmings>
-      }
-    }
+    @switch (activeTab) { @case ('misJuegos') {
+    <app-juegos-lista [filtroActual]="filtroSeleccionado"></app-juegos-lista>
+    } @case ('misProgramaciones') {
+    <app-my-programmings [gameId]="gameIdSeleccionado"></app-my-programmings>
+    } }
   </div>
 </div>

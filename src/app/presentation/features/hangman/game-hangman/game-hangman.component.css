@@ -111,3 +111,104 @@ button:disabled {
         0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
         100% { transform: translateY(100vh) rotate(-270deg); opacity: 0; }
       }
+
+      /* Animación para el muñeco del ahorcado */
+@keyframes drawPart {
+  0% { 
+    stroke-dasharray: 0, 1000;
+    opacity: 0;
+  }
+  100% { 
+    stroke-dasharray: 1000, 0;
+    opacity: 1;
+  }
+}
+
+.hangman-part {
+  animation: drawPart 0.8s ease-in-out forwards;
+}
+
+.hangman-svg {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Efecto de shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake {
+  animation: shake 0.6s ease-in-out;
+}
+
+/* Animación para letras reveladas */
+@keyframes letterReveal {
+  0% { 
+    transform: scale(0) rotate(180deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(0deg);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.letter-reveal {
+  animation: letterReveal 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Mejoras para botones del teclado */
+.keyboard-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.keyboard-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.keyboard-button:active:not(:disabled)::before {
+  width: 100%;
+  height: 100%;
+}
+
+/* Efecto sparkle */
+@keyframes sparkle {
+  0%, 100% { 
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+.sparkle {
+  animation: sparkle 1s ease-in-out;
+}
+
+/* Tiempo con advertencia */
+@keyframes timePulse {
+  0%, 100% { color: inherit; }
+  50% { color: #EF4444; }
+}
+
+.time-warning {
+  animation: timePulse 1s ease-in-out infinite;
+}

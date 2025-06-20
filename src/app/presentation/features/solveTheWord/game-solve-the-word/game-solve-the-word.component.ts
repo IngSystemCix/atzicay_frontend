@@ -1,8 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
-import { GameConfigurationService, GameConfiguration } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
-
+import { ActivatedRoute, Router } from '@angular/router';
+import {
+  GameConfigurationService,
+  GameConfiguration,
+} from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import Swal from 'sweetalert2';
 interface WordCell {
   letter: string;
   isFound: boolean;
@@ -21,7 +24,7 @@ interface Word {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './game-solve-the-word.component.html',
-  styleUrl: './game-solve-the-word.component.css'
+  styleUrl: './game-solve-the-word.component.css',
 })
 export class GameSolveTheWordComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -37,67 +40,78 @@ export class GameSolveTheWordComponent implements OnInit {
   timer: any;
   selection: WordCell[] = [];
   directions = [
-    { row: -1, col: 0 },  // arriba
-    { row: -1, col: 1 },  // arriba-derecha
-    { row: 0, col: 1 },   // derecha
-    { row: 1, col: 1 },   // abajo-derecha
-    { row: 1, col: 0 },   // abajo
-    { row: 1, col: -1 },  // abajo-izquierda
-    { row: 0, col: -1 },  // izquierda
-    { row: -1, col: -1 }  // arriba-izquierda
+    { row: -1, col: 0 }, // arriba
+    { row: -1, col: 1 }, // arriba-derecha
+    { row: 0, col: 1 }, // derecha
+    { row: 1, col: 1 }, // abajo-derecha
+    { row: 1, col: 0 }, // abajo
+    { row: 1, col: -1 }, // abajo-izquierda
+    { row: 0, col: -1 }, // izquierda
+    { row: -1, col: -1 }, // arriba-izquierda
   ];
   isSelecting = false;
   loading = true;
   error = '';
   title = '';
   description = '';
+  isCompact = false;
 
+  toggleCompact() {
+    this.isCompact = !this.isCompact;
+  }
+  // Agregar esta línea después de la declaración de originalTimeLimit
   ngOnInit() {
     const id = Number(this.route.snapshot.params['id']);
-    if (id) {
+    if (id && !isNaN(id)) {
       this.loading = true;
       this.gameConfigService.getGameConfiguration(id).subscribe({
         next: (response) => {
-          console.log('Respuesta completa:', response); // Para debug
-          
+          console.log('Respuesta completa:', response);
+
           if ((response.success || response.data) && response.data) {
             this.title = response.data.title;
             this.description = response.data.description;
-            
-            const timeSetting = response.data.settings?.find((s: any) => 
-              s.key.toLowerCase() === 'time_limit'
+
+            const timeSetting = response.data.settings?.find(
+              (s: any) => s.key.toLowerCase() === 'time_limit'
             );
             this.timeLeft = timeSetting ? parseInt(timeSetting.value, 10) : 347;
-            
+            // ✅ GUARDAR EL TIEMPO ORIGINAL AQUÍ
+            this.originalTimeLimit = this.timeLeft;
+
             const rows = response.data.game_data?.rows || 12;
             const cols = response.data.game_data?.columns || rows || 12;
             this.gridRows = rows;
             this.gridCols = cols;
-            
+
+            this.updateGridSize();
+
             const wordsArr = response.data.game_data?.words || [];
-            this.words = wordsArr.map((w: any) => ({ 
-              text: w.word.toUpperCase(), 
-              found: false, 
-              orientation: w.orientation 
+            this.words = wordsArr.map((w: any) => ({
+              text: w.word.toUpperCase(),
+              found: false,
+              orientation: w.orientation,
             }));
             this.totalWords = this.words.length;
             this.wordsFound = 0;
-            
+
             this.initializeGrid();
             this.placeWordsOnGrid();
             this.fillRemainingCells();
             this.startTimer();
             this.loading = false;
           } else {
-            this.error = response.message || 'No se pudo cargar la configuración del juego';
+            this.showErrorAlert(
+              response.message || 'No se pudo cargar la configuración del juego'
+            );
             this.loading = false;
           }
         },
         error: (err) => {
           console.error('Error en suscripción:', err);
-          this.error = 'Error al cargar la configuración del juego';
+          this.showErrorAlert('Error al cargar la configuración del juego');
           this.loading = false;
-        }
+        },
       });
     } else {
       this.error = 'No se proporcionó un ID de juego válido';
@@ -115,40 +129,115 @@ export class GameSolveTheWordComponent implements OnInit {
         row.push({
           letter: '',
           isFound: false,
-          position: { row: i, col: j }
+          position: { row: i, col: j },
         });
       }
       this.grid.push(row);
     }
   }
 
+  private showWinAlert() {
+    Swal.fire({
+      title: '¡Felicidades!',
+      html: `
+        <div style="text-align: center;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+          <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+            Has encontrado todas las palabras en <strong>${this.formatTime(
+              347 - this.timeLeft
+            )}</strong>
+          </p>
+        </div>
+      `,
+      icon: 'success',
+      showCancelButton: true,
+      confirmButtonText: '🎮 Jugar de nuevo',
+      cancelButtonText: 'Continuar',
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#6b7280',
+      customClass: {
+        popup: 'animated bounceIn',
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.resetGame();
+      }
+    });
+  }
+
+  private showTimeUpAlert() {
+    Swal.fire({
+      title: '¡Tiempo agotado!',
+      html: `
+      <div style="text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">⏰</div>
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+          Encontraste <strong>${this.wordsFound}</strong> de <strong>${this.totalWords}</strong> palabras
+        </p>
+      </div>
+    `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '🔄 Intentar de nuevo',
+      cancelButtonText: 'Ver palabras',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      customClass: {
+        popup: 'animated bounceIn',
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.resetGame();
+      }
+    });
+  }
+
+  private showErrorAlert(message: string) {
+    Swal.fire({
+      title: 'Error',
+      text: message,
+      icon: 'error',
+      confirmButtonText: 'Reintentar',
+      confirmButtonColor: '#ef4444',
+    }).then(() => {
+      this.resetGame();
+    });
+  }
+
   placeWordsOnGrid() {
     console.log('Colocando palabras:', this.words); // Debug
-    
+
     for (const word of this.words) {
       let placed = false;
       let attempts = 0;
 
       // ✅ MAPEAR ORIENTACIONES DEL JSON A DIRECCIONES CORRECTAS
       const orientationMap: { [key: string]: { row: number; col: number } } = {
-        'HL': { row: 0, col: 1 },   // Horizontal Left to Right (normal)
-        'HR': { row: 0, col: 1 },   // Horizontal Right (igual que HL)
-        'VU': { row: 1, col: 0 },   // Vertical Up to Down (normal)
-        'VD': { row: 1, col: 0 },   // Vertical Down (igual que VU)
-        'DU': { row: 1, col: 1 },   // Diagonal Down-Right
-        'DD': { row: 1, col: 1 }    // Diagonal Down (igual que DU)
+        HL: { row: 0, col: 1 }, // Horizontal Left to Right (normal)
+        HR: { row: 0, col: 1 }, // Horizontal Right (igual que HL)
+        VU: { row: 1, col: 0 }, // Vertical Up to Down (normal)
+        VD: { row: 1, col: 0 }, // Vertical Down (igual que VU)
+        DU: { row: 1, col: 1 }, // Diagonal Down-Right
+        DD: { row: 1, col: 1 }, // Diagonal Down (igual que DU)
       };
 
-      const direction = orientationMap[word.orientation || 'HL'] || { row: 0, col: 1 };
+      const direction = orientationMap[word.orientation || 'HL'] || {
+        row: 0,
+        col: 1,
+      };
 
       while (!placed && attempts < 100) {
         attempts++;
 
         // ✅ CALCULAR POSICIÓN INICIAL CONSIDERANDO EL TAMAÑO DE LA PALABRA
-        const maxStartRow = direction.row === 0 ? this.gridRows - 1 : 
-                          this.gridRows - word.text.length;
-        const maxStartCol = direction.col === 0 ? this.gridCols - 1 : 
-                          this.gridCols - word.text.length;
+        const maxStartRow =
+          direction.row === 0
+            ? this.gridRows - 1
+            : this.gridRows - word.text.length;
+        const maxStartCol =
+          direction.col === 0
+            ? this.gridCols - 1
+            : this.gridCols - word.text.length;
 
         const startRow = Math.floor(Math.random() * (maxStartRow + 1));
         const startCol = Math.floor(Math.random() * (maxStartCol + 1));
@@ -177,7 +266,12 @@ export class GameSolveTheWordComponent implements OnInit {
     }
   }
 
-  canPlaceWord(word: string, startRow: number, startCol: number, direction: { row: number; col: number }): boolean {
+  canPlaceWord(
+    word: string,
+    startRow: number,
+    startCol: number,
+    direction: { row: number; col: number }
+  ): boolean {
     for (let i = 0; i < word.length; i++) {
       const row = startRow + i * direction.row;
       const col = startCol + i * direction.col;
@@ -196,15 +290,14 @@ export class GameSolveTheWordComponent implements OnInit {
     return true;
   }
 
-
- placeFallbackWord(word: Word) {
+  placeFallbackWord(word: Word) {
     console.log(`Colocando palabra fallback: ${word.text}`);
-    
+
     // ✅ BUSCAR PRIMERA POSICIÓN HORIZONTAL DISPONIBLE
     for (let row = 0; row < this.gridRows; row++) {
       for (let col = 0; col <= this.gridCols - word.text.length; col++) {
         let canPlace = true;
-        
+
         // Verificar si se puede colocar horizontalmente
         for (let i = 0; i < word.text.length; i++) {
           const currentLetter = this.grid[row][col + i].letter;
@@ -221,17 +314,20 @@ export class GameSolveTheWordComponent implements OnInit {
             positions.push({ row, col: col + i });
           }
           word.positions = positions;
-          console.log(`Palabra fallback "${word.text}" colocada en:`, positions);
+          console.log(
+            `Palabra fallback "${word.text}" colocada en:`,
+            positions
+          );
           return;
         }
       }
     }
-    
+
     // ✅ SI NO SE PUEDE COLOCAR HORIZONTALMENTE, INTENTAR VERTICALMENTE
     for (let col = 0; col < this.gridCols; col++) {
       for (let row = 0; row <= this.gridRows - word.text.length; row++) {
         let canPlace = true;
-        
+
         for (let i = 0; i < word.text.length; i++) {
           const currentLetter = this.grid[row + i][col].letter;
           if (currentLetter !== '' && currentLetter !== word.text[i]) {
@@ -247,7 +343,10 @@ export class GameSolveTheWordComponent implements OnInit {
             positions.push({ row: row + i, col });
           }
           word.positions = positions;
-          console.log(`Palabra fallback vertical "${word.text}" colocada en:`, positions);
+          console.log(
+            `Palabra fallback vertical "${word.text}" colocada en:`,
+            positions
+          );
           return;
         }
       }
@@ -270,13 +369,13 @@ export class GameSolveTheWordComponent implements OnInit {
     if (this.timer) {
       clearInterval(this.timer);
     }
-    
+
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
       } else {
         clearInterval(this.timer);
-        // Manejo de fin de tiempo
+        this.showTimeUpAlert();
       }
     }, 1000);
   }
@@ -295,60 +394,87 @@ export class GameSolveTheWordComponent implements OnInit {
   onCellMouseOver(cell: WordCell) {
     if (!this.isSelecting) return;
 
-    // Si es la primera celda, simplemente la agregamos
-    if (this.selection.length === 0) {
-      this.selection.push(cell);
+    if (
+      this.selection.length === 0 ||
+      (this.selection.length === 1 && this.selection[0] === cell)
+    ) {
+      if (!this.selection.includes(cell)) {
+        this.selection = [cell];
+      }
       return;
     }
 
     const firstCell = this.selection[0];
-    const lastCell = this.selection[this.selection.length - 1];
 
-    // Calcular dirección entre la primera y última celda seleccionada
-    const direction = this.calculateDirection(firstCell, lastCell);
+    const rowDiff = cell.position.row - firstCell.position.row;
+    const colDiff = cell.position.col - firstCell.position.col;
 
-    // Verificar si la nueva celda continúa en la misma dirección
-    if (this.isInDirection(lastCell, cell, direction)) {
-      // Verificar que no esté ya seleccionado
-      if (!this.selection.some(c =>
-        c.position.row === cell.position.row &&
-        c.position.col === cell.position.col)) {
-        this.selection.push(cell);
-      }
-    } else {
-      // Si no está en la misma dirección, verificar si forma nueva dirección con la primera celda
-      const newDirection = this.calculateDirection(firstCell, cell);
-      if (this.isValidDirection(newDirection) &&
-        Math.abs(cell.position.row - firstCell.position.row) ===
-        Math.abs(cell.position.col - firstCell.position.col) ||
-        cell.position.row === firstCell.position.row ||
-        cell.position.col === firstCell.position.col) {
-        // Reiniciar selección con la nueva dirección válida
-        this.selection = [firstCell, cell];
+    const isHorizontal = rowDiff === 0;
+    const isVertical = colDiff === 0;
+    const isDiagonal = Math.abs(rowDiff) === Math.abs(colDiff);
+
+    if (isHorizontal || isVertical || isDiagonal) {
+      this.selection = [firstCell];
+
+      const stepRow = rowDiff === 0 ? 0 : rowDiff / Math.abs(rowDiff);
+      const stepCol = colDiff === 0 ? 0 : colDiff / Math.abs(colDiff);
+
+      let currentRow = firstCell.position.row + stepRow;
+      let currentCol = firstCell.position.col + stepCol;
+
+      while (
+        currentRow !== cell.position.row + stepRow ||
+        currentCol !== cell.position.col + stepCol
+      ) {
+        if (
+          currentRow >= 0 &&
+          currentRow < this.gridRows &&
+          currentCol >= 0 &&
+          currentCol < this.gridCols
+        ) {
+          this.selection.push(this.grid[currentRow][currentCol]);
+        }
+
+        currentRow += stepRow;
+        currentCol += stepCol;
       }
     }
   }
 
-  private calculateDirection(start: WordCell, end: WordCell): { row: number, col: number } {
+  updateGridSize() {
+    const size = Math.max(this.gridRows, this.gridCols);
+    this.gridRows = size;
+    this.gridCols = size;
+  }
+
+  private calculateDirection(
+    start: WordCell,
+    end: WordCell
+  ): { row: number; col: number } {
     const rowDiff = end.position.row - start.position.row;
     const colDiff = end.position.col - start.position.col;
 
     return {
       row: rowDiff !== 0 ? rowDiff / Math.abs(rowDiff) : 0,
-      col: colDiff !== 0 ? colDiff / Math.abs(colDiff) : 0
+      col: colDiff !== 0 ? colDiff / Math.abs(colDiff) : 0,
     };
   }
 
-  private isInDirection(from: WordCell, to: WordCell, direction: { row: number, col: number }): boolean {
-    return to.position.row === from.position.row + direction.row &&
-      to.position.col === from.position.col + direction.col;
+  private isInDirection(
+    from: WordCell,
+    to: WordCell,
+    direction: { row: number; col: number }
+  ): boolean {
+    return (
+      to.position.row === from.position.row + direction.row &&
+      to.position.col === from.position.col + direction.col
+    );
   }
 
-  private isValidDirection(direction: { row: number, col: number }): boolean {
+  private isValidDirection(direction: { row: number; col: number }): boolean {
     // Todas las direcciones son válidas (horizontal, vertical y diagonal)
     return Math.abs(direction.row) <= 1 && Math.abs(direction.col) <= 1;
   }
-
 
   onCellMouseUp() {
     this.isSelecting = false;
@@ -358,31 +484,28 @@ export class GameSolveTheWordComponent implements OnInit {
       return;
     }
 
-    const selectedWord = this.selection.map(cell => cell.letter).join('');
+    const selectedWord = this.selection.map((cell) => cell.letter).join('');
     const reversedWord = selectedWord.split('').reverse().join('');
 
-    // Buscar palabra en ambas direcciones
-    const foundWord = this.words.find(word =>
-      !word.found &&
-      (word.text === selectedWord || word.text === reversedWord)
+    const foundWord = this.words.find(
+      (word) =>
+        !word.found &&
+        (word.text === selectedWord || word.text === reversedWord)
     );
 
     if (foundWord) {
       foundWord.found = true;
       this.wordsFound++;
 
-      // Marcar todas las celdas de la palabra como encontradas
       for (const cell of this.selection) {
         cell.isFound = true;
       }
 
-      // Guardar las posiciones para referencia futura
-      foundWord.positions = this.selection.map(cell => ({
+      foundWord.positions = this.selection.map((cell) => ({
         row: cell.position.row,
-        col: cell.position.col
+        col: cell.position.col,
       }));
     } else {
-      // Si no es una palabra válida, desmarcar las celdas
       for (const cell of this.selection) {
         if (!this.cellBelongsToFoundWord(cell)) {
           cell.isFound = false;
@@ -392,9 +515,9 @@ export class GameSolveTheWordComponent implements OnInit {
 
     this.selection = [];
 
-    // Comprobar si se completó el juego
     if (this.wordsFound === this.totalWords) {
       clearInterval(this.timer);
+      this.showWinAlert(); 
     }
   }
 
@@ -404,12 +527,20 @@ export class GameSolveTheWordComponent implements OnInit {
     }
   }
 
-  isAligned(firstCell: WordCell, currentCell: WordCell, length: number): boolean {
+
+  isAligned(
+    firstCell: WordCell,
+    currentCell: WordCell,
+    length: number
+  ): boolean {
     for (const direction of this.directions) {
       const expectedRow = firstCell.position.row + (length - 1) * direction.row;
       const expectedCol = firstCell.position.col + (length - 1) * direction.col;
 
-      if (expectedRow === currentCell.position.row && expectedCol === currentCell.position.col) {
+      if (
+        expectedRow === currentCell.position.row &&
+        expectedCol === currentCell.position.col
+      ) {
         return true;
       }
     }
@@ -429,20 +560,13 @@ export class GameSolveTheWordComponent implements OnInit {
     return false;
   }
 
-
   resetGame() {
     this.wordsFound = 0;
-    
-    // ✅ RESTAURAR EL TIEMPO ORIGINAL CONFIGURADO
-    const timeSetting = this.gameConfigService.getGameConfiguration(
-      Number(this.route.snapshot.params['id'])
-    );
-    // Alternativamente, guardar el tiempo original en una variable
-    
     this.selection = [];
     this.isSelecting = false;
+    this.words.forEach((word) => (word.found = false));
 
-    this.words.forEach(word => word.found = false);
+    this.timeLeft = this.originalTimeLimit;
 
     this.initializeGrid();
     this.placeWordsOnGrid();

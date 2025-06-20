@@ -1,84 +1,237 @@
-<div class="flex flex-col items-center w-full min-h-screen bg-purple-50 p-4">
-  <h1 class="text-2xl font-bold text-purple-500 mb-4">Encontrar todas las palabras ocultas en la sopa de letras</h1>
+  <div class="w-full max-w-full flex flex-col xl:flex-row gap-6 overflow-y-auto">
+  @if (loading) {
+  <div class="flex flex-col items-center justify-center min-h-[400px]">
+    <div
+      class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mb-4"
+    ></div>
+    <p class="text-purple-600 text-lg">Cargando juego...</p>
+  </div>
+  }
+  @if (!loading && !error) {
+  <div class="w-full flex flex-col xl:flex-row gap-4 m-4">
+    <div class="w-full xl:w-3/4 flex flex-col">
+      <div
+        class="bg-white rounded-lg shadow-md mb-4 transition-all duration-300"
+        [class.p-2]="isCompact"
+        [class.p-4]="!isCompact"
+      >
+        <button
+          class="w-full flex items-center justify-between p-2 hover:bg-purple-50 rounded-lg transition-colors"
+          (click)="toggleCompact()"
+        >
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg md:text-xl font-bold text-purple-600">
+              {{ title || "Sopa de Letras" }}
+            </h1>
+            <span *ngIf="isCompact" class="text-sm text-purple-500 font-medium">
+              {{ wordsFound }}/{{ totalWords }} - {{ formatTime(timeLeft) }}
+            </span>
+          </div>
 
-  <div class="w-full max-w-4xl flex flex-col lg:flex-row gap-4">
-    <!-- Información del juego -->
-    <div class="w-full lg:w-3/4 flex flex-col">
-      <div class="flex justify-between items-center mb-2">
-        <div class="text-purple-600">
-          Palabras encontradas: {{wordsFound}}/{{totalWords}}
-        </div>
-        <div class="text-purple-600">
-          Tiempo: {{formatTime(timeLeft)}}
-        </div>
-      </div>
+          <div class="text-purple-500">
+            <svg
+              class="w-5 h-5 transition-transform duration-200"
+              [class.rotate-180]="!isCompact"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </div>
+        </button>
 
-      <!-- Barra de progreso -->
-      <div class="w-full h-2 mb-4 bg-purple-200 rounded-full">
-        <div class="h-full bg-purple-500 rounded-full"
-             [style.width]="((347 - timeLeft) / 347 * 100) + '%'"></div>
-      </div>
+        <div
+          class="overflow-hidden transition-all duration-300"
+          [class.max-h-0]="isCompact"
+          [class.max-h-96]="!isCompact"
+        >
+          <div class="pt-2">
+            <p class="text-purple-500 text-sm md:text-base text-center mb-4">
+              {{ description || "Encuentra todas las palabras ocultas" }}
+            </p>
 
-      <!-- Cuadrícula de sopa de letras -->
-      <div class="grid grid-cols-12 gap-1 p-2 bg-white rounded-lg shadow-md select-none">
-        @for (row of grid; track $index) {
-          @for (cell of row; track $index) {
-            <div class="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center border rounded-md text-lg font-medium cursor-pointer transition-colors"
-                 [class.bg-purple-200]="cell.isFound"
-                 [class.bg-purple-300]="selection.includes(cell)"
-                 [class.text-purple-600]="cell.isFound"
-                 [class.font-bold]="cell.isFound"
-                 [class.border-purple-500]="cell.isFound"
-                 [class.border-2]="cell.isFound"
-                 (mousedown)="onCellMouseDown(cell)"
-                 (mouseover)="onCellMouseOver(cell)"
-                 (mouseup)="onCellMouseUp()"
-                 (mouseleave)="onCellMouseLeave()">
-              {{cell.letter}}
+            <div
+              class="flex flex-col md:flex-row justify-between items-center gap-4"
+            >
+              <div
+                class="flex flex-col md:flex-row gap-4 text-center md:text-left"
+              >
+                <div class="bg-purple-50 px-4 py-2 rounded-lg">
+                  <div class="text-purple-600 font-semibold">
+                    Palabras encontradas
+                  </div>
+                  <div class="text-2xl font-bold text-purple-700">
+                    {{ wordsFound }}/{{ totalWords }}
+                  </div>
+                </div>
+
+                <div class="bg-purple-50 px-4 py-2 rounded-lg">
+                  <div class="text-purple-600 font-semibold">
+                    Tiempo restante
+                  </div>
+                  <div class="text-2xl font-bold text-purple-700">
+                    {{ formatTime(timeLeft) }}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                class="bg-purple-500 text-white py-2 px-6 rounded-lg hover:bg-purple-600 transition-colors font-medium"
+                (click)="resetGame()"
+              >
+                🔄 Reiniciar
+              </button>
             </div>
-          }
-        }
+
+            <div class="mt-4">
+              <div class="flex justify-between text-sm text-purple-600 mb-2">
+                <span>Progreso del juego</span>
+                <span>{{ ((wordsFound / totalWords) * 100).toFixed(0) }}%</span>
+              </div>
+              <div
+                class="w-full h-4 bg-purple-200 rounded-full overflow-hidden"
+              >
+                <div
+                  class="h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full transition-all duration-500 ease-out"
+                  [style.width]="(wordsFound / totalWords) * 100 + '%'"
+                ></div>
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <div class="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Tiempo transcurrido</span>
+                <span>{{ formatTime(347 - timeLeft) }}</span>
+              </div>
+              <div class="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-gradient-to-r from-green-500 to-yellow-500 rounded-full transition-all duration-1000"
+                  [style.width]="((347 - timeLeft) / 347) * 100 + '%'"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Mensaje de felicitaciones (abajo del juego) -->
-      @if (wordsFound === totalWords) {
-        <div class="mt-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-center">
-          <h2 class="text-xl font-bold mb-2">¡Felicidades!</h2>
-          <p class="mb-3">Has encontrado todas las palabras en {{formatTime(347 - timeLeft)}}.</p>
-          <button class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"
-                  (click)="resetGame()">
-            Jugar de nuevo
-          </button>
+      <div class="bg-white rounded-xl shadow-lg p-2">
+        <div
+          class="grid gap-1 p-4 bg-gradient-to-br from-purple-25 to-purple-50 rounded-lg select-none mx-auto border-2 border-purple-200"
+          [style.grid-template-columns]="
+            'repeat(' + gridCols + ', minmax(0, 1fr))'
+          "
+          [style.aspect-ratio]="'1 / 1'"
+          [style.max-width]="'min(80vw, 600px)'"
+        >
+          @for (row of grid; track $index) { @for (cell of row; track $index) {
+          <div
+            class="flex items-center justify-center border border-purple-200 rounded-md text-sm md:text-base lg:text-lg font-bold cursor-pointer transition-all duration-200 aspect-square hover:scale-105 hover:shadow-md"
+            [class.bg-green-200]="cell.isFound"
+            [class.bg-yellow-300]="selection.includes(cell) && !cell.isFound"
+            [class.text-green-700]="cell.isFound"
+            [class.text-purple-700]="!cell.isFound && !selection.includes(cell)"
+            [class.text-purple-800]="selection.includes(cell) && !cell.isFound"
+            [class.font-black]="cell.isFound"
+            [class.border-green-400]="cell.isFound"
+            [class.border-yellow-400]="
+              selection.includes(cell) && !cell.isFound
+            "
+            [class.border-2]="cell.isFound || selection.includes(cell)"
+            [class.shadow-md]="cell.isFound"
+            [class.bg-white]="!cell.isFound && !selection.includes(cell)"
+            (mousedown)="onCellMouseDown(cell)"
+            (mouseover)="onCellMouseOver(cell)"
+            (mouseup)="onCellMouseUp()"
+            (mouseleave)="onCellMouseLeave()"
+          >
+            {{ cell.letter }}
+          </div>
+          } }
         </div>
-      }
-
-      <!-- Mensaje de tiempo agotado (abajo del juego) -->
-      @if (timeLeft === 0 && wordsFound < totalWords) {
-        <div class="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-center">
-          <h2 class="text-xl font-bold mb-2">¡Tiempo agotado!</h2>
-          <p class="mb-3">Encontraste {{wordsFound}} de {{totalWords}} palabras.</p>
-          <button class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
-                  (click)="resetGame()">
-            Intentar de nuevo
-          </button>
-        </div>
-      }
+      </div>
     </div>
 
-    <!-- Lista de palabras a encontrar -->
-    <div class="w-full lg:w-1/4">
-      <div class="p-4 bg-white rounded-lg shadow-md">
-        <h3 class="text-purple-500 mb-2">Palabras a encontrar:</h3>
-        <div class="space-y-2">
+    <div class="w-full xl:w-1/4">
+      <div class="bg-white rounded-xl shadow-lg p-6 sticky top-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-purple-600">
+            Palabras a encontrar
+          </h3>
+          <div
+            class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold"
+          >
+            {{ wordsFound }}/{{ totalWords }}
+          </div>
+        </div>
+
+        <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
           @for (word of words; track word.text) {
-            <div class="p-2 rounded-lg text-center bg-purple-100"
-                 [class.bg-purple-300]="word.found"
-                 [class.line-through]="word.found">
-              {{word.text}} <span class="text-xs text-purple-400">({{word.orientation}})</span>
+          <div
+            class="p-4 rounded-lg text-center transition-all duration-300 border-2"
+            [class.bg-purple-50]="!word.found"
+            [class.border-purple-200]="!word.found"
+            [class.bg-green-50]="word.found"
+            [class.border-green-400]="word.found"
+            [class.line-through]="word.found"
+            [class.text-green-700]="word.found"
+            [class.text-purple-700]="!word.found"
+          >
+            <div class="font-bold text-lg">{{ word.text }}</div>
+            <div class="text-xs mt-1 opacity-75">
+              <span
+                class="bg-purple-100 text-purple-600 px-2 py-1 rounded-full"
+              >
+                {{ word.orientation }}
+              </span>
             </div>
+            @if (word.found) {
+            <div class="text-green-600 mt-2 text-sm">✓ Encontrada</div>
+            }
+          </div>
           }
+        </div>
+
+        <div class="mt-6 pt-4 border-t-2 border-purple-100">
+          <div class="space-y-3">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-purple-600 font-medium">Progreso:</span>
+              <span class="font-bold text-purple-700"
+                >{{ ((wordsFound / totalWords) * 100).toFixed(0) }}%</span
+              >
+            </div>
+
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-purple-600 font-medium">Tiempo usado:</span>
+              <span class="font-bold text-purple-700">{{
+                formatTime(347 - timeLeft)
+              }}</span>
+            </div>
+
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-purple-600 font-medium">Restantes:</span>
+              <span class="font-bold text-purple-700"
+                >{{ totalWords - wordsFound }} palabras</span
+              >
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <div class="w-full h-2 bg-purple-200 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-purple-500 rounded-full transition-all duration-500"
+                [style.width]="(wordsFound / totalWords) * 100 + '%'"
+              ></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  }
 </div>

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
 
 interface Card {
   id: number;
@@ -24,6 +26,8 @@ export class GameMemoryComponent implements OnInit {
   gameCompleted = false;
   timer = 0;
   timerInterval: any;
+  loading = false;
+  error: string | null = null;
 
   planets = [
     { name: 'Júpiter', image: 'assets/jupiter.jpg' },
@@ -36,8 +40,31 @@ export class GameMemoryComponent implements OnInit {
     { name: 'Marte', image: 'assets/marte.jpg' }
   ];
 
+  constructor(
+    private route: ActivatedRoute,
+    private gameConfigService: GameConfigurationService
+  ) {}
+
   ngOnInit() {
-    this.initializeGame();
+    const id = Number(this.route.snapshot.params['id']);
+    if (id && !isNaN(id)) {
+      this.loading = true;
+      this.gameConfigService.getGameConfiguration(id).subscribe({
+        next: (response) => {
+          // Aquí puedes manejar la respuesta del servicio
+          console.log('Configuración del juego:', response);
+          this.initializeGame(); // Inicializa el juego con la configuración recibida
+        },
+        error: (err) => {
+          console.error('Error al obtener la configuración del juego:', err);
+          this.error = 'Error al cargar la configuración del juego';
+          this.loading = false;
+        }
+      });
+    } else {
+      this.error = 'No se proporcionó un ID de juego válido';
+      this.loading = false;
+    }
   }
 
   initializeGame() {

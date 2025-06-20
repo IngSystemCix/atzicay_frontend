@@ -26,24 +26,25 @@ export class GameService {
   }
 
   // Observable que se actualiza automáticamente cuando cambia el limit
-  getAllGames(limit: number, offset: number): Observable<Game[]> {
+  getAllGames(limit: number): Observable<Game[]> {
     const token = sessionStorage.getItem('access_token');
-    const headers = token
-      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
-      : undefined;
-
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
     return this.http
-      .get<ApiResponse<Game[]>>(
-        `${this.apiUrl}game-instances/all?limit=${limit}&offset=${offset}`,
-        headers ? { headers } : {}
+      .get<any>(
+        `${this.apiUrl}game-instances/all/${limit}`,
+        { headers }
       )
       .pipe(
-        map((response: ApiResponse<Game[]>) =>
-          response.data.map((game: Game) => ({
+        map((response: any) => {
+          const dataArr = Array.isArray(response?.data) ? response.data : [];
+          return dataArr.map((game: Game) => ({
             ...game,
             image: this.imageMap[game.type] || 'assets/default-game.png',
-          }))
-        )
+          }));
+        })
       );
   }
 }

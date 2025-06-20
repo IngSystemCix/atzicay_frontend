@@ -20,11 +20,13 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
-    pathMatch: 'full'
+    pathMatch: 'full',
+    title: 'Login'
   },
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    title: 'Login'
   },
   {
     path: '',
@@ -32,15 +34,18 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        component: DashboardComponent
+        component: DashboardComponent,
+        title:"Dashboard"
       },
       {
         path: 'juegos',
-        component: JuegosComponent
+        component: JuegosComponent,
+        title: "Juegos"
       },
       {
         path: 'perfil',
-        component: ProfileComponent
+        component: ProfileComponent,
+        title: "Perfil"
       },
 
 
@@ -48,10 +53,12 @@ export const routes: Routes = [
       {
         path: 'juegos/hangman',
         component: LayoutHangmanComponent,
+        title:"Crear Ahorcado"
       },
       {
         path: 'juegos/jugar-hangman/:id',
-         component: GameHangmanComponent
+         component: GameHangmanComponent,
+         title:"Juego de ahorcado"
       },
 
 
@@ -59,11 +66,13 @@ export const routes: Routes = [
 
       {
         path: 'juegos/puzzle/jugar',
-        component: GamePuzzleComponent
+        component: GamePuzzleComponent,
+        title:"Juego de Rompezabezas"
       },
       {
         path: 'juegos/puzzle/create',
-        component: LayoutsPuzzleComponent
+        component: LayoutsPuzzleComponent,
+        title:"Crear Rompezabezas"
       },
 
 
@@ -71,11 +80,13 @@ export const routes: Routes = [
 
       {
         path: 'juegos/memory/jugar',
-        component: GameMemoryComponent
+        component: GameMemoryComponent,
+        title:"Juego de Memoria"
       },
       {
         path: 'juegos/memory/create',
-        component: LayoutsMemoryComponent
+        component: LayoutsMemoryComponent,
+        title:"Crear Memoria"
       },
 
 
@@ -83,26 +94,31 @@ export const routes: Routes = [
 
       {
         path: 'juegos/solve-The-Word/jugar',
-        component: GamePuzzleComponent
+        component: GamePuzzleComponent,
+        title:"Juego de Pupiletras"
       },
       {
         path: 'juegos/jugar-solve-the-word/:id',
-        component: GameSolveTheWordComponent
+        component: GameSolveTheWordComponent,
+        title:"Juego de Pupiletras"
       },
       {
         path: 'juegos/solve-The-Word/create',
-        component: LayoutsSolveTheWordComponent
+        component: LayoutsSolveTheWordComponent,
+        title:"Crear Pupiletras"
       },
 
       {
         path: 'juegos/editar/:id',
-        component: GameConfigurationComponent
+        component: GameConfigurationComponent,
+        title: "Editar Juego"
       },
 
 
       {
         path: 'juegos/configuracion/:id',
-        component: ConfigGameComponent
+        component: ConfigGameComponent,
+        title: "Configuración del Juego"
       }
     ]
   }
