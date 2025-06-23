@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
-import { AuthService } from '@auth0/auth0-angular';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ModalEditUsersComponent } from '../../shared/modal-edit-users/modal-edit-users.component';
-import { UserService } from '../../../core/infrastructure/api/user.service';
-import { CountriesService } from '../../../core/infrastructure/api/countries.service';
-import { Country } from '../../../core/domain/interface/countries';
-import { GameInstanceService } from '../../../core/infrastructure/api/GameInstance/game-instance.service';
+import { ProfileService } from '../../../core/infrastructure/api/profile.service';
+import { CountryService } from '../../../core/infrastructure/api/country.service';
+import { Profile } from '../../../core/domain/model/profile.model';
+import { Country } from '../../../core/domain/model/country.model';
+import { AuthService } from '../../../core/infrastructure/api/auth.service';
+import { AuthService as Auth0Service } from '@auth0/auth0-angular';
+import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 
 @Component({
   selector: 'app-profile',
@@ -15,146 +17,130 @@ import { GameInstanceService } from '../../../core/infrastructure/api/GameInstan
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css',
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   countries: Country[] = [];
-  user: any = {}; // Objeto para almacenar los datos del usuario
+  user: Profile | null = null;
   private currentUserId: number | null = null;
   picture: string = '';
-  totalGamesCreated: number = 0;
-  gameCounts: any = {}; 
+  showModal = false;
+  public showNoUserMessage: boolean = false;
+
   constructor(
-    public auth: AuthService,
-    private userService: UserService,
-    private countriesService: CountriesService,
-    private gameInstanceService: GameInstanceService 
+    private authService: AuthService,
+    private profileService: ProfileService,
+    private countryService: CountryService,
+    private auth0: Auth0Service,
+    private userSession: UserSessionService
+  ) {}
 
-  ) {
-    this.loadCountries().then(() => {
-      this.auth.user$.subscribe((auth0User) => {
-        if (auth0User?.email) {
-          // Guardar la foto de Auth0
-          this.picture = auth0User.picture || 'assets/default-profile.png';
-
-          this.userService
-            .findUserByEmail(auth0User.email)
-            .subscribe((response) => {
-              if (response && response.data) {
-                this.currentUserId = response.data.Id;
-                this.loadUserProfile(response.data.Id);
+  ngOnInit(): void {
+    this.loadCountries();
+    const auth0UserRaw = sessionStorage.getItem('auth0_user');
+    if (auth0UserRaw) {
+      try {
+        const auth0User = JSON.parse(auth0UserRaw);
+        this.picture = auth0User.picture || '';
+      } catch (e) {
+        this.picture = '';
+      }
+    }
+    const userId = this.userSession.getUserId();
+    if (userId !== null) {
+      this.currentUserId = userId;
+      this.loadUserProfile(userId);
+    } else {
+      this.auth0.user$.subscribe((user) => {
+        const email = user?.email;
+        if (email) {
+          this.profileService.getUserIdByEmail(email).subscribe({
+            next: (res) => {
+              if (res && res.data && res.data.user_id) {
+                this.userSession.setUserId(res.data.user_id);
+                this.currentUserId = res.data.user_id;
+                this.loadUserProfile(res.data.user_id);
+              } else {
+                this.showNoUserMessage = true;
+              }
+            },
+            error: (err) => {
+              console.error('No se pudo obtener el id del usuario por email', err);
+              this.showNoUserMessage = true;
+            }
+          });
+        } else {
+          // Si no hay email, intenta obtenerlo desde el backend usando el token guardado
+          const token = sessionStorage.getItem('token_jwt');
+          if (token) {
+            this.authService.refreshToken(token).subscribe({
+              next: (res) => {
+                if (res && res.user && res.user.Id) {
+                  this.userSession.setUserId(res.user.Id);
+                  this.currentUserId = res.user.Id;
+                  this.loadUserProfile(res.user.Id);
+                }
+              },
+              error: (err) => {
+                console.error('No se pudo refrescar el token ni obtener el id del usuario', err);
+                this.showNoUserMessage = true;
               }
             });
-        } else {
-          // Si no hay usuario de Auth0, intentar obtener de sessionStorage
-          const auth0UserRaw = sessionStorage.getItem('auth0_user');
-          if (auth0UserRaw) {
-            try {
-              const storedAuth0User = JSON.parse(auth0UserRaw);
-              this.picture =
-                storedAuth0User.picture || 'assets/default-profile.png';
-            } catch (e) {
-              this.picture = 'assets/default-profile.png';
-            }
+          } else {
+            this.showNoUserMessage = true;
           }
         }
       });
-    });
+    }
   }
 
-  private loadCountries(): Promise<void> {
-    return new Promise((resolve) => {
-      this.countriesService.getAllCountries().subscribe((data) => {
-        this.countries = data;
-        resolve();
-      });
+  private loadCountries(): void {
+    this.countryService.getAllCountries().subscribe((res) => {
+      this.countries = res.data;
     });
   }
 
   private loadUserProfile(userId: number) {
-    this.userService.getUserById(userId).subscribe((response) => {
-      if (response && response.data) {
-        const countryId = response.data.CountryId;
-
-        const countryName =
-          this.countries.find((c) => c.Id === countryId)?.Name ||
-          'No especificado';
-
-        this.user = {
-          id: response.data.Id,
-          name: response.data.Name,
-          lastName: response.data.LastName,
-          email: response.data.Email,
-          gender: response.data.Gender,
-          countryId: countryId,
-          countryName: countryName,
-          city: response.data.City,
-          birthdate: response.data.Birthdate,
-          created_at: this.formatDate(response.data.CreatedAt),
-          activated: response.data.Activated,
-          fullName: `${response.data.Name} ${response.data.LastName}`,
-          formattedBirthdate: this.formatDate(response.data.Birthdate),
-          picture: this.picture,
-          games_created: 0
-        };
-         this.loadGameCounts(userId);
-      }
+    this.profileService.getUserProfile(userId).subscribe({
+      next: (res) => {
+        console.log('Respuesta del perfil:', res);
+        if (res && res.data) {
+          this.user = res.data;
+          this.showNoUserMessage = false;
+        } else {
+          this.user = null;
+          this.showNoUserMessage = true;
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar perfil:', error);
+        if (error.status === 404) {
+          console.error('Usuario no encontrado con ID:', userId);
+        }
+        this.user = null;
+        this.showNoUserMessage = true;
+      },
     });
   }
 
   onUserUpdated(updatedUserData: any) {
     if (this.currentUserId) {
-      // Preparar datos para el API
-      const userDto = {
-        Activated: updatedUserData.activated || true,
-        Email: updatedUserData.email,
-        Name: updatedUserData.name,
-        LastName: updatedUserData.lastName,
-        Gender: updatedUserData.gender,
-        CountryId: updatedUserData.countryId,
-        City: updatedUserData.city,
-        Birthdate: updatedUserData.birthdate,
+      const payload = {
+        name: updatedUserData.name,
+        last_name: updatedUserData.last_name,
+        gender: updatedUserData.gender,
+        birthdate: updatedUserData.birthdate,
+        city: updatedUserData.city,
+        country_id: updatedUserData.country_id,
       };
-
-      this.userService
-        .updateUser(this.currentUserId, userDto)
-        .subscribe((response) => {
-          if (response && response.status === 'success') {
-            // Recargar los datos del perfil
-            this.loadUserProfile(this.currentUserId!);
+      this.profileService
+        .updateUserProfile(this.currentUserId, payload)
+        .subscribe((res) => {
+          if (res && res.success && this.currentUserId !== null) {
+            this.loadUserProfile(this.currentUserId);
             this.cerrarModal();
-            // Opcional: mostrar mensaje de éxito
-            console.log('Usuario actualizado correctamente');
-          } else {
-            console.error('Error al actualizar usuario');
           }
         });
     }
   }
-
-  private loadGameCounts(userId: number) {
-  this.gameInstanceService.getGameCountsByProfessor(userId).subscribe(
-    (counts) => {
-      this.gameCounts = counts;
-      // Calcular el total sumando todos los valores
-      this.totalGamesCreated = Object.values(counts).reduce((total: number, count: any) => total + count, 0);
-      
-      // Actualizar el objeto user con el total
-      if (this.user) {
-        this.user.games_created = this.totalGamesCreated;
-      }
-    },
-    (error) => {
-      console.error('Error al cargar conteos de juegos:', error);
-      this.gameCounts = {};
-      this.totalGamesCreated = 0;
-    }
-  );
-}
-
-  private formatDate(dateString: string): string {
-    return dateString.split('T')[0];
-  }
-
-  showModal = false;
 
   abrirModal() {
     this.showModal = true;
@@ -162,5 +148,12 @@ export class ProfileComponent {
 
   cerrarModal() {
     this.showModal = false;
+  }
+
+  formatMemberSince(dateString: string | undefined): string {
+    if (!dateString) return 'Fecha no disponible';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Fecha no disponible';
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 }

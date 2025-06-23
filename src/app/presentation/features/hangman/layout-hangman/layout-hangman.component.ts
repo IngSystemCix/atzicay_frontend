@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -9,180 +9,101 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
-import { Difficulty } from '../../../../core/domain/enum/difficulty';
-import { Visibility } from '../../../../core/domain/enum/visibility';
-import { CreateGame } from '../../../../core/domain/interface/create-game';
-import { HangmanData } from '../../../../core/domain/interface/hangman-data';
-import { GameService } from '../../../../core/infrastructure/api/createGame/game.service';
-import { UserService } from '../../../../core/infrastructure/api/user.service';
 import { FormsModule } from '@angular/forms';
+import { AtzicayTabsComponent } from '../../../components/atzicay-tabs/atzicay-tabs.component';
+import { AtzicayButtonComponent } from '../../../components/atzicay-button/atzicay-button.component';
+import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
+import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
+import { CreateGame, HangmanWord } from '../../../../core/domain/model/create-game.model';
+import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my-games/base-create-game.component';
 
 @Component({
   selector: 'app-layout-hangman',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    AtzicayTabsComponent,
+    AtzicayButtonComponent,
+  ],
   templateUrl: './layout-hangman.component.html',
   styleUrls: ['./layout-hangman.component.css'],
 })
-export class LayoutHangmanComponent implements OnInit {
-  // Control de tabs
-  activeTab: 'content' | 'config' | 'preview' = 'content';
-
-  // Control de pistas
-  showClues: boolean = true;
-
-  // Estado del juego
-  juegoPublico: boolean = true;
-
-
-  // Forms
+export class LayoutHangmanComponent extends BaseCreateGameComponent implements OnInit {
+  activeTab = 'content';
+  tabs = [
+    { id: 'content', label: 'Contenido' },
+    { id: 'config', label: 'Configuración' },
+    { id: 'preview', label: 'Vista Previa' },
+  ];
+  showClues = true;
+  juegoPublico = true;
   hangmanForm!: FormGroup;
   wordsForm!: FormGroup;
   configForm!: FormGroup;
-
-  // Estados
-  successMessage: string = '';
-  errorMessage: string = '';
-  isLoading: boolean = false;
-
-  // Opciones para configuración
+  successMessage = '';
+  errorMessage = '';
+  isLoading = false;
   fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
   fuenteSeleccionada: string = this.fonts[0];
 
-  private currentProfessorId: number = 0;
   constructor(
     private fb: FormBuilder,
-    private gameService: GameService,
-    private router: Router,
-    private usuarioService: UserService
+    private createGameService: CreateGameService,
+    private userSession: UserSessionService,
+    private router: Router
   ) {
+    super();
     this.initializeForms();
+    const userId = this.userSession.getUserId();
+    if (userId) this.userId = userId;
   }
 
-  async ngOnInit(): Promise<void> {
-    await this.loadUserData(); 
+  ngOnInit(): void {
     this.addNewWord();
   }
 
-  private async loadUserData(): Promise<void> {
-    try {
-      const userString = sessionStorage.getItem('user');
-      if (!userString) throw new Error('No hay usuario en sesión');
-      
-      const user = JSON.parse(userString);
-      const email = user?.Email;
-      if (!email) throw new Error('El usuario no tiene email registrado');
-
-      // Obtener el ID del usuario desde el servicio
-      const userResponse = await this.usuarioService.findUserByEmail(email).toPromise();
-      if (!userResponse?.data?.Id) throw new Error('ID de usuario no válido');
-      
-      this.currentProfessorId = userResponse.data.Id;
-      console.log('ID del profesor obtenido:', this.currentProfessorId);
-      
-      // Actualizar el formulario con el ID correcto
-      this.hangmanForm.patchValue({
-        professorId: this.currentProfessorId
-      });
-      
-    } catch (error) {
-      console.error('Error al cargar datos del usuario:', error);
-      this.currentProfessorId = 1; // Valor por defecto si falla
-      this.hangmanForm.patchValue({
-        professorId: this.currentProfessorId
-      });
-    }
-  }
-
   private initializeForms(): void {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const professorId = user?.Id || 1; 
-    // Formulario principal del juego
     this.hangmanForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
-      professorId: [professorId, [Validators.required, Validators.min(1)]],
       difficulty: ['E', Validators.required],
       visibility: ['P', Validators.required],
       presentation: ['A', Validators.required],
     });
-
-    // Formulario de palabras
     this.wordsForm = this.fb.group({
       words: this.fb.array([]),
     });
-
-    // Formulario de configuración - sin valores por defecto
     this.configForm = this.fb.group({
-      timeLimit: [
-        60,
-        [Validators.required, Validators.min(10), Validators.max(300)],
-      ],
-      theme: ['Claro', Validators.required],
-      font: [this.fonts[0], Validators.required], 
+      timeLimit: [60, [Validators.required, Validators.min(10), Validators.max(300)]],
+      font: [this.fonts[0], Validators.required],
       backgroundColor: ['#ffffff', Validators.required],
       fontColor: ['#000000', Validators.required],
-      successMessage: [
-        '¡Excelente trabajo!',
-        [Validators.required, Validators.minLength(3)],
-      ],
-      failureMessage: [
-        'Inténtalo de nuevo',
-        [Validators.required, Validators.minLength(3)],
-      ],
-      assessmentValue: [
-        0.0,
-        [Validators.required, Validators.min(0), Validators.max(1)],
-      ],
-      assessmentComments: [
-        'Buen desafío para principiantes.',
-        [Validators.required, Validators.minLength(5)],
-      ],
-      publicGame: [false],
+      successMessage: ['¡Excelente trabajo!', [Validators.required, Validators.minLength(3)]],
+      failureMessage: ['Inténtalo de nuevo', [Validators.required, Validators.minLength(3)]],
     });
     this.fuenteSeleccionada = this.fonts[0];
   }
-  // Getters para formularios
+
   get wordsArray(): FormArray {
     return this.wordsForm.get('words') as FormArray;
   }
 
-  get timeLimit() {
-    return this.configForm.get('timeLimit');
-  }
-  get backgroundColor() {
-    return this.configForm.get('backgroundColor');
-  }
-  get fontColor() {
-    return this.configForm.get('fontColor');
-  }
-  get successMessageControl() {
-    return this.configForm.get('successMessage');
-  }
-  get failureMessageControl() {
-    return this.configForm.get('failureMessage');
-  }
-
-  setActiveTab(tab: 'content' | 'config' | 'preview'): void {
+  setActiveTab(tab: string): void {
     this.activeTab = tab;
-    
     if (tab === 'config') {
       setTimeout(() => {
         this.configForm.updateValueAndValidity();
-        // Asegurar que el valor de fuente esté sincronizado
         this.fuenteSeleccionada = this.configForm.get('font')?.value || this.fonts[0];
       }, 0);
     }
   }
 
-  // Métodos para palabras
   addNewWord(): void {
     const wordForm = this.fb.group({
       word: ['', [Validators.required, Validators.minLength(2)]],
-      clue: [
-        { value: '', disabled: !this.showClues }, 
-        this.showClues ? [Validators.required, Validators.minLength(5)] : [],
-      ],
+      clue: [{ value: '', disabled: !this.showClues }, this.showClues ? [Validators.required, Validators.minLength(5)] : []],
     });
     this.wordsArray.push(wordForm);
   }
@@ -195,46 +116,27 @@ export class LayoutHangmanComponent implements OnInit {
     }
   }
 
-
   toggleShowClues(): void {
     this.showClues = !this.showClues;
-
     this.wordsArray.controls.forEach((control) => {
       const clueControl = control.get('clue');
       if (clueControl) {
         if (this.showClues) {
           clueControl.enable();
-          clueControl.setValidators([
-            Validators.required,
-            Validators.minLength(5),
-          ]);
+          clueControl.setValidators([Validators.required, Validators.minLength(5)]);
         } else {
           clueControl.disable();
           clueControl.clearValidators();
-          clueControl.setValue(''); 
+          clueControl.setValue('');
         }
         clueControl.updateValueAndValidity();
       }
     });
-
     this.wordsForm.updateValueAndValidity();
   }
 
-  onColorChange(field: string, color: string): void {
-    this.configForm.get(field)?.setValue(color);
-  }
-
   private isFormValid(): boolean {
-    const isHangmanValid = this.hangmanForm.valid;
-    const isWordsValid = this.wordsForm.valid && this.wordsArray.length > 0;
-    const isConfigValid = this.configForm.valid;
-    console.log('Validación de formularios:', {
-      hangman: isHangmanValid,
-      words: isWordsValid,
-      config: isConfigValid,
-      wordsCount: this.wordsArray.length,
-    });
-    return isHangmanValid && isWordsValid && isConfigValid;
+    return this.hangmanForm.valid && this.wordsForm.valid && this.wordsArray.length > 0 && this.configForm.valid;
   }
 
   private markAllAsTouched(): void {
@@ -245,286 +147,119 @@ export class LayoutHangmanComponent implements OnInit {
     });
   }
 
-  // Getters para facilitar el acceso en el template
-  get isNameInvalid(): boolean {
-    const control = this.hangmanForm.get('name');
-    return !!(control && control.invalid && control.touched);
-  }
-
-  get isDescriptionInvalid(): boolean {
-    const control = this.hangmanForm.get('description');
-    return !!(control && control.invalid && control.touched);
-  }
-
-  isWordInvalid(index: number): boolean {
-    const control = this.wordsArray.at(index)?.get('word');
-    return !!(control && control.invalid && control.touched);
-  }
-
-  isClueInvalid(index: number): boolean {
-    if (!this.showClues) return false;
-    const control = this.wordsArray.at(index)?.get('clue');
-    return !!(control && control.invalid && control.touched);
-  }
-
-  // Preparar datos para envío
-  private prepareFormDataToSend() {
-    const hangmanData = this.hangmanForm.value;
-    const configData = this.configForm.value;
-
-    // Obtener todas las palabras
-    const words = this.wordsArray.controls
-      .map((control) => ({
-        word: control.get('word')?.value?.trim(),
-        clue: control.get('clue')?.value?.trim(),
-      }))
-      .filter((w) => w.word && w.word.length >= 2);
-    const userString = sessionStorage.getItem('user');
-    const user = JSON.parse(userString || '{}');
-    const email = user?.Email || '';
-    // Preparar información básica del juego
-    const gameInfo: Omit<CreateGame, 'game_type' | 'hangman'> = {
-      Name: hangmanData.name.trim(),
-      Description: hangmanData.description.trim(),
-      ProfessorId: this.currentProfessorId,
-      Activated: false,
-      Difficulty: hangmanData.difficulty as Difficulty,
-      Visibility: hangmanData.visibility as Visibility,
-      settings: [
-        {
-          ConfigKey: 'TiempoLimite',
-          ConfigValue: configData.timeLimit.toString(),
-        },
-        { ConfigKey: 'Fuente', ConfigValue: configData.font },
-        { ConfigKey: 'ColorFondo', ConfigValue: configData.backgroundColor },
-        { ConfigKey: 'ColorTexto', ConfigValue: configData.fontColor },
-        { ConfigKey: 'MensajeExito', ConfigValue: configData.successMessage },
-        { ConfigKey: 'MensajeFallo', ConfigValue: configData.failureMessage },
-      ],
-      assessment: {
-        value: configData.assessmentValue,
-        comments: configData.assessmentComments.trim(),
-      },
-    };
-
-    const hangmanDataToSend: HangmanData = {
-      presentation: hangmanData.presentation,
-      words: this.wordsArray.controls.map((control) => ({
-        word: control.get('word')?.value?.trim(),
-        clue: control.get('clue')?.value?.trim(),
-      })),
-    };
-
-    return {
-      gameInfo,
-      hangmanData: hangmanDataToSend,
-      allWords: words,
-    };
-  }
-
   private showSuccess(message: string): void {
-    Swal.fire({
-      icon: 'success',
-      title: '¡Éxito!',
-      text: message,
-      confirmButtonColor: '#A293FA',
-      timer: 2500,
-      timerProgressBar: true,
-      showConfirmButton: false
-    });
+    Swal.fire({ icon: 'success', title: '¡Éxito!', text: message, confirmButtonColor: '#A293FA', timer: 2500, timerProgressBar: true, showConfirmButton: false });
     this.successMessage = '';
     this.errorMessage = '';
   }
 
   private showError(message: string): void {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: message,
-      confirmButtonColor: '#A293FA',
-      timer: 3500,
-      timerProgressBar: true,
-      showConfirmButton: false
-    });
+    Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#A293FA', timer: 3500, timerProgressBar: true, showConfirmButton: false });
     this.successMessage = '';
     this.errorMessage = '';
+  }
+
+  buildGameData(): CreateGame {
+    const hangmanData = this.hangmanForm.value;
+    const configData = this.configForm.value;
+    const words: HangmanWord[] = this.wordsArray.controls.map((control) => ({
+      Word: control.get('word')?.value?.trim(),
+      Clue: this.showClues ? control.get('clue')?.value?.trim() : undefined,
+      Presentation: hangmanData.presentation
+    }));
+    return {
+      Name: hangmanData.name.trim(),
+      Description: hangmanData.description.trim(),
+      Activated: true,
+      Difficulty: hangmanData.difficulty,
+      Visibility: hangmanData.visibility,
+      Settings: [
+        { Key: 'TiempoLimite', Value: configData.timeLimit.toString() },
+        { Key: 'Fuente', Value: configData.font },
+        { Key: 'ColorFondo', Value: configData.backgroundColor },
+        { Key: 'ColorTexto', Value: configData.fontColor },
+        { Key: 'MensajeExito', Value: configData.successMessage },
+        { Key: 'MensajeFallo', Value: configData.failureMessage },
+      ],
+      Words: words
+    };
   }
 
   onSubmit(): void {
     if (this.isLoading) return;
     this.isLoading = true;
-
     this.markAllAsTouched();
-
     if (!this.isFormValid()) {
-      this.showError(
-        'Por favor completa todos los campos requeridos correctamente.'
-      );
+      this.showError('Por favor completa todos los campos requeridos correctamente.');
       this.isLoading = false;
       return;
     }
-
-    const words: { word: string; clue?: string }[] =
-      this.wordsArray.controls.map((control) => ({
-        word: control.value.word?.trim(),
-        clue: this.showClues ? control.value.clue?.trim() : '',
-      }));
-
-    const isInvalidWord = words.some((w) => !w.word || w.word.length < 2);
-    const isInvalidClue =
-      this.showClues && words.some((w) => !w.clue || w.clue.length < 5);
-
-    if (isInvalidWord) {
-      this.showError('Cada palabra debe tener al menos 2 caracteres.');
-      return;
-    }
-
-    if (isInvalidClue) {
-      this.showError('Cada pista debe tener al menos 5 caracteres.');
-      return;
-    }
-
-    this.isLoading = true;
-
-    try {
-      const hangmanFormData = this.hangmanForm.value;
-      const configData = this.configForm.value;
-
-    const gameInfo: Omit<CreateGame, 'game_type' | 'hangman'> = {
-      Name: hangmanFormData.name.trim(),
-      Description: hangmanFormData.description.trim(),
-      ProfessorId: this.currentProfessorId, 
-      Activated: true, 
-      Difficulty: hangmanFormData.difficulty as Difficulty,
-      Visibility: hangmanFormData.visibility as Visibility,
-      settings: [
-        {
-          ConfigKey: 'TiempoLimite',
-          ConfigValue: configData.timeLimit.toString(),
-        },
-        { ConfigKey: 'Fuente', ConfigValue: configData.font },
-        { ConfigKey: 'ColorFondo', ConfigValue: configData.backgroundColor },
-        { ConfigKey: 'ColorTexto', ConfigValue: configData.fontColor },
-        { ConfigKey: 'MensajeExito', ConfigValue: configData.successMessage },
-        { ConfigKey: 'MensajeFallo', ConfigValue: configData.failureMessage },
-      ],
-      assessment: {
-        value: configData.assessmentValue,
-        comments: configData.assessmentComments.trim(),
-      },
+    const gameData = this.buildGameData();
+    const body = {
+      gameType: 'hangman',
+      data: gameData
     };
-
-      // ✅ CORRECCIÓN: Crear SOLO los datos específicos de hangman
-      const hangmanSpecificData: HangmanData = {
-        presentation: hangmanFormData.presentation as 'A' | 'F',
-        words: words.map((w) => ({
-          word: w.word,
-          clue: w.clue || '',
-        })),
-      };
-
-      console.log('🎯 Datos del juego (sin hangman):', gameInfo);
-      console.log('🎯 Datos específicos de hangman:', hangmanSpecificData);
-
-      this.gameService
-        .createHangmanGame(gameInfo, hangmanSpecificData)
-        .subscribe({
-          next: (gameInstance) => {
-            console.log('✅ Juego creado:', gameInstance);
-            this.isLoading = false;
-
-            Swal.fire({
-              title: '🎉 Nuevo juego del ahorcado!',
-              text: 'La creación del juego fue exitosa.',
-              icon: 'success',
-            });
-
-            this.showSuccess('✅ Juego creado exitosamente!');
-            setTimeout(() => this.router.navigate(['/juegos']), 2000);
-          },
-          error: (error) => {
-            console.error('❌ Error al crear el juego:', error);
-            this.isLoading = false;
-
-            this.showError(
-              error.message ||
-                'Error inesperado al crear el juego. Por favor, inténtalo de nuevo.'
-            );
-
-            Swal.fire({
-              title: '❌ Ups!',
-              text: 'No se pudo crear el juego. Por favor, inténtalo de nuevo.',
-              icon: 'error',
-            });
-          },
-        });
-    } catch (error) {
-      console.error('🚨 Error al preparar datos:', error);
+    this.createGameService.createHangmanGame(this.userId, body).subscribe(() => {
       this.isLoading = false;
-      this.showError(
-        'Error al preparar los datos del juego. Verifica la información ingresada.'
-      );
-    }
+      this.showSuccess('Juego creado exitosamente!');
+      setTimeout(() => this.router.navigate(['/juegos']), 2000);
+    }, (err) => {
+      this.isLoading = false;
+      this.showError('Error al crear el juego: ' + (err?.message || ''));
+    });
   }
 
-  // Método para cancelar
   onCancel(): void {
-    if (
-      confirm(
-        '¿Estás seguro de que deseas cancelar? Se perderán todos los datos ingresados.'
-      )
-    ) {
+    if (confirm('¿Estás seguro de que deseas cancelar? Se perderán todos los datos ingresados.')) {
       this.router.navigate(['/juegos']);
     }
   }
 
-  get assessmentComments() {
-    return this.configForm.get('assessmentComments');
+  // Métodos de validación para el template
+  get isNameInvalid(): boolean {
+    const control = this.hangmanForm.get('name');
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  // Método para resetear formularios (opcional)
-  resetForms(): void {
-    this.hangmanForm.reset();
-    this.configForm.reset();
-
-    // Limpiar array de palabras
-    while (this.wordsArray.length) {
-      this.wordsArray.removeAt(0);
-    }
-
-    // Agregar una palabra inicial
-    this.addNewWord();
-
-    this.activeTab = 'content';
-    this.showClues = true;
+  get isDescriptionInvalid(): boolean {
+    const control = this.hangmanForm.get('description');
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  getPreviewWord(index: number): string[] {
-    const wordControl = this.wordsArray.at(index);
-    if (!wordControl) return [];
-    
-    const word = wordControl.get('word')?.value || '';
-    return word.toUpperCase().split('');
+  isWordInvalid(index: number): boolean {
+    const control = this.wordsArray.at(index)?.get('word');
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
-  
+
+  isClueInvalid(index: number): boolean {
+    if (!this.showClues) return false;
+    const control = this.wordsArray.at(index)?.get('clue');
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  // Getters públicos para el template
+  get successMessageControl() {
+    return this.configForm.get('successMessage');
+  }
+
+  get failureMessageControl() {
+    return this.configForm.get('failureMessage');
+  }
+
   /**
-   * Obtiene una pista para mostrar en la vista previa
+   * Devuelve la palabra de vista previa para el índice dado (usado en el tab de preview)
+   */
+  getPreviewWord(index: number): string[] {
+    if (this.wordsArray.length === 0) return [];
+    const word = this.wordsArray.at(index)?.get('word')?.value || '';
+    return word.split('');
+  }
+
+  /**
+   * Devuelve la pista de vista previa para el índice dado (usado en el tab de preview)
    */
   getPreviewClue(index: number): string {
-  const wordControl = this.wordsArray.at(index);
-  if (!wordControl) return 'Ejemplo de pista';
-  
-  return wordControl.get('clue')?.value || 'Ejemplo de pista';
-}
-  
-  /**
-   * Valida si la vista previa puede mostrarse
-   */
-  canShowPreview(): boolean {
-    return this.wordsArray.length > 0 && 
-           this.hangmanForm.get('name')?.value?.trim() &&
-           this.hangmanForm.get('description')?.value?.trim();
+    if (!this.showClues || this.wordsArray.length === 0) return '';
+    return this.wordsArray.at(index)?.get('clue')?.value || '';
   }
-
-  
 }

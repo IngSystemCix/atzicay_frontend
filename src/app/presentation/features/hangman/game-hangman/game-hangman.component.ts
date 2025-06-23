@@ -1,11 +1,8 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  GameConfiguration,
-  GameConfigurationService,
-  HangmanData,
-} from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { GameConfiguration, HangmanWord } from '../../../../core/domain/model/game-configuration.model';
 
 interface JuegoState {
   palabraActual: string;
@@ -29,7 +26,7 @@ interface JuegoState {
   fuente: string;
   cargando: boolean;
   error: string;
-  palabrasJuego: HangmanData[];
+  palabrasJuego: HangmanWord[];
   indicePalabraActual: number;
   palabrasCompletadas: number;
   totalPalabras: number;
@@ -128,7 +125,6 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
 
   aplicarConfiguracion(): void {
     if (!this.state.gameConfig) return;
-
     const config = this.state.gameConfig;
 
     // Aplicar configuraciones desde settings
@@ -156,26 +152,21 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Cargar palabras del hangman_data
-    if (
-      config.game_data?.hangman_data &&
-      Array.isArray(config.game_data.hangman_data)
-    ) {
-      this.state.palabrasJuego = config.game_data.hangman_data;
+    // Cargar palabras del hangman_words
+    if (Array.isArray(config.hangman_words)) {
+      this.state.palabrasJuego = config.hangman_words.map((item) => ({
+        ...item,
+        word: item.word.toUpperCase(),
+      }));
       this.state.totalPalabras = this.state.palabrasJuego.length;
-
-      // Configurar la primera palabra
-      if (this.state.palabrasJuego.length > 0) {
-        this.configurarPalabraActual();
-      }
-
-      // Configurar palabras para el canvas
-      this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
-        item.word.toUpperCase()
-      );
+      this.state.indicePalabraActual = 0;
+      // Inicializar palabrasAdivinadas para el canvas flotante
+      this.palabrasAdivinadas = this.state.palabrasJuego.map((item) => item.word);
     } else {
-      this.state.error =
-        'No se encontraron palabras en la configuración del juego';
+      this.state.palabrasJuego = [];
+      this.state.totalPalabras = 0;
+      this.state.indicePalabraActual = 0;
+      this.palabrasAdivinadas = [];
     }
   }
   configurarPalabraActual(): void {
@@ -418,13 +409,10 @@ reiniciarJuego(): void {
   }
 
   get tituloJuego(): string {
-    return this.state.gameConfig?.title || 'Juego del Ahorcado';
+    return this.state.gameConfig?.game_name || 'Juego del Ahorcado';
   }
 
   get descripcionJuego(): string {
-    return (
-      this.state.gameConfig?.description ||
-      'Adivina la palabra antes de que se complete el ahorcado'
-    );
+    return this.state.gameConfig?.game_description || '';
   }
 }

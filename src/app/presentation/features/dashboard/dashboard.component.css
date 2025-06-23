@@ -1,53 +1,42 @@
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-/* Scroll solo en el contenido del dashboard */
-.dashboard-scroll-content {
-  /* Ajusta la altura para dejar espacio al footer fuera del scroll */
-  height: calc(100vh - 220px); /* 180px + 40px de espacio para el botón */
-  overflow-y: auto;
-  padding-bottom: 0;
-  position: relative; /* Para el posicionamiento del footer */
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 1rem;
-  padding: 1.5rem;
-  padding-bottom: 0; /* Sin padding bottom para que el footer esté pegado */
-  max-width: 90rem;
-}
-
-@media (min-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 .dashboard-grid-footer {
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;
-  padding: 1.5rem 0 2.5rem 0; /* Más espacio abajo */
+  padding: 1.5rem 0 2.5rem 0; 
   margin-top: 1rem;
-  margin-bottom: 0.5rem; /* Margen inferior extra para separar del borde */
+  margin-bottom: 0.5rem; 
   position: static;
   background: none;
   z-index: 5;
+}
+
+.dashboard-responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .dashboard-responsive-grid {
+    grid-template-columns: repeat(2, minmax(350px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-responsive-grid {
+    grid-template-columns: repeat(3, minmax(350px, 1fr));
+  }
+}
+
+@media (min-width: 1600px) {
+  .dashboard-responsive-grid {
+    grid-template-columns: repeat(3, minmax(380px, 1fr));
+    max-width: 1600px;
+  }
+}
+
+/* Ajuste de altura de las cards */
+.dashboard-responsive-grid > div {
+  height: 520px; /* Aumentamos de 500px a 520px */
 }

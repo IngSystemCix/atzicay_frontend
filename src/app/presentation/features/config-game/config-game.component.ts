@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameInstanceService } from '../../../core/infrastructure/api/GameInstance/game-instance.service';
 import { UserService } from '../../../core/infrastructure/api/user.service';
 import { ConfigGame } from '../../../core/domain/interface/config-game';
 import {
@@ -34,7 +33,6 @@ export class ConfigGameComponent implements OnInit {
 
   constructor(
     private programmingGameService: ProgrammingGameService,
-    private gameInstanceService: GameInstanceService,
     private userService: UserService,
     private route: ActivatedRoute,
     private router: Router

@@ -104,7 +104,18 @@
 }
 
 @layer utilities {
-
+  .juegos-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    background: transparent;
+  }
+  .juegos-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-atzicay-bg-button);
+    border-radius: 8px;
+  }
+  .juegos-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-atzicay-bg-button) transparent;
+  }
 }
 
 

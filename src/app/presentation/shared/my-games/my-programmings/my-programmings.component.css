@@ -8,4 +8,20 @@ input[type="date"] {
   min-width: 140px;
 }
 
+.filters-sticky::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0,0,0,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.filters-sticky.scrolled::before {
+  opacity: 1;
+}
+
 

@@ -1,17 +1,10 @@
-import { Component, OnInit, OnChanges, Input } from '@angular/core';
+import { Component, OnChanges, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProgrammingGameService } from '../../../../core/infrastructure/api/ProgrammingGame/programming-game.service';
-import { ProgrammingGame } from '../../../../core/domain/interface/programming-game';
+import { MyProgrammingGamesService } from '../../../../core/infrastructure/api/my-programming-games.service';
+import { MyProgrammingGame } from '../../../../core/domain/model/my-programming-game.model';
 import { ActivatedRoute, Router } from '@angular/router';
-
-interface ActivityCard {
-  id: number;
-  type: string;
-  title: string;
-  status: 'Activo' | 'Desactivado';
-  difficulty: 'basico' | 'intermedio' | 'dificil';
-}
+import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 
 @Component({
   selector: 'app-my-programmings',
@@ -21,160 +14,16 @@ interface ActivityCard {
   styleUrl: './my-programmings.component.css',
 })
 export class MyProgrammingsComponent implements OnChanges {
-    @Input() gameId: number | null = null;
+  @Input() gameId: number | null = null;
 
-  activities: ActivityCard[] = [];
+  activities: MyProgrammingGame[] = [];
   mobileMenuOpen = false;
   private activitiesPerPage = 6;
   private currentPage = 1;
-  gameTitle: string = '';
-  showingSpecificGame: boolean = false;
-  
-
-  constructor(
-    private programmingGameService: ProgrammingGameService,
-    private route: ActivatedRoute,
-    private router: Router
-  ) {}
-
-  ngOnChanges() {
-    if (this.gameId) {
-      // Filtrar o cargar programaciones específicas del juego
-      this.cargarProgramacionesDelJuego(this.gameId);
-    }
-  }
-   private cargarProgramacionesDelJuego(gameId: number) {
-    // Lógica para filtrar las programaciones por el gameId
-    console.log('Mostrando programaciones del juego:', gameId);
-  }
-
-  //Esto es para el diseño responsivo
-  toggleMobileMenu() {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
-  }
-
-  getPaginatedActivities() {
-    const filteredActivities = this.getFilteredActivities();
-    const startIndex = 0;
-    const endIndex = this.currentPage * this.activitiesPerPage;
-
-    return filteredActivities.slice(startIndex, endIndex);
-  }
-
-  hasMoreActivities(): boolean {
-    const filteredActivities = this.getFilteredActivities();
-    const totalShown = this.currentPage * this.activitiesPerPage;
-
-    return filteredActivities.length > totalShown;
-  }
-
-  loadMore(): void {
-    this.currentPage++;
-  }
-
-  /**
-   * Resetea la paginación cuando cambian los filtros
-   */
-  resetPagination(): void {
-    this.currentPage = 1;
-  }
-
-  onTabChange(tab: string): void {
-    this.selectedTab = tab;
-    this.resetPagination(); // Agrega esta línea
-  }
-
-  onDateChange(): void {
-    this.resetPagination(); // Agrega esta línea cuando cambien las fechas
-  }
-
-  ngOnInit() {
-    // Verificar si hay un gameId en los query params
-    this.route.queryParams.subscribe((params) => {
-      this.gameId = params['gameId'] ? +params['gameId'] : null;
-      this.showingSpecificGame = !!this.gameId;
-
-      if (this.gameId) {
-        this.loadSpecificGameProgrammings();
-      } else {
-        this.loadAllProgrammings();
-      }
-    });
-  }
-
-  private loadAllProgrammings(): void {
-    this.programmingGameService.getAllProgrammingGames().subscribe({
-      next: (games: ProgrammingGame[]) => {
-        this.activities = games.map((game) => ({
-          id: game.Id,
-          type: this.mapType(game.Name),
-          title: game.Name,
-          status: game.Activated ? 'Activo' : 'Desactivado',
-          difficulty: this.mapDifficulty(game.MaximumTime),
-        }));
-      },
-      error: (err) => {
-        console.error('Error al cargar programaciones:', err);
-      },
-    });
-  }
-
-  backToAllProgrammings(): void {
-    this.gameId = null;
-    this.showingSpecificGame = false;
-    this.gameTitle = '';
-    this.router.navigate(['/mis-programaciones'], { queryParams: {} });
-  }
-
-  private loadSpecificGameProgrammings(): void {
-    if (!this.gameId) return;
-
-    // Obtener todas las programaciones y filtrar por GameInstancesId
-    this.programmingGameService.getAllProgrammingGames().subscribe({
-      next: (games: ProgrammingGame[]) => {
-        // Filtrar programaciones que correspondan al juego específico
-        const filteredGames = games.filter(
-          (game) => game.GameInstancesId === this.gameId
-        );
-
-        this.activities = filteredGames.map((game) => ({
-          id: game.Id,
-          type: this.mapType(game.Name),
-          title: game.Name,
-          status: game.Activated ? 'Activo' : 'Desactivado',
-          difficulty: this.mapDifficulty(game.MaximumTime),
-        }));
-
-        // Si hay actividades, usar el nombre del primer juego como título
-        if (this.activities.length > 0) {
-          this.gameTitle = this.activities[0].title;
-        }
-      },
-      error: (err) => {
-        console.error('Error al cargar programaciones del juego:', err);
-      },
-    });
-  }
-
-  mapType(name: string): string {
-    // Mapea el nombre del juego a un tipo si es necesario
-    if (name.includes('Ahorcado')) return 'Ahorcado';
-    if (name.includes('Rompecabezas')) return 'Rompecabezas';
-    if (name.includes('Memoria')) return 'Memoria';
-    if (name.includes('Pupiletras')) return 'Pupiletras';
-    return 'Otro';
-  }
-
-  mapDifficulty(maxTime: number): 'basico' | 'intermedio' | 'dificil' {
-    if (maxTime <= 60) return 'basico';
-    if (maxTime <= 180) return 'intermedio';
-    return 'dificil';
-  }
   selectedTab: string = 'Todos';
   startDate: string = '';
   endDate: string = '';
   menuAbierto: number | null = null;
-
   tabs: string[] = [
     'Todos',
     'Ahorcado',
@@ -182,42 +31,167 @@ export class MyProgrammingsComponent implements OnChanges {
     'Memoria',
     'Pupiletras',
   ];
+  totalActivities: number = 0;
+  userId: number = 0;
+  isScrolled = false;
+  constructor(
+    private myProgrammingGamesService: MyProgrammingGamesService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private userSession: UserSessionService
+  ) {}
 
-  getDifficultyClass(difficulty: string): string {
-    switch (difficulty) {
-      case 'basico':
-        return 'bg-[#C9FFD0]';
-      case 'intermedio':
-        return 'bg-[#FFFEC2]';
-      case 'dificil':
-        return 'bg-[#FFB4B4]';
-      default:
-        return '';
+  ngOnInit() {
+    const id = this.userSession.getUserId();
+    this.userId = id ? id : 0;
+    this.route.queryParams.subscribe((params) => {
+      this.gameId = params['gameId'] ? +params['gameId'] : null;
+      this.resetPagination();
+      this.loadProgrammings();
+    });
+    window.addEventListener('scroll', this.onScroll.bind(this));
+  }
+
+  ngOnDestroy() {
+    // Remover listener cuando se destruya el componente
+    window.removeEventListener('scroll', this.onScroll.bind(this));
+  }
+
+  onScroll() {
+    this.isScrolled = window.scrollY > 20;
+  }
+
+  ngOnChanges() {
+    this.resetPagination();
+    this.loadProgrammings();
+  }
+
+  loadProgrammings(loadMore: boolean = false): void {
+    const gameType =
+      this.selectedTab === 'Todos'
+        ? 'all'
+        : this.mapTabToType(this.selectedTab);
+    const limit = this.activitiesPerPage;
+    const offset = loadMore ? (this.currentPage - 1) * limit : 0;
+    let startDate = '',
+      endDate = '',
+      exactStartDate = '',
+      exactEndDate = '';
+    if (this.startDate && this.endDate) {
+      startDate = this.startDate;
+      endDate = this.endDate;
+      exactStartDate = '';
+      exactEndDate = '';
+    } else if (this.startDate && !this.endDate) {
+      exactStartDate = this.startDate;
+      startDate = '';
+      endDate = '';
+      exactEndDate = '';
+    } else if (!this.startDate && this.endDate) {
+      exactEndDate = this.endDate;
+      startDate = '';
+      endDate = '';
+      exactStartDate = '';
+    } else {
+      startDate = '';
+      endDate = '';
+      exactStartDate = '';
+      exactEndDate = '';
     }
+    this.myProgrammingGamesService
+      .getMyProgrammingGames(
+        this.userId,
+        gameType,
+        limit,
+        offset,
+        startDate,
+        endDate,
+        exactStartDate,
+        exactEndDate
+      )
+      .subscribe({
+        next: (res) => {
+          if (res && res.data && Array.isArray(res.data.data)) {
+            if (loadMore && offset > 0) {
+              this.activities = [...this.activities, ...res.data.data];
+            } else {
+              this.activities = res.data.data;
+            }
+            this.totalActivities = res.data.total;
+          } else {
+            this.activities = [];
+          }
+        },
+        error: (err) => {
+          this.activities = [];
+          console.error('Error al cargar programaciones:', err);
+        },
+      });
+  }
+
+  getPaginatedActivities() {
+    return this.activities;
+  }
+
+  hasMoreActivities(): boolean {
+    return this.activities.length < this.totalActivities;
+  }
+
+  loadMore(): void {
+    this.currentPage++;
+    this.loadProgrammings(true);
+  }
+
+  resetPagination(): void {
+    this.currentPage = 1;
+    this.activities = [];
+  }
+
+  onTabChange(tab: string): void {
+    this.selectedTab = tab;
+    this.resetPagination();
+    this.loadProgrammings();
+  }
+
+  onDateChange(): void {
+    this.resetPagination();
+    this.loadProgrammings();
+  }
+
+  mapTabToType(tab: string): string {
+    switch (tab) {
+      case 'Ahorcado':
+        return 'hangman';
+      case 'Rompecabezas':
+        return 'puzzle';
+      case 'Memoria':
+        return 'memory';
+      case 'Pupiletras':
+        return 'solve_the_word';
+      default:
+        return 'all';
+    }
+  }
+
+  getDifficultyClass(difficulty: number): string {
+    if (difficulty <= 60) return 'bg-[#C9FFD0]';
+    if (difficulty <= 180) return 'bg-[#FFFEC2]';
+    return 'bg-[#FFB4B4]';
   }
 
   getTypeIcon(type: string): string {
     switch (type) {
-      case 'Ahorcado':
+      case 'hangman':
         return '🎯';
-      case 'Rompecabezas':
+      case 'puzzle':
         return '🧩';
-      case 'Memoria':
+      case 'memory':
         return '🃏';
-      case 'Pupiletras':
+      case 'solve_the_word':
         return '📝';
       default:
         return '📚';
     }
-  }
-
-  getFilteredActivities() {
-    if (this.selectedTab === 'Todos') {
-      return this.activities;
-    }
-    return this.activities.filter(
-      (activity) => activity.type === this.selectedTab
-    );
   }
 
   editarActividad(id: number) {
@@ -236,5 +210,9 @@ export class MyProgrammingsComponent implements OnChanges {
   }
   verReporte(id: number): void {
     console.log(`Ver reporte de la actividad con ID: ${id}`);
+  }
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 }

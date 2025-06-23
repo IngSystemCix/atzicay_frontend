@@ -1,5 +1,5 @@
-/* Elimino el scroll vertical de la lista de juegos individual */
-.juegos-lista-scroll-content {
+/* Elimino scroll y layout, solo reglas necesarias */
+/* .juegos-lista-scroll-content {
   height: auto !important;
   overflow-y: visible !important;
   padding-bottom: 0 !important;
@@ -14,23 +14,23 @@
 }
 
 /* Contenedor principal con filtro fijo */
-.juegos-container {
+/* .juegos-container {
   display: flex;
   flex-direction: column;
   height: 100vh; /* O la altura que necesites */
-}
+
 
 /* Filtro fijo en la parte superior */
-.filtros-fijos {
+/* .filtros-fijos {
   flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: 50;
   background: white; /* Para que no se vea transparente */
-}
+
 
 /* Contenedor del grid con scroll */
-.juegos-lista-scroll-content {
+/* .juegos-lista-scroll-content {
   flex: 1;
   overflow-y: auto;
   padding-bottom: 2rem;
@@ -43,4 +43,4 @@
 
 .card-container {
   transform-style: preserve-3d;
-}
+} */

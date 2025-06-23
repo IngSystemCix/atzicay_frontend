@@ -1,8 +1,7 @@
 <div class=" sm:p-4 lg:p-2 max-w-full">
   <!-- Header responsivo -->
-  <div class="flex flex-col gap-4 mb-6">
-    
-    <!-- Mobile/Tablet Header con Burger Menu (menos de 800px) -->
+  <div class="filters-sticky flex flex-col gap-4 mb-6">
+
     <div class="md:hidden">
       <div class="flex justify-between items-center mb-4">
         <h1 class="text-xl font-bold text-gray-900">Actividades</h1>
@@ -20,7 +19,7 @@
       </div>
 
       @if (mobileMenuOpen) {
-        <div class="bg-[#E5D8F2] rounded-lg p-4 mb-4 space-y-4 animate-in slide-in-from-top duration-200 mx-2">
+        <div class="bg-atzicay-bg rounded-lg p-4 mb-4 space-y-4 animate-in slide-in-from-top duration-200 mx-2">
           <!-- Tabs para móvil - Columna vertical -->
           <div class="space-y-3">
             <label class="text-sm font-medium text-gray-700 block">Categorías</label>
@@ -29,7 +28,7 @@
                 <button
                   class="px-4 py-3 rounded-lg font-medium transition-colors text-sm text-left w-full cursor-pointer"
                   [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white cursor-pointer' : 'text-gray-600 hover:bg-gray-200 cursor-pointer'"
-                  (click)="selectedTab = tab; mobileMenuOpen = false; resetPagination()">
+                  (click)="selectedTab = tab; mobileMenuOpen = false; resetPagination(); loadProgrammings()">
                   {{ tab }}
                 </button>
               }
@@ -47,7 +46,7 @@
                   type="date"
                   id="fechaInicioMobile"
                   [(ngModel)]="startDate"
-                  (change)="resetPagination()"
+                  (change)="resetPagination(); loadProgrammings()"
                   class="bg-purple-200 rounded-lg px-3 py-2 text-sm w-full"/>
               </div>
               <div>
@@ -57,8 +56,8 @@
                   type="date"
                   id="fechaFinMobile"
                   [(ngModel)]="endDate"
-                  (change)="resetPagination()"
-                  class="bg-purple-200 rounded-lg px-3 py-2 text-sm w-full"/>
+                  (change)="resetPagination(); loadProgrammings()"
+                  class="bg-purple-200 rounded-lg px-3 py-2 text-sm w-full cursor-pointer"/>
               </div>
             </div>
           </div>
@@ -74,7 +73,7 @@
           <button
             class="px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-sm cursor-pointer"
             [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white cursor-pointer' : 'text-gray-600 hover:bg-gray-200 cursor-pointer'"
-            (click)="selectedTab = tab; resetPagination()">
+            (click)="selectedTab = tab; resetPagination(); loadProgrammings()">
             {{ tab }}
           </button>
         }
@@ -89,7 +88,7 @@
             type="date"
             id="fechaInicio"
             [(ngModel)]="startDate"
-            (change)="resetPagination()"
+            (change)="resetPagination(); loadProgrammings()"
             class="bg-purple-200 rounded-lg px-3 py-2 text-sm min-w-0 flex-1 md:flex-none"/>
         </div>
 
@@ -100,7 +99,7 @@
             type="date"
             id="fechaFin"
             [(ngModel)]="endDate"
-            (change)="resetPagination()"
+            (change)="resetPagination(); loadProgrammings()"
             class="bg-purple-200 rounded-lg px-3 py-2 text-sm min-w-0 flex-1 md:flex-none"/>
         </div>
       </div>
@@ -108,134 +107,103 @@
   </div>
 
   <!-- Grid de Cards Responsivo -->
-  <!-- Encabezado condicional para juego específico -->
-<div *ngIf="showingSpecificGame" class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-    <div>
-      <h3 class="text-lg font-semibold text-blue-800">
-        🎮 Programaciones de: {{ gameTitle }}
-      </h3>
-      <p class="text-blue-600 text-sm">
-        Mostrando {{ getPaginatedActivities().length }} programación(es) de este juego
-      </p>
-    </div>
-    <button 
-      (click)="backToAllProgrammings()"
-      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-      ← Ver todas las programaciones
-    </button>
-  </div>
-</div>
-
-<!-- Mensaje cuando no hay programaciones del juego específico -->
-<div *ngIf="showingSpecificGame && getPaginatedActivities().length === 0" 
-     class="text-center py-12">
-  <div class="text-6xl mb-4">📅</div>
-  <h3 class="text-xl font-semibold text-gray-700 mb-2">
-    No hay programaciones para este juego
-  </h3>
-  <p class="text-gray-500 mb-6">
-    Este juego aún no tiene programaciones creadas.
-  </p>
-  <button 
-    (click)="backToAllProgrammings()"
-    class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-    Ver todas las programaciones
-  </button>
-</div>
-
-<!-- Grid de Cards Responsivo -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mx-2"
-     *ngIf="!showingSpecificGame || getPaginatedActivities().length > 0">
-  @for (activity of getPaginatedActivities(); track activity.id) {
-    <div [class]="'rounded-lg p-4 sm:p-6 relative min-h-[280px] flex flex-col ' + getDifficultyClass(activity.difficulty)">
-
-      <!-- Header de la card -->
-      <div class="flex justify-between items-start mb-4 flex-shrink-0">
-        <div class="flex items-center gap-3 min-w-0 flex-1">
-          <div class="text-2xl sm:text-3xl bg-white/30 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-sm flex-shrink-0">
-            {{ getTypeIcon(activity.type) }}
-          </div>
-          <div class="min-w-0 flex-1">
-            <h3 class="font-bold text-base sm:text-lg text-gray-900 leading-tight truncate">
-              {{ activity.title }}
-            </h3>
-          </div>
-        </div>
-
-        <!-- Menú de opciones -->
-        <div class="relative flex-shrink-0 ml-2">
-          <button
-            class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/40 hover:bg-white/60 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm cursor-pointer"
-            (click)="showOptions($event, activity.id)">
-            <span class="text-lg sm:text-xl text-gray-800">⋯</span>
-          </button>
-
-          @if (menuAbierto === activity.id) {
-            <div class="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl py-2 w-40 sm:w-48 z-20 border border-purple-200 animate-in slide-in-from-top-2 duration-200">
-              <button
-                class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer"
-                (click)="eliminarActividad(activity.id)">
-                <span class="mr-2 sm:mr-3 text-sm sm:text-lg">🗑️</span> Eliminar
-              </button>
-              <button
-                class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer"
-                (click)="editarActividad(activity.id)">
-                <span class="mr-2 sm:mr-3 text-sm sm:text-lg">✏️</span> Editar
-              </button>
-              <button
-                class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer"
-                (click)="verReporte(activity.id)">
-                <span class="mr-2 sm:mr-3 text-sm sm:text-lg">📊</span> Ver Reporte
-              </button>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mx-2"
+       *ngIf="activities.length > 0">
+    @for (activity of activities; track activity.game_instance_id) {
+      <div class="rounded-lg p-4 sm:p-6 relative min-h-[280px] flex flex-col bg-white shadow border border-gray-100">
+        <!-- Header de la card -->
+        <div class="flex justify-between items-start mb-4 flex-shrink-0">
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="text-2xl sm:text-3xl bg-white/30 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-sm flex-shrink-0">
+              {{ getTypeIcon(activity.type_game) }}
             </div>
-          }
+            <div class="min-w-0 flex-1">
+              <h3 class="font-bold text-base sm:text-lg text-gray-900 leading-tight truncate">
+                {{ activity.programming_name }}
+              </h3>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="px-2 py-1 rounded-full text-xs font-medium"
+                  [ngClass]="{
+                    'bg-green-200 text-green-800': activity.maximum_time <= 60,
+                    'bg-orange-200 text-orange-800': activity.maximum_time > 60 && activity.maximum_time <= 180,
+                    'bg-red-200 text-red-800': activity.maximum_time > 180
+                  }">
+                  {{ activity.maximum_time <= 60 ? 'Básico' : activity.maximum_time <= 180 ? 'Intermedio' : 'Difícil' }}
+                </span>
+                <span [ngClass]="activity.status === 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-white'" class="px-2 py-1 rounded-full text-xs font-medium">
+                  {{ activity.status === 1 ? 'Público' : 'Privado' }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- Menú de opciones -->
+          <div class="relative flex-shrink-0 ml-2">
+            <button
+              class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/40 hover:bg-white/60 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm cursor-pointer"
+              (click)="showOptions($event, activity.game_instance_id)">
+              <span class="text-lg sm:text-xl text-gray-800">⋯</span>
+            </button>
+            @if (menuAbierto === activity.game_instance_id) {
+              <div class="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl py-2 w-40 sm:w-48 z-20 border border-purple-200 animate-in slide-in-from-top-2 duration-200">
+                <button class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer" (click)="eliminarActividad(activity.game_instance_id)">
+                  <span class="mr-2 sm:mr-3 text-sm sm:text-lg">🗑️</span> Eliminar
+                </button>
+                <button class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer" (click)="editarActividad(activity.game_instance_id)">
+                  <span class="mr-2 sm:mr-3 text-sm sm:text-lg">✏️</span> Editar
+                </button>
+                <button class="flex items-center px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-purple-600 w-full hover:bg-purple-50 transition-colors duration-200 cursor-pointer" (click)="verReporte(activity.game_instance_id)">
+                  <span class="mr-2 sm:mr-3 text-sm sm:text-lg">📊</span> Ver Reporte
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+        <!-- Fechas y detalles -->
+        <div class="flex-1 mb-4">
+          <div class="space-y-2 text-sm text-gray-700">
+            <div class="flex items-center gap-2">
+              <span class="text-purple-600">📅</span>
+              <span class="font-medium">Inicio:</span>
+              <span>{{ activity.start_time | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-purple-600">⏰</span>
+              <span class="font-medium">Fin:</span>
+              <span>{{ activity.end_time | date: 'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-purple-600">🔢</span>
+              <span class="font-medium">Intentos:</span>
+              <span>{{ activity.attempts }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-purple-600">🧩</span>
+              <span class="font-medium">Juego:</span>
+              <span>{{ activity.name_game }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Footer de la card -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 sm:gap-4 pt-4 border-t border-black/10 flex-shrink-0">
+          <div class="space-y-2">
+            <span class="text-xs sm:text-sm font-semibold text-gray-800 block">Estado</span>
+            <div [class]="'inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium ' + (activity.status === 1 ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-gray-100 text-gray-800 border border-gray-300')">
+              <span class="w-2 h-2 rounded-full mr-2" [class]="activity.status === 1 ? 'bg-green-500' : 'bg-gray-500'"></span>
+              {{ activity.status === 1 ? 'Activo' : 'Desactivado' }}
+            </div>
+          </div>
+          <button class="bg-white/40 hover:bg-white/60 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-900 transition-all duration-300 hover:scale-105 border border-white/50 shadow-sm whitespace-nowrap cursor-pointer">
+            🔗 <span class="hidden sm:inline">Obtener </span>URL
+          </button>
         </div>
       </div>
-
-      <!-- Espacio flexible -->
-      <div class="flex-1 mb-4">
-        <!-- Información adicional de la programación -->
-        <div class="space-y-2 text-sm text-gray-700">
-          <div class="flex items-center gap-2">
-            <span class="text-purple-600">📅</span>
-            <span class="font-medium">Programada para:</span>
-          </div>
-          <!-- Aquí podrías agregar las fechas de inicio y fin si las tienes -->
-          <div class="ml-6 text-xs text-gray-600">
-            Ver detalles en configuración
-          </div>
-        </div>
-      </div>
-
-      <!-- Footer de la card -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 sm:gap-4 pt-4 border-t border-black/10 flex-shrink-0">
-        <div class="space-y-2">
-          <span class="text-xs sm:text-sm font-semibold text-gray-800 block">Estado</span>
-          <div
-            [class]="'inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs font-medium ' +
-              (activity.status === 'Activo' ? 
-                'bg-green-100 text-green-800 border border-green-300' : 
-                'bg-gray-100 text-gray-800 border border-gray-300')">
-            <span class="w-2 h-2 rounded-full mr-2" 
-                  [class]="activity.status === 'Activo' ? 'bg-green-500' : 'bg-gray-500'"></span>
-            {{ activity.status }}
-          </div>
-        </div>
-        
-        <button class="bg-white/40 hover:bg-white/60 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-900 transition-all duration-300 hover:scale-105 border border-white/50 shadow-sm whitespace-nowrap cursor-pointer">
-          🔗 <span class="hidden sm:inline">Obtener </span>URL
-        </button>
-      </div>
-    </div>
-  }
-</div>
-
+    }
+  </div>
   <!-- Botón Ver Más -->
   @if (hasMoreActivities()) {
     <div class="flex justify-center mt-8 mx-2">
       <button 
-        class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base cursor-pointer"
+        class="bg-atzicay-bg-button hover:bg-atzicay-purple-700 text-white font-bold px-8 py-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base cursor-pointer"
         (click)="loadMore()">
         <span>Ver más actividades</span>
         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,22 +212,20 @@
       </button>
     </div>
   }
-
   <!-- Contador de actividades -->
-  @if (getFilteredActivities().length > 0) {
+  @if (activities.length > 0) {
     <div class="text-center mt-4 mx-2">
       <p class="text-sm text-gray-600">
-        Mostrando {{ getPaginatedActivities().length }} de {{ getFilteredActivities().length }} programaciones
+        Mostrando {{ activities.length }} de {{ totalActivities }} programaciones
       </p>
     </div>
   }
-
   <!-- Mensaje cuando no hay actividades -->
-  @if (getFilteredActivities().length === 0) {
+  @if (activities.length === 0) {
     <div class="text-center py-12 mx-2">
       <div class="text-6xl mb-4">📋</div>
       <h3 class="text-xl font-semibold text-gray-600 mb-2">No hay Programaciones</h3>
-      <p class="text-gray-500">No se encontraron programacioens con los filtros aplicados.</p>
+      <p class="text-gray-500">No se encontraron programaciones con los filtros aplicados.</p>
     </div>
   }
 </div>

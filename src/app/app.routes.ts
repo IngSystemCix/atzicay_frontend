@@ -12,113 +12,111 @@ import {LayoutsMemoryComponent} from './presentation/features/memory/layouts-mem
 import {
   LayoutsSolveTheWordComponent
 } from './presentation/features/solveTheWord/layouts-solve-the-word/layouts-solve-the-word.component';
-import { GameConfigurationComponent } from './presentation/shared/game-configuration/game-configuration.component';
 import { ConfigGameComponent } from './presentation/features/config-game/config-game.component';
 import { GameSolveTheWordComponent } from './presentation/features/solveTheWord/game-solve-the-word/game-solve-the-word.component';
+import { authGuard } from './core/infrastructure/guards/auth.guard';
+import { loginGuard } from './core/infrastructure/guards/login.guard';
 
 export const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
-    pathMatch: 'full',
-    title: 'Login'
+    pathMatch: 'full'
   },
   {
     path: 'login',
     component: LoginComponent,
+    canActivate: [loginGuard],
     title: 'Login'
   },
   {
-    path: '',
+    path: 'dashboard',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       {
-        path: 'dashboard',
+        path: '',
         component: DashboardComponent,
         title:"Dashboard"
-      },
+      }
+    ]
+  },
+  {
+    path: 'juegos',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
       {
-        path: 'juegos',
+        path: '',
         component: JuegosComponent,
         title: "Juegos"
       },
       {
-        path: 'perfil',
-        component: ProfileComponent,
-        title: "Perfil"
-      },
-
-
-
-      {
-        path: 'juegos/hangman',
+        path: 'hangman',
         component: LayoutHangmanComponent,
         title:"Crear Ahorcado"
       },
       {
-        path: 'juegos/jugar-hangman/:id',
-         component: GameHangmanComponent,
-         title:"Juego de ahorcado"
+        path: 'jugar-hangman/:id',
+        component: GameHangmanComponent,
+        title:"Juego de ahorcado"
       },
-
-
-
-
       {
-        path: 'juegos/puzzle/jugar',
+        path: 'puzzle/jugar',
         component: GamePuzzleComponent,
         title:"Juego de Rompezabezas"
       },
       {
-        path: 'juegos/puzzle/create',
+        path: 'jugar-puzzle/:id',
+        component: GamePuzzleComponent,
+        title:"Juego de Rompezabezas"
+      },
+      {
+        path: 'puzzle/create',
         component: LayoutsPuzzleComponent,
         title:"Crear Rompezabezas"
       },
-
-
-
-
       {
-        path: 'juegos/memory/jugar',
+        path: 'memory/jugar',
         component: GameMemoryComponent,
         title:"Juego de Memoria"
       },
       {
-        path: 'juegos/memory/create',
+        path: 'memory/create',
         component: LayoutsMemoryComponent,
         title:"Crear Memoria"
       },
-
-
-
-
       {
-        path: 'juegos/solve-The-Word/jugar',
+        path: 'solve-The-Word/jugar',
         component: GamePuzzleComponent,
         title:"Juego de Pupiletras"
       },
       {
-        path: 'juegos/jugar-solve-the-word/:id',
+        path: 'jugar-solve-the-word/:id',
         component: GameSolveTheWordComponent,
         title:"Juego de Pupiletras"
       },
       {
-        path: 'juegos/solve-The-Word/create',
+        path: 'solve-The-Word/create',
         component: LayoutsSolveTheWordComponent,
         title:"Crear Pupiletras"
       },
-
       {
-        path: 'juegos/editar/:id',
-        component: GameConfigurationComponent,
-        title: "Editar Juego"
-      },
-
-
-      {
-        path: 'juegos/configuracion/:id',
+        path: 'configuracion/:id',
         component: ConfigGameComponent,
         title: "Configuración del Juego"
+      }
+    ]
+  },
+  {
+    path: 'perfil',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        component: ProfileComponent,
+        title: "Perfil"
       }
     ]
   }

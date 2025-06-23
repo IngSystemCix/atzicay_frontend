@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { GameConfiguration, PuzzleConfig } from '../../../../core/domain/model/game-configuration.model';
 
 interface PuzzlePiece {
   id: number;
@@ -23,7 +24,7 @@ interface PuzzlePiece {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './game-puzzle.component.html',
-  styleUrl: './game-puzzle.component.css'
+  styleUrl: './game-puzzle.component.css',
 })
 export class GamePuzzleComponent implements OnInit {
   pieces: PuzzlePiece[] = [];
@@ -50,8 +51,9 @@ export class GamePuzzleComponent implements OnInit {
   // Variables para la configuración del juego
   loading = false;
   error: string | null = null;
-  gameConfig: any;
-  
+  gameConfig: GameConfiguration | null = null;
+  puzzleConfig: PuzzleConfig | null = null;
+
   // URL de la imagen del puzzle
   puzzleImageUrl = 'assets/pedrito.jpg';
 
@@ -62,7 +64,7 @@ export class GamePuzzleComponent implements OnInit {
   isPanelOpen = true;
 
   constructor(
-    private route: ActivatedRoute, 
+    private route: ActivatedRoute,
     private gameConfigService: GameConfigurationService
   ) {}
 
@@ -72,30 +74,60 @@ export class GamePuzzleComponent implements OnInit {
       this.loading = true;
       this.gameConfigService.getGameConfiguration(id).subscribe({
         next: (response) => {
-          this.gameConfig = response;
-          this.rows = this.gameConfig.rows || 4;
-          this.cols = this.gameConfig.cols || 4;
-          this.totalPieces = this.rows * this.cols;
-          this.maxTime = this.gameConfig.maxTime || 300;
-          this.imageWidth = this.gameConfig.imageWidth || 600;
-          this.imageHeight = this.gameConfig.imageHeight || 450;
-          this.sidebarWidth = this.gameConfig.sidebarWidth || 200;
-          this.puzzleImageUrl = this.gameConfig.imageUrl || 'assets/pedrito.jpg';
-
+          const data = response.data;
+          this.gameConfig = data;
+          this.puzzleConfig = data.puzzle;
+          if (this.puzzleConfig) {
+            this.rows = this.puzzleConfig.rows || 4;
+            this.cols = this.puzzleConfig.cols || 4;
+            this.totalPieces = this.rows * this.cols;
+            this.maxTime = 300;
+            this.imageWidth = 600;
+            this.imageHeight = 450;
+            if (this.puzzleConfig.path_img) {
+              this.puzzleImageUrl = this.getFrontendImagePath(
+                this.puzzleConfig.path_img
+              );
+            } else {
+              this.puzzleImageUrl = 'assets/rompecabezas.png';
+            }
+            this.allowWrongPlacements = !this.puzzleConfig.automatic_help;
+          }
           this.loading = false;
-          this.startGame();
+          // Esperar un poco antes de iniciar para asegurar que la imagen se cargue
+          setTimeout(() => {
+            this.startGame();
+          }, 100);
         },
         error: (err) => {
+          console.error('Error loading game config:', err);
           this.error = 'Error al cargar la configuración del juego';
           this.loading = false;
-          // Usar valores por defecto si hay error
+          // Usar imagen por defecto
+          this.puzzleImageUrl = 'assets/rompecabezas.png';
           this.startGame();
-        }
+        },
       });
     } else {
-      // Si no hay ID válido, usar configuración por defecto
       this.startGame();
     }
+  }
+
+  getFrontendImagePath(path: string): string {
+    // Si la imagen está en public\storage\puzzle, conviértela a una URL relativa accesible
+    const normalized = path.replace(/\\/g, '/');
+    const publicIndex = normalized.toLowerCase().indexOf('public/storage/');
+    if (publicIndex !== -1) {
+      // Quita 'public/' para que quede 'storage/puzzle/...' y sea accesible desde el servidor
+      const relativePath = normalized.substring(publicIndex + 7); // 7 = length of 'public/'
+      // Si sirves storage como /storage en tu servidor (Laravel típico)
+      return `/${relativePath}`;
+    }
+    // Si es una ruta absoluta local, no funcionará en el navegador
+    if (/^[a-zA-Z]:\\/.test(path) || path.startsWith('/')) {
+      return 'assets/rompecabezas.png';
+    }
+    return path;
   }
 
   generatePuzzleShapes() {
@@ -110,13 +142,19 @@ export class GamePuzzleComponent implements OnInit {
     // Generar conectores de manera coordinada
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
-        const piece = this.pieces.find(p => p.row === row && p.col === col);
+        const piece = this.pieces.find((p) => p.row === row && p.col === col);
         if (!piece) continue;
 
         // Conector derecho (solo si no es la última columna)
         if (col < this.cols - 1) {
-          const rightPiece = this.pieces.find(p => p.row === row && p.col === col + 1);
-          if (rightPiece && piece.rightConnector === 'none' && rightPiece.leftConnector === 'none') {
+          const rightPiece = this.pieces.find(
+            (p) => p.row === row && p.col === col + 1
+          );
+          if (
+            rightPiece &&
+            piece.rightConnector === 'none' &&
+            rightPiece.leftConnector === 'none'
+          ) {
             const isOut = Math.random() > 0.5;
             piece.rightConnector = isOut ? 'out' : 'in';
             rightPiece.leftConnector = isOut ? 'in' : 'out';
@@ -125,8 +163,14 @@ export class GamePuzzleComponent implements OnInit {
 
         // Conector inferior (solo si no es la última fila)
         if (row < this.rows - 1) {
-          const bottomPiece = this.pieces.find(p => p.row === row + 1 && p.col === col);
-          if (bottomPiece && piece.bottomConnector === 'none' && bottomPiece.topConnector === 'none') {
+          const bottomPiece = this.pieces.find(
+            (p) => p.row === row + 1 && p.col === col
+          );
+          if (
+            bottomPiece &&
+            piece.bottomConnector === 'none' &&
+            bottomPiece.topConnector === 'none'
+          ) {
             const isOut = Math.random() > 0.5;
             piece.bottomConnector = isOut ? 'out' : 'in';
             bottomPiece.topConnector = isOut ? 'in' : 'out';
@@ -156,7 +200,7 @@ export class GamePuzzleComponent implements OnInit {
           topConnector: 'none',
           rightConnector: 'none',
           bottomConnector: 'none',
-          leftConnector: 'none'
+          leftConnector: 'none',
         });
       }
     }
@@ -172,19 +216,19 @@ export class GamePuzzleComponent implements OnInit {
 
   getPuzzleShapeClasses(piece: PuzzlePiece): string {
     const classes = ['puzzle-piece'];
-    
+
     if (piece.topConnector === 'in') classes.push('top-in');
     else if (piece.topConnector === 'out') classes.push('top-out');
-    
+
     if (piece.rightConnector === 'in') classes.push('right-in');
     else if (piece.rightConnector === 'out') classes.push('right-out');
-    
+
     if (piece.bottomConnector === 'in') classes.push('bottom-in');
     else if (piece.bottomConnector === 'out') classes.push('bottom-out');
-    
+
     if (piece.leftConnector === 'in') classes.push('left-in');
     else if (piece.leftConnector === 'out') classes.push('left-out');
-    
+
     return classes.join(' ');
   }
 
@@ -209,6 +253,9 @@ export class GamePuzzleComponent implements OnInit {
     this.initializePuzzle();
     this.gameStarted = true;
     this.gameCompleted = false;
+
+    // Verificar que la imagen se cargue
+    this.checkImageLoad();
   }
 
   shufflePiecesForSidebar() {
@@ -277,7 +324,9 @@ export class GamePuzzleComponent implements OnInit {
       return;
     }
 
-    const isCorrectPosition = this.draggedPiece.row === targetRow && this.draggedPiece.col === targetCol;
+    const isCorrectPosition =
+      this.draggedPiece.row === targetRow &&
+      this.draggedPiece.col === targetCol;
 
     // Si no permitimos colocaciones incorrectas y la posición no es correcta
     if (!this.allowWrongPlacements && !isCorrectPosition) {
@@ -308,7 +357,7 @@ export class GamePuzzleComponent implements OnInit {
   }
 
   updateCorrectPiecesCount() {
-    this.correctPieces = this.pieces.filter(p => p.correctPos).length;
+    this.correctPieces = this.pieces.filter((p) => p.correctPos).length;
   }
 
   checkGameCompletion() {
@@ -321,11 +370,17 @@ export class GamePuzzleComponent implements OnInit {
   }
 
   isPieceAt(row: number, col: number): boolean {
-    return this.pieces.some(p => p.inBoard && p.currentRow === row && p.currentCol === col);
+    return this.pieces.some(
+      (p) => p.inBoard && p.currentRow === row && p.currentCol === col
+    );
   }
 
   getPieceAt(row: number, col: number): PuzzlePiece | null {
-    return this.pieces.find(p => p.inBoard && p.currentRow === row && p.currentCol === col) || null;
+    return (
+      this.pieces.find(
+        (p) => p.inBoard && p.currentRow === row && p.currentCol === col
+      ) || null
+    );
   }
 
   isPieceCorrect(row: number, col: number): boolean {
@@ -345,52 +400,76 @@ export class GamePuzzleComponent implements OnInit {
 
     const pieceWidth = this.imageWidth / this.cols;
     const pieceHeight = this.imageHeight / this.rows;
-    const scale = this.isInSidebar(piece) ? 0.8 : 1;
+    const scale = this.isInSidebar(piece) ? 0.6 : 1; // Reducir escala en sidebar
     const isInBoard = !this.isInSidebar(piece);
 
-    return {
-      'width': isInBoard ? '100%' : `${pieceWidth * scale}px`,
-      'height': isInBoard ? '100%' : `${pieceHeight * scale}px`,
+    const baseStyle = {
+      width: isInBoard ? '100%' : `${pieceWidth * scale}px`,
+      height: isInBoard ? '100%' : `${pieceHeight * scale}px`,
       'background-image': `url(${this.puzzleImageUrl})`,
-      'background-position': `-${piece.col * pieceWidth}px -${piece.row * pieceHeight}px`,
+      'background-position': `-${piece.col * pieceWidth}px -${
+        piece.row * pieceHeight
+      }px`,
       'background-size': `${this.imageWidth}px ${this.imageHeight}px`,
       'background-repeat': 'no-repeat',
-      'cursor': this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
-      'border': isInBoard ? '1px solid rgba(147, 51, 234, 0.3)' : '2px solid rgba(102, 102, 102, 0.5)',
+      cursor: this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
+      border: isInBoard
+        ? '1px solid rgba(147, 51, 234, 0.3)'
+        : '2px solid rgba(102, 102, 102, 0.5)',
       'border-radius': isInBoard ? '2px' : '8px',
-      'box-shadow': this.selectedPiece?.id === piece.id 
-        ? '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2)' 
-        : isInBoard ? 'none' : '0 2px 4px rgba(0,0,0,0.1)',
-      'display': 'block',
-      'position': isInBoard ? 'absolute' : 'relative',
+      'box-shadow':
+        this.selectedPiece?.id === piece.id
+          ? '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2)'
+          : isInBoard
+          ? 'none'
+          : '0 2px 4px rgba(0,0,0,0.1)',
+      display: 'block',
+      position: isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
-      'transition': 'all 0.2s ease',
-      'transform': this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
-      'top': isInBoard ? '0' : 'auto',
-      'left': isInBoard ? '0' : 'auto',
-      'margin': '0',
-      'padding': '0'
+      transition: 'all 0.2s ease',
+      transform:
+        this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
+      top: isInBoard ? '0' : 'auto',
+      left: isInBoard ? '0' : 'auto',
+      margin: isInBoard ? '0' : '4px',
+      padding: '0',
+      'object-fit': 'cover',
     };
+
+    // Si la imagen no se carga, agregar un fallback
+    return baseStyle;
+  }
+
+  checkImageLoad() {
+    const img = new Image();
+    img.onload = () => {
+      console.log('Imagen cargada correctamente');
+    };
+    img.onerror = () => {
+      console.error('Error al cargar la imagen, usando imagen por defecto');
+      this.puzzleImageUrl = 'assets/rompecabezas.png';
+    };
+    img.src = this.puzzleImageUrl;
   }
   getDropZoneStyle() {
     const pieceWidth = this.imageWidth / this.cols;
     const pieceHeight = this.imageHeight / this.rows;
 
     return {
-      'width': `${pieceWidth}px`,
-      'height': `${pieceHeight}px`,
+      width: `${pieceWidth}px`,
+      height: `${pieceHeight}px`,
       'min-width': `${pieceWidth}px`,
       'min-height': `${pieceHeight}px`,
       'max-width': `${pieceWidth}px`,
       'max-height': `${pieceHeight}px`,
-      'position': 'relative',
+      position: 'relative',
       'box-sizing': 'border-box',
-      'border': '1px dashed rgba(147, 51, 234, 0.2)',
+      border: '1px dashed rgba(147, 51, 234, 0.2)',
       'background-color': 'rgba(255, 255, 255, 0.1)',
-      'display': 'flex',
+      display: 'flex',
       'align-items': 'center',
       'justify-content': 'center',
-      'overflow': 'hidden'
+      overflow: 'hidden',
     };
   }
 

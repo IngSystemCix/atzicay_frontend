@@ -1,325 +1,336 @@
-<div class="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 p-6">
-  <div class="max-w-6xl mx-auto">
-    <!-- Tab Navigation -->
-    <div class="flex mb-8">
-      <button
-        (click)="setActiveTab('contenido')"
-        [class]="activeTab === 'contenido' ? 'bg-purple-400 text-white' : 'bg-white text-gray-600 hover:bg-purple-50'"
-        class="px-6 py-3 rounded-t-lg font-medium transition-colors duration-200 border-b-0"
-      >
-        Contenido
-      </button>
-      <button
-        (click)="setActiveTab('configuracion')"
-        [class]="activeTab === 'configuracion' ? 'bg-purple-400 text-white' : 'bg-white text-gray-600 hover:bg-purple-50'"
-        class="px-6 py-3 rounded-t-lg font-medium transition-colors duration-200 border-b-0 ml-1"
-      >
-        Configuración
-      </button>
-      <button
-        (click)="setActiveTab('vista-previa')"
-        [class]="activeTab === 'vista-previa' ? 'bg-purple-400 text-white' : 'bg-white text-gray-600 hover:bg-purple-50'"
-        class="px-6 py-3 rounded-t-lg font-medium transition-colors duration-200 border-b-0 ml-1"
-      >
-        Vista Previa
-      </button>
-      <div class="ml-auto">
-        <button
-          (click)="cancel()"
-          class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors duration-200"
-        >
-          Cancelar
-        </button>
-        <button
-          (click)="save()"
-          class="px-6 py-3 bg-purple-400 text-white rounded-lg font-medium hover:bg-purple-500 transition-colors duration-200 ml-2">
-          Guardar
-        </button>
-      </div>
+<div
+  class="layout-hangman-scroll min-h-screen p-4"
+  style="background-color: var(--color-atzicay-bg)"
+>
+  <!-- Tab Navigation -->
+  <div class="flex mb-0.5 p-4 justify-between items-center">
+    <app-atzicay-tabs
+      [tabs]="tabs"
+      [activeTab]="activeTab"
+      (tabChanged)="setActiveTab($event)"
+    ></app-atzicay-tabs>
+
+    <div class="ml-auto flex gap-2">
+      <app-atzicay-button
+        type="cancel"
+        label="Cancelar"
+        (click)="cancel()"
+      ></app-atzicay-button>
+
+      <app-atzicay-button
+        type="primary"
+        label="Guardar"
+        (click)="save()"
+      ></app-atzicay-button>
     </div>
+  </div>
 
-    <!-- Tab Content -->
-    <div class="bg-white rounded-lg shadow-lg p-8 min-h-[600px]">
-      <!-- Contenido Tab -->
-      @if (activeTab === 'contenido') {
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Información del juego -->
-          <div class="space-y-6">
-            <div>
-              <h2 class="text-2xl font-bold text-purple-600 mb-2">
-                Información del juego
-              </h2>
-              <p class="text-gray-500 text-sm mb-6">
-                Tu progreso en la plataforma
-              </p>
-            </div>
+  <!-- Tab Content -->
+  <div class="bg-white rounded-lg shadow-lg p-8 min-h-[600px]">
+    <!-- Contenido Tab -->
+    @if (activeTab === 'contenido') {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Información del juego -->
+      <div class="space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold text-purple-600 mb-2">
+            Información del juego
+          </h2>
+          <p class="text-gray-500 text-sm mb-6">Tu progreso en la plataforma</p>
+        </div>
 
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Título del Juego</label
+          >
+          <input
+            title="Título del juego"
+            [(ngModel)]="gameTitle"
+            type="text"
+            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Descripción</label
+          >
+          <textarea
+            title="Descripción del juego"
+            [(ngModel)]="gameDescription"
+            rows="4"
+            class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all resize-none"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2"
+            >Tamaño de la cuadrícula</label
+          >
+          <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Título del Juego</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Filas</label
+              >
               <input
-                title="Título del juego"
-                [(ngModel)]="gameTitle"
-                type="text"
+                title="Número de filas"
+                type="number"
+                min="5"
+                max="30"
+                [(ngModel)]="rows"
                 class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
               />
             </div>
-
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
-              <textarea
-                title="Descripción del juego"
-                [(ngModel)]="gameDescription"
-                rows="4"
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all resize-none"
-              ></textarea>
-            </div>
-
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Tamaño de la cuadrícula</label>
-              <select
-                title="Selecciona el tamaño de la cuadrícula"
-                [(ngModel)]="gridSize"
-                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all bg-white"
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Columnas</label
               >
-                <option value="10 x 10">10 x 10</option>
-                <option value="15 x 15">15 x 15</option>
-                <option value="20 x 20">20 x 20</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Palabras -->
-          <div class="space-y-6">
-            <div class="flex justify-between items-center">
-              <h2 class="text-2xl font-bold text-purple-600">Palabras</h2>
-              <button
-                (click)="addWord()"
-                class="bg-purple-400 hover:bg-purple-500 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
-              >
-                Agregar Palabra
-              </button>
-            </div>
-
-            <p class="text-gray-500 text-sm">
-              Agregar las palabras que los estudiantes deberán encontrar
-            </p>
-            <p class="text-gray-400 text-xs flex items-center">
-              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fill-rule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-              Se recomienda agregar al menos 5 palabras
-            </p>
-
-            <div class="space-y-4 max-h-80 overflow-y-auto">
-              <!-- Buenas prácticas: Usar @for para iterar palabras -->
-              @for (word of words; track $index) {
-                <div class="bg-purple-50 p-4 rounded-lg relative">
-                  <div class="flex justify-between items-start mb-3">
-                    <span class="bg-purple-400 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      Palabra {{ word.id }}
-                    </span>
-                    @if (words.length > 1) {
-                      <button
-                        (click)="removeWord(word.id)"
-                        class="text-red-500 hover:text-red-700 font-bold text-lg"
-                      >
-                        ×
-                      </button>
-                    }
-                  </div>
-
-                  <div class="space-y-3">
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Palabra</label>
-                      <input
-                        title="Palabra a encontrar"
-                        [(ngModel)]="word.word"
-                        type="text"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-gray-700 mb-1">Orientación</label>
-                      <select
-                        [(ngModel)]="word.orientation"
-                        class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white">
-                        <option value="HL">Horizontal (Izquierda a Derecha)</option>
-                        <option value="HR">Horizontal (Derecha a Izquierda)</option>
-                        <option value="VU">Vertical (Arriba a Abajo)</option>
-                        <option value="VD">Vertical (Abajo a Arriba)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              }
-              @empty {
-                <div class="text-center text-gray-400">No hay palabras agregadas.</div>
-              }
+              <input
+                title="Número de columnas"
+                type="number"
+                min="5"
+                max="30"
+                [(ngModel)]="cols"
+                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
+              />
             </div>
           </div>
         </div>
-      }
+      </div>
 
-      <!-- Configuración Tab -->
-      @if (activeTab === 'configuracion') {
-        <div class="max-w-4xl">
-          <div>
-            <h2 class="text-2xl font-bold text-purple-600 mb-2">
-              Configuración del Juego
-            </h2>
-            <p class="text-gray-500 text-sm mb-8">
-              Personaliza las reglas y opciones del juego
-            </p>
-          </div>
+      <!-- Palabras -->
+      <div class="space-y-6">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-bold text-purple-600">Palabras</h2>
+          <button
+            (click)="addWord()"
+            class="bg-purple-400 hover:bg-purple-500 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+          >
+            Agregar Palabra
+          </button>
+        </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="space-y-6">
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Fuente</label>
-                <input
-                  [(ngModel)]="fontFamily"
-                  type="text"
-                  placeholder="Ej: Arial, Helvetica, sans-serif"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
-                />
-              </div>
+        <p class="text-gray-500 text-sm">
+          Agregar las palabras que los estudiantes deberán encontrar
+        </p>
+        <p class="text-gray-400 text-xs flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+          Se recomienda agregar al menos 5 palabras
+        </p>
 
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Fondo</label>
-                <div class="flex gap-3">
-                  <!-- Buenas prácticas: Usar @for para iterar colores -->
-                  @for (color of colorOptions; track $index) {
-                    <button
-                      title="Selecciona un color de fondo"
-                      (click)="selectColor(color.name, 'background')"
-                      [class]="color.class"
-                      class="w-12 h-12 rounded-lg border-2 transition-all hover:scale-105"
-                      [class.ring-2]="backgroundColor === color.name"
-                      [class.ring-purple-400]="backgroundColor === color.name"
-                    ></button>
-                  }
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Color de Fuente</label>
-                <div class="flex gap-3">
-                  @for (color of colorOptions; track $index) {
-                    <button
-                      title="Selecciona un color para la fuente"
-                      (click)="selectColor(color.name, 'font')"
-                      [class]="color.class"
-                      class="w-12 h-12 rounded-lg border-2 transition-all hover:scale-105"
-                      [class.ring-2]="fontColor === color.name"
-                      [class.ring-purple-400]="fontColor === color.name"
-                    ></button>
-                  }
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-4">Juego Público</label>
-                <div class="flex items-center">
-                  <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                      [(ngModel)]="isPublicGame"
-                      type="checkbox"
-                      class="sr-only peer"
-                    />
-                    <div
-                      class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-400"
-                    ></div>
-                    <span class="ml-3 text-sm text-gray-500">Otros usuarios podrán usar este juego</span>
-                  </label>
-                </div>
-              </div>
+        <div class="space-y-4 max-h-80 overflow-y-auto">
+          <!-- Buenas prácticas: Usar @for para iterar palabras -->
+          @for (word of words; track $index) {
+          <div class="bg-purple-50 p-4 rounded-lg relative">
+            <div class="flex justify-between items-start mb-3">
+              <span
+                class="bg-purple-400 text-white px-3 py-1 rounded-full text-sm font-medium"
+              >
+                Palabra {{ word.id }}
+              </span>
+              @if (words.length > 1) {
+              <button
+                (click)="removeWord(word.id)"
+                class="text-red-500 hover:text-red-700 font-bold text-lg"
+              >
+                ×
+              </button>
+              }
             </div>
 
-            <div class="space-y-6">
+            <div class="space-y-3">
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Mensaje de Éxito</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Palabra</label
+                >
                 <input
-                  [(ngModel)]="successMessage"
+                  title="Palabra a encontrar"
+                  [(ngModel)]="word.word"
                   type="text"
-                  placeholder="¡Excelente trabajo!"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Mensaje de Fracaso</label>
-                <input
-                  [(ngModel)]="failureMessage"
-                  type="text"
-                  placeholder="¡Inténtalo de nuevo!"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
+                  class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                 />
               </div>
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Dificultad</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >Orientación</label
+                >
                 <select
-                  [(ngModel)]="difficulty"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all bg-white">
-                  <option [value]="'E'">Fácil</option>
-                  <option [value]="'M'">Medio</option>
-                  <option [value]="'H'">Difícil</option>
+                  [(ngModel)]="word.orientation"
+                  class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none bg-white"
+                >
+                  <option value="HR">Horizontal (Derecha)</option>
+                  <option value="HL">Horizontal (Izquierda)</option>
+                  <option value="VD">Vertical (Abajo)</option>
+                  <option value="VU">Vertical (Arriba)</option>
+                  <option value="DU">Diagonal (Arriba)</option>
+                  <option value="DD">Diagonal (Abajo)</option>
                 </select>
               </div>
             </div>
           </div>
-        </div>
-      }
-
-      <!-- Vista Previa Tab -->
-      @if (activeTab === 'vista-previa') {
-        <div class="text-center py-20">
-          <div class="text-gray-400 mb-4">
-            <svg
-              class="w-24 h-24 mx-auto"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
+          } @empty {
+          <div class="text-center text-gray-400">
+            No hay palabras agregadas.
           </div>
-          <h3 class="text-xl font-semibold text-gray-600 mb-2">
-            Vista Previa del Juego
-          </h3>
-          <p class="text-gray-500">
-            Aquí se mostrará una vista previa del juego configurado
-          </p>
+          }
         </div>
-      }
+      </div>
     </div>
+    }
 
-    <!-- Action Buttons -->
-    <div class="flex justify-between mt-8">
-      <button
-        (click)="cancel()"
-        class="px-8 py-3 border border-gray-300 text-gray-600 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200"
-      >
-        Cancelar
-      </button>
-      <button
-        (click)="debugGameData()"
-        class="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg font-medium transition-colors duration-200">
-        🔍 Debug
-      </button>
-      <button
-        (click)="save()"
-        class="px-8 py-3 bg-purple-400 hover:bg-purple-500 text-white rounded-lg font-medium transition-colors duration-200"
-      >
-        Guardar
-      </button>
+    <!-- Configuración Tab -->
+    @if (activeTab === 'configuracion') {
+    <div class="max-w-4xl">
+      <div>
+        <h2 class="text-2xl font-bold text-purple-600 mb-2">
+          Configuración del Juego
+        </h2>
+        <p class="text-gray-500 text-sm mb-8">
+          Personaliza las reglas y opciones del juego
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Fuente</label
+            >
+            <input
+              [(ngModel)]="fontFamily"
+              type="text"
+              placeholder="Ej: Arial, Helvetica, sans-serif"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3"
+              >Fondo</label
+            >
+            <div class="flex gap-3">
+              <!-- Buenas prácticas: Usar @for para iterar colores -->
+              @for (color of colorOptions; track $index) {
+              <button
+                title="Selecciona un color de fondo"
+                (click)="selectColor(color.name, 'background')"
+                [class]="color.class"
+                class="w-12 h-12 rounded-lg border-2 transition-all hover:scale-105"
+                [class.ring-2]="backgroundColor === color.name"
+                [class.ring-purple-400]="backgroundColor === color.name"
+              ></button>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-3"
+              >Color de Fuente</label
+            >
+            <div class="flex gap-3">
+              @for (color of colorOptions; track $index) {
+              <button
+                title="Selecciona un color para la fuente"
+                (click)="selectColor(color.name, 'font')"
+                [class]="color.class"
+                class="w-12 h-12 rounded-lg border-2 transition-all hover:scale-105"
+                [class.ring-2]="fontColor === color.name"
+                [class.ring-purple-400]="fontColor === color.name"
+              ></button>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-4"
+              >Juego Público</label
+            >
+            <div class="flex items-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  [(ngModel)]="isPublicGame"
+                  type="checkbox"
+                  class="sr-only peer"
+                />
+                <div
+                  class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-400"
+                ></div>
+                <span class="ml-3 text-sm text-gray-500"
+                  >Otros usuarios podrán usar este juego</span
+                >
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Mensaje de Éxito</label
+            >
+            <input
+              [(ngModel)]="successMessage"
+              type="text"
+              placeholder="¡Excelente trabajo!"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Mensaje de Fracaso</label
+            >
+            <input
+              [(ngModel)]="failureMessage"
+              type="text"
+              placeholder="¡Inténtalo de nuevo!"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Dificultad</label
+            >
+            <select
+              [(ngModel)]="difficulty"
+              class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all bg-white"
+            >
+              <option [value]="'E'">Fácil</option>
+              <option [value]="'M'">Medio</option>
+              <option [value]="'H'">Difícil</option>
+            </select>
+          </div>
+        </div>
+      </div>
     </div>
+    }
+
+    <!-- Vista Previa Tab -->
+    @if (activeTab === 'vista-previa') {
+    <div class="text-center py-20">
+      <div class="text-gray-400 mb-4">
+        <svg class="w-24 h-24 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+          <path
+            fill-rule="evenodd"
+            d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+            clip-rule="evenodd"
+          ></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-semibold text-gray-600 mb-2">
+        Vista Previa del Juego
+      </h3>
+      <p class="text-gray-500">
+        Aquí se mostrará una vista previa del juego configurado
+      </p>
+    </div>
+    }
   </div>
 </div>
 

@@ -1,10 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import {
-  GameConfigurationService,
-  GameConfiguration,
-} from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { ActivatedRoute } from '@angular/router';
+import { GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { GameConfiguration, SolveTheWordWord, GameSetting } from '../../../../core/domain/model/game-configuration.model';
 import Swal from 'sweetalert2';
 interface WordCell {
   letter: string;
@@ -55,39 +53,32 @@ export class GameSolveTheWordComponent implements OnInit {
   title = '';
   description = '';
   isCompact = false;
+  fontFamily = 'Arial';
+  backgroundColor = '#fff';
+  fontColor = '#000';
 
-  toggleCompact() {
-    this.isCompact = !this.isCompact;
-  }
-  // Agregar esta línea después de la declaración de originalTimeLimit
   ngOnInit() {
     const id = Number(this.route.snapshot.params['id']);
     if (id && !isNaN(id)) {
       this.loading = true;
       this.gameConfigService.getGameConfiguration(id).subscribe({
-        next: (response) => {
-          console.log('Respuesta completa:', response);
+        next: (response: { success: boolean; data: GameConfiguration; message?: string }) => {
+          if (response.success && response.data) {
+            const data = response.data;
+            this.title = data.game_name;
+            this.description = data.game_description;
 
-          if ((response.success || response.data) && response.data) {
-            this.title = response.data.title;
-            this.description = response.data.description;
-
-            const timeSetting = response.data.settings?.find(
-              (s: any) => s.key.toLowerCase() === 'time_limit'
-            );
-            this.timeLeft = timeSetting ? parseInt(timeSetting.value, 10) : 347;
-            // ✅ GUARDAR EL TIEMPO ORIGINAL AQUÍ
+            // Leer settings
+            const getSetting = (key: string) => data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)?.value;
+            this.timeLeft = parseInt(getSetting('time_limit') || '347', 10);
+            this.fontFamily = getSetting('font_family') || 'Arial';
+            this.backgroundColor = getSetting('background_color') || '#fff';
+            this.fontColor = getSetting('font_color') || '#000';
             this.originalTimeLimit = this.timeLeft;
 
-            const rows = response.data.game_data?.rows || 12;
-            const cols = response.data.game_data?.columns || rows || 12;
-            this.gridRows = rows;
-            this.gridCols = cols;
-
-            this.updateGridSize();
-
-            const wordsArr = response.data.game_data?.words || [];
-            this.words = wordsArr.map((w: any) => ({
+            // Palabras y orientaciones
+            const solveArr: SolveTheWordWord[] = data.solve_the_word || [];
+            this.words = solveArr.map((w) => ({
               text: w.word.toUpperCase(),
               found: false,
               orientation: w.orientation,
@@ -95,6 +86,12 @@ export class GameSolveTheWordComponent implements OnInit {
             this.totalWords = this.words.length;
             this.wordsFound = 0;
 
+            // Tamaño de grilla dinámico
+            const maxWordLen = this.words.reduce((max, w) => Math.max(max, w.text.length), 0);
+            this.gridRows = Math.max(12, maxWordLen + 2, this.words.length + 2);
+            this.gridCols = Math.max(12, maxWordLen + 2, this.words.length + 2);
+
+            this.updateGridSize();
             this.initializeGrid();
             this.placeWordsOnGrid();
             this.fillRemainingCells();
@@ -107,8 +104,7 @@ export class GameSolveTheWordComponent implements OnInit {
             this.loading = false;
           }
         },
-        error: (err) => {
-          console.error('Error en suscripción:', err);
+        error: (err: unknown) => {
           this.showErrorAlert('Error al cargar la configuración del juego');
           this.loading = false;
         },
@@ -576,5 +572,9 @@ export class GameSolveTheWordComponent implements OnInit {
       clearInterval(this.timer);
     }
     this.startTimer();
+  }
+
+  toggleCompact(): void {
+    this.isCompact = !this.isCompact;
   }
 }

@@ -1,0 +1,64 @@
+<!-- Botón tipo link -->
+<a *ngIf="type === 'link'" 
+   [routerLink]="routerLink"
+   [ngClass]="{
+     'block': true,
+     'w-full': fullWidth,
+     'btn-atzicay': true,
+     'rounded-xl': true,
+     'py-3': true,
+     'font-medium': true,
+     'transition-all': true,
+     'duration-200': true,
+     'text-center': true,
+     'hover:scale-105': true,
+     'hover:shadow-md': true,
+     'active:scale-95': true
+   }"
+>
+  {{ label }}
+</a>
+
+
+
+<!-- Cancelar -->
+<button *ngIf="type === 'cancel'"
+        type="button"
+        [disabled]="disabled || isLoading"
+        (click)="click.emit($event)"
+        [ngClass]="{
+          'w-full': fullWidth,
+          'bg-gray-500': true,
+          'hover:bg-gray-700': true,
+          'text-white': true,
+          'px-6 py-2': true,
+          'rounded-md': true,
+          'font-bold': true,
+          'disabled:opacity-50': true,
+          'transition-colors': true,
+          'min-w-[140px] h-12': true
+        }"
+>
+  {{ label }}
+</button>
+
+<!-- Guardar / Editar -->
+<button *ngIf="type === 'primary'"
+        type="submit"
+        [disabled]="disabled || isLoading"
+        (click)="click.emit($event)"
+        [ngClass]="{
+          'w-full': fullWidth,
+          'bg-atzicay-purple-500': true,
+          'hover:bg-atzicay-purple-700': true,
+          'text-white': true,
+          'px-6 py-2': true,
+          'rounded-md': true,
+          'font-bold': true,
+          'disabled:opacity-50': true,
+          'transition-colors': true,
+          'min-w-[140px] h-12': true
+        }"
+>
+  {{ label }}
+</button>

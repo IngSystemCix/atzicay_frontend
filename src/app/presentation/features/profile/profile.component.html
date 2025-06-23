@@ -1,27 +1,16 @@
-<div
-  class="bg-gradient-to-br from-[#F8F4FF] via-[#F2EEFD] to-[#EDE9FE] min-h-screen p-6"
->
-  <!-- Navegación de pestañas -->
-  <div class="flex space-x-1 mb-8">
-    <button
-      class="px-6 py-3 bg-white text-[#6B46C1] font-semibold rounded-t-lg shadow-sm border-b-2 border-[#6B46C1] transition-all duration-200"
-    >
-      Perfil
-    </button>
-    <!-- Pestañas comentadas -->
-  </div>
+<div class="bg-gradient-to-br from-[#F8F4FF] via-[#F2EEFD] to-[#EDE9FE] min-h-screen p-6">
 
-  <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+  <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-atzicay-border">
     <div class="flex flex-col lg:flex-row">
       <!-- Panel izquierdo - Información del perfil -->
       <div
-        class="w-full lg:w-1/3 bg-gradient-to-b from-[#6B46C1] to-[#8B5CF6] text-white p-8 text-center"
+        class="w-full lg:w-1/3 bg-white text-white p-8 text-center"
       >
         <div class="relative inline-block mb-6">
           <img
             [src]="picture || 'assets/default-profile.png'"
             alt="Foto de perfil"
-            class="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-lg object-cover"
+            class="w-32 h-32 rounded-full mx-auto border-4 border-atzicay-border shadow-lg object-cover"
           />
           <div
             class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-400 rounded-full border-3 border-white flex items-center justify-center"
@@ -30,107 +19,52 @@
           </div>
         </div>
 
-        <h2 class="text-2xl font-bold mb-2">
-          {{ user?.fullName || "Usuario" }}
+        <h2 class="text-2xl text-atzicay-heading font-bold mb-2">
+          {{ user?.name || "Usuario" }} {{ user?.last_name || '' }}
         </h2>
 
-        <p class="text-purple-100 mb-6 flex items-center justify-center">
-          <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
-            ></path>
-            <path
-              d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
-            ></path>
-          </svg>
-          {{ user?.email || "Correo no disponible" }}
-        </p>
-
-        <div
-          class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-left space-y-3 mb-6"
-        >
-          @if (user?.formattedBirthdate) {
+        <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-left space-y-3 mb-6">
           <div class="flex items-center text-sm">
-            <svg
-              class="w-4 h-4 mr-3 text-purple-200"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                clip-rule="evenodd"
-              ></path>
+            <svg class="w-4 h-4 mr-3 text-atzicay-heading" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
             </svg>
             <div>
-              <span class="text-purple-200">Nacimiento</span><br />
-              <span class="font-medium">{{ user?.formattedBirthdate }}</span>
+              <span class="text-atzicay-heading font-bold">Nacimiento</span><br />
+              <span class="text-atzicay-heading">{{ formatMemberSince(user?.birthdate) }}</span>
             </div>
           </div>
-          } @if (user?.city) {
           <div class="flex items-center text-sm">
-            <svg
-              class="w-4 h-4 mr-3 text-purple-200"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                clip-rule="evenodd"
-              ></path>
+            <svg class="w-4 h-4 mr-3 text-atzicay-heading" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
             </svg>
             <div>
-              <span class="text-purple-200">Ubicación</span><br />
-              <span class="font-medium"
-                >{{ user?.city }}, {{ user.countryName }}</span
-              >
+              <span class="text-atzicay-heading font-bold">País</span><br />
+              <span class="text-atzicay-heading">{{ user?.country }}</span>
             </div>
           </div>
-          } @else {
           <div class="flex items-center text-sm">
-            <svg
-              class="w-4 h-4 mr-3 text-purple-200"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                clip-rule="evenodd"
-              ></path>
+            <svg class="w-4 h-4 mr-3 text-atzicay-heading font-bold" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
             </svg>
             <div>
-              <span class="text-purple-200">País</span><br />
-              <span class="font-medium">{{ user.countryName }}</span>
+              <span class="text-atzicay-heading font-bold">Ciudad</span><br />
+              <span class="text-atzicay-heading">{{ user?.city }}</span>
             </div>
           </div>
-          }
-
           <div class="flex items-center text-sm">
-            <svg
-              class="w-4 h-4 mr-3 text-purple-200"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                clip-rule="evenodd"
-              ></path>
+            <svg class="w-4 h-4 mr-3 text-atzicay-heading" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
             </svg>
             <div>
-              <span class="text-purple-200">Miembro desde</span><br />
-              <span class="font-medium">{{
-                user?.created_at || "Fecha no disponible"
-              }}</span>
+              <span class="text-atzicay-heading font-bold">Miembro desde</span><br />
+              <span class="text-atzicay-heading">{{ formatMemberSince(user?.member_since) }}</span>
             </div>
           </div>
         </div>
 
         <button
           (click)="abrirModal()"
-          class="w-full bg-white text-[#6B46C1] font-semibold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 shadow-lg"
+          class="w-full bg-atzicay-bg-button text-white font-semibold py-3 px-6 rounded-xl hover:bg-atzicay-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
         >
           <svg
             class="w-5 h-5 inline mr-2"
@@ -149,11 +83,10 @@
         </button>
       </div>
 
-      <!-- Panel derecho - Estadísticas -->
       <div class="w-full lg:w-2/3 p-8">
         <div class="flex items-center mb-6">
           <div
-            class="w-12 h-12 bg-gradient-to-r from-[#6B46C1] to-[#8B5CF6] rounded-xl flex items-center justify-center mr-4"
+            class="w-12 h-12 bg-atzicay-purple-500 rounded-xl flex items-center justify-center mr-4"
           >
             <svg
               class="w-6 h-6 text-white"
@@ -170,19 +103,19 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-3xl font-bold text-gray-800">Estadísticas</h3>
-            <p class="text-gray-600">Tu progreso en la plataforma</p>
+            <h3 class="text-3xl font-bold text-atzicay-heading">Estadísticas</h3>
+            <p class="text-atzicay-subheading">Tu progreso en la plataforma</p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Juegos Creados -->
           <div
-            class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border border-blue-200 hover:shadow-lg transition-all duration-300 group"
+            class="bg-atzicay-bg p-6 rounded-2xl border-2 border-atzicay-border hover:shadow-lg transition-all duration-300 group"
           >
             <div class="flex items-center justify-between mb-4">
               <div
-                class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
+                class="w-12 h-12 bg-atzicay-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
               >
                 <svg
                   class="w-6 h-6 text-white"
@@ -198,53 +131,17 @@
                   ></path>
                 </svg>
               </div>
-              <span class="text-blue-600 text-sm font-medium"
-                >↗ +2 este mes</span
-              >
             </div>
-            <p class="text-4xl font-bold text-blue-600 mb-2">
-              {{ user?.games_created || 0 }}
-            </p>
-            <p class="text-blue-700 font-medium">Juegos Creados</p>
-            <p class="text-blue-600 text-sm mt-1">
-              Total de experiencias diseñadas
-            </p>
-          </div>
 
-          <!-- Estadística adicional 1 -->
-          <div
-            class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl border border-green-200 hover:shadow-lg transition-all duration-300 group"
-          >
-            <div class="flex items-center justify-between mb-4">
-              <div
-                class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
-              >
-                <svg
-                  class="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  ></path>
-                </svg>
-              </div>
-              <span class="text-green-600 text-sm font-medium">Activo</span>
-            </div>
-            <p class="text-4xl font-bold text-green-600 mb-2">0%</p>
-            <p class="text-green-700 font-medium">Nivel de Actividad</p>
-            <p class="text-green-600 text-sm mt-1">
-              Participación en la plataforma
+            <p class="text-atzicay-heading font-extrabold">Juegos Creados</p>
+            <p class="text-atzicay-heading text-sm mt-1">
+              Total de experiencias diseñadas
             </p>
           </div>
 
           <!-- Estadística adicional 2 -->
           <div
-            class="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-2xl border border-purple-200 hover:shadow-lg transition-all duration-300 group"
+            class="bg-atzicay-bg p-6 rounded-2xl border-2 border-atzicay-border hover:shadow-lg transition-all duration-300 group"
           >
             <div class="flex items-center justify-between mb-4">
               <div
@@ -264,46 +161,10 @@
                   ></path>
                 </svg>
               </div>
-              <span class="text-purple-600 text-sm font-medium"
-                >⭐ Excelente</span
-              >
             </div>
-            <p class="text-4xl font-bold text-purple-600 mb-2">0</p>
-            <p class="text-purple-700 font-medium">Calificación</p>
-            <p class="text-purple-600 text-sm mt-1">Promedio de valoraciones</p>
-          </div>
-        </div>
-
-        <!-- Sección de logros -->
-        <div class="mt-8">
-          <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-yellow-500"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.922-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-              ></path>
-            </svg>
-            Logros Recientes
-          </h4>
-          <div class="flex flex-wrap gap-3">
-            <span
-              class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-medium flex items-center"
-            >
-              🏆 Creador Activo
-            </span>
-            <span
-              class="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium flex items-center"
-            >
-              🎯 Primera Creación
-            </span>
-            <span
-              class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium flex items-center"
-            >
-              ✨ Perfil Completo
-            </span>
+            <p class="text-4xl font-bold text-atzicay-heading mb-2">0</p>
+            <p class="text-atzicay-heading font-extrabold">Calificación</p>
+            <p class="text-atzicay-heading text-sm mt-1">Promedio de valoraciones</p>
           </div>
         </div>
       </div>

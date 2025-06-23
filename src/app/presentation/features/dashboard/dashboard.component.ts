@@ -1,22 +1,30 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, ElementRef, ViewChild, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ElementRef,
+  ViewChild,
+  HostListener,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { BehaviorSubject, catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap } from 'rxjs';
-import { Game } from '../../../core/domain/model/game.model';
+import { BehaviorSubject } from 'rxjs';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
-import { GameService } from '../../../core/infrastructure/api/game.service';
+import { GameInstance } from '../../../core/domain/model/game-instance.model';
+import { AtzicayButtonComponent } from '../../components/atzicay-button/atzicay-button.component';
+import { GameInstanceService } from '../../../core/infrastructure/api/game-instance.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink],
+  imports: [FormsModule, CommonModule, RouterLink, AtzicayButtonComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
-  private readonly gameService = inject(GameService);
+  private gameInstanceService = inject(GameInstanceService);
   protected PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
@@ -28,7 +36,6 @@ export class DashboardComponent implements OnInit {
 
   getGameRoute(gameType: string, id: number): string {
     const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
-    // Usa el ID numérico directamente en la URL
     switch (normalizedType) {
       case 'hangman':
         return `/juegos/jugar-hangman/${id}`;
@@ -43,54 +50,53 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  private limitSubject = new BehaviorSubject<{ limit: number }>(
-    { limit: 6}
-  );
-  ngOnInit() {
-    this.auth0.isAuthenticated$
-      .pipe(
-        filter(isAuth => isAuth),
-        switchMap(() => this.auth0.idTokenClaims$),
-        filter(claims => !!claims?.__raw),
-        switchMap(claims => {
-          const idToken = claims!.__raw;
-          return this.backendAuthService.login(idToken).pipe(
-            tap(authResponse => {
-              if (authResponse) {
-                sessionStorage.setItem('access_token', authResponse.access_token);
-                sessionStorage.setItem('user', JSON.stringify(authResponse.user));
-              }
-            }),
-            switchMap(() => this.gameService.getAllGames(this.PAGE_SIZE)),
-            catchError(err => {
-              console.error('Error autenticando backend o cargando juegos:', err);
-              return of([] as Game[]);
-            })
-          );
-        }),
-        tap((games) => {
-          this.allGames = games || [];
-          this.filteredGames = games || [];
-          this.displayedGames = (games || []).slice(0, this.PAGE_SIZE);
-          this.currentOffset = games?.length || 0; // Línea cambiada
+  private limitSubject = new BehaviorSubject<{ limit: number }>({ limit: 6 });
+  ngOnInit(): void {
+    this.loadGameInstances();
+  }
+
+  private loadGameInstances(): void {
+    this.gameInstanceService
+      .getGameInstances(this.searchTerm, this.selectedType, this.PAGE_SIZE, 0)
+      .subscribe({
+        next: (response) => {
+          // Filtrado adicional por nombre o autor en frontend
+          const search = this.searchTerm.trim().toLowerCase();
+          let games = response.data.data;
+          if (search) {
+            games = games.filter(
+              (game) =>
+                game.name.toLowerCase().includes(search) ||
+                game.author.toLowerCase().includes(search)
+            );
+          }
+          this.allGames = games;
+          this.filteredGames = games;
+          this.displayedGames = games.slice(0, this.PAGE_SIZE);
+          this.currentOffset = games.length;
           this.hasMoreGames = games.length === this.PAGE_SIZE;
           (this as any).isLoading = false;
-        }),
-      )
-      .subscribe();
+        },
+        error: (err) => {
+          console.error('Error cargando instancias de juegos:', err);
+          this.allGames = [];
+          this.filteredGames = [];
+          this.displayedGames = [];
+        },
+      });
   }
 
   currentPage = 1;
   isFilterDropdownOpen = false;
   searchTerm = '';
-  selectedTypes: string[] = [];
+  selectedType: string = 'all';
   selectedLevels: string[] = [];
 
   gameTypes = [
-    { value: 'Memory', label: 'Memoria' },
-    { value: 'Hangman', label: 'Ahorcado' },
-    { value: 'Puzzle', label: 'Rompecabezas' },
-    { value: 'Solve the Word', label: 'Sopa de letras' },
+    { value: 'hangman', label: 'Ahorcado' },
+    { value: 'memory', label: 'Memoria' },
+    { value: 'puzzle', label: 'Rompecabezas' },
+    { value: 'solve_the_word', label: 'Sopa de letras' },
   ];
 
   difficultyLevels = [
@@ -99,18 +105,24 @@ export class DashboardComponent implements OnInit {
     { value: 'D', label: 'Difícil' },
   ];
 
-  allGames: Game[] = [];
-  filteredGames: Game[] = [];
-  displayedGames: Game[] = [];
+  allGames: GameInstance[] = [];
+  filteredGames: GameInstance[] = [];
+  displayedGames: GameInstance[] = [];
 
   toggleTypeFilter(type: string): void {
-    const index = this.selectedTypes.indexOf(type);
-    if (index === -1) {
-      this.selectedTypes.push(type);
+    if (this.selectedType === type) {
+      this.selectedType = 'all';
     } else {
-      this.selectedTypes.splice(index, 1);
+      this.selectedType = type;
     }
     this.applyFilters();
+  }
+
+  removeTypeFilter(type: string): void {
+    if (this.selectedType === type) {
+      this.selectedType = 'all';
+      this.applyFilters();
+    }
   }
 
   toggleLevelFilter(level: string): void {
@@ -123,18 +135,13 @@ export class DashboardComponent implements OnInit {
     this.applyFilters();
   }
 
-  removeTypeFilter(type: string): void {
-    this.selectedTypes = this.selectedTypes.filter((t) => t !== type);
-    this.applyFilters();
-  }
-
   removeLevelFilter(level: string): void {
     this.selectedLevels = this.selectedLevels.filter((l) => l !== level);
     this.applyFilters();
   }
 
   clearFilters(): void {
-    this.selectedTypes = [];
+    this.selectedType = 'all';
     this.selectedLevels = [];
     this.searchTerm = '';
     this.applyFilters();
@@ -143,32 +150,32 @@ export class DashboardComponent implements OnInit {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.loadGameInstances();
+  }
 
-    this.filteredGames = this.allGames.filter((game) => {
+  loadMoreGames(): void {
+    if (!this.hasMoreGames) return;
 
-      const matchesSearch =
-        this.searchTerm === '' ||
-        game.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        game.description
-          .toLowerCase()
-          .includes(this.searchTerm.toLowerCase()) ||
-        game.author.toLowerCase().includes(this.searchTerm.toLowerCase());
+    const newLimit = this.PAGE_SIZE + 6;
 
-      const matchesType =
-        this.selectedTypes.length === 0 ||
-        this.selectedTypes.includes(game.type);
-
-      const matchesLevel =
-        this.selectedLevels.length === 0 ||
-        this.selectedLevels.includes(game.level);
-
-      return matchesSearch && matchesType && matchesLevel;
-    });
-
-    this.displayedGames = this.filteredGames.slice(
-      0,
-      this.PAGE_SIZE * this.currentPage
-    );
+    this.gameInstanceService
+      .getGameInstances(this.searchTerm, this.selectedType, newLimit, 0)
+      .subscribe({
+        next: (response) => {
+          if (response.data.data.length > this.allGames.length) {
+            this.allGames = response.data.data;
+            this.currentOffset = this.allGames.length;
+            this.hasMoreGames = this.allGames.length === newLimit;
+            this.PAGE_SIZE = newLimit;
+          } else {
+            this.hasMoreGames = false;
+          }
+          this.applyFilters();
+        },
+        error: (err) => {
+          console.error('Error cargando más instancias de juegos:', err);
+        },
+      });
   }
 
   getLevelClasses(level: string): string {
@@ -246,38 +253,48 @@ export class DashboardComponent implements OnInit {
     this.allGames = [];
     this.hasMoreGames = true;
     this.limitSubject.next({
-      limit: this.PAGE_SIZE
+      limit: this.PAGE_SIZE,
     });
   }
 
-  loadMoreGames(): void {
-  if (!this.hasMoreGames) return;
-  
-  const newLimit = this.PAGE_SIZE + 6; 
-  
-  this.gameService.getAllGames(newLimit)
-    .pipe(
-      tap((allGames) => {
-        if (allGames.length > this.allGames.length) {
-          this.allGames = allGames; 
-          this.currentOffset = allGames.length;
-          this.hasMoreGames = allGames.length === newLimit;
-          this.PAGE_SIZE = newLimit; 
-        } else {
-          this.hasMoreGames = false;
-        }
-        this.applyFilters();
-      }),
-      catchError((err) => {
-        console.error('Error cargando más juegos:', err);
-        return of([]);
-      })
-    )
-    .subscribe();
-}
-
-
   get totalGames(): number {
     return this.filteredGames.length;
+  }
+
+  getGameImage(type: string): string {
+    switch (type) {
+      case 'hangman':
+        return 'assets/ahorcado.png';
+      case 'memory':
+        return 'assets/memoria.png';
+      case 'puzzle':
+        return 'assets/rompecabezas.png';
+      case 'solve_the_word':
+        return 'assets/pupiletras.png';
+      default:
+        return 'assets/default-game.png';
+    }
+  }
+
+  // Si el usuario escribe en el buscador, aplicar el filtro en frontend
+  onSearchTermChange(): void {
+    const search = this.searchTerm.trim().toLowerCase();
+    if (search) {
+      this.filteredGames = this.allGames.filter(
+        (game) =>
+          game.name.toLowerCase().includes(search) ||
+          game.author.toLowerCase().includes(search)
+      );
+    } else {
+      this.filteredGames = this.allGames;
+    }
+    this.displayedGames = this.filteredGames.slice(0, this.PAGE_SIZE);
+    this.currentOffset = this.filteredGames.length;
+    this.hasMoreGames = this.filteredGames.length === this.PAGE_SIZE;
+  }
+
+  // trackBy function for gameTypes ngFor
+  trackByTypeValue(index: number, type: { value: string; label: string }) {
+    return type.value;
   }
 }

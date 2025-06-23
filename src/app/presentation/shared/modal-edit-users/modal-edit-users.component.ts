@@ -16,16 +16,13 @@ export class ModalEditUsersComponent implements OnInit {
   user: any;
 
   ngOnInit() {
-    // Mapear los datos correctamente desde el formato del API
     this.user = {
       name: this.userData?.name || '',
-      lastName: this.userData?.lastName || '',
-      email: this.userData?.email || '',
+      last_name: this.userData?.last_name || '',
       gender: this.userData?.gender || 'O',
-      countryId: this.userData?.countryId || 1,
+      country_id: this.userData?.country_id || '',
       city: this.userData?.city || '',
       birthdate: this.formatDateForInput(this.userData?.birthdate),
-      activated: this.userData?.activated || true,
     };
   }
 
@@ -36,10 +33,8 @@ export class ModalEditUsersComponent implements OnInit {
   }
 
   onSubmit() {
-    // Emitir los datos actualizados
+    // Emitir solo los datos permitidos
     this.userUpdated.emit(this.user);
-    console.log('Usuario actualizado:', this.user);
-    // No cerrar aquí, lo hará el componente padre después de la actualización exitosa
   }
 
   cerrar() {

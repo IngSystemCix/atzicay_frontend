@@ -1,31 +1,10 @@
-/* Contenedor principal */
-.juegos-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh; /* O la altura que necesites */
-}
-
-/* Tabs fijos */
-.juegos-tabs-fixed {
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  background: text-atzicay-purple-500; /* Para que no se vea transparente */
-}
-
-/* Área de scroll para el contenido */
-.juegos-scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 2rem;
-}
-
+/* Dropdown menu positioning */
 .dropdown-menu {
   position: absolute !important;
   z-index: 9999 !important;
 }
 
+/* 3D transform for card container */
 .card-container {
   transform-style: preserve-3d;
 }

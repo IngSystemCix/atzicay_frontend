@@ -1,9 +1,9 @@
-<div class="juegos-container">
+<div class="flex flex-col h-full min-h-screen">
   <app-juegos-header></app-juegos-header>
   <app-juegos-categorias></app-juegos-categorias>
 
   <!-- Tabs fijos -->
-  <div class="juegos-tabs-fixed">
+  <div class="flex-shrink-0 sticky top-0 z-40 bg-atzicay-bg">
     <app-juegos-tabs
       [tabActiva]="activeTab"
       (tabChanged)="cambiarVista($event)"
@@ -12,7 +12,7 @@
   </div>
 
   <!-- Área de scroll para el contenido -->
-  <div class="juegos-scroll-area">
+  <div class="flex-1 overflow-y-auto juegos-scrollbar pb-8">
     @switch (activeTab) { @case ('misJuegos') {
     <app-juegos-lista [filtroActual]="filtroSeleccionado"></app-juegos-lista>
     } @case ('misProgramaciones') {

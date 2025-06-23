@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { catchError, EMPTY, switchMap, tap } from 'rxjs';
-import { UserService } from '../../../../core/infrastructure/api/user.service';
-import { GameInstanceService } from '../../../../core/infrastructure/api/GameInstance/game-instance.service';
-import { GameCounts } from '../../../../core/domain/interface/game-count-response';
+import { GameTypeCountsService } from '../../../../core/infrastructure/api/game-type-counts.service';
+import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 
 @Component({
   selector: 'app-juegos-categorias',
@@ -33,71 +31,112 @@ export class JuegosCategoriasComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private userService: UserService,
-    private gameInstanceService: GameInstanceService
+    private gameTypeCountsService: GameTypeCountsService,
+    private userSession: UserSessionService
   ) { }
 
   ngOnInit(): void {
     this.loadData();
+    this.loadGameTypeCounts();
+  }
+
+  private loadGameTypeCounts(): void {
+    const userId = this.userSession.getUserId();
+    if (!userId) {
+      this.error = true;
+      this.cargando = false;
+      return;
+    }
+    this.cargando = true;
+    this.error = false;
+    this.gameTypeCountsService.getGameTypeCountsByUser(userId).subscribe({
+      next: (res: any) => {
+        if (res && res.data) {
+          // Actualiza también los contadores para pruebas y lógica futura
+          this.contadores = {
+            Ahorcado: res.data.hangman_count,
+            Rompecabezas: res.data.puzzle_count,
+            Memoria: res.data.memorygame_count,
+            Pupiletras: res.data.solvetheword_count
+          };
+          this.categorias = this.categorias.map((categoria) => {
+            switch (categoria.nombre) {
+              case 'Ahorcado': return { ...categoria, cantidad: res.data.hangman_count };
+              case 'Rompecabezas': return { ...categoria, cantidad: res.data.puzzle_count };
+              case 'Memoria': return { ...categoria, cantidad: res.data.memorygame_count };
+              case 'Pupiletras': return { ...categoria, cantidad: res.data.solvetheword_count };
+              default: return categoria;
+            }
+          });
+        }
+        this.cargando = false;
+      },
+      error: (err: any) => {
+        console.error('Error al obtener conteos de juegos por tipo:', err);
+        this.error = true;
+        this.cargando = false;
+      }
+    });
   }
 
   private loadData(): void {
-    const userString = sessionStorage.getItem('user');
-    if (!userString) {
-      console.error('No hay usuario en sesión');
-      this.error = true;
-      this.cargando = false;
-      return;
-    }
-
-    const user = JSON.parse(userString);
-    const email = user?.Email;
-    if (!email) {
-      console.error('El usuario no tiene email registrado');
-      this.error = true;
-      this.cargando = false;
-      return;
-    }
-
-    this.cargando = true;
-    this.error = false;
-
-    this.userService.findUserByEmail(email).pipe(
-      switchMap((response) => {
-        const professorId = response?.data?.Id;
-        if (!professorId) {
-          throw new Error('ID de usuario no válido');
-        }
-        return this.gameInstanceService.getGameCountsByProfessor(professorId);
-      }),
-      tap((counts: GameCounts) => {
-        this.contadores = {
-          Ahorcado: counts.hangman,
-          Rompecabezas: counts.puzzle,
-          Memoria: counts.memory,
-          Pupiletras: counts.solve_the_word
-        };
-
-        this.categorias = this.categorias.map((categoria) => {
-          switch (categoria.nombre) {
-            case 'Ahorcado': return { ...categoria, cantidad: counts.hangman };
-            case 'Rompecabezas': return { ...categoria, cantidad: counts.puzzle };
-            case 'Memoria': return { ...categoria, cantidad: counts.memory };
-            case 'Pupiletras': return { ...categoria, cantidad: counts.solve_the_word };
-            default: return categoria;
-          }
-        });
-
-        console.log('Conteos actualizados:', this.contadores);
-      }),
-      tap(() => { this.cargando = false }),
-      catchError((err) => {
-        console.error('Error al cargar datos:', err);
-        this.error = true;
-        this.cargando = false;
-        return EMPTY;
-      })
-    ).subscribe();
+    // TODO: Desactivado temporalmente. Solo se usará dashboard y login.
+    // const userString = sessionStorage.getItem('user');
+    // if (!userString) {
+    //   console.error('No hay usuario en sesión');
+    //   this.error = true;
+    //   this.cargando = false;
+    //   return;
+    // }
+    //
+    // const user = JSON.parse(userString);
+    // const email = user?.Email;
+    // if (!email) {
+    //   console.error('El usuario no tiene email registrado');
+    //   this.error = true;
+    //   this.cargando = false;
+    //   return;
+    // }
+    //
+    // this.cargando = true;
+    // this.error = false;
+    //
+    // this.userService.findUserByEmail(email).pipe(
+    //   switchMap((response) => {
+    //     const professorId = response?.data?.Id;
+    //     if (!professorId) {
+    //       throw new Error('ID de usuario no válido');
+    //     }
+    //     return this.gameInstanceService.getGameCountsByProfessor(professorId);
+    //   }),
+    //   tap((counts: GameCounts) => {
+    //     this.contadores = {
+    //       Ahorcado: counts.hangman,
+    //       Rompecabezas: counts.puzzle,
+    //       Memoria: counts.memory,
+    //       Pupiletras: counts.solve_the_word
+    //     };
+    //
+    //     this.categorias = this.categorias.map((categoria) => {
+    //       switch (categoria.nombre) {
+    //         case 'Ahorcado': return { ...categoria, cantidad: counts.hangman };
+    //         case 'Rompecabezas': return { ...categoria, cantidad: counts.puzzle };
+    //         case 'Memoria': return { ...categoria, cantidad: counts.memory };
+    //         case 'Pupiletras': return { ...categoria, cantidad: counts.solve_the_word };
+    //         default: return categoria;
+    //       }
+    //     });
+    //
+    //     console.log('Conteos actualizados:', this.contadores);
+    //   }),
+    //   tap(() => { this.cargando = false }),
+    //   catchError((err) => {
+    //     console.error('Error al cargar datos:', err);
+    //     this.error = true;
+    //     this.cargando = false;
+    //     return EMPTY;
+    //   })
+    // ).subscribe();
   }
 
   crearJuego(ruta: string): void {
@@ -118,3 +157,8 @@ export class JuegosCategoriasComponent implements OnInit {
     console.log('Contador de prueba actualizado:', this.categorias[0].cantidad);
   }
 }
+
+// TODO: Este método será implementado más adelante. Por ahora, se desactiva para evitar errores.
+// getGameCountsByProfessor(professorId: number) {
+//   // Implementación futura
+// }
