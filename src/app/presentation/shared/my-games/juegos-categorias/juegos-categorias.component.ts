@@ -9,31 +9,63 @@ import { UserSessionService } from '../../../../core/infrastructure/service/user
   standalone: true,
   imports: [CommonModule],
   templateUrl: './juegos-categorias.component.html',
-  styleUrl: './juegos-categorias.component.css'
+  styleUrl: './juegos-categorias.component.css',
 })
 export class JuegosCategoriasComponent implements OnInit {
   contadores = {
     Ahorcado: 0,
     Rompecabezas: 0,
     Memoria: 0,
-    Pupiletras: 0
+    Pupiletras: 0,
   };
 
   cargando = true;
   error = false;
 
   categorias = [
-    { nombre: 'Ahorcado', icono: '🎯', cantidad: 0, colorFondo: '#F4E8FE', borde: '#A294F8', hover: 'hover:bg-[#EADDFD]', ruta: 'juegos/hangman' },
-    { nombre: 'Rompecabezas', icono: '🧩', cantidad: 0, colorFondo: '#DBEAFF', borde: '#A294F8', hover: 'hover:bg-[#CFE1FF]', ruta: 'juegos/puzzle/create' },
-    { nombre: 'Memoria', icono: '🧠', cantidad: 0, colorFondo: '#DCFCE7', borde: '#A294F8', hover: 'hover:bg-[#CFFAD9]', ruta: 'juegos/memory/create' },
-    { nombre: 'Pupiletras', icono: '📝', cantidad: 0, colorFondo: '#FEF9C2', borde: '#A294F8', hover: 'hover:bg-[#FDF5A8]', ruta: 'juegos/solve-The-Word/create' }
+    {
+      nombre: 'Ahorcado',
+      icono: '🎯',
+      cantidad: 0,
+      colorFondo: '#F4E8FE',
+      borde: '#A294F8',
+      hover: 'hover:bg-[#EADDFD]',
+      ruta: 'juegos/hangman',
+    },
+    {
+      nombre: 'Rompecabezas',
+      icono: '🧩',
+      cantidad: 0,
+      colorFondo: '#DBEAFF',
+      borde: '#A294F8',
+      hover: 'hover:bg-[#CFE1FF]',
+      ruta: 'juegos/puzzle/create',
+    },
+    {
+      nombre: 'Memoria',
+      icono: '🧠',
+      cantidad: 0,
+      colorFondo: '#DCFCE7',
+      borde: '#A294F8',
+      hover: 'hover:bg-[#CFFAD9]',
+      ruta: 'juegos/memory/create',
+    },
+    {
+      nombre: 'Pupiletras',
+      icono: '📝',
+      cantidad: 0,
+      colorFondo: '#FEF9C2',
+      borde: '#A294F8',
+      hover: 'hover:bg-[#FDF5A8]',
+      ruta: 'juegos/solve-The-Word/create',
+    },
   ];
 
   constructor(
     private router: Router,
     private gameTypeCountsService: GameTypeCountsService,
     private userSession: UserSessionService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -57,15 +89,20 @@ export class JuegosCategoriasComponent implements OnInit {
             Ahorcado: res.data.hangman_count,
             Rompecabezas: res.data.puzzle_count,
             Memoria: res.data.memorygame_count,
-            Pupiletras: res.data.solvetheword_count
+            Pupiletras: res.data.solvetheword_count,
           };
           this.categorias = this.categorias.map((categoria) => {
             switch (categoria.nombre) {
-              case 'Ahorcado': return { ...categoria, cantidad: res.data.hangman_count };
-              case 'Rompecabezas': return { ...categoria, cantidad: res.data.puzzle_count };
-              case 'Memoria': return { ...categoria, cantidad: res.data.memorygame_count };
-              case 'Pupiletras': return { ...categoria, cantidad: res.data.solvetheword_count };
-              default: return categoria;
+              case 'Ahorcado':
+                return { ...categoria, cantidad: res.data.hangman_count };
+              case 'Rompecabezas':
+                return { ...categoria, cantidad: res.data.puzzle_count };
+              case 'Memoria':
+                return { ...categoria, cantidad: res.data.memorygame_count };
+              case 'Pupiletras':
+                return { ...categoria, cantidad: res.data.solvetheword_count };
+              default:
+                return categoria;
             }
           });
         }
@@ -75,7 +112,7 @@ export class JuegosCategoriasComponent implements OnInit {
         console.error('Error al obtener conteos de juegos por tipo:', err);
         this.error = true;
         this.cargando = false;
-      }
+      },
     });
   }
 
@@ -156,9 +193,11 @@ export class JuegosCategoriasComponent implements OnInit {
     this.contadores.Ahorcado = this.categorias[0].cantidad;
     console.log('Contador de prueba actualizado:', this.categorias[0].cantidad);
   }
-}
 
-// TODO: Este método será implementado más adelante. Por ahora, se desactiva para evitar errores.
-// getGameCountsByProfessor(professorId: number) {
-//   // Implementación futura
-// }
+  minimizado = true;
+
+  // Agregar este método
+  toggleMinimizado(): void {
+    this.minimizado = !this.minimizado;
+  }
+}

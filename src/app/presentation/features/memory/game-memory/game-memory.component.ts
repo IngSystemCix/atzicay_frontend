@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 
 interface Card {
   id: number;

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration, HangmanWord } from '../../../../core/domain/model/game-configuration.model';
 
 interface JuegoState {
@@ -30,6 +30,8 @@ interface JuegoState {
   indicePalabraActual: number;
   palabrasCompletadas: number;
   totalPalabras: number;
+  contadorCambio: number;
+  intervaloContador: any;
 }
 
 @Component({
@@ -45,6 +47,7 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   private gameConfigService = inject(GameConfigurationService);
 
   readonly INTENTOS_INICIALES = 6;
+  private intervaloContador: any;
 
   state: JuegoState = {
     palabraActual: '',
@@ -71,6 +74,8 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     indicePalabraActual: 0,
     palabrasCompletadas: 0,
     totalPalabras: 0,
+    contadorCambio: 0,
+    intervaloContador: null,
   };
 
   alfabeto: string[] = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
@@ -82,6 +87,7 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   palabrasCanvasVisible = true;
   palabrasAdivinadas: string[] = [];
   tiempoRestanteModal = 3;
+  headerExpanded: boolean = true;
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.params['id']);
@@ -98,6 +104,60 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
       clearInterval(this.state.timerInterval);
     }
   }
+
+  palabraAdivinada() {
+    this.mostrarModalExito = true;
+    this.state.palabrasCompletadas++;
+    
+    // Marcar palabra como completada en el canvas
+    const palabraActual = this.state.palabraActual;
+    const index = this.palabrasAdivinadas.findIndex(p => 
+      this.limpiarPalabra(p) === palabraActual
+    );
+    if (index !== -1) {
+      this.palabrasAdivinadas[index] = `~~${palabraActual}~~`;
+    }
+
+    // Si hay más palabras, iniciar contador de 5 segundos
+    if (this.state.indicePalabraActual + 1 < this.state.totalPalabras) {
+      this.iniciarContadorCambio();
+    }
+  }
+
+   private iniciarContadorCambio() {
+    this.state.contadorCambio = 5;
+    if (this.intervaloContador) {
+      clearInterval(this.intervaloContador);
+    }
+    this.intervaloContador = setInterval(() => {
+      this.state.contadorCambio--;
+      if (this.state.contadorCambio <= 0) {
+        this.continuarSiguientePalabra();
+      }
+    }, 1000);
+  }
+   continuarSiguientePalabra() {
+    // Limpiar intervalo y modal de éxito
+    if (this.intervaloContador) {
+      clearInterval(this.intervaloContador);
+      this.intervaloContador = null;
+    }
+    this.mostrarModalExito = false;
+    // Pasar a la siguiente palabra
+    this.state.indicePalabraActual++;
+    this.configurarPalabraActual();
+    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+    this.state.letrasSeleccionadas.clear();
+    this.state.intentosRestantes = this.INTENTOS_INICIALES;
+    this.state.contadorCambio = 0;
+    this.state.juegoTerminado = false;
+    this.state.juegoGanado = false;
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval);
+    }
+    this.iniciarTimer();
+  }
+
 
   cargarConfiguracionJuego(id: number): void {
     this.state.cargando = true;
@@ -234,8 +294,14 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
           this.state.indicePalabraActual + 1 <
           this.state.palabrasJuego.length
         ) {
-          // Pasar a la siguiente palabra
-          this.pasarSiguientePalabra();
+          // Mostrar modal de éxito y esperar 5 segundos o botón
+          this.mostrarModalExito = true;
+          // PAUSAR el timer principal
+          if (this.state.timerInterval) {
+            clearInterval(this.state.timerInterval);
+            this.state.timerInterval = null;
+          }
+          this.iniciarContadorCambio();
         } else {
           // Juego completado
           this.finalizarJuego(true);
@@ -285,11 +351,24 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   }
 
   finalizarJuego(ganado: boolean): void {
+    // Limpiar todos los modales antes de mostrar uno
+    this.mostrarModalTiempoAgotado = false;
+    this.mostrarModalFallo = false;
+    this.mostrarModalExito = false;
+    this.mostrarModalJuegoFinalizado = false;
+
     this.state.juegoTerminado = true;
     this.state.juegoGanado = ganado;
 
-    if (this.state.timerInterval) {
-      clearInterval(this.state.timerInterval);
+    // Solo limpiar el timer si el juego terminó completamente (sin vidas)
+    if (!ganado && this.state.vidasRestantes - 1 <= 0) {
+      if (this.state.timerInterval) {
+        clearInterval(this.state.timerInterval);
+      }
+    }
+    if (this.intervaloContador) {
+      clearInterval(this.intervaloContador);
+      this.intervaloContador = null;
     }
 
     if (!ganado) {
@@ -298,7 +377,14 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
         this.state.juegoFinalizado = true;
         this.mostrarModalJuegoFinalizado = true;
       } else {
-        this.mostrarModalFallo = true;
+        // Si fue por tiempo, mostrar solo el modal de tiempo agotado
+        if (this.state.tiempoRestante === 0) {
+          this.mostrarModalTiempoAgotado = true;
+        } else {
+          this.mostrarModalFallo = true;
+        }
+        // Si aún quedan vidas, el timer sigue corriendo (no se reinicia)
+        // Solo limpiar el timer si se acabaron todas las vidas (ya hecho arriba)
       }
       // No revelar la palabra si perdió
     } else {
@@ -307,12 +393,17 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
         this.state.palabraRevelada[i] = this.state.palabraActual[i];
       }
       this.mostrarModalExito = true;
+      // Iniciar contador de 5 segundos si hay más palabras
+      if (this.state.indicePalabraActual + 1 < this.state.totalPalabras) {
+        this.iniciarContadorCambio();
+      }
     }
   }
 
 
   reiniciarPalabraActual(): void {
   this.mostrarModalFallo = false;
+  this.mostrarModalTiempoAgotado = false;
   
   // Solo reiniciar la palabra actual, NO las vidas
   this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
@@ -373,12 +464,15 @@ reiniciarJuego(): void {
   }
 
   iniciarTimer(): void {
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval);
+    }
     this.state.timerInterval = setInterval(() => {
       if (this.state.tiempoRestante > 0) {
         this.state.tiempoRestante--;
       } else {
+        // Solo mostrar el modal de tiempo agotado
         this.finalizarJuego(false);
-        this.mostrarModalTiempoAgotado = true;
       }
     }, 1000);
   }
@@ -414,5 +508,9 @@ reiniciarJuego(): void {
 
   get descripcionJuego(): string {
     return this.state.gameConfig?.game_description || '';
+  }
+
+  toggleHeader(): void {
+    this.headerExpanded = !this.headerExpanded;
   }
 }

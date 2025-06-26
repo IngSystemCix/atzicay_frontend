@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 
 interface CardPair {
   id: number;
@@ -23,7 +24,8 @@ type CardType = 'imagen-texto' | 'imagenes';
   selector: 'app-layouts-memory',
   imports: [CommonModule, FormsModule],
   templateUrl: './layouts-memory.component.html',
-  styleUrl: './layouts-memory.component.css'
+  styleUrl: './layouts-memory.component.css',
+  providers: [CreateGameService],
 })
 export class LayoutsMemoryComponent {
   // Tab management
@@ -69,7 +71,10 @@ export class LayoutsMemoryComponent {
     return Math.round((this.completedPairs / this.totalPairs) * 100);
   }
 
-  constructor() {
+  isSaving = false;
+  saveError: string | null = null;
+
+  constructor(public createGameService: CreateGameService) {
     this.initializeDefaultData();
   }
 
@@ -211,28 +216,89 @@ export class LayoutsMemoryComponent {
   }
 
   // Action methods
-  onSave(): void {
-    if (this.isFormValid()) {
-      const gameData = this.prepareGameData();
-      this.logAction('Game saved', gameData);
-      console.log('Guardando juego...', gameData);
-      // Here you would typically call a service to save the data
-    } else {
+  async onSave(): Promise<void> {
+    this.saveError = null;
+    if (!this.isFormValid()) {
       const errors = this.getValidationErrors();
       console.error('Cannot save game:', errors);
-      // Here you could show validation errors to the user
+      this.saveError = errors.join(', ');
+      return;
+    }
+    this.isSaving = true;
+    try {
+      const userId = 1; // TODO: obtener el userId real
+      const pairsPayload = await this.buildPairsPayload();
+      const body = {
+        title: this.gameTitle,
+        description: this.gameDescription,
+        mode: this.cardType === 'imagenes' ? 'II' : 'ID',
+        pairs: pairsPayload
+      };
+      this.createGameService.createMemoryGame(userId, { data: body }).subscribe({
+        next: (res: any) => {
+          this.isSaving = false;
+          this.logAction('Game saved', res);
+          alert('Juego de memoria guardado correctamente');
+          this.resetForm();
+        },
+        error: (err: any) => {
+          this.isSaving = false;
+          this.saveError = 'Error al guardar el juego';
+          console.error(err);
+        }
+      });
+    } catch (e) {
+      this.isSaving = false;
+      this.saveError = 'Error procesando imágenes';
+      console.error(e);
     }
   }
 
-  onCancel(): void {
-    if (this.hasUnsavedChanges()) {
-      const confirmCancel = confirm('¿Estás seguro de que quieres cancelar? Se perderán los cambios no guardados.');
-      if (!confirmCancel) return;
-    }
+  private async buildPairsPayload(): Promise<any[]> {
+    // Convierte imágenes a base64 y arma el array de pares según el modo
+    const promises = this.pairs.map(async (pair) => {
+      const PathImage1 = pair.card1?.image
+        ? await this.fileToBase64(pair.card1.image)
+        : pair.card1?.imageUrl || '';
+      const PathImage2 = pair.card2?.image
+        ? await this.fileToBase64(pair.card2.image)
+        : pair.card2?.imageUrl || '';
+      if (this.cardType === 'imagenes') {
+        // II: ambos PathImage1 y PathImage2 requeridos
+        return {
+          PathImage1,
+          PathImage2,
+          Description: ''
+        };
+      } else {
+        // ID: PathImage1 requerido, Description opcional
+        return {
+          PathImage1,
+          PathImage2: '',
+          Description: pair.card1?.text || ''
+        };
+      }
+    });
+    return Promise.all(promises);
+  }
 
-    this.resetForm();
-    this.logAction('Game creation cancelled');
-    console.log('Cancelando...');
+  private fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Asegura el prefijo correcto
+        const base64 = reader.result as string;
+        if (base64.startsWith('data:image/')) {
+          resolve(base64);
+        } else {
+          // Si falta el prefijo, lo agrega
+          const ext = file.type.split('/')[1] || 'png';
+          resolve(`data:image/${ext};base64,${base64.split(',')[1]}`);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
   // Utility methods

@@ -68,7 +68,7 @@
       <div class="relative">
         <button
           (click)="toggleFilterDropdown()"
-          class="btn-atzicay text-white px-6 py-2.5 rounded-xl transition-all duration-200 flex items-center hover:scale-105 hover:shadow-md active:scale-95"
+          class="btn-atzicay text-white px-6 py-2.5 rounded-xl transition-all duration-200 flex items-center hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +116,6 @@
             }}</label>
           </div>
 
-          <!-- Limpiar filtros -->
           <div class="border-t border-gray-50 mt-2 pt-2 px-4">
             <button
               class="w-full text-xs text-atzicay-purple-500 hover:text-atzicay-purple-700 py-2 text-left transition-colors duration-150"
@@ -193,7 +192,7 @@
       @for (game of displayedGames; track game.game_instance_id) { @defer {
       <!-- Inline Game Card -->
       <div
-        class="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-[520px] group border border-gray-50"
+        class="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-[520px] group border border-atzicay-border"
       >
         <!-- Game Image -->
         <div
@@ -202,7 +201,7 @@
           <img
             [src]="getGameImage(game.type_game)"
             alt="Game Image"
-            class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            class="w-full h-full object-cover object-center transition-transform duration-300"
           />
           <!-- Overlay gradient -->
           <div
@@ -366,23 +365,16 @@
     <div class="dashboard-grid-footer">
       @if (hasMoreGames && displayedGames.length > 0) {
       <button
-        class="btn-atzicay px-6 py-3 rounded-xl transition-all duration-200 max-w-full sm:w-auto hover:scale-105 hover:shadow-md active:scale-95"
+        class="btn-atzicay px-6 py-3 rounded-xl transition-all duration-200 max-w-full sm:w-auto hover:scale-105 hover:shadow-md cursor-pointer active:scale-95 flex items-center"
         (click)="loadMoreGames()"
       >
-        <svg
-          class="w-4 h-4 mr-2 inline"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 6v6l4 2"
-          />
+        <!-- Nuevo icono bonito al inicio -->
+        <svg class="w-5 h-5 mr-2 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M10 2a8 8 0 108 8 8 8 0 00-8-8zm1 11H9v-2H7a1 1 0 010-2h2V7a1 1 0 012 0v2h2a1 1 0 010 2h-2z"/>
         </svg>
-        Ver más juegos
+        <span class="flex items-center">
+          Ver más juegos
+        </span>
       </button>
       } @else if (!hasMoreGames && displayedGames.length > 0) {
       <div

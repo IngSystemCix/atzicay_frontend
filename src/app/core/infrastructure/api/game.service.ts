@@ -1,7 +1,6 @@
 // src/app/core/infrastructure/api/game.service.ts
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { ApiResponse } from '../../domain/model/api.response';
 import { Game } from '../../domain/model/game.model';
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';

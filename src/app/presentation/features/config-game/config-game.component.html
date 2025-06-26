@@ -41,8 +41,8 @@
                         <input 
                             type="text" 
                             id="nombre" 
-                            [(ngModel)]="config.nombre"
                             name="nombre"
+                            [(ngModel)]="programmingGame.Name"
                             class="w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base"
                             required
                         />
@@ -54,9 +54,10 @@
                             type="number"
                             name="intentos" 
                             id="intentos"
-                            [(ngModel)]="config.intentos"
+                            [(ngModel)]="programmingGame.Attempts"
                             min="1"
                             max="10"
+                            required
                         />
                     </div>
                 </div>
@@ -68,7 +69,7 @@
                                 type="datetime-local" 
                                 name="inicio" 
                                 id="inicio" 
-                                [(ngModel)]="config.fechaInicio"
+                                [(ngModel)]="programmingGame.StartTime"
                                 class="w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base"
                                 required
                             >
@@ -79,7 +80,7 @@
                                 type="datetime-local" 
                                 name="fin" 
                                 id="fin" 
-                                [(ngModel)]="config.fechaFin"
+                                [(ngModel)]="programmingGame.EndTime"
                                 class="w-full border border-gray-300 rounded-md p-2 text-sm sm:text-base"
                                 required
                             >
@@ -91,7 +92,7 @@
                             type="number" 
                             name="tiempo" 
                             id="tiempo" 
-                            [(ngModel)]="config.tiempoMaximo"
+                            [(ngModel)]="programmingGame.MaximumTime"
                             min="1"
                             class="w-full border border-gray-300 rounded-md p-2 text-right text-sm sm:text-base"
                             required

@@ -1,28 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ProgrammingGame } from '../../domain/model/programming-game.model';
 import { environment } from '../../../../environments/environment.development';
-import { GameSetting } from '../../domain/interface/game-setting';
-
-export interface ProgrammingGameConfig {
-  ProgrammerId: number;
-  ProgrammingGameName: string;
-  StartTime: string;
-  EndTime: string;
-  Attempts: number;
-  MaximumTime: number;
-}
-
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ProgrammingGameService {
-  private apiUrl = `${environment.api_base_url}game-instances/programming`;
+  private baseUrl = `${environment.api_base_url}programming-game`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
-  updateProgrammingGame(gameId: number, config: ProgrammingGameConfig): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${gameId}`, config);
+  createProgrammingGame(gameInstanceId: number, userId: number, data: ProgrammingGame): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/create/${gameInstanceId}/${userId}`,
+      data
+    );
   }
 }

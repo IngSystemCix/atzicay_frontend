@@ -1,23 +1,13 @@
 <div 
-  class="flex"
-  [class.flex-wrap]="wrap"
-  [class.gap-1]="gap === 'sm'"
-  [class.gap-2]="gap === 'md'"
-  [class.gap-3]="gap === 'lg'"
-  [class.bg-gray-100]="pillStyle"
-  [class.p-1]="pillStyle && padding === 'sm'"
-  [class.p-2]="pillStyle && padding === 'md'"
-  [class.p-3]="pillStyle && padding === 'lg'"
-  [class.rounded-lg]="pillStyle"
-  [class.rounded-full]="roundedFull"
-  [class.w-full]="fullWidth"
+  class="bg-[#E5D8F2] rounded-lg p-2 mx-4 my-4 flex flex-wrap w-fit gap-x-2"
 >
   @for (tab of tabs; track trackByFn($index, tab)) {
     @if (!tab.hidden) {
       <button
         (click)="changeTab(tab.id)"
         [disabled]="tab.disabled"
-        [class]="getButtonClasses(tab)"
+        class="px-6 py-2 rounded-lg font-medium transition-colors"
+        [class]="activeTab === tab.id ? 'bg-atzicay-bg-button text-white' : 'text-gray-700 hover:bg-gray-100'"
       >
         @if (tab.icon) {
           <i class="mr-2" [class]="tab.icon"></i>

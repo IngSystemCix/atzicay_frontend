@@ -2,13 +2,25 @@
   <app-juegos-header></app-juegos-header>
   <app-juegos-categorias></app-juegos-categorias>
 
-  <!-- Tabs fijos -->
+  <!-- Tabs fijos + Filtro de juegos -->
   <div class="flex-shrink-0 sticky top-0 z-40 bg-atzicay-bg">
-    <app-juegos-tabs
-      [tabActiva]="activeTab"
-      (tabChanged)="cambiarVista($event)"
-    >
-    </app-juegos-tabs>
+    <div class="flex items-center gap-4 px-4 pt-2 pb-2"> <!-- pt-2 pb-2 para menos espacio vertical -->
+      <app-juegos-tabs
+        [tabActiva]="activeTab"
+        (tabChanged)="cambiarVista($event)"
+      ></app-juegos-tabs>
+      <!-- Filtro de juegos solo si está en Mis Juegos -->
+      <ng-container *ngIf="activeTab === 'misJuegos'">
+        <app-atzicay-tabs
+          [tabs]="filtroTabs"
+          [activeTab]="filtroSeleccionado"
+          (tabChanged)="actualizarFiltro($event)"
+          [size]="'sm'"
+          [gap]="'sm'"
+          [padding]="'sm'"
+        ></app-atzicay-tabs>
+      </ng-container>
+    </div>
   </div>
 
   <!-- Área de scroll para el contenido -->

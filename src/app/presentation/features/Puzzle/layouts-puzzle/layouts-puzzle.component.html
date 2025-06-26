@@ -192,16 +192,15 @@
           >
             Seleccionar archivo
           </button>
-          <div *ngIf="selectedFile" class="mt-2 text-xs text-gray-600">
-            Archivo seleccionado: {{ selectedFile.name }}
-          </div>
-          <div *ngIf="selectedImage" class="mt-4">
-            <img
-              [src]="selectedImage"
-              alt="Imagen seleccionada"
-              class="max-h-40 mx-auto rounded-lg shadow-md border border-purple-300"
-            />
-          </div>
+          <div *ngIf="selectedFile" class="mt-2 text-xs text-gray-600"></div>
+        </div>
+
+        <div *ngIf="selectedImage" class="mt-4">
+          <img
+            [src]="selectedImage"
+            alt="Imagen seleccionada"
+            class="max-h-40 mx-auto rounded-lg shadow-md"
+          />
         </div>
 
         <div class="mt-6 flex items-center space-x-3">

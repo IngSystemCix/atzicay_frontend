@@ -1,61 +1,139 @@
-<!-- Indicador de carga -->
-@if (cargando) {
-<div class="col-span-full text-center py-8">
-  <div class="flex justify-center">
-    <svg class="animate-spin h-8 w-8 text-purple-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-  </div>
-  <p class="mt-2 text-gray-600">Cargando juegos...</p>
-</div>
-}
-
-<!-- Mensaje de error -->
-@if (error && !cargando) {
-<div class="col-span-full text-center py-8">
-  <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-    <p>Ha ocurrido un error al cargar los juegos. Intenta recargar la página.</p>
-  </div>
-</div>
-}
-
-<!-- Listado de categorías -->
-@if (!cargando && !error) {
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 m-4">
-  @for (categoria of categorias; track categoria.nombre) {
-    <div
-      class="rounded-lg p-4"
-      [ngStyle]="{
-        'background-color': categoria.colorFondo,
-        'border': '1px solid ' + categoria.borde
-      }"
+<!-- Contenedor principal con animación -->
+<div class="transition-all duration-300 ease-in-out bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  
+  <!-- Header minimalista -->
+  <div class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 bg-atzicay-purple-500 rounded-full flex items-center justify-center">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">Crear Juegos</h2>
+        <p class="text-sm text-gray-500">Selecciona una categoría para comenzar</p>
+      </div>
+    </div>
+    
+    <!-- Botón de minimizar -->
+    <button 
+      (click)="toggleMinimizado()"
+      class="p-2 hover:bg-white/50 rounded-full cursor-pointer transition-colors duration-200 group"
+      [title]="minimizado ? 'Expandir' : 'Minimizar'"
     >
-      <div class="flex justify-between items-center mb-2">
-        <div class="flex items-center">
-          <div class="text-2xl mr-2">{{ categoria.icono }}</div>
-          <h3 class="text-lg text-gray-800 font-semibold">{{ categoria.nombre }}</h3>
+      <svg 
+        class="w-5 h-5 text-gray-600 group-hover:text-purple-600 transition-all duration-200"
+        [class.rotate-180]="minimizado"
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Contenido principal -->
+  <div 
+    class="transition-all duration-300 ease-in-out"
+    [class.max-h-0]="minimizado"
+    [class.max-h-96]="!minimizado"
+    [class.opacity-0]="minimizado"
+    [class.opacity-100]="!minimizado"
+  >
+    
+    <!-- Indicador de carga -->
+    @if (cargando) {
+      <div class="p-8 text-center">
+        <div class="flex justify-center mb-4">
+          <div class="relative">
+            <div class="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+          </div>
         </div>
-        <div class="bg-white text-gray-700 border border-gray-300 px-2 rounded-full text-sm font-medium">
-          {{ categoria.cantidad }}
+        <p class="text-gray-600 text-sm">Cargando categorías...</p>
+      </div>
+    }
+
+    <!-- Mensaje de error -->
+    @if (error && !cargando) {
+      <div class="p-6">
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-3">
+          <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+          </svg>
+          <div>
+            <p class="font-medium">Error al cargar</p>
+            <p class="text-sm">No se pudieron cargar los juegos. Intenta recargar la página.</p>
+          </div>
         </div>
       </div>
+    }
 
-      <button
-        class="w-full py-2 border rounded-md font-bold transition duration-300 cursor-pointer"
-        [ngStyle]="{
-    'background-color': '#FFFFFF',
-    'border-color': '#CDC1FE',
-    'color': '#63606C'
-  }"
-        [ngClass]="categoria.hover"
-        (click)="crearJuego(categoria.ruta)"
-      >
-        Crear {{ categoria.nombre }}
-      </button>
+    <!-- Grid de categorías -->
+    @if (!cargando && !error) {
+      <div class="p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          @for (categoria of categorias; track categoria.nombre) {
+            <div class="group relative bg-white rounded-xl border border-gray-200 hover:border-purple-300 transition-all duration-200 hover:shadow-lg overflow-hidden">
+              
+              <!-- Borde superior colorido -->
+              <div class="h-1" [style.background-color]="categoria.borde"></div>
+              
+              <!-- Contenido de la tarjeta -->
+              <div class="p-5">
+                <!-- Header de la categoría -->
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="text-2xl">{{ categoria.icono }}</div>
+                    <div>
+                      <h3 class="font-semibold text-gray-800 text-sm">{{ categoria.nombre }}</h3>
+                    </div>
+                  </div>
+                  <div class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                    {{ categoria.cantidad }}
+                  </div>
+                </div>
+
+                <!-- Botón de acción -->
+                <button
+                  (click)="crearJuego(categoria.ruta)"
+                  class="w-full py-2.5 px-4 bg-atzicay-bg-button hover:from-purple-600 hover:bg-atzicay-purple-700 text-white font-medium text-sm rounded-lg transition-all duration-200 hover:shadow-md active:scale-95"
+                >
+                  <span class="flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    <span>Crear</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          } @empty {
+            <div class="col-span-full text-center py-8">
+              <div class="text-gray-400 mb-2">
+                <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+              </div>
+              <p class="text-gray-500 text-sm">No hay categorías disponibles</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Footer minimalista cuando está minimizado -->
+  @if (minimizado && !cargando && !error) {
+    <div class="px-4 pb-1">
+      <div class="flex items-center justify-center space-x-6 text-xs text-gray-500">
+        @for (categoria of categorias; track categoria.nombre) {
+          <div class="flex items-center space-x-1">
+            <span>{{ categoria.icono }}</span>
+            <span class="font-medium">{{ categoria.cantidad }}</span>
+          </div>
+        }
+      </div>
     </div>
-  } @empty {
-    <p class="text-center text-gray-500 col-span-full">No hay categorías disponibles.</p>
   }
 </div>
-}

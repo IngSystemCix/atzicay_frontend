@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { GameConfigurationService } from '../../../../core/infrastructure/api/GameSetting/game-configuration.service';
+import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration, PuzzleConfig } from '../../../../core/domain/model/game-configuration.model';
 
 interface PuzzlePiece {
@@ -117,17 +117,8 @@ export class GamePuzzleComponent implements OnInit {
     // Si la imagen está en public\storage\puzzle, conviértela a una URL relativa accesible
     const normalized = path.replace(/\\/g, '/');
     const publicIndex = normalized.toLowerCase().indexOf('public/storage/');
-    if (publicIndex !== -1) {
-      // Quita 'public/' para que quede 'storage/puzzle/...' y sea accesible desde el servidor
-      const relativePath = normalized.substring(publicIndex + 7); // 7 = length of 'public/'
-      // Si sirves storage como /storage en tu servidor (Laravel típico)
+    const relativePath = normalized.substring(publicIndex + 7); 
       return `/${relativePath}`;
-    }
-    // Si es una ruta absoluta local, no funcionará en el navegador
-    if (/^[a-zA-Z]:\\/.test(path) || path.startsWith('/')) {
-      return 'assets/rompecabezas.png';
-    }
-    return path;
   }
 
   generatePuzzleShapes() {

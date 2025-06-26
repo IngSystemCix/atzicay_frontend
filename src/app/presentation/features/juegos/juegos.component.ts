@@ -6,7 +6,8 @@ import { JuegosListaComponent } from '../../shared/my-games/juegos-lista/juegos-
 import { MyProgrammingsComponent } from '../../shared/my-games/my-programmings/my-programmings.component';
 import { HttpClientModule } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-
+import { CommonModule } from '@angular/common';
+import { AtzicayTabsComponent, Tab as AtzicayTab } from '../../components/atzicay-tabs/atzicay-tabs.component';
 @Component({
   selector: 'app-juegos',
   imports: [
@@ -16,14 +17,24 @@ import { ActivatedRoute } from '@angular/router';
     JuegosTabsComponent,
     JuegosListaComponent,
     MyProgrammingsComponent,
+    CommonModule,
+    AtzicayTabsComponent, 
   ],
   templateUrl: './juegos.component.html',
   styleUrl: './juegos.component.css',
 })
 export class JuegosComponent implements OnInit {
   activeTab: 'misJuegos' | 'misProgramaciones' = 'misJuegos';
-  filtroSeleccionado: string = 'Todos';
+  filtroSeleccionado: string = 'all';
   gameIdSeleccionado: number | null = null;
+
+  filtroTabs: AtzicayTab<string>[] = [
+    { id: 'all', label: 'Todos' },
+    { id: 'hangman', label: 'Ahorcado' },
+    { id: 'puzzle', label: 'Rompecabezas' },
+    { id: 'memory', label: 'Memoria' },
+    { id: 'solve_the_word', label: 'Pupiletras' },
+  ];
 
   constructor(private route: ActivatedRoute) {}
 

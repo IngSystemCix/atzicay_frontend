@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UserService } from '../../../core/infrastructure/api/user.service';
-import { ConfigGame } from '../../../core/domain/interface/config-game';
-import {
-  ProgrammingGameConfig,
-  ProgrammingGameService,
-} from '../../../core/infrastructure/api/programming-game.service';
+
 import Swal from 'sweetalert2';
+import { ProgrammingGameService } from '../../../core/infrastructure/api/programming-game.service';
+import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
+import { ProgrammingGame } from '../../../core/domain/model/programming-game.model';
+
 @Component({
   selector: 'app-config-game',
   standalone: true,
@@ -19,55 +18,31 @@ import Swal from 'sweetalert2';
 export class ConfigGameComponent implements OnInit {
   gameId: number | null = null;
 
-  config: ConfigGame = {
-    nombre: '',
-    intentos: 3,
-    fechaInicio: '',
-    fechaFin: '',
-    tiempoMaximo: 120,
-  };
-
   isLoading = false;
   error = '';
   currentUserId: number | null = null;
 
+  programmingGame: ProgrammingGame = {
+    Name: '',
+    Activated: true,
+    StartTime: '',
+    EndTime: '',
+    Attempts: 1,
+    MaximumTime: 1
+  };
+
   constructor(
-    private programmingGameService: ProgrammingGameService,
-    private userService: UserService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private programmingGameService: ProgrammingGameService,
+    private userSession: UserSessionService
   ) {}
 
   ngOnInit() {
     this.route.params.subscribe((params) => {
       this.gameId = +params['id'];
     });
-    this.getCurrentUser();
-    this.setDefaultDates();
-  }
-
-  private getCurrentUser() {
-    const userString = sessionStorage.getItem('user');
-    if (userString) {
-      const user = JSON.parse(userString);
-      this.userService.findUserByEmail(user.Email).subscribe({
-        next: (response) => {
-          this.currentUserId = response.data?.Id;
-        },
-        error: (err) => {
-          console.error('Error al obtener usuario:', err);
-        },
-      });
-    }
-  }
-
-  private setDefaultDates() {
-    const now = new Date();
-    const later = new Date(now);
-    later.setHours(later.getHours() + 1); // una hora después
-
-    this.config.fechaInicio = this.formatDateTimeLocal(now);
-    this.config.fechaFin = this.formatDateTimeLocal(later);
+    this.currentUserId = this.userSession.getUserId();
   }
 
   private formatDateTimeLocal(date: Date): string {
@@ -77,80 +52,66 @@ export class ConfigGameComponent implements OnInit {
   }
 
   onSubmit() {
-    // Validar que fecha de inicio < fecha de fin
-    if (new Date(this.config.fechaInicio) >= new Date(this.config.fechaFin)) {
-      this.error = 'La fecha y hora de fin debe ser posterior a la de inicio';
-      return;
-    }
-
     if (!this.gameId || !this.currentUserId) {
-      this.error = 'Datos necesarios no disponibles';
+      this.error = 'No se encontró el usuario o el juego.';
       return;
     }
-
-    if (!this.validateForm()) {
+    // Validaciones frontend
+    if (!this.programmingGame.Name || this.programmingGame.Name.trim().length === 0) {
+      this.error = 'El nombre es obligatorio.';
       return;
     }
-
+    if (!this.programmingGame.StartTime) {
+      this.error = 'La fecha y hora de inicio es obligatoria.';
+      return;
+    }
+    if (!this.programmingGame.EndTime) {
+      this.error = 'La fecha y hora de fin es obligatoria.';
+      return;
+    }
+    if (isNaN(this.programmingGame.Attempts) || this.programmingGame.Attempts < 1) {
+      this.error = 'El número de intentos debe ser mayor o igual a 1.';
+      return;
+    }
+    if (isNaN(this.programmingGame.MaximumTime) || this.programmingGame.MaximumTime < 1) {
+      this.error = 'El tiempo máximo debe ser mayor o igual a 1 minuto.';
+      return;
+    }
+    // Validar que la fecha de fin sea posterior a la de inicio
+    if (this.programmingGame.StartTime && this.programmingGame.EndTime && this.programmingGame.StartTime >= this.programmingGame.EndTime) {
+      this.error = 'La fecha de fin debe ser posterior a la de inicio.';
+      return;
+    }
     this.isLoading = true;
     this.error = '';
-
-    const programmingConfig: ProgrammingGameConfig = {
-      ProgrammerId: this.currentUserId,
-      ProgrammingGameName: this.config.nombre,
-      StartTime: this.config.fechaInicio,
-      EndTime: this.config.fechaFin,
-      Attempts: this.config.intentos,
-      MaximumTime: this.config.tiempoMaximo,
+    // Formatear fechas a 'YYYY-MM-DD HH:mm:ss'
+    const start = this.programmingGame.StartTime.replace('T', ' ') + ':00';
+    const end = this.programmingGame.EndTime.replace('T', ' ') + ':00';
+    const data: ProgrammingGame = {
+      ...this.programmingGame,
+      StartTime: start,
+      EndTime: end,
+      Attempts: Number(this.programmingGame.Attempts),
+      MaximumTime: Number(this.programmingGame.MaximumTime)
     };
-
     this.programmingGameService
-      .updateProgrammingGame(this.gameId, programmingConfig)
+      .createProgrammingGame(this.gameId, this.currentUserId, data)
       .subscribe({
-        next: (response) => {
-          console.log('Configuración guardada exitosamente:', response);
+        next: () => {
           this.isLoading = false;
-
-          Swal.fire({
-            title: '¡Éxito!',
-            text: 'La programación del juego se ha creado correctamente',
-            icon: 'success',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#3085d6',
-          }).then(() => {
+          Swal.fire(
+            '¡Éxito!',
+            'Programación creada correctamente',
+            'success'
+          ).then(() => {
             this.router.navigate(['/juegos']);
           });
         },
         error: (err) => {
-          console.error('Error al guardar configuración:', err);
-          this.error = 'Error al guardar la configuración';
           this.isLoading = false;
+          this.error = 'Error al crear la programación';
         },
       });
-  }
-
-  private validateForm(): boolean {
-    if (!this.config.nombre.trim()) {
-      this.error = 'El nombre es requerido';
-      return false;
-    }
-
-    if (!this.config.fechaInicio || !this.config.fechaFin) {
-      this.error = 'Las fechas de inicio y fin son requeridas';
-      return false;
-    }
-
-    if (new Date(this.config.fechaInicio) >= new Date(this.config.fechaFin)) {
-      this.error = 'La fecha de fin debe ser posterior a la fecha de inicio';
-      return false;
-    }
-
-    if (this.config.tiempoMaximo <= 0) {
-      this.error = 'El tiempo máximo debe ser mayor a 0';
-      return false;
-    }
-
-    return true;
   }
 
   private formatDateTime(date: string, time: string): string {

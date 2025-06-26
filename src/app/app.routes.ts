@@ -54,52 +54,22 @@ export const routes: Routes = [
       {
         path: 'hangman',
         component: LayoutHangmanComponent,
-        title:"Crear Ahorcado"
-      },
-      {
-        path: 'jugar-hangman/:id',
-        component: GameHangmanComponent,
-        title:"Juego de ahorcado"
-      },
-      {
-        path: 'puzzle/jugar',
-        component: GamePuzzleComponent,
-        title:"Juego de Rompezabezas"
-      },
-      {
-        path: 'jugar-puzzle/:id',
-        component: GamePuzzleComponent,
-        title:"Juego de Rompezabezas"
+        title: "Crear Ahorcado"
       },
       {
         path: 'puzzle/create',
         component: LayoutsPuzzleComponent,
-        title:"Crear Rompezabezas"
-      },
-      {
-        path: 'memory/jugar',
-        component: GameMemoryComponent,
-        title:"Juego de Memoria"
+        title: "Crear Rompezabezas"
       },
       {
         path: 'memory/create',
         component: LayoutsMemoryComponent,
-        title:"Crear Memoria"
-      },
-      {
-        path: 'solve-The-Word/jugar',
-        component: GamePuzzleComponent,
-        title:"Juego de Pupiletras"
-      },
-      {
-        path: 'jugar-solve-the-word/:id',
-        component: GameSolveTheWordComponent,
-        title:"Juego de Pupiletras"
+        title: "Crear Memoria"
       },
       {
         path: 'solve-The-Word/create',
         component: LayoutsSolveTheWordComponent,
-        title:"Crear Pupiletras"
+        title: "Crear Pupiletras"
       },
       {
         path: 'configuracion/:id',
@@ -107,6 +77,43 @@ export const routes: Routes = [
         title: "Configuración del Juego"
       }
     ]
+  },
+  // Juegos jugables en pantalla completa (fuera del layout)
+  {
+    path: 'juegos/jugar-hangman/:id',
+    component: GameHangmanComponent,
+    canActivate: [authGuard],
+    title: "Juego de ahorcado"
+  },
+  {
+    path: 'juegos/jugar-puzzle/:id',
+    component: GamePuzzleComponent,
+    canActivate: [authGuard],
+    title: "Juego de Rompezabezas"
+  },
+  {
+    path: 'juegos/puzzle/jugar',
+    component: GamePuzzleComponent,
+    canActivate: [authGuard],
+    title: "Juego de Rompezabezas"
+  },
+  {
+    path: 'juegos/memory/jugar',
+    component: GameMemoryComponent,
+    canActivate: [authGuard],
+    title: "Juego de Memoria"
+  },
+  {
+    path: 'juegos/jugar-solve-the-word/:id',
+    component: GameSolveTheWordComponent,
+    canActivate: [authGuard],
+    title: "Juego de Pupiletras"
+  },
+  {
+    path: 'juegos/solve-The-Word/jugar',
+    component: GamePuzzleComponent,
+    canActivate: [authGuard],
+    title: "Juego de Pupiletras"
   },
   {
     path: 'perfil',

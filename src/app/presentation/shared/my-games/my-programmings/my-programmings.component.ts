@@ -5,7 +5,11 @@ import { MyProgrammingGamesService } from '../../../../core/infrastructure/api/m
 import { MyProgrammingGame } from '../../../../core/domain/model/my-programming-game.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
-
+import { DisableProgrammingGameService } from '../../../../core/infrastructure/api/disable-programming-game.service';
+import Swal from 'sweetalert2';
+import { GameReportResponse } from '../../../../core/domain/interface/game-report-response';
+import ApexCharts from 'apexcharts';
+import { GameReportService } from '../../../../core/infrastructure/api/game-report.service';
 @Component({
   selector: 'app-my-programmings',
   standalone: true,
@@ -24,6 +28,8 @@ export class MyProgrammingsComponent implements OnChanges {
   startDate: string = '';
   endDate: string = '';
   menuAbierto: number | null = null;
+  showReportModal: boolean = false;
+  reportGameInstanceId: number | null = null;
   tabs: string[] = [
     'Todos',
     'Ahorcado',
@@ -38,7 +44,9 @@ export class MyProgrammingsComponent implements OnChanges {
     private myProgrammingGamesService: MyProgrammingGamesService,
     private route: ActivatedRoute,
     private router: Router,
-    private userSession: UserSessionService
+    private userSession: UserSessionService,
+    private disableProgrammingGameService: DisableProgrammingGameService,
+    private gameReportService: GameReportService // Corregido: inyectar correctamente el servicio
   ) {}
 
   ngOnInit() {
@@ -204,14 +212,167 @@ export class MyProgrammingsComponent implements OnChanges {
   }
 
   eliminarActividad(id: number): void {
-    if (confirm('¿Estás seguro de que deseas eliminar esta actividad?')) {
-      console.log(`Eliminar actividad con ID: ${id}`);
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción desactivará la programación.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8571FB',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, desactivar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.disableProgrammingGameService
+          .disableProgrammingGame(id)
+          .subscribe({
+            next: () => {
+              this.menuAbierto = null;
+              this.resetPagination();
+              this.loadProgrammings();
+              Swal.fire(
+                'Desactivado',
+                'La programación fue desactivada correctamente.',
+                'success'
+              );
+            },
+            error: (err) => {
+              this.menuAbierto = null;
+              Swal.fire(
+                'Error',
+                'Error al desactivar la programación',
+                'error'
+              );
+              console.error('Error al desactivar:', err);
+            },
+          });
+      }
+    });
   }
   verReporte(id: number): void {
-    console.log(`Ver reporte de la actividad con ID: ${id}`);
+    this.reportGameInstanceId = id;
+    this.menuAbierto = null;
+
+    // Mostrar el modal con SweetAlert2
+    Swal.fire({
+      title: 'Reporte de Juego',
+      html: '<div id="chart-container" style="min-height: 400px;"></div>',
+      width: 800,
+      showCloseButton: true,
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      customClass: {
+        popup: 'report-modal-popup',
+      },
+      didOpen: () => {
+        this.loadReportData(id);
+      },
+    });
   }
 
+  private loadReportData(gameInstanceId: number): void {
+    // Mostrar loading
+    const container = document.getElementById('chart-container');
+    if (container) {
+      container.innerHTML = '<div class="text-center py-8"><div class="spinner-border text-purple-600" role="status"></div><p class="mt-2">Cargando reporte...</p></div>';
+    }
+
+    this.gameReportService.getReport(gameInstanceId.toString()).subscribe({ // Corregido: uso de this.gameReportService
+      next: (res: GameReportResponse) => {
+        this.renderReportChart(res.data);
+      },
+      error: (error) => {
+        if (container) {
+          container.innerHTML = '<div class="text-center text-red-500 py-8"><i class="fas fa-exclamation-triangle mb-2"></i><p>No se pudo cargar el reporte</p></div>';
+        }
+      }
+    });
+  }
+
+  private renderReportChart(data: any): void {
+    const container = document.getElementById('chart-container');
+    if (!container) return;
+
+    // Para el JSON que muestras, crear un gráfico simple
+    const options = {
+      chart: {
+        type: 'donut',
+        height: 350,
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 800
+        }
+      },
+      series: [data.sessions_count || 0, data.average_rating || 0],
+      labels: ['Sesiones Totales', 'Rating Promedio'],
+      colors: ['#7C3AED', '#38BDF8'],
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '65%',
+            labels: {
+              show: true,
+              total: {
+                show: true,
+                label: 'Total',
+                formatter: () => `ID: ${data.game_instance_id}`
+              }
+            }
+          }
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (val: number) => `${val.toFixed(1)}%`
+      },
+      legend: {
+        position: 'bottom',
+        fontSize: '14px'
+      },
+      tooltip: {
+        y: {
+          formatter: (val: number, opts: any) => {
+            const label = opts.w.globals.labels[opts.seriesIndex];
+            return label === 'Sesiones Totales' ? `${val} sesiones` : `${val.toFixed(1)} rating`;
+          }
+        }
+      }
+    };
+
+    const chart = new ApexCharts(container, options);
+    chart.render();
+
+    // Agregar información adicional debajo del gráfico
+    setTimeout(() => {
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'mt-4 p-4 bg-gray-50 rounded-lg';
+      infoDiv.innerHTML = `
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div class="bg-white p-3 rounded-lg shadow-sm">
+            <div class="text-2xl font-bold text-purple-600">${data.game_instance_id}</div>
+            <div class="text-sm text-gray-600">ID Instancia</div>
+          </div>
+          <div class="bg-white p-3 rounded-lg shadow-sm">
+            <div class="text-2xl font-bold text-blue-600">${data.sessions_count}</div>
+            <div class="text-sm text-gray-600">Sesiones</div>
+          </div>
+          <div class="bg-white p-3 rounded-lg shadow-sm">
+            <div class="text-2xl font-bold text-green-600">${data.average_rating.toFixed(1)}</div>
+            <div class="text-sm text-gray-600">Rating Promedio</div>
+          </div>
+        </div>
+      `;
+      container.appendChild(infoDiv);
+    }, 100);
+  }
+
+
+
+  closeReportModal() {
+    this.showReportModal = false;
+    this.reportGameInstanceId = null;
+  }
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
   }

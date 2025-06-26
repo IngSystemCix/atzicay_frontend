@@ -1,10 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MyGamesService } from '../../../../core/infrastructure/api/my-games.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { MyGame } from '../../../../core/domain/model/my-game.model';
+import { UpdateVisibilityService } from '../../../../core/infrastructure/api/update-visibility.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-juegos-lista',
@@ -13,27 +15,9 @@ import { MyGame } from '../../../../core/domain/model/my-game.model';
   templateUrl: './juegos-lista.component.html',
   styleUrl: './juegos-lista.component.css',
 })
-export class JuegosListaComponent implements OnInit {
-  filtroSeleccionado: string = 'all';
-  filtros: string[] = ['all', 'hangman', 'memory', 'puzzle', 'solve_the_word'];
-  filtroLabels: { [key: string]: string } = {
-    all: 'Todos',
-    hangman: 'Ahorcado',
-    memory: 'Memoria',
-    puzzle: 'Rompecabezas',
-    solve_the_word: 'Pupiletras',
-  };
-
+export class JuegosListaComponent implements OnInit, OnChanges {
+  @Input() filtroActual: string = 'all';
   @Output() filtroChange = new EventEmitter<string>();
-
-  filtrar(tipo: string) {
-    this.filtroSeleccionado = tipo;
-    this.currentOffset = 0;
-    this.cargarJuegos();
-    this.filtroChange.emit(tipo);
-  }
-
-  @Input() filtroActual: string = 'Ahorcado';
 
   menuAbierto: number | null = null;
   juegos: MyGame[] = [];
@@ -52,12 +36,20 @@ export class JuegosListaComponent implements OnInit {
   constructor(
     private myGamesService: MyGamesService,
     private userSession: UserSessionService,
-    private router: Router
+    private router: Router,
+    private updateVisibilityService: UpdateVisibilityService
   ) {}
 
   ngOnInit(): void {
     this.userId = this.userSession.getUserId();
     this.cargarJuegos();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filtroActual'] && !changes['filtroActual'].firstChange) {
+      this.currentOffset = 0;
+      this.cargarJuegos();
+    }
   }
 
   cargarJuegos(loadMore: boolean = false): void {
@@ -70,7 +62,8 @@ export class JuegosListaComponent implements OnInit {
     this.error = null;
     const offset = loadMore ? this.currentOffset : 0;
     const limit = this.pageLimit;
-    this.myGamesService.getMyGames(this.userId, this.filtroSeleccionado, limit, offset).subscribe({
+    // Usar filtroActual en vez de filtroSeleccionado
+    this.myGamesService.getMyGames(this.userId, this.filtroActual, limit, offset).subscribe({
       next: (res) => {
         if (res && res.data && Array.isArray(res.data.data)) {
           if (loadMore && offset > 0) {
@@ -118,10 +111,8 @@ export class JuegosListaComponent implements OnInit {
   }
 
   programarJuego(id: number) {
-    this.selectedGameId = id;
-    this.showConfigModal = true;
     this.menuAbierto = null;
-    document.addEventListener('click', this.cerrarMenus.bind(this));
+    this.router.navigate(['/juegos/configuracion', id]);
   }
 
   eliminarJuego(id: number) {}
@@ -140,6 +131,39 @@ export class JuegosListaComponent implements OnInit {
     this.mostrarMensaje('Configuración guardada correctamente', 'success');
     this.cargarJuegos();
     this.cerrarModalConfiguracion();
+  }
+
+  changeVisibility(juego: MyGame) {
+    const isPublic = juego.visibility === 'P';
+    const newStatus = !isPublic;
+    const confirmText = isPublic ? '¿Deseas hacer este juego restringido?' : '¿Deseas hacer este juego público?';
+    const successText = isPublic ? 'El juego ahora es restringido.' : 'El juego ahora es público.';
+    const confirmButton = isPublic ? 'Sí, restringir' : 'Sí, hacer público';
+    Swal.fire({
+      title: 'Cambiar visibilidad',
+      text: confirmText,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#8571FB',
+      cancelButtonColor: '#d33',
+      confirmButtonText: confirmButton,
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.updateVisibilityService.updateVisibility(juego.game_instance_id, newStatus).subscribe({
+          next: () => {
+            this.menuAbierto = null;
+            this.cargarJuegos();
+            Swal.fire('Actualizado', successText, 'success');
+          },
+          error: (err) => {
+            this.menuAbierto = null;
+            Swal.fire('Error', 'No se pudo cambiar la visibilidad', 'error');
+            console.error('Error al cambiar visibilidad:', err);
+          }
+        });
+      }
+    });
   }
 
   getRoundedRating(rating: string): number {
