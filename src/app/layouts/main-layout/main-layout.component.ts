@@ -28,7 +28,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.checkScreenSize();
-    
+
     if (this.isMobile) {
       this.sidebarCollapsed = true;
       this.sidebarService.setSidebarState(true);
@@ -40,7 +40,9 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.ensureUserIdLoaded();
+    this.userSession.waitForToken().then(() => {
+      this.ensureUserIdLoaded();
+    });
   }
 
   ngOnDestroy(): void {
@@ -50,7 +52,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   @HostListener('window:resize', ['$event'])
   onResize(event: any): void {
     this.checkScreenSize();
-    
+
     // Auto-colapsar en móvil
     if (this.isMobile && !this.sidebarCollapsed) {
       this.toggleSidebar();

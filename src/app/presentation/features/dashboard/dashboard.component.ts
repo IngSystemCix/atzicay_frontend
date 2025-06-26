@@ -52,7 +52,21 @@ export class DashboardComponent implements OnInit {
 
   private limitSubject = new BehaviorSubject<{ limit: number }>({ limit: 6 });
   ngOnInit(): void {
-    this.loadGameInstances();
+    const token = sessionStorage.getItem('token_jwt');
+    if (token) {
+      console.log('[Dashboard] Token disponible, cargando juegos...');
+      this.loadGameInstances();
+    } else {
+      console.warn('[Dashboard] Token aún no está, esperando...');
+      const checkToken = setInterval(() => {
+        const newToken = sessionStorage.getItem('token_jwt');
+        if (newToken) {
+          clearInterval(checkToken);
+          console.log('[Dashboard] Token detectado. Cargando juegos...');
+          this.loadGameInstances();
+        }
+      }, 100); // revisa cada 100ms
+    }
   }
 
   private loadGameInstances(): void {
@@ -294,7 +308,7 @@ export class DashboardComponent implements OnInit {
   }
 
   // trackBy function for gameTypes ngFor
-  trackByTypeValue(index: number, type: { value: string; label: string }) {
+  trackByTypeValue(_index: number, type: { value: string; label: string }) {
     return type.value;
   }
 }

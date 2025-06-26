@@ -12,21 +12,15 @@ export class AuthService {
   private http = inject(HttpClient);
 
   /**
-   * Realiza el login con el id token de Auth0 y devuelve un observable con la informacion del usuario autenticado.
-   * @param idToken id token de Auth0
-   * @returns observable con la informacion del usuario autenticado
+   * Realiza el login con el id token de Auth0 y devuelve un observable con la información del usuario autenticado.
+   * Guarda el token JWT interno en sessionStorage con clave 'token_jwt'.
    */
-
   login(idToken: string): Observable<Auth> {
     const body = { id_token: idToken };
     return this.http
       .post<AuthResponse>(`${this.apiUrl}auth/generate-token`, body)
       .pipe(
         map((response) => {
-          // Guarda el id del usuario autenticado en sessionStorage
-          if (response.user && response.user.Id) {
-            sessionStorage.setItem('user_id', response.user.Id.toString());
-          }
           const auth: Auth = {
             access_token: response.access_token,
             token_type: response.token_type,
@@ -43,24 +37,34 @@ export class AuthService {
               CreatedAt: response.user.CreatedAt,
             },
           };
+
           return auth;
         })
       );
   }
 
+  /**
+   * Solicita un nuevo token JWT al backend.
+   * Usa el token actual como autorización para solicitar uno nuevo.
+   */
   refreshToken(token: string): Observable<any> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
-    return this.http.post<any>(
-      `${this.apiUrl}auth/refresh-token`,
-      {},
-      { headers }
-    );
+    return this.http.post<any>(`${this.apiUrl}auth/refresh-token`, {}, { headers });
   }
 
+  /**
+   * Limpia sesión del usuario.
+   * Nota: la navegación al login debe manejarse en el componente.
+   */
   logout(): void {
-    sessionStorage.clear();
-    // La navegación debe hacerse desde el componente, no desde el servicio para evitar dependencias circulares
+    sessionStorage.removeItem('token_jwt');
+    sessionStorage.removeItem('user_id');
   }
+
+  isAuthenticated(): boolean {
+    return !!sessionStorage.getItem('token_jwt');
+  }
+
 }

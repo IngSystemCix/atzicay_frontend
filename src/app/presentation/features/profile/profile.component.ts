@@ -31,7 +31,7 @@ export class ProfileComponent implements OnInit {
     private countryService: CountryService,
     private auth0: Auth0Service,
     private userSession: UserSessionService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadCountries();
@@ -49,45 +49,47 @@ export class ProfileComponent implements OnInit {
       this.currentUserId = userId;
       this.loadUserProfile(userId);
     } else {
-      this.auth0.user$.subscribe((user) => {
-        const email = user?.email;
-        if (email) {
-          this.profileService.getUserIdByEmail(email).subscribe({
-            next: (res) => {
-              if (res && res.data && res.data.user_id) {
-                this.userSession.setUserId(res.data.user_id);
-                this.currentUserId = res.data.user_id;
-                this.loadUserProfile(res.data.user_id);
-              } else {
-                this.showNoUserMessage = true;
-              }
-            },
-            error: (err) => {
-              console.error('No se pudo obtener el id del usuario por email', err);
-              this.showNoUserMessage = true;
-            }
-          });
-        } else {
-          // Si no hay email, intenta obtenerlo desde el backend usando el token guardado
-          const token = sessionStorage.getItem('token_jwt');
-          if (token) {
-            this.authService.refreshToken(token).subscribe({
+      this.userSession.waitForToken().then(() => {
+        this.auth0.user$.subscribe((user) => {
+          const email = user?.email;
+          if (email) {
+            this.profileService.getUserIdByEmail(email).subscribe({
               next: (res) => {
-                if (res && res.user && res.user.Id) {
-                  this.userSession.setUserId(res.user.Id);
-                  this.currentUserId = res.user.Id;
-                  this.loadUserProfile(res.user.Id);
+                if (res && res.data && res.data.user_id) {
+                  this.userSession.setUserId(res.data.user_id);
+                  this.currentUserId = res.data.user_id;
+                  this.loadUserProfile(res.data.user_id);
+                } else {
+                  this.showNoUserMessage = true;
                 }
               },
               error: (err) => {
-                console.error('No se pudo refrescar el token ni obtener el id del usuario', err);
+                console.error('No se pudo obtener el id del usuario por email', err);
                 this.showNoUserMessage = true;
               }
             });
           } else {
-            this.showNoUserMessage = true;
+            // Si no hay email, intenta obtenerlo desde el backend usando el token guardado
+            const token = sessionStorage.getItem('token_jwt');
+            if (token) {
+              this.authService.refreshToken(token).subscribe({
+                next: (res) => {
+                  if (res && res.user && res.user.Id) {
+                    this.userSession.setUserId(res.user.Id);
+                    this.currentUserId = res.user.Id;
+                    this.loadUserProfile(res.user.Id);
+                  }
+                },
+                error: (err) => {
+                  console.error('No se pudo refrescar el token ni obtener el id del usuario', err);
+                  this.showNoUserMessage = true;
+                }
+              });
+            } else {
+              this.showNoUserMessage = true;
+            }
           }
-        }
+        });
       });
     }
   }

@@ -2,6 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { CommonModule } from '@angular/common';
+import { filter, switchMap, take, tap } from 'rxjs';
+import { AuthService } from './core/infrastructure/api/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -11,19 +13,32 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
-  title = 'atzicay';
-  sidebarCollapsed = false;
-
-  constructor(public auth: Auth0Service, private router: Router) {}
-
-  toggleSidebar() {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
-  }
+  private auth0 = inject(Auth0Service);
+  private backendAuth = inject(AuthService);
+  private router = inject(Router);
+  private hasLoggedIn = false;
 
   ngOnInit(): void {
-    this.auth.appState$.subscribe((appState) => {
-      if (appState?.target) {
-        this.router.navigate([appState.target]);
+    console.log('[AppComponent] Token actual en sessionStorage:', sessionStorage.getItem('token_jwt'));
+
+    this.auth0.isAuthenticated$.pipe(
+      filter(authenticated => authenticated && !this.hasLoggedIn),
+      take(1),
+      switchMap(() => this.auth0.idTokenClaims$),
+      filter((claims): claims is { __raw: string } => !!claims && typeof (claims as any).__raw === 'string'),
+      switchMap((claims) => this.backendAuth.login((claims as { __raw: string }).__raw)),
+      tap(authResponse => {
+        this.hasLoggedIn = true;
+        sessionStorage.setItem('token_jwt', authResponse.access_token);
+        sessionStorage.setItem('user', JSON.stringify(authResponse.user));
+
+        if (location.pathname === '/') {
+          this.router.navigate(['/dashboard']);
+        }
+      })
+    ).subscribe({
+      error: (err) => {
+        console.error('[AppComponent] Error autenticando:', err);
       }
     });
   }

@@ -15,4 +15,19 @@ export class UserSessionService {
   clearUserId(): void {
     sessionStorage.removeItem('user_id');
   }
+
+  waitForToken(maxRetries = 20, interval = 100): Promise<string> {
+    return new Promise((resolve, reject) => {
+      let retries = 0;
+      const check = () => {
+        const token = sessionStorage.getItem('token_jwt');
+        if (token) return resolve(token);
+        retries++;
+        if (retries >= maxRetries) return reject('Token JWT no disponible');
+        setTimeout(check, interval);
+      };
+      check();
+    });
+  }
+
 }

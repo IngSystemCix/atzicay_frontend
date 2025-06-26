@@ -4,7 +4,6 @@ import { provideAuth0 } from '@auth0/auth0-angular';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment.development';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { tokenInterceptor } from './core/infrastructure/middleware/token-interceptor.interceptor';
 import { authInterceptor } from './core/infrastructure/middleware/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -15,7 +14,9 @@ export const appConfig: ApplicationConfig = {
       clientId: environment.clientId,
       authorizationParams: {
         redirect_uri: window.location.origin + '/dashboard',
-      }
+        response_type: 'id_token',
+        scope: 'openid profile email',
+      },
     }),
     provideHttpClient(
       withInterceptors([authInterceptor]),
