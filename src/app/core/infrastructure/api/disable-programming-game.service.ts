@@ -10,6 +10,6 @@ export class DisableProgrammingGameService {
   constructor(private http: HttpClient) {}
 
   disableProgrammingGame(gameInstanceId: number): Observable<any> {
-    return this.http.put(`${this.baseUrl}disable-programming-game/${gameInstanceId}`, {});
+    return this.http.put(`${this.baseUrl}programming-game/update-status/${gameInstanceId}`, {});
   }
 }

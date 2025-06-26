@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
 
@@ -9,11 +9,22 @@ export interface UpdateVisibilityRequest {
 
 @Injectable({ providedIn: 'root' })
 export class UpdateVisibilityService {
-  private baseUrl = environment.api_base_url; // Ajusta si tu base cambia
+  private baseUrl = environment.api_base_url;
 
   constructor(private http: HttpClient) {}
 
   updateVisibility(gameInstanceId: number, status: boolean): Observable<any> {
-    return this.http.put(`${this.baseUrl}my-game/update-status/${gameInstanceId}`, { status });
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    
+    const body: UpdateVisibilityRequest = { status };
+    const url = `${this.baseUrl}my-game/update-status/${gameInstanceId}`;
+    
+    console.log('Enviando PUT request a:', url);
+    console.log('Con body:', body);
+    console.log('Con headers:', headers);
+    
+    return this.http.put(url, body, { headers });
   }
 }

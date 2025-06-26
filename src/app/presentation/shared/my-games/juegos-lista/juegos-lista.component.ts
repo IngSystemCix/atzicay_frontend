@@ -135,10 +135,19 @@ export class JuegosListaComponent implements OnInit, OnChanges {
 
   changeVisibility(juego: MyGame) {
     const isPublic = juego.visibility === 'P';
-    const newStatus = !isPublic;
+    // Para el endpoint: true = público, false = restringido
+    const newStatus = !isPublic; // Si era público (P), será false (restringido), si era restringido (R), será true (público)
     const confirmText = isPublic ? '¿Deseas hacer este juego restringido?' : '¿Deseas hacer este juego público?';
     const successText = isPublic ? 'El juego ahora es restringido.' : 'El juego ahora es público.';
     const confirmButton = isPublic ? 'Sí, restringir' : 'Sí, hacer público';
+    
+    console.log('Estado actual del juego:', {
+      gameId: juego.game_instance_id,
+      currentVisibility: juego.visibility,
+      isPublic: isPublic,
+      newStatus: newStatus
+    });
+    
     Swal.fire({
       title: 'Cambiar visibilidad',
       text: confirmText,
@@ -150,16 +159,40 @@ export class JuegosListaComponent implements OnInit, OnChanges {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
+        console.log('Enviando request:', { gameInstanceId: juego.game_instance_id, status: newStatus });
+        
         this.updateVisibilityService.updateVisibility(juego.game_instance_id, newStatus).subscribe({
-          next: () => {
+          next: (response) => {
+            console.log('Respuesta del servidor:', response);
             this.menuAbierto = null;
+            
+            // Actualizar localmente el estado del juego antes de recargar
+            juego.visibility = newStatus ? 'P' : 'R';
+            
+            // Recarga la lista para asegurar consistencia
             this.cargarJuegos();
             Swal.fire('Actualizado', successText, 'success');
           },
           error: (err) => {
             this.menuAbierto = null;
-            Swal.fire('Error', 'No se pudo cambiar la visibilidad', 'error');
-            console.error('Error al cambiar visibilidad:', err);
+            console.error('Error completo al cambiar visibilidad:', {
+              error: err,
+              gameId: juego.game_instance_id,
+              attemptedStatus: newStatus,
+              errorMessage: err.error?.message || err.message,
+              statusCode: err.status
+            });
+            
+            let errorMessage = 'No se pudo cambiar la visibilidad.';
+            if (err.status === 401) {
+              errorMessage = 'No tienes autorización para realizar esta acción.';
+            } else if (err.status === 404) {
+              errorMessage = 'El juego no fue encontrado.';
+            } else if (err.error?.message) {
+              errorMessage = err.error.message;
+            }
+            
+            Swal.fire('Error', errorMessage, 'error');
           }
         });
       }

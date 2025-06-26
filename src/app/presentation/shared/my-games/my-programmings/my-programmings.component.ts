@@ -6,6 +6,7 @@ import { MyProgrammingGame } from '../../../../core/domain/model/my-programming-
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { DisableProgrammingGameService } from '../../../../core/infrastructure/api/disable-programming-game.service';
+import { ProgrammingStatusService } from '../../../../core/infrastructure/api/programming-status.service';
 import Swal from 'sweetalert2';
 import { GameReportResponse } from '../../../../core/domain/interface/game-report-response';
 import ApexCharts from 'apexcharts';
@@ -46,6 +47,7 @@ export class MyProgrammingsComponent implements OnChanges {
     private router: Router,
     private userSession: UserSessionService,
     private disableProgrammingGameService: DisableProgrammingGameService,
+    private programmingStatusService: ProgrammingStatusService,
     private gameReportService: GameReportService // Corregido: inyectar correctamente el servicio
   ) {}
 
@@ -58,11 +60,14 @@ export class MyProgrammingsComponent implements OnChanges {
       this.loadProgrammings();
     });
     window.addEventListener('scroll', this.onScroll.bind(this));
+    // Agregar listener para cerrar menús al hacer clic fuera
+    document.addEventListener('click', this.closeMenus.bind(this));
   }
 
   ngOnDestroy() {
     // Remover listener cuando se destruya el componente
     window.removeEventListener('scroll', this.onScroll.bind(this));
+    document.removeEventListener('click', this.closeMenus.bind(this));
   }
 
   onScroll() {
@@ -203,12 +208,17 @@ export class MyProgrammingsComponent implements OnChanges {
   }
 
   editarActividad(id: number) {
+    this.menuAbierto = null;
     console.log('Editar actividad', id);
   }
 
   showOptions(event: MouseEvent, id: number): void {
     event.stopPropagation();
     this.menuAbierto = this.menuAbierto === id ? null : id;
+  }
+
+  closeMenus(): void {
+    this.menuAbierto = null;
   }
 
   eliminarActividad(id: number): void {
@@ -375,5 +385,71 @@ export class MyProgrammingsComponent implements OnChanges {
   }
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  changeStatusActivity(activity: MyProgrammingGame): void {
+    const isActive = activity.status === 1;
+    const newStatus = isActive ? 0 : 1; // Si está activo (1), será 0 (restringido), si está inactivo (0), será 1 (público)
+    const confirmText = isActive ? '¿Deseas hacer esta programación restringida?' : '¿Deseas hacer esta programación pública?';
+    const successText = isActive ? 'La programación ahora es restringida.' : 'La programación ahora es pública.';
+    const confirmButton = isActive ? 'Sí, restringir' : 'Sí, hacer pública';
+    
+    console.log('Estado actual de la programación:', {
+      gameInstanceId: activity.game_instance_id,
+      currentStatus: activity.status,
+      isActive: isActive,
+      newStatus: newStatus
+    });
+    
+    Swal.fire({
+      title: 'Cambiar estado',
+      text: confirmText,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#8571FB',
+      cancelButtonColor: '#d33',
+      confirmButtonText: confirmButton,
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        console.log('Enviando request:', { gameInstanceId: activity.game_instance_id, status: newStatus });
+        
+        this.programmingStatusService.setProgrammingGameStatus(activity.game_instance_id, newStatus).subscribe({
+          next: (response) => {
+            console.log('Respuesta del servidor:', response);
+            this.menuAbierto = null;
+            
+            // Actualizar localmente el estado de la actividad antes de recargar
+            activity.status = newStatus;
+            
+            // Recarga la lista para asegurar consistencia
+            this.resetPagination();
+            this.loadProgrammings();
+            Swal.fire('Actualizado', successText, 'success');
+          },
+          error: (err) => {
+            this.menuAbierto = null;
+            console.error('Error completo al cambiar estado:', {
+              error: err,
+              gameInstanceId: activity.game_instance_id,
+              attemptedStatus: newStatus,
+              errorMessage: err.error?.message || err.message,
+              statusCode: err.status
+            });
+            
+            let errorMessage = 'No se pudo cambiar el estado de la programación.';
+            if (err.status === 401) {
+              errorMessage = 'No tienes autorización para realizar esta acción.';
+            } else if (err.status === 404) {
+              errorMessage = 'La programación no fue encontrada.';
+            } else if (err.error?.message) {
+              errorMessage = err.error.message;
+            }
+            
+            Swal.fire('Error', errorMessage, 'error');
+          }
+        });
+      }
+    });
   }
 }
