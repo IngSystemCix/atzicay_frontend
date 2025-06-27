@@ -146,7 +146,11 @@
             <button
               class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/40 hover:bg-white/60 flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm cursor-pointer"
               (click)="showOptions($event, activity.game_instance_id)">
-              <span class="text-lg sm:text-xl text-gray-800">⋯</span>
+                <svg class="w-4 h-4 sm:w-6 sm:h-6 text-gray-800" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                <circle cx="10" cy="4" r="1.5"/>
+                <circle cx="10" cy="10" r="1.5"/>
+                <circle cx="10" cy="16" r="1.5"/>
+                </svg>
             </button>
             @if (menuAbierto === activity.game_instance_id) {
               <div class="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl py-2 w-40 sm:w-48 z-20 border border-purple-200 animate-in slide-in-from-top-2 duration-200">
