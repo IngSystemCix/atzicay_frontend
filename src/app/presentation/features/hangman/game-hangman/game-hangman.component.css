@@ -1,214 +1,79 @@
-.text-purple-300 {
-  color: #d8b4fe;
+/* Estilos personalizados para alertas amigables para niños */
+:host ::ng-deep .animated-popup {
+  border-radius: 25px !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+  animation: bounceIn 0.6s ease-out !important;
+  border: 3px solid #e1bee7 !important;
 }
 
-.text-purple-400 {
-  color: #c084fc;
+:host ::ng-deep .kid-friendly-button {
+  border-radius: 25px !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  padding: 12px 24px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+  text-transform: none !important;
 }
 
-.text-purple-500 {
-  color: #a855f7;
+:host ::ng-deep .kid-friendly-button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
 }
 
-.text-purple-600 {
-  color: #9333ea;
+:host ::ng-deep .kid-friendly-button-secondary {
+  border-radius: 25px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+  text-transform: none !important;
 }
 
-.bg-purple-50 {
-  background-color: #faf5ff;
+:host ::ng-deep .kid-toast-alert {
+  border-radius: 20px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+  border: 2px solid #ffa726 !important;
 }
 
-.bg-purple-100 {
-  background-color: #f3e8ff;
-}
-
-.bg-purple-200 {
-  background-color: #e9d5ff;
-}
-
-.bg-purple-400 {
-  background-color: #c084fc;
-}
-
-.bg-purple-500 {
-  background-color: #a855f7;
-}
-
-.bg-purple-600 {
-  background-color: #9333ea;
-}
-
-.hover\:bg-purple-100:hover {
-  background-color: #f3e8ff;
-}
-
-.hover\:bg-purple-500:hover {
-  background-color: #a855f7;
-}
-
-.hover\:bg-purple-600:hover {
-  background-color: #9333ea;
-}
-
-.bg-red-100 {
-  background-color: #fee2e2;
-}
-
-.text-red-700 {
-  color: #b91c1c;
-}
-
-.bg-green-100 {
-  background-color: #dcfce7;
-}
-
-.text-green-700 {
-  color: #15803d;
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-.animate-scaleIn {
-  animation: scaleIn 0.3s cubic-bezier(0.4,0,0.2,1);
-}
-
-@keyframes confeti-fall-1 {
-        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-      }
-      @keyframes confeti-fall-2 {
-        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(-360deg); opacity: 0; }
-      }
-      @keyframes confeti-fall-3 {
-        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(180deg); opacity: 0; }
-      }
-      @keyframes confeti-fall-4 {
-        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(-180deg); opacity: 0; }
-      }
-      @keyframes confeti-fall-5 {
-        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(270deg); opacity: 0; }
-      }
-      @keyframes confeti-fall-6 {
-        0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(-270deg); opacity: 0; }
-      }
-
-      /* Animación para el muñeco del ahorcado */
-@keyframes drawPart {
-  0% { 
-    stroke-dasharray: 0, 1000;
+/* Animación de entrada personalizada */
+@keyframes bounceIn {
+  0% {
     opacity: 0;
-  }
-  100% { 
-    stroke-dasharray: 1000, 0;
-    opacity: 1;
-  }
-}
-
-.hangman-part {
-  animation: drawPart 0.8s ease-in-out forwards;
-}
-
-.hangman-svg {
-  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
-}
-
-/* Efecto de shake */
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-.shake {
-  animation: shake 0.6s ease-in-out;
-}
-
-/* Animación para letras reveladas */
-@keyframes letterReveal {
-  0% { 
-    transform: scale(0) rotate(180deg);
-    opacity: 0;
+    transform: scale(0.3) translateY(-50px);
   }
   50% {
-    transform: scale(1.2) rotate(0deg);
-    opacity: 0.8;
-  }
-  100% { 
-    transform: scale(1) rotate(0deg);
     opacity: 1;
+    transform: scale(1.05) translateY(0);
   }
-}
-
-.letter-reveal {
-  animation: letterReveal 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-/* Mejoras para botones del teclado */
-.keyboard-button {
-  position: relative;
-  overflow: hidden;
-}
-
-.keyboard-button::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s;
-}
-
-.keyboard-button:active:not(:disabled)::before {
-  width: 100%;
-  height: 100%;
-}
-
-/* Efecto sparkle */
-@keyframes sparkle {
-  0%, 100% { 
-    opacity: 0;
-    transform: scale(0) rotate(0deg);
+  70% {
+    transform: scale(0.95);
   }
-  50% { 
+  100% {
     opacity: 1;
-    transform: scale(1) rotate(180deg);
+    transform: scale(1);
   }
 }
 
-.sparkle {
-  animation: sparkle 1s ease-in-out;
+/* Efectos adicionales para hacer más atractivo */
+:host ::ng-deep .swal2-timer-progress-bar {
+  background: linear-gradient(90deg, #4caf50, #8bc34a, #cddc39) !important;
+  height: 6px !important;
 }
 
-/* Tiempo con advertencia */
-@keyframes timePulse {
-  0%, 100% { color: inherit; }
-  50% { color: #EF4444; }
+:host ::ng-deep .swal2-title {
+  margin: 0 0 15px 0 !important;
+  font-family: 'Arial', sans-serif !important;
 }
 
-.time-warning {
-  animation: timePulse 1s ease-in-out infinite;
+:host ::ng-deep .swal2-html-container {
+  margin: 0 !important;
+  font-family: 'Arial', sans-serif !important;
+}
+
+/* Efecto hover para botones */
+:host ::ng-deep .kid-friendly-button:active {
+  transform: translateY(0px) scale(0.95) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }

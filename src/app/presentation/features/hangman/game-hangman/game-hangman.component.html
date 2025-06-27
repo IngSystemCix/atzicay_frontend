@@ -1,4 +1,3 @@
-
 <div
   class="flex flex-col border-8 border-atzicay-border items-center min-h-screen h-screen p-4 overflow-x-hidden"
   style="background-color: var(--color-atzicay-bg)"
@@ -7,26 +6,51 @@
   @if (isLoading || state.cargando) {
   <div class="text-center">
     <div
-      class="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
+      class="animate-spin w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-6"
     ></div>
-    <p class="text-lg">{{ isLoading ? 'Autenticando...' : 'Cargando juego...' }}</p>
+    <div class="space-y-2">
+      <div class="h-2 bg-purple-200 rounded-full overflow-hidden">
+        <div class="h-full bg-purple-500 rounded-full animate-pulse"></div>
+      </div>
+      <p
+        class="text-xl font-medium"
+        [style.color]="'var(--color-text-primary)'"
+      >
+        {{ isLoading ? "Autenticando..." : "Cargando juego..." }}
+      </p>
+    </div>
   </div>
   }
 
-  <!-- Error State (authentication or game) -->
+  <!-- Error State mejorado -->
   @if ((authError || state.error) && !isLoading && !state.cargando) {
-  <div class="text-center">
+  <div class="text-center max-w-md">
     <div
-      class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+      class="bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-2xl mb-6 shadow-lg"
     >
-      <p class="font-bold">Error</p>
-      <p>{{ authError || state.error }}</p>
+      <div class="flex items-center justify-center mb-3">
+        <svg
+          class="w-8 h-8 text-red-500"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+          />
+        </svg>
+      </div>
+      <p class="font-bold text-lg mb-2">¡Ups! Algo salió mal</p>
+      <p class="text-sm">{{ authError || state.error }}</p>
     </div>
     <button
       (click)="volverAlDashboard()"
-      class="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+      class="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
     >
-      Volver al Dashboard
+      ← Volver al Dashboard
     </button>
   </div>
   }
@@ -34,115 +58,273 @@
   <!-- Game Content -->
   @if (!isLoading && !authError && !state.cargando && !state.error) {
   <div class="w-full h-full flex flex-col">
-    
-    <!-- Header Colapsible -->
-    <div class="w-full mb-4 transition-all duration-300 ease-in-out">
-      <!-- Header expandido -->
+    <!-- Header Mejorado -->
+    <div class="w-full mb-6 transition-all duration-500 ease-in-out">
+      <!-- Header expandido con mejor jerarquía -->
       <div
         *ngIf="headerExpanded"
-        class="bg-white/15 rounded-2xl backdrop-blur-sm shadow-lg border border-purple-200/30 p-6 animate-fadeIn"
+        class="bg-white/20 rounded-3xl backdrop-blur-md shadow-2xl border border-white/30 p-8"
+        style="backdrop-filter: blur(20px)"
       >
-        <!-- Fila superior: Botón volver, título, toggle -->
-        <div class="flex items-center justify-between mb-4">
+        <!-- Fila superior con mejor espaciado -->
+        <div class="flex items-center justify-between mb-6">
           <button
             (click)="volverAlDashboard()"
-            class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 font-semibold text-sm cursor-pointer transition-all duration-200 hover:scale-105"
+            class="group px-6 py-3 bg-white/90 text-purple-700 rounded-xl hover:bg-white font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
           >
-            ← Volver
+            <svg
+              class="inline w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Volver
           </button>
-          
-          <h1
-            class="text-3xl font-bold text-center flex-1 mx-4"
-            [style.color]="state.colorTexto"
-          >
-            {{ tituloJuego }}
-          </h1>
-          
+
+          <div class="text-center flex-1 mx-6">
+            <h1
+              class="text-4xl font-black mb-2 tracking-tight"
+              [style.color]="state.colorTexto"
+              style="text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)"
+            >
+              {{ tituloJuego }}
+            </h1>
+            <p
+              class="text-lg font-medium opacity-90"
+              [style.color]="state.colorTexto"
+            >
+              {{ descripcionJuego }}
+            </p>
+          </div>
+
           <button
             (click)="toggleHeader()"
-            class="bg-purple-100 hover:bg-purple-200 rounded-full p-2 transition-colors cursor-pointer"
+            class="bg-white/90 hover:bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl"
             title="Minimizar header"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-purple-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 15l7-7 7 7"
+              />
             </svg>
           </button>
         </div>
 
-        <!-- Descripción del juego -->
-        <div class="text-center mb-4">
-          <p
-            class="text-lg font-medium"
-            [style.color]="state.colorTexto"
-          >
-            {{ descripcionJuego }}
-          </p>
-        </div>
-
-        <!-- Información del juego: vidas y tiempo -->
-        <div class="flex justify-between items-center">
+        <!-- Stats mejorados con cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Vidas -->
           <div
-            class="flex items-center gap-2 bg-white/20 rounded-lg px-4 py-2"
-            [style.color]="state.colorTexto"
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-            <span class="font-semibold">{{ state.vidasRestantes }} vidas</span>
+            <div class="flex items-center gap-3">
+              <div class="bg-red-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-red-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-800">
+                  {{ state.vidasRestantes }}
+                </p>
+                <p class="text-sm text-gray-600 font-medium">
+                  {{ state.vidasRestantes === 1 ? "Vida" : "Vidas" }}
+                </p>
+              </div>
+            </div>
           </div>
-          
+
+          <!-- Progreso mejorado -->
           <div
-            class="flex items-center gap-2 bg-white/20 rounded-lg px-4 py-2"
-            [style.color]="state.colorTexto"
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span class="font-semibold">{{ formatearTiempo() }}</span>
+            <div class="mb-3">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-semibold text-gray-700"
+                  >Progreso del Desafío</span
+                >
+                <span class="text-lg font-bold text-purple-600"
+                  >{{ state.palabrasCompletadas }}/{{
+                    state.totalPalabras
+                  }}</span
+                >
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div
+                  class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
+                  [style.width.%]="porcentajeProgreso"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tiempo -->
+          <div
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
+          >
+            <div class="flex items-center gap-3">
+              <div class="bg-blue-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-gray-800 font-mono">
+                  {{ formatearTiempo() }}
+                </p>
+                <p class="text-sm text-gray-600 font-medium">Tiempo</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Header minimizado -->
+      <!-- Header minimizado mejorado -->
       <div
         *ngIf="!headerExpanded"
-        class="bg-white/10 rounded-full backdrop-blur-lg shadow-md border border-purple-200/30 px-6 py-3 animate-fadeIn"
+        class="bg-white/15 rounded-full backdrop-blur-lg shadow-xl border border-white/20 px-8 py-4"
       >
         <div class="flex items-center justify-between">
-          <!-- Info compacta -->
-          <div class="flex items-center gap-4 text-sm" [style.color]="state.colorTexto">
-            <span class="font-semibold">{{ tituloJuego }}</span>
-            <div class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          <!-- Info compacta mejorada -->
+          <div
+            class="flex items-center gap-6 text-sm font-medium"
+            [style.color]="state.colorTexto"
+          >
+            <span class="text-lg font-bold">{{ tituloJuego }}</span>
+
+            <!-- Stats compactos con iconos -->
+            <div
+              class="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
               </svg>
-              <span>{{ state.vidasRestantes }}</span>
+              <span class="font-bold">{{ state.vidasRestantes }}</span>
             </div>
-            <div class="flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+            <!-- Progreso compacto -->
+            <div
+              class="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1"
+            >
+              <span class="font-bold"
+                >{{ state.palabrasCompletadas }}/{{ state.totalPalabras }}</span
+              >
+              <div class="w-16 bg-white/30 rounded-full h-1.5">
+                <div
+                  class="bg-white h-1.5 rounded-full transition-all duration-500"
+                  [style.width.%]="porcentajeProgreso"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Tiempo compacto -->
+            <div
+              class="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1 font-mono"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
-              <span>{{ formatearTiempo() }}</span>
+              <span class="font-bold">{{ formatearTiempo() }}</span>
             </div>
           </div>
-          
-          <!-- Botón expandir -->
-          <button
-            (click)="toggleHeader()"
-            class="bg-purple-100 hover:bg-purple-200 rounded-full p-2 transition-colors cursor-pointer"
-            title="Expandir header"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+
+          <!-- Botones de acción mejorados -->
+          <div class="flex items-center gap-3">
+            <button
+              (click)="volverAlDashboard()"
+              class="px-4 py-2 bg-white/90 text-purple-700 rounded-xl hover:bg-white font-semibold text-sm cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
+            >
+              ← Volver
+            </button>
+
+            <button
+              (click)="toggleHeader()"
+              class="bg-white/90 hover:bg-white rounded-xl p-2.5 transition-all duration-200 cursor-pointer active:scale-95 shadow-lg"
+              title="Expandir header"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-purple-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Área principal del juego - Ocupa el resto del espacio -->
-    <div class="flex-1 flex flex-col lg:flex-row justify-between items-stretch gap-6">
-      
+    <div
+      class="flex-1 flex flex-col lg:flex-row justify-between items-stretch gap-6"
+    >
       <!-- Panel izquierdo: Dibujo del ahorcado -->
       <div class="w-full lg:w-2/5 flex justify-center items-center">
         <div
@@ -275,102 +457,152 @@
       </div>
 
       <!-- Panel derecho: Palabra y controles -->
-      <div class="w-full lg:w-3/5 flex flex-col justify-center gap-6">
-        
-        <!-- Palabra a adivinar -->
+      <div class="w-full xl:w-3/5 flex flex-col justify-center gap-8">
+        <!-- Palabra con mejor feedback visual -->
         <div class="flex justify-center">
           <div
-            class="flex justify-center flex-wrap bg-white rounded-2xl p-6 shadow-xl border border-purple-100 gap-2"
+            class="bg-white/95 rounded-3xl p-8 shadow-2xl border border-white/50 backdrop-blur-sm"
           >
-            @for (letra of state.palabraActual.split(''); let i = $index; track
-            $index) {
-            <div class="flex flex-col items-center">
-              <div
-                class="text-4xl font-bold h-16 w-16 flex items-center justify-center rounded-xl shadow-md bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 transition-all duration-300"
-                [ngClass]="{
-                  'border-purple-400 text-purple-600 scale-105 shadow-lg':
-                    state.palabraRevelada[$index] !== '',
-                  'text-purple-300': state.palabraRevelada[$index] === ''
-                }"
-              >
+            <div class="flex justify-center flex-wrap gap-3 max-w-4xl">
+              @for (letra of state.palabraActual.split(''); let i = $index;
+              track $index) {
+              <div class="relative">
+                <div
+                  class="text-4xl lg:text-5xl font-black h-16 w-16 lg:h-20 lg:w-20 flex items-center justify-center rounded-2xl shadow-lg transition-all duration-500 transform hover:scale-105"
+                  [ngClass]="{
+                    'bg-gradient-to-br from-purple-100 to-purple-200 border-2 border-purple-300 text-purple-700 scale-110 shadow-xl animate-bounce':
+                      state.palabraRevelada[$index] !== '',
+                    'bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-gray-300 text-gray-400':
+                      state.palabraRevelada[$index] === ''
+                  }"
+                  style="animation-duration: 0.6s; animation-fill-mode: both"
+                >
+                  @if (state.palabraRevelada[$index] !== '') {
+                  <span class="animate-pulse">{{
+                    state.palabraRevelada[$index]
+                  }}</span>
+                  } @else {
+                  <span class="text-2xl">?</span>
+                  }
+                </div>
+
+                <!-- Efecto de brillo cuando se revela -->
                 @if (state.palabraRevelada[$index] !== '') {
-                {{ state.palabraRevelada[$index] }}
+                <div
+                  class="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"
+                ></div>
                 }
               </div>
+              }
             </div>
-            }
           </div>
         </div>
-        
-        <!-- Teclado -->
+
+        <!-- Teclado mejorado -->
         <div
-          class="bg-white rounded-2xl p-6 shadow-xl border border-purple-100"
+          class="bg-white/95 rounded-3xl p-8 shadow-2xl border border-white/50 backdrop-blur-sm"
         >
-          <div class="grid grid-cols-6 sm:grid-cols-7 gap-3 mx-auto max-w-2xl">
+          <div class="grid grid-cols-6 sm:grid-cols-7 gap-3 mx-auto max-w-3xl">
             @for (letra of alfabeto; track letra) {
             <button
-              class="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+              class="relative w-12 h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center text-sm lg:text-base font-bold transition-all duration-300 transform hover:scale-110 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300/50 overflow-hidden"
               [ngClass]="{
-                'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 hover:from-purple-200 hover:to-purple-300 border border-purple-300':
+                'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 hover:from-purple-200 hover:to-purple-300 border-2 border-purple-300 hover:border-purple-400':
                   !estaLetraSeleccionada(letra),
-                'bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-purple-200':
+                'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-green-300 border-2 border-green-400 animate-pulse':
                   estaLetraSeleccionada(letra) && estaLetraEnPalabra(letra),
-                'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-red-200':
+                'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-red-300 border-2 border-red-400 shake':
                   estaLetraSeleccionada(letra) && !estaLetraEnPalabra(letra),
-                'cursor-not-allowed opacity-60 transform-none hover:scale-100':
+                'cursor-not-allowed opacity-50 transform-none hover:scale-100':
                   estaLetraSeleccionada(letra) || state.juegoTerminado
               }"
               [disabled]="estaLetraSeleccionada(letra) || state.juegoTerminado"
               (click)="seleccionarLetra(letra)"
             >
               {{ letra }}
+
+              <!-- Efecto de éxito -->
+              @if (estaLetraSeleccionada(letra) && estaLetraEnPalabra(letra)) {
+              <div
+                class="absolute inset-0 bg-white/20 rounded-2xl animate-ping"
+              ></div>
+              }
             </button>
             }
           </div>
         </div>
-        
-        <!-- Pista -->
+
+        <!-- Pista mejorada y más intuitiva -->
         <div
-          class="text-center bg-white/15 rounded-2xl backdrop-blur-sm shadow-lg border border-purple-200/30 p-4"
+          class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl shadow-2xl border border-yellow-200 overflow-hidden"
         >
-          <div class="flex items-center justify-center gap-2 mb-2">
+          <div class="p-6">
             <button
               (click)="mostrarPista = !mostrarPista"
-              class="focus:outline-none bg-yellow-100 hover:bg-yellow-200 rounded-full p-2 transition-colors cursor-pointer"
-              title="Mostrar pista"
-              aria-label="Mostrar pista"
+              class="w-full flex items-center justify-center gap-3 focus:outline-none group"
+              aria-label="Mostrar/ocultar pista"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 text-yellow-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              <div
+                class="bg-yellow-400 group-hover:bg-yellow-500 rounded-full p-3 transition-colors shadow-lg group-hover:shadow-xl"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M6.343 17.657l-1.414 1.414M17.657 17.657l-1.414-1.414M6.343 6.343L4.929 4.929"
-                />
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="5"
-                  stroke="currentColor"
-                  stroke-width="2"
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-white transition-transform duration-300"
+                  [ngClass]="{ 'rotate-180': mostrarPista }"
                   fill="none"
-                />
-              </svg>
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9.663 17h4.673M12 3v1m6.364-.636l-.707.707M21 12h-1M17.66 18.364l-.707-.707M12 21v-1m-6.364-.636l.707-.707M3 12h1m2.343-5.657l-.707-.707"
+                  />
+                </svg>
+              </div>
+              <div class="text-center">
+                <h3 class="text-xl font-bold text-yellow-700 mb-1">
+                  💡 Pista Disponible
+                </h3>
+                <p class="text-sm text-yellow-600 font-medium">
+                  {{ mostrarPista ? "Toca para ocultar" : "Toca para revelar" }}
+                </p>
+              </div>
             </button>
-            <span class="font-medium" [style.color]="state.colorTexto">Pista</span>
-          </div>
-          <div
-            *ngIf="mostrarPista"
-            class="text-lg animate-fadeIn font-medium"
-            [style.color]="state.colorTexto"
-          >
-            {{ state.pistaPalabra }}
+
+            @if (mostrarPista) {
+            <div
+              class="mt-6 p-4 bg-white/80 rounded-2xl border border-yellow-200 backdrop-blur-sm"
+              style="animation: fadeInUp 0.4s ease forwards"
+            >
+              <div class="flex items-start gap-3">
+                <div class="bg-yellow-100 rounded-full p-2 mt-1">
+                  <svg
+                    class="w-5 h-5 text-yellow-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm font-semibold text-yellow-700 mb-1">
+                    Pista:
+                  </p>
+                  <p class="text-lg font-medium text-gray-800 leading-relaxed">
+                    {{ state.pistaPalabra }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            }
           </div>
         </div>
       </div>
@@ -382,10 +614,12 @@
   <!-- Modal único para tiempo agotado Y fallo por ahorcado -->
   @if (mostrarModalTiempoAgotado || mostrarModalFallo) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm opacity-0"
+    style="animation: fadeIn 0.3s ease forwards"
   >
     <div
-      class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn"
+      class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-75 opacity-0"
+      style="animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards"
     >
       <div class="mb-6">
         <svg
@@ -431,62 +665,58 @@
           />
           }
         </svg>
-        
-        <h2 class="text-2xl font-bold mb-3" 
-            [ngClass]="{
-              'text-purple-600': mostrarModalTiempoAgotado,
-              'text-red-500': mostrarModalFallo
-            }">
-          @if (mostrarModalTiempoAgotado) {
-            ¡Se acabó el tiempo!
-          } @else {
-            ¡{{ state.mensajeFallo }}!
-          }
+
+        <h2
+          class="text-2xl font-bold mb-3"
+          [ngClass]="{
+            'text-purple-600': mostrarModalTiempoAgotado,
+            'text-red-500': mostrarModalFallo
+          }"
+        >
+          @if (mostrarModalTiempoAgotado) { ¡Tiempo agotado! } @else { ¡Palabra
+          no adivinada! }
         </h2>
-        
+
         <p class="text-gray-700 mb-4">
-          @if (mostrarModalTiempoAgotado) {
-            No lograste adivinar la palabra a tiempo.
-          } @else {
-            No lograste adivinar la palabra.
-          }
-          <br>
-          @if (state.vidasRestantes > 0) {
-            Te quedan {{ state.vidasRestantes }} vidas.
-          } @else {
-            Se acabaron tus vidas.
-          }
+          @if (mostrarModalTiempoAgotado) { Se agotaron los 3 minutos. ¡Sigue
+          intentándolo! } @else { Se completó el ahorcado. ¡No te rindas! }
+          <br />
+          @if (state.vidasRestantes > 0) { Te quedan {{ state.vidasRestantes }}
+          {{ state.vidasRestantes === 1 ? "vida" : "vidas" }}. } @else { ¡Ya no
+          tienes más vidas! }
         </p>
-        
-        <!-- Mostrar la palabra correcta -->
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
-          <p class="text-sm text-gray-600 mb-1">La palabra era:</p>
-          <p class="text-xl font-bold text-gray-800">
-            {{ state.palabraActual }}
+
+        <!-- Mensaje motivacional en lugar de mostrar la palabra -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+          <p class="text-sm text-blue-600 mb-1">💪 ¡Motivación!</p>
+          <p class="text-sm font-medium text-blue-800">
+            @if (mostrarModalTiempoAgotado) { Concéntrate más y usa las pistas
+            para ganar tiempo. } @else { Piensa bien antes de elegir cada letra.
+            }
           </p>
         </div>
       </div>
-      
+
       <div class="flex flex-col gap-3">
         @if (state.vidasRestantes > 0) {
-          <button
-            (click)="reiniciarPalabraActual()"
-            class="btn-atzicay w-full py-3 text-lg font-semibold"
-          >
-            Reintentar
-          </button>
+        <button
+          (click)="reiniciarPalabraActual()"
+          class="btn-atzicay w-full py-3 text-lg font-semibold"
+        >
+          Intentar de nuevo
+        </button>
         } @else {
-          <button
-            (click)="reiniciarJuego()"
-            class="btn-atzicay w-full py-3 text-lg font-semibold"
-          >
-            Reiniciar juego
-          </button>
+        <button
+          (click)="reiniciarJuego()"
+          class="btn-atzicay w-full py-3 text-lg font-semibold"
+        >
+          Empezar de nuevo
+        </button>
         }
-        
+
         <button
           (click)="volverAlDashboard()"
-          class="w-full bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-semibold transition-colors"
+          class="w-full bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-semibold transition-colors duration-200 active:scale-95"
         >
           Volver al menú
         </button>
@@ -498,10 +728,12 @@
   <!-- Modal de juego completamente finalizado (sin vidas) -->
   @if (mostrarModalJuegoFinalizado) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm opacity-0"
+    style="animation: fadeIn 0.3s ease forwards"
   >
     <div
-      class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center animate-scaleIn"
+      class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-75 opacity-0"
+      style="animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards"
     >
       <div class="mb-6">
         <svg
@@ -528,18 +760,26 @@
           />
         </svg>
         <h2 class="text-2xl font-bold mb-3" style="color: #fe6161">
-          ¡Juego terminado!
+          ¡Fin del juego!
         </h2>
-        <p class="text-gray-700 mb-6">
-          Se acabaron tus vidas.<br />¿Quieres intentarlo de nuevo?
+        <p class="text-gray-700 mb-4">
+          Se agotaron todas tus vidas en este desafío.
         </p>
+
+        <!-- Mensaje motivacional -->
+        <div class="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+          <p class="text-sm text-orange-600 mb-1">🎯 ¡Tip para mejorar!</p>
+          <p class="text-sm font-medium text-orange-800">
+            Intenta usar las pistas y piensa en las letras más comunes primero.
+          </p>
+        </div>
       </div>
       <div class="flex flex-col gap-3">
         <button
           (click)="reiniciarJuego()"
           class="btn-atzicay w-full py-3 text-lg font-semibold"
         >
-          Reiniciar juego
+          Jugar otra vez
         </button>
         <button
           (click)="volverAlDashboard()"
@@ -555,16 +795,20 @@
   <!-- Modal de éxito optimizado -->
   @if (mostrarModalExito) {
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm opacity-0"
+    style="animation: fadeIn 0.3s ease forwards"
   >
     <!-- Modal más compacto -->
     <div
-      class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full text-center animate-scaleIn relative"
+      class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full text-center relative transform scale-75 opacity-0"
+      style="animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards"
     >
       <!-- Confeti sutil en las esquinas -->
       <div class="absolute -top-2 -left-2 text-3xl animate-bounce">🎉</div>
-      <div class="absolute -top-2 -right-2 text-3xl animate-bounce" style="animation-delay: 0.2s">🎊</div>
-      
+      <div class="absolute -top-2 -right-2 text-3xl animate-bounce delay-200">
+        🎊
+      </div>
+
       <div class="mb-4">
         <div class="text-4xl mb-3 animate-pulse">✅</div>
         <h2 class="text-xl font-bold mb-2 text-green-600">
@@ -579,19 +823,27 @@
         </div>
 
         <!-- Progreso compacto -->
-        <div class="flex justify-center items-center gap-4 bg-purple-50 rounded-lg p-2 mb-3">
+        <div
+          class="flex justify-center items-center gap-4 bg-purple-50 rounded-lg p-2 mb-3"
+        >
           <div class="text-center">
             <p class="text-xs text-purple-500">Progreso</p>
-            <p class="font-bold text-sm">{{ state.palabrasCompletadas }} / {{ state.totalPalabras }}</p>
+            <p class="font-bold text-sm">
+              {{ state.palabrasCompletadas }} / {{ state.totalPalabras }}
+            </p>
           </div>
-          
+
           @if (state.indicePalabraActual + 1 < state.totalPalabras) {
           <div class="flex items-center gap-2">
             <div class="w-8 h-1 bg-purple-200 rounded-full overflow-hidden">
-              <div class="h-full bg-purple-500 rounded-full transition-all duration-300" 
-                   [style.width.%]="((5 - state.contadorCambio) / 5) * 100"></div>
+              <div
+                class="h-full bg-purple-500 rounded-full transition-all duration-300"
+                [style.width.%]="((5 - state.contadorCambio) / 5) * 100"
+              ></div>
             </div>
-            <span class="text-sm text-purple-600 font-mono">{{ state.contadorCambio }}s</span>
+            <span class="text-sm text-purple-600 font-mono"
+              >{{ state.contadorCambio }}s</span
+            >
           </div>
           }
         </div>
@@ -710,7 +962,7 @@
       </li>
     </ul>
   </div>
-  
+
   <!-- Icono flotante cuando está minimizado -->
   <button
     *ngIf="!palabrasCanvasVisible"
