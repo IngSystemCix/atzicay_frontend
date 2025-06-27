@@ -2,7 +2,10 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
-import { GameConfiguration, HangmanWord } from '../../../../core/domain/model/game-configuration.model';
+import {
+  GameConfiguration,
+  HangmanWord,
+} from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
 import Swal from 'sweetalert2';
 
@@ -43,7 +46,10 @@ interface JuegoState {
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
 })
-export class GameHangmanComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
+export class GameHangmanComponent
+  extends BaseAuthenticatedComponent
+  implements OnInit, OnDestroy
+{
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
@@ -115,11 +121,11 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   palabraAdivinada() {
     this.mostrarModalExito = true;
     this.state.palabrasCompletadas++;
-    
+
     // Marcar palabra como completada en el canvas
     const palabraActual = this.state.palabraActual;
-    const index = this.palabrasAdivinadas.findIndex(p => 
-      this.limpiarPalabra(p) === palabraActual
+    const index = this.palabrasAdivinadas.findIndex(
+      (p) => this.limpiarPalabra(p) === palabraActual
     );
     if (index !== -1) {
       this.palabrasAdivinadas[index] = `~~${palabraActual}~~`;
@@ -161,8 +167,8 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
         allowOutsideClick: false,
         customClass: {
           popup: 'animated-popup',
-          confirmButton: 'kid-friendly-button'
-        }
+          confirmButton: 'kid-friendly-button',
+        },
       }).then(() => {
         // Después de exactamente 5 segundos o botón, continuar
         this.continuarSiguientePalabra();
@@ -176,7 +182,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
     }
   }
 
-   private iniciarContadorCambio() {
+  private iniciarContadorCambio() {
     this.state.contadorCambio = 5;
     if (this.intervaloContador) {
       clearInterval(this.intervaloContador);
@@ -188,29 +194,30 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
       }
     }, 1000);
   }
-   continuarSiguientePalabra() {
+  continuarSiguientePalabra() {
     // Limpiar intervalo y modal de éxito
     if (this.intervaloContador) {
       clearInterval(this.intervaloContador);
       this.intervaloContador = null;
     }
     this.mostrarModalExito = false;
-    
+
     // Pasar a la siguiente palabra
     this.state.indicePalabraActual++;
     this.configurarPalabraActual();
-    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
+      ''
+    );
     this.state.letrasSeleccionadas.clear();
     this.state.intentosRestantes = this.INTENTOS_INICIALES;
     this.state.contadorCambio = 0;
     this.state.juegoTerminado = false;
     this.state.juegoGanado = false;
-    
+
     // REANUDAR el timer después de la pausa de exactamente 5 segundos
     // El tiempo restante se mantiene igual que cuando se pausó
     this.iniciarTimer();
   }
-
 
   cargarConfiguracionJuego(id: number): void {
     this.state.cargando = true;
@@ -276,7 +283,9 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
       this.state.totalPalabras = this.state.palabrasJuego.length;
       this.state.indicePalabraActual = 0;
       // Inicializar palabrasAdivinadas para el canvas flotante
-      this.palabrasAdivinadas = this.state.palabrasJuego.map((item) => item.word);
+      this.palabrasAdivinadas = this.state.palabrasJuego.map(
+        (item) => item.word
+      );
     } else {
       this.state.palabrasJuego = [];
       this.state.totalPalabras = 0;
@@ -339,26 +348,19 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
         }
       }
 
-      // Verificar si la palabra está completa
       if (!this.state.palabraRevelada.includes('')) {
-        // Llamar al método palabraAdivinada() que maneja la lógica de éxito
         this.palabraAdivinada();
       }
     } else {
-      // Letra incorrecta
       this.state.intentosRestantes--;
 
       if (this.state.intentosRestantes <= 0) {
-        // El muñequito está ahorcado - verificar si aún hay vidas
         if (this.state.vidasRestantes > 1) {
-          // Aún hay vidas restantes - mostrar alerta NO BLOQUEANTE y resetear palabra inmediatamente
           this.mostrarAlertaAhorcadoConVidas();
-          // Resetear la palabra actual inmediatamente después de la alerta
           setTimeout(() => {
             this.resetearPalabraParaNuevoIntento();
-          }, 3500); // Dar tiempo para que la alerta se muestre
+          }, 3500);
         } else {
-          // Sin vidas restantes - finalizar juego
           this.finalizarJuego(false);
         }
       }
@@ -399,7 +401,6 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   }
 
   finalizarJuego(ganado: boolean): void {
-    // Limpiar todos los modales antes de mostrar uno
     this.mostrarModalTiempoAgotado = false;
     this.mostrarModalFallo = false;
     this.mostrarModalExito = false;
@@ -408,7 +409,6 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
     this.state.juegoTerminado = true;
     this.state.juegoGanado = ganado;
 
-    // Limpiar el timer si el juego terminó completamente (sin vidas)
     if (!ganado && this.state.vidasRestantes <= 0) {
       if (this.state.timerInterval) {
         clearInterval(this.state.timerInterval);
@@ -423,8 +423,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
       if (this.state.vidasRestantes <= 0) {
         this.state.juegoFinalizado = true;
         this.mostrarModalJuegoFinalizado = true;
-        
-        // SweetAlert para juego completamente finalizado (Evento #4: sin intentos/sin vidas)
+
         Swal.fire({
           icon: 'error',
           title: '😢 ¡Oh no, se acabaron las vidas!',
@@ -454,8 +453,8 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
           customClass: {
             popup: 'animated-popup',
             confirmButton: 'kid-friendly-button',
-            cancelButton: 'kid-friendly-button-secondary'
-          }
+            cancelButton: 'kid-friendly-button-secondary',
+          },
         }).then((result) => {
           if (result.isConfirmed) {
             this.reiniciarJuego();
@@ -464,11 +463,8 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
           }
         });
       } else {
-        // Verificar si fue por tiempo agotado para mostrar alerta específica
         if (this.state.tiempoRestante === 0) {
           this.mostrarModalTiempoAgotado = true;
-          
-          // SweetAlert para tiempo agotado (Evento #3: tiempo agotado)
           Swal.fire({
             icon: 'warning',
             title: '⏰ ¡Se acabó el tiempo!',
@@ -480,7 +476,9 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
                 </p>
                 <div style="background: linear-gradient(135deg, #fff8e1, #ffecb3); padding: 15px; border-radius: 15px; margin: 15px 0;">
                   <p style="font-size: 16px; color: #e65100; margin: 0;">
-                    💝 Te quedan ${this.state.vidasRestantes} ${this.state.vidasRestantes === 1 ? 'vida' : 'vidas'}
+                    💝 Te quedan ${this.state.vidasRestantes} ${
+              this.state.vidasRestantes === 1 ? 'vida' : 'vidas'
+            }
                   </p>
                 </div>
                 <p style="font-size: 16px; color: #555; margin: 10px 0;">
@@ -496,22 +494,17 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
             allowOutsideClick: false,
             customClass: {
               popup: 'animated-popup',
-              confirmButton: 'kid-friendly-button'
-            }
+              confirmButton: 'kid-friendly-button',
+            },
           });
         }
-        // NOTA: La lógica para cuando es ahorcado pero con vidas se maneja en seleccionarLetra()
       }
-      // No revelar la palabra si perdió
     } else {
-      // Revelar toda la palabra solo si ganó
       for (let i = 0; i < this.state.palabraActual.length; i++) {
         this.state.palabraRevelada[i] = this.state.palabraActual[i];
       }
-      
-      // Verificar si completó todas las palabras del juego
+
       if (this.state.indicePalabraActual + 1 >= this.state.totalPalabras) {
-        // SweetAlert para victoria completa del juego (Evento #5: todas las palabras completadas)
         Swal.fire({
           icon: 'success',
           title: '🏆 ¡Eres un súper héroe de las palabras!',
@@ -541,8 +534,8 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
           customClass: {
             popup: 'animated-popup',
             confirmButton: 'kid-friendly-button',
-            cancelButton: 'kid-friendly-button-secondary'
-          }
+            cancelButton: 'kid-friendly-button-secondary',
+          },
         }).then((result) => {
           if (result.isConfirmed) {
             this.reiniciarJuego();
@@ -552,42 +545,40 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
         });
       } else {
         this.mostrarModalExito = true;
-        // Iniciar contador de 5 segundos si hay más palabras
         this.iniciarContadorCambio();
       }
     }
   }
 
-
   reiniciarPalabraActual(): void {
-  this.mostrarModalFallo = false;
-  this.mostrarModalTiempoAgotado = false;
-  
-  // Solo reiniciar la palabra actual, NO las vidas
-  this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
-  this.state.letrasSeleccionadas = new Set<string>();
-  this.state.intentosRestantes = this.INTENTOS_INICIALES;
-  this.state.tiempoRestante = this.state.tiempoInicial;
-  this.state.juegoTerminado = false;
-  this.state.juegoGanado = false;
+    this.mostrarModalFallo = false;
+    this.mostrarModalTiempoAgotado = false;
 
-  if (this.state.timerInterval) {
-    clearInterval(this.state.timerInterval);
+    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
+      ''
+    );
+    this.state.letrasSeleccionadas = new Set<string>();
+    this.state.intentosRestantes = this.INTENTOS_INICIALES;
+    this.state.tiempoRestante = this.state.tiempoInicial;
+    this.state.juegoTerminado = false;
+    this.state.juegoGanado = false;
+
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval);
+    }
+    this.iniciarTimer();
   }
-  this.iniciarTimer();
-}
 
-reiniciarJuego(): void {
-  this.mostrarModalTiempoAgotado = false;
-  this.mostrarModalJuegoFinalizado = false;
-  this.mostrarModalFallo = false;
-  this.mostrarModalExito = false;
+  reiniciarJuego(): void {
+    this.mostrarModalTiempoAgotado = false;
+    this.mostrarModalJuegoFinalizado = false;
+    this.mostrarModalFallo = false;
+    this.mostrarModalExito = false;
 
-  // SweetAlert para reinicio de juego amigable para niños (Evento #1: empezar de nuevo)
-  Swal.fire({
-    icon: 'success',
-    title: '🎮 ¡Nueva aventura comenzando!',
-    html: `
+    Swal.fire({
+      icon: 'success',
+      title: '🎮 ¡Nueva aventura comenzando!',
+      html: `
       <div style="font-family: 'Arial', sans-serif; text-align: center;">
         <div style="font-size: 60px; margin: 20px 0;">🚀</div>
         <p style="font-size: 18px; color: #1565c0; margin: 15px 0; font-weight: 600;">
@@ -603,37 +594,29 @@ reiniciarJuego(): void {
         </p>
       </div>
     `,
-    background: 'linear-gradient(135deg, #e3f2fd, #f3e5f5)',
-    confirmButtonColor: '#2196f3',
-    confirmButtonText: '✨ ¡Vamos a jugar!',
-    timer: 2500,
-    timerProgressBar: true,
-    allowOutsideClick: false,
-    customClass: {
-      popup: 'animated-popup',
-      confirmButton: 'kid-friendly-button'
-    }
-  });
+      background: 'linear-gradient(135deg, #e3f2fd, #f3e5f5)',
+      confirmButtonColor: '#2196f3',
+      confirmButtonText: '✨ ¡Vamos a jugar!',
+      timer: 2500,
+      timerProgressBar: true,
+      allowOutsideClick: false,
+      customClass: {
+        popup: 'animated-popup',
+        confirmButton: 'kid-friendly-button',
+      },
+    });
 
-  // Resetear completamente el estado del juego
-  this.state.indicePalabraActual = 0;
-  this.state.palabrasCompletadas = 0;
-  this.state.vidasRestantes = 3; // Solo aquí se resetean las vidas a 3
-  this.state.juegoFinalizado = false;
+    this.state.indicePalabraActual = 0;
+    this.state.palabrasCompletadas = 0;
+    this.state.vidasRestantes = 3;
+    this.state.juegoFinalizado = false;
 
-  // Restaurar todas las palabras en el canvas
-  this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
-    item.word.toUpperCase()
-  );
+    this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
+      item.word.toUpperCase()
+    );
 
-  this.iniciarJuego();
-}
-
-  /**
-   * Obtiene el progreso actual del juego como una cadena de la forma
-   * "Palabra X de Y", donde X es el índice actual de la palabra en el
-   * array de palabras y Y es el total de palabras en el juego.
-   */
+    this.iniciarJuego();
+  }
   get progresoJuego(): string {
     return `Palabra ${this.state.indicePalabraActual + 1} de ${
       this.state.totalPalabras
@@ -642,7 +625,9 @@ reiniciarJuego(): void {
 
   get porcentajeProgreso(): number {
     if (this.state.totalPalabras === 0) return 0;
-    return Math.round((this.state.palabrasCompletadas / this.state.totalPalabras) * 100);
+    return Math.round(
+      (this.state.palabrasCompletadas / this.state.totalPalabras) * 100
+    );
   }
 
   volverAlDashboard(): void {
@@ -665,8 +650,7 @@ reiniciarJuego(): void {
     this.state.timerInterval = setInterval(() => {
       if (this.state.tiempoRestante > 0) {
         this.state.tiempoRestante--;
-        
-        // Alerta amigable de 30 segundos restantes
+
         if (this.state.tiempoRestante === 30) {
           Swal.fire({
             icon: 'warning',
@@ -689,12 +673,11 @@ reiniciarJuego(): void {
             timer: 2500,
             timerProgressBar: true,
             customClass: {
-              popup: 'kid-toast-alert'
-            }
+              popup: 'kid-toast-alert',
+            },
           });
         }
       } else {
-        // Solo mostrar el modal de tiempo agotado
         this.finalizarJuego(false);
       }
     }, 1000);
@@ -716,7 +699,6 @@ reiniciarJuego(): void {
     return palabra.replace(/~~/g, '');
   }
 
-  // Getters para aplicar estilos dinámicos
   get estilosJuego() {
     return {
       'background-color': this.state.colorFondo,
@@ -737,11 +719,7 @@ reiniciarJuego(): void {
     this.headerExpanded = !this.headerExpanded;
   }
 
-  /**
-   * Muestra una alerta amigable cuando el muñequito es ahorcado pero aún hay vidas
-   */
   private mostrarAlertaAhorcadoConVidas(): void {
-    // SweetAlert para muñequito ahorcado (NO BLOQUEAR - solo informativo)
     Swal.fire({
       icon: 'error',
       title: '😔 ¡El muñequito necesita ayuda!',
@@ -753,7 +731,9 @@ reiniciarJuego(): void {
           </p>
           <div style="background: linear-gradient(135deg, #ffebee, #fce4ec); padding: 15px; border-radius: 15px; margin: 15px 0;">
             <p style="font-size: 16px; color: #c62828; margin: 0;">
-              💖 Pero aún tienes ${this.state.vidasRestantes - 1} ${this.state.vidasRestantes - 1 === 1 ? 'vida' : 'vidas'} para salvarlo
+              💖 Pero aún tienes ${this.state.vidasRestantes - 1} ${
+        this.state.vidasRestantes - 1 === 1 ? 'vida' : 'vidas'
+      } para salvarlo
             </p>
           </div>
           <p style="font-size: 16px; color: #555; margin: 10px 0;">
@@ -770,26 +750,19 @@ reiniciarJuego(): void {
       showCloseButton: true,
       customClass: {
         popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button'
-      }
+        confirmButton: 'kid-friendly-button',
+      },
     });
   }
-
-  /**
-   * Resetea la palabra actual para un nuevo intento (cuando hay vidas restantes)
-   */
   private resetearPalabraParaNuevoIntento(): void {
-    // Reducir una vida
     this.state.vidasRestantes--;
-    
-    // Reiniciar la palabra actual manteniendo las vidas restantes
-    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+
+    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
+      ''
+    );
     this.state.letrasSeleccionadas = new Set<string>();
     this.state.intentosRestantes = this.INTENTOS_INICIALES;
     this.state.juegoTerminado = false;
     this.state.juegoGanado = false;
-    
-    // NO reiniciar el tiempo - el timer sigue corriendo desde donde estaba
-    // Solo mostrar visualmente que el juego continúa
   }
 }
