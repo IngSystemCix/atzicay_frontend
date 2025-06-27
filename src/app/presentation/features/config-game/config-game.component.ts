@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import Swal from 'sweetalert2';
 import { ProgrammingGameService } from '../../../core/infrastructure/api/programming-game.service';
@@ -15,12 +16,12 @@ import { ProgrammingGame } from '../../../core/domain/model/programming-game.mod
   templateUrl: './config-game.component.html',
   styleUrl: './config-game.component.css',
 })
-export class ConfigGameComponent implements OnInit {
+export class ConfigGameComponent implements OnInit, OnDestroy {
   gameId: number | null = null;
-
   isLoading = false;
   error = '';
   currentUserId: number | null = null;
+  private subscription = new Subscription();
 
   programmingGame: ProgrammingGame = {
     Name: '',
@@ -35,14 +36,36 @@ export class ConfigGameComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private programmingGameService: ProgrammingGameService,
-    private userSession: UserSessionService
+    private userSessionService: UserSessionService
   ) {}
 
   ngOnInit() {
-    this.route.params.subscribe((params) => {
-      this.gameId = +params['id'];
-    });
-    this.currentUserId = this.userSession.getUserId();
+    this.subscription.add(
+      this.route.params.subscribe((params) => {
+        this.gameId = +params['id'];
+      })
+    );
+    
+    // Usar el UserSessionService optimizado
+    if (this.userSessionService.isAuthenticated()) {
+      this.currentUserId = this.userSessionService.getUserId();
+    } else {
+      this.subscription.add(
+        this.userSessionService.waitForToken$(3000).subscribe({
+          next: () => {
+            this.currentUserId = this.userSessionService.getUserId();
+          },
+          error: (err) => {
+            console.error('[ConfigGame] Error esperando token:', err);
+            this.error = 'Error de autenticación. Por favor, recarga la página.';
+          }
+        })
+      );
+    }
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   private formatDateTimeLocal(date: Date): string {
@@ -94,25 +117,29 @@ export class ConfigGameComponent implements OnInit {
       Attempts: Number(this.programmingGame.Attempts),
       MaximumTime: Number(this.programmingGame.MaximumTime)
     };
+
+    // Mostrar en consola el JSON que se enviará
+    console.log('Datos enviados:', JSON.stringify(data, null, 2));
+
     this.programmingGameService
       .createProgrammingGame(this.gameId, this.currentUserId, data)
       .subscribe({
-        next: () => {
-          this.isLoading = false;
-          Swal.fire(
-            '¡Éxito!',
-            'Programación creada correctamente',
-            'success'
-          ).then(() => {
-            this.router.navigate(['/juegos']);
-          });
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.error = 'Error al crear la programación';
-        },
+      next: () => {
+        this.isLoading = false;
+        Swal.fire(
+        '¡Éxito!',
+        'Programación creada correctamente',
+        'success'
+        ).then(() => {
+        this.router.navigate(['/juegos']);
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.error = 'Error al crear la programación';
+      },
       });
-  }
+    }
 
   private formatDateTime(date: string, time: string): string {
     return `${date}T${time}`;

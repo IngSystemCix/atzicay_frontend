@@ -105,6 +105,7 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
     }
     const gameData = this.buildGameData();
     const body = { data: gameData };
+    // Mostrar el JSON en consola
     console.log('JSON enviado al backend:', JSON.stringify(body, null, 2));
     this.createGameService.createSolveTheWordGame(this.userId, body).subscribe({
       next: () => {

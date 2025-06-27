@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { MyGamesService } from '../../../../core/infrastructure/api/my-games.ser
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { MyGame } from '../../../../core/domain/model/my-game.model';
 import { UpdateVisibilityService } from '../../../../core/infrastructure/api/update-visibility.service';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -15,7 +16,7 @@ import Swal from 'sweetalert2';
   templateUrl: './juegos-lista.component.html',
   styleUrl: './juegos-lista.component.css',
 })
-export class JuegosListaComponent implements OnInit, OnChanges {
+export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
   @Input() filtroActual: string = 'all';
   @Output() filtroChange = new EventEmitter<string>();
 
@@ -28,6 +29,7 @@ export class JuegosListaComponent implements OnInit, OnChanges {
   hasMore: boolean = true;
   private userId: number | null = null;
   currentOffset: number = 0;
+  private subscription = new Subscription();
 
   // Variables para el modal de configuración
   showConfigModal = false;
@@ -41,8 +43,59 @@ export class JuegosListaComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  private initializeComponent(): void {
+    // Verificar si ya tenemos userId y token
     this.userId = this.userSession.getUserId();
-    this.cargarJuegos();
+    
+    if (this.userId && this.userSession.isAuthenticated()) {
+      console.log('[JuegosList] Usuario y token disponibles, cargando juegos...');
+      this.cargarJuegos();
+    } else {
+      console.log('[JuegosList] Esperando token y userId...');
+      // Esperar tanto el token como el userId
+      this.subscription.add(
+        this.userSession.waitForToken$(5000).subscribe({
+          next: (token) => {
+            console.log('[JuegosList] Token recibido');
+            // Ahora verificar userId
+            this.waitForUserId();
+          },
+          error: (err) => {
+            console.error('[JuegosList] Error esperando token:', err);
+            this.error = 'Error de autenticación. Intente recargar la página.';
+            this.cargando = false;
+          }
+        })
+      );
+    }
+  }
+
+  private waitForUserId(): void {
+    // Suscribirse a cambios en userId
+    this.subscription.add(
+      this.userSession.userId$.subscribe(userId => {
+        if (userId) {
+          console.log('[JuegosList] UserId recibido:', userId);
+          this.userId = userId;
+          this.cargarJuegos();
+        }
+      })
+    );
+
+    // Si después de un tiempo no tenemos userId, mostrar error
+    setTimeout(() => {
+      if (!this.userId) {
+        this.error = 'No se pudo obtener la información del usuario.';
+        this.cargando = false;
+      }
+    }, 3000);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -144,8 +197,8 @@ export class JuegosListaComponent implements OnInit, OnChanges {
     console.log('Estado actual del juego:', {
       gameId: juego.game_instance_id,
       currentVisibility: juego.visibility,
-      isPublic: isPublic,
-      newStatus: newStatus
+      isCurrentlyPublic: isPublic,
+      willBePublic: newStatus
     });
     
     Swal.fire({
@@ -159,35 +212,64 @@ export class JuegosListaComponent implements OnInit, OnChanges {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log('Enviando request:', { gameInstanceId: juego.game_instance_id, status: newStatus });
+        console.log('Enviando request:', { 
+          gameInstanceId: juego.game_instance_id, 
+          status: newStatus,
+          explanation: `Cambiando de ${isPublic ? 'público' : 'restringido'} a ${newStatus ? 'público' : 'restringido'}`
+        });
+        
+        // Función de depuración
+        this.updateVisibilityService.testUpdateVisibility(juego.game_instance_id, newStatus);
         
         this.updateVisibilityService.updateVisibility(juego.game_instance_id, newStatus).subscribe({
           next: (response) => {
-            console.log('Respuesta del servidor:', response);
+            console.log('✅ Respuesta exitosa del servidor:', response);
+            console.log('📦 Data recibida:', response.data);
+            
+            if (response.data) {
+              console.log('🎯 Nuevo status recibido:', response.data.status);
+              console.log('👁️ Nueva visibilidad recibida:', response.data.visibility);
+            }
+            
             this.menuAbierto = null;
             
-            // Actualizar localmente el estado del juego antes de recargar
-            juego.visibility = newStatus ? 'P' : 'R';
+            // Actualizar localmente el estado del juego usando la respuesta del servidor
+            if (response.data && response.data.visibility) {
+              juego.visibility = response.data.visibility;
+            } else {
+              // Fallback en caso de que el backend aún no esté actualizado
+              juego.visibility = newStatus ? 'P' : 'R';
+            }
             
-            // Recarga la lista para asegurar consistencia
-            this.cargarJuegos();
+            // Mostrar mensaje de éxito
             Swal.fire('Actualizado', successText, 'success');
+            
+            // Opcional: recargar la lista para asegurar consistencia
+            // this.cargarJuegos();
           },
           error: (err) => {
             this.menuAbierto = null;
-            console.error('Error completo al cambiar visibilidad:', {
+            console.error('❌ Error completo al cambiar visibilidad:', {
               error: err,
               gameId: juego.game_instance_id,
               attemptedStatus: newStatus,
+              currentVisibility: juego.visibility,
               errorMessage: err.error?.message || err.message,
-              statusCode: err.status
+              statusCode: err.status,
+              url: err.url,
+              headers: err.headers,
+              fullError: err
             });
             
             let errorMessage = 'No se pudo cambiar la visibilidad.';
             if (err.status === 401) {
-              errorMessage = 'No tienes autorización para realizar esta acción.';
+              errorMessage = 'No tienes autorización para realizar esta acción. Verifica tu sesión.';
             } else if (err.status === 404) {
               errorMessage = 'El juego no fue encontrado.';
+            } else if (err.status === 422) {
+              errorMessage = 'Datos de solicitud inválidos.';
+            } else if (err.status === 0) {
+              errorMessage = 'Error de conexión. Verifica que el servidor esté funcionando.';
             } else if (err.error?.message) {
               errorMessage = err.error.message;
             }
@@ -231,7 +313,7 @@ export class JuegosListaComponent implements OnInit, OnChanges {
   getVisibilityClass(v: string): string {
     switch (v) {
       case 'P': return 'bg-blue-500 text-white';
-      case 'R': return 'bg-yellow-500 text-white';
+      case 'R': return 'bg-orange-500 text-white';
       default: return 'bg-gray-400 text-white';
     }
   }
@@ -245,7 +327,27 @@ export class JuegosListaComponent implements OnInit, OnChanges {
     return [1, 2, 3, 4, 5];
   }
 
-  
+  getVisibilityInfo(visibility: string) {
+    if (visibility === 'P') {
+      return {
+        isPublic: true,
+        currentLabel: 'Público',
+        actionLabel: 'Hacer Restringido',
+        actionDescription: 'Cambiar a privado',
+        icon: 'lock',
+        color: 'yellow'
+      };
+    } else {
+      return {
+        isPublic: false,
+        currentLabel: 'Restringido',
+        actionLabel: 'Hacer Público',
+        actionDescription: 'Cambiar a público',
+        icon: 'globe',
+        color: 'blue'
+      };
+    }
+  }
 
   private cerrarMenus() {
     this.menuAbierto = null;

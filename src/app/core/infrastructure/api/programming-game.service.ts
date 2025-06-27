@@ -10,9 +10,9 @@ export class ProgrammingGameService {
   constructor(private http: HttpClient) {}
 
   createProgrammingGame(gameInstanceId: number, userId: number, data: ProgrammingGame): Observable<any> {
-    return this.http.post<any>(
-      `${this.baseUrl}/create/${gameInstanceId}/${userId}`,
-      data
-    );
+    const url = `${this.baseUrl}/create/${gameInstanceId}/${userId}`;
+    console.log('POST URL:', url);
+    console.log('Payload:', data);
+    return this.http.post<any>(url, data);
   }
 }

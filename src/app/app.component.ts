@@ -4,6 +4,7 @@ import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { CommonModule } from '@angular/common';
 import { filter, switchMap, take, tap } from 'rxjs';
 import { AuthService } from './core/infrastructure/api/auth.service';
+import { UserSessionService } from './core/infrastructure/service/user-session.service';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ export class AppComponent implements OnInit {
   private auth0 = inject(Auth0Service);
   private backendAuth = inject(AuthService);
   private router = inject(Router);
+  private userSessionService = inject(UserSessionService);
   private hasLoggedIn = false;
 
   ngOnInit(): void {
@@ -29,7 +31,8 @@ export class AppComponent implements OnInit {
       switchMap((claims) => this.backendAuth.login((claims as { __raw: string }).__raw)),
       tap(authResponse => {
         this.hasLoggedIn = true;
-        sessionStorage.setItem('token_jwt', authResponse.access_token);
+        // Usar UserSessionService para manejar el token centralmente
+        this.userSessionService.setToken(authResponse.access_token);
         sessionStorage.setItem('user', JSON.stringify(authResponse.user));
 
         if (location.pathname === '/') {

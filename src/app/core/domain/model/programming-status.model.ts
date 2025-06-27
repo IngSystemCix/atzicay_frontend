@@ -3,7 +3,11 @@ export interface ProgrammingStatusRequest {
 }
 
 export interface ProgrammingStatusResponse {
-  data?: any;
+  data?: {
+    status: number;
+    isActive: boolean;
+  } | null;
   message?: string;
   success: boolean;
+  code?: number;
 }

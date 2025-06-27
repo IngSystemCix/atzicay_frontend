@@ -6,15 +6,17 @@ import {
   ElementRef,
   ViewChild,
   HostListener,
+  OnDestroy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { GameInstance } from '../../../core/domain/model/game-instance.model';
 import { AtzicayButtonComponent } from '../../components/atzicay-button/atzicay-button.component';
 import { GameInstanceService } from '../../../core/infrastructure/api/game-instance.service';
+import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -23,11 +25,13 @@ import { GameInstanceService } from '../../../core/infrastructure/api/game-insta
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private gameInstanceService = inject(GameInstanceService);
+  private userSessionService = inject(UserSessionService);
   protected PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
+  private subscription = new Subscription();
 
   @ViewChild('dropdownMenu') dropdownMenu!: ElementRef;
   isDropdownOpen = false;
@@ -51,22 +55,32 @@ export class DashboardComponent implements OnInit {
   }
 
   private limitSubject = new BehaviorSubject<{ limit: number }>({ limit: 6 });
+  
   ngOnInit(): void {
-    const token = sessionStorage.getItem('token_jwt');
-    if (token) {
-      console.log('[Dashboard] Token disponible, cargando juegos...');
+    // Usar el UserSessionService optimizado para esperar el token
+    if (this.userSessionService.isAuthenticated()) {
+      console.log('[Dashboard] Token ya disponible, cargando juegos...');
       this.loadGameInstances();
     } else {
-      console.warn('[Dashboard] Token aún no está, esperando...');
-      const checkToken = setInterval(() => {
-        const newToken = sessionStorage.getItem('token_jwt');
-        if (newToken) {
-          clearInterval(checkToken);
-          console.log('[Dashboard] Token detectado. Cargando juegos...');
-          this.loadGameInstances();
-        }
-      }, 100); // revisa cada 100ms
+      console.log('[Dashboard] Esperando token...');
+      this.subscription.add(
+        this.userSessionService.waitForToken$(5000).subscribe({
+          next: (token) => {
+            console.log('[Dashboard] Token recibido, cargando juegos...');
+            this.loadGameInstances();
+          },
+          error: (err) => {
+            console.error('[Dashboard] Error esperando token:', err);
+            // Fallback: intentar cargar igualmente
+            this.loadGameInstances();
+          }
+        })
+      );
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   private loadGameInstances(): void {

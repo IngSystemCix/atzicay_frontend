@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration, PuzzleConfig } from '../../../../core/domain/model/game-configuration.model';
+import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
 
 interface PuzzlePiece {
   id: number;
@@ -26,7 +27,9 @@ interface PuzzlePiece {
   templateUrl: './game-puzzle.component.html',
   styleUrl: './game-puzzle.component.css',
 })
-export class GamePuzzleComponent implements OnInit {
+export class GamePuzzleComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private gameConfigService = inject(GameConfigurationService);
   pieces: PuzzlePiece[] = [];
   rows = 4; // Reducido para mejor jugabilidad
   cols = 4;
@@ -63,54 +66,86 @@ export class GamePuzzleComponent implements OnInit {
   // Nueva propiedad para controlar el panel lateral
   isPanelOpen = true;
 
-  constructor(
-    private route: ActivatedRoute,
-    private gameConfigService: GameConfigurationService
-  ) {}
+  constructor() {
+    super();
+  }
 
-  ngOnInit() {
+  override ngOnInit() {
+    super.ngOnInit();
+  }
+
+  override ngOnDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+    super.ngOnDestroy();
+  }
+
+  onAuthenticationReady(userId: number): void {
     const id = Number(this.route.snapshot.params['id']);
     if (id && !isNaN(id)) {
-      this.loading = true;
-      this.gameConfigService.getGameConfiguration(id).subscribe({
-        next: (response) => {
-          const data = response.data;
-          this.gameConfig = data;
-          this.puzzleConfig = data.puzzle;
-          if (this.puzzleConfig) {
-            this.rows = this.puzzleConfig.rows || 4;
-            this.cols = this.puzzleConfig.cols || 4;
-            this.totalPieces = this.rows * this.cols;
-            this.maxTime = 300;
-            this.imageWidth = 600;
-            this.imageHeight = 450;
-            if (this.puzzleConfig.path_img) {
-              this.puzzleImageUrl = this.getFrontendImagePath(
-                this.puzzleConfig.path_img
-              );
-            } else {
-              this.puzzleImageUrl = 'assets/rompecabezas.png';
-            }
-            this.allowWrongPlacements = !this.puzzleConfig.automatic_help;
-          }
-          this.loading = false;
-          // Esperar un poco antes de iniciar para asegurar que la imagen se cargue
-          setTimeout(() => {
-            this.startGame();
-          }, 100);
-        },
-        error: (err) => {
-          console.error('Error loading game config:', err);
+      this.cargarConfiguracionJuego(id);
+    } else {
+      this.startGame();
+    }
+  }
+
+  private cargarConfiguracionJuego(id: number): void {
+    this.loading = true;
+    this.error = null;
+
+    this.gameConfigService.getGameConfiguration(id).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.aplicarConfiguracion(response.data);
+          this.iniciarJuego();
+        } else {
           this.error = 'Error al cargar la configuración del juego';
           this.loading = false;
           // Usar imagen por defecto
           this.puzzleImageUrl = 'assets/rompecabezas.png';
           this.startGame();
-        },
-      });
-    } else {
-      this.startGame();
+        }
+      },
+      error: (err) => {
+        console.error('Error loading game config:', err);
+        this.error = 'Error al cargar la configuración del juego';
+        this.loading = false;
+        // Usar imagen por defecto
+        this.puzzleImageUrl = 'assets/rompecabezas.png';
+        this.startGame();
+      },
+    });
+  }
+
+  private aplicarConfiguracion(data: GameConfiguration): void {
+    this.gameConfig = data;
+    this.puzzleConfig = data.puzzle;
+    
+    if (this.puzzleConfig) {
+      this.rows = this.puzzleConfig.rows || 4;
+      this.cols = this.puzzleConfig.cols || 4;
+      this.totalPieces = this.rows * this.cols;
+      this.maxTime = 300;
+      this.imageWidth = 600;
+      this.imageHeight = 450;
+      
+      if (this.puzzleConfig.path_img) {
+        this.puzzleImageUrl = this.getFrontendImagePath(this.puzzleConfig.path_img);
+      } else {
+        this.puzzleImageUrl = 'assets/rompecabezas.png';
+      }
+      
+      this.allowWrongPlacements = !this.puzzleConfig.automatic_help;
     }
+  }
+
+  private iniciarJuego(): void {
+    this.loading = false;
+    // Esperar un poco antes de iniciar para asegurar que la imagen se cargue
+    setTimeout(() => {
+      this.startGame();
+    }, 100);
   }
 
   getFrontendImagePath(path: string): string {

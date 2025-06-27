@@ -15,6 +15,7 @@ import {
 import { ConfigGameComponent } from './presentation/features/config-game/config-game.component';
 import { GameSolveTheWordComponent } from './presentation/features/solveTheWord/game-solve-the-word/game-solve-the-word.component';
 import { authGuard } from './core/infrastructure/guards/auth.guard';
+import { optimizedAuthGuard } from './core/infrastructure/guards/optimized-auth.guard';
 import { loginGuard } from './core/infrastructure/guards/login.guard';
 
 export const routes: Routes = [
@@ -32,7 +33,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     children: [
       {
         path: '',
@@ -44,7 +45,7 @@ export const routes: Routes = [
   {
     path: 'juegos',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     children: [
       {
         path: '',
@@ -82,43 +83,43 @@ export const routes: Routes = [
   {
     path: 'juegos/jugar-hangman/:id',
     component: GameHangmanComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     title: "Juego de ahorcado"
   },
   {
     path: 'juegos/jugar-puzzle/:id',
     component: GamePuzzleComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas"
   },
   {
     path: 'juegos/puzzle/jugar',
     component: GamePuzzleComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas"
   },
   {
     path: 'juegos/memory/jugar',
     component: GameMemoryComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     title: "Juego de Memoria"
   },
   {
     path: 'juegos/jugar-solve-the-word/:id',
     component: GameSolveTheWordComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     title: "Juego de Pupiletras"
   },
   {
     path: 'juegos/solve-The-Word/jugar',
     component: GamePuzzleComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     title: "Juego de Pupiletras"
   },
   {
     path: 'perfil',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
+    canActivate: [optimizedAuthGuard],
     children: [
       {
         path: '',

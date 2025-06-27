@@ -73,38 +73,41 @@ export class JuegosCategoriasComponent implements OnInit {
   }
 
   private loadGameTypeCounts(): void {
-    const userId = this.userSession.getUserId();
-    if (!userId) {
-      this.error = true;
-      this.cargando = false;
-      return;
+    // Usar el UserSessionService optimizado
+    if (this.userSession.isAuthenticated()) {
+      const userId = this.userSession.getUserId();
+      if (userId) {
+        this.fetchGameCounts(userId);
+      } else {
+        this.handleNoUserId();
+      }
+    } else {
+      this.cargando = true;
+      this.userSession.waitForToken$(5000).subscribe({
+        next: () => {
+          const userId = this.userSession.getUserId();
+          if (userId) {
+            this.fetchGameCounts(userId);
+          } else {
+            this.handleNoUserId();
+          }
+        },
+        error: (err: any) => {
+          console.error('[JuegosCategorias] Error esperando token:', err);
+          this.handleNoUserId();
+        }
+      });
     }
+  }
+
+  private fetchGameCounts(userId: number): void {
     this.cargando = true;
     this.error = false;
+    
     this.gameTypeCountsService.getGameTypeCountsByUser(userId).subscribe({
       next: (res: any) => {
         if (res && res.data) {
-          // Actualiza también los contadores para pruebas y lógica futura
-          this.contadores = {
-            Ahorcado: res.data.hangman_count,
-            Rompecabezas: res.data.puzzle_count,
-            Memoria: res.data.memorygame_count,
-            Pupiletras: res.data.solvetheword_count,
-          };
-          this.categorias = this.categorias.map((categoria) => {
-            switch (categoria.nombre) {
-              case 'Ahorcado':
-                return { ...categoria, cantidad: res.data.hangman_count };
-              case 'Rompecabezas':
-                return { ...categoria, cantidad: res.data.puzzle_count };
-              case 'Memoria':
-                return { ...categoria, cantidad: res.data.memorygame_count };
-              case 'Pupiletras':
-                return { ...categoria, cantidad: res.data.solvetheword_count };
-              default:
-                return categoria;
-            }
-          });
+          this.updateCounters(res.data);
         }
         this.cargando = false;
       },
@@ -113,6 +116,36 @@ export class JuegosCategoriasComponent implements OnInit {
         this.error = true;
         this.cargando = false;
       },
+    });
+  }
+
+  private handleNoUserId(): void {
+    this.error = true;
+    this.cargando = false;
+  }
+
+  private updateCounters(data: any): void {
+    // Actualiza también los contadores para pruebas y lógica futura
+    this.contadores = {
+      Ahorcado: data.hangman_count,
+      Rompecabezas: data.puzzle_count,
+      Memoria: data.memorygame_count,
+      Pupiletras: data.solvetheword_count,
+    };
+    
+    this.categorias = this.categorias.map((categoria) => {
+      switch (categoria.nombre) {
+        case 'Ahorcado':
+          return { ...categoria, cantidad: data.hangman_count };
+        case 'Rompecabezas':
+          return { ...categoria, cantidad: data.puzzle_count };
+        case 'Memoria':
+          return { ...categoria, cantidad: data.memorygame_count };
+        case 'Pupiletras':
+          return { ...categoria, cantidad: data.solvetheword_count };
+        default:
+          return categoria;
+      }
     });
   }
 

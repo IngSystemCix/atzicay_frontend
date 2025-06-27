@@ -4,6 +4,7 @@ import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
+import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 import { filter, switchMap, take, tap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
@@ -24,7 +25,8 @@ export class LoginComponent implements OnInit {
   constructor(
     public auth: Auth0Service,
     private router: Router,
-    private backendAuthService: AuthService
+    private backendAuthService: AuthService,
+    private userSessionService: UserSessionService
   ) { }
 
   /**
@@ -42,7 +44,8 @@ export class LoginComponent implements OnInit {
       switchMap(claims => this.backendAuthService.login(claims!.__raw)),
       tap(authResponse => {
         this.hasLoggedIn = true;
-        sessionStorage.setItem('token_jwt', authResponse.access_token);
+        // Usar UserSessionService para manejar el token centralmente
+        this.userSessionService.setToken(authResponse.access_token);
         sessionStorage.setItem('user', JSON.stringify(authResponse.user));
 
         // Navegación en el siguiente ciclo del event loop para asegurar persistencia

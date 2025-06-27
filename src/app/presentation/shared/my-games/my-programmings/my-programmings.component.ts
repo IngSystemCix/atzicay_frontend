@@ -1,12 +1,12 @@
-import { Component, OnChanges, Input } from '@angular/core';
+import { Component, OnChanges, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MyProgrammingGamesService } from '../../../../core/infrastructure/api/my-programming-games.service';
 import { MyProgrammingGame } from '../../../../core/domain/model/my-programming-game.model';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
-import { DisableProgrammingGameService } from '../../../../core/infrastructure/api/disable-programming-game.service';
 import { ProgrammingStatusService } from '../../../../core/infrastructure/api/programming-status.service';
+import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 import { GameReportResponse } from '../../../../core/domain/interface/game-report-response';
 import ApexCharts from 'apexcharts';
@@ -18,7 +18,7 @@ import { GameReportService } from '../../../../core/infrastructure/api/game-repo
   templateUrl: './my-programmings.component.html',
   styleUrl: './my-programmings.component.css',
 })
-export class MyProgrammingsComponent implements OnChanges {
+export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
   @Input() gameId: number | null = null;
 
   activities: MyProgrammingGame[] = [];
@@ -41,30 +41,70 @@ export class MyProgrammingsComponent implements OnChanges {
   totalActivities: number = 0;
   userId: number = 0;
   isScrolled = false;
+  private subscription = new Subscription();
   constructor(
     private myProgrammingGamesService: MyProgrammingGamesService,
     private route: ActivatedRoute,
     private router: Router,
     private userSession: UserSessionService,
-    private disableProgrammingGameService: DisableProgrammingGameService,
     private programmingStatusService: ProgrammingStatusService,
     private gameReportService: GameReportService // Corregido: inyectar correctamente el servicio
   ) {}
 
   ngOnInit() {
-    const id = this.userSession.getUserId();
-    this.userId = id ? id : 0;
-    this.route.queryParams.subscribe((params) => {
-      this.gameId = params['gameId'] ? +params['gameId'] : null;
-      this.resetPagination();
-      this.loadProgrammings();
-    });
+    this.initializeComponent();
+    this.subscription.add(
+      this.route.queryParams.subscribe((params) => {
+        this.gameId = params['gameId'] ? +params['gameId'] : null;
+        this.resetPagination();
+        if (this.userId) {
+          this.loadProgrammings();
+        }
+      })
+    );
     window.addEventListener('scroll', this.onScroll.bind(this));
     // Agregar listener para cerrar menús al hacer clic fuera
     document.addEventListener('click', this.closeMenus.bind(this));
   }
 
+  private initializeComponent(): void {
+    // Verificar si ya tenemos userId y token
+    this.userId = this.userSession.getUserId() || 0;
+    
+    if (this.userId && this.userSession.isAuthenticated()) {
+      console.log('[MyProgrammings] Usuario y token disponibles');
+      this.loadProgrammings();
+    } else {
+      console.log('[MyProgrammings] Esperando token y userId...');
+      // Esperar tanto el token como el userId
+      this.subscription.add(
+        this.userSession.waitForToken$(5000).subscribe({
+          next: (token) => {
+            console.log('[MyProgrammings] Token recibido');
+            this.waitForUserId();
+          },
+          error: (err) => {
+            console.error('[MyProgrammings] Error esperando token:', err);
+          }
+        })
+      );
+    }
+  }
+
+  private waitForUserId(): void {
+    this.subscription.add(
+      this.userSession.userId$.subscribe(userId => {
+        if (userId) {
+          console.log('[MyProgrammings] UserId recibido:', userId);
+          this.userId = userId;
+          this.loadProgrammings();
+        }
+      })
+    );
+  }
+
   ngOnDestroy() {
+    this.subscription.unsubscribe();
     // Remover listener cuando se destruya el componente
     window.removeEventListener('scroll', this.onScroll.bind(this));
     document.removeEventListener('click', this.closeMenus.bind(this));
@@ -219,45 +259,6 @@ export class MyProgrammingsComponent implements OnChanges {
 
   closeMenus(): void {
     this.menuAbierto = null;
-  }
-
-  eliminarActividad(id: number): void {
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción desactivará la programación.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#8571FB',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, desactivar',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.disableProgrammingGameService
-          .disableProgrammingGame(id)
-          .subscribe({
-            next: () => {
-              this.menuAbierto = null;
-              this.resetPagination();
-              this.loadProgrammings();
-              Swal.fire(
-                'Desactivado',
-                'La programación fue desactivada correctamente.',
-                'success'
-              );
-            },
-            error: (err) => {
-              this.menuAbierto = null;
-              Swal.fire(
-                'Error',
-                'Error al desactivar la programación',
-                'error'
-              );
-              console.error('Error al desactivar:', err);
-            },
-          });
-      }
-    });
   }
   verReporte(id: number): void {
     this.reportGameInstanceId = id;
@@ -416,16 +417,24 @@ export class MyProgrammingsComponent implements OnChanges {
         
         this.programmingStatusService.setProgrammingGameStatus(activity.game_instance_id, newStatus).subscribe({
           next: (response) => {
-            console.log('Respuesta del servidor:', response);
+            console.log('✅ Respuesta del servidor:', response);
             this.menuAbierto = null;
             
-            // Actualizar localmente el estado de la actividad antes de recargar
-            activity.status = newStatus;
+            // Actualizar localmente el estado usando la respuesta del servidor
+            if (response.data && typeof response.data.status === 'number') {
+              activity.status = response.data.status;
+              console.log('🎯 Estado actualizado desde servidor:', response.data.status);
+            } else {
+              // Fallback en caso de que el backend aún no esté actualizado
+              activity.status = newStatus;
+              console.log('🔄 Estado actualizado localmente (fallback):', newStatus);
+            }
             
-            // Recarga la lista para asegurar consistencia
-            this.resetPagination();
-            this.loadProgrammings();
             Swal.fire('Actualizado', successText, 'success');
+            
+            // Opcional: recargar solo si es necesario
+            // this.resetPagination();
+            // this.loadProgrammings();
           },
           error: (err) => {
             this.menuAbierto = null;

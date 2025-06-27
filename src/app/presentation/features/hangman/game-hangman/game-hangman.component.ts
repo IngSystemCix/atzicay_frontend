@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration, HangmanWord } from '../../../../core/domain/model/game-configuration.model';
+import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
 
 interface JuegoState {
   palabraActual: string;
@@ -41,7 +42,7 @@ interface JuegoState {
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
 })
-export class GameHangmanComponent implements OnInit, OnDestroy {
+export class GameHangmanComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
@@ -89,19 +90,24 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
   tiempoRestanteModal = 3;
   headerExpanded: boolean = true;
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval);
+    }
+  }
+
+  protected onAuthenticationReady(userId: number): void {
     const id = Number(this.route.snapshot.params['id']);
     if (id && !isNaN(id)) {
       this.cargarConfiguracionJuego(id);
     } else {
       this.state.error = 'ID de juego inválido';
       this.state.cargando = false;
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.state.timerInterval) {
-      clearInterval(this.state.timerInterval);
     }
   }
 
@@ -188,29 +194,31 @@ export class GameHangmanComponent implements OnInit, OnDestroy {
     const config = this.state.gameConfig;
 
     // Aplicar configuraciones desde settings
-    config.settings.forEach((setting) => {
-      switch (setting.key) {
-        case 'TiempoLimite':
-          this.state.tiempoInicial = parseInt(setting.value) || 60;
-          this.state.tiempoRestante = this.state.tiempoInicial;
-          break;
-        case 'MensajeExito':
-          this.state.mensajeExito = setting.value;
-          break;
-        case 'MensajeFallo':
-          this.state.mensajeFallo = setting.value;
-          break;
-        case 'ColorFondo':
-          this.state.colorFondo = setting.value;
-          break;
-        case 'ColorTexto':
-          this.state.colorTexto = setting.value;
-          break;
-        case 'Fuente':
-          this.state.fuente = setting.value;
-          break;
-      }
-    });
+    if (config.settings && Array.isArray(config.settings)) {
+      config.settings.forEach((setting) => {
+        switch (setting.key) {
+          case 'TiempoLimite':
+            this.state.tiempoInicial = parseInt(setting.value) || 60;
+            this.state.tiempoRestante = this.state.tiempoInicial;
+            break;
+          case 'MensajeExito':
+            this.state.mensajeExito = setting.value;
+            break;
+          case 'MensajeFallo':
+            this.state.mensajeFallo = setting.value;
+            break;
+          case 'ColorFondo':
+            this.state.colorFondo = setting.value;
+            break;
+          case 'ColorTexto':
+            this.state.colorTexto = setting.value;
+            break;
+          case 'Fuente':
+            this.state.fuente = setting.value;
+            break;
+        }
+      });
+    }
 
     // Cargar palabras del hangman_words
     if (Array.isArray(config.hangman_words)) {

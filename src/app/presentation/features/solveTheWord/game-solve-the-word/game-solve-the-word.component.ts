@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration, SolveTheWordWord, GameSetting } from '../../../../core/domain/model/game-configuration.model';
+import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
 import Swal from 'sweetalert2';
 interface WordCell {
   letter: string;
@@ -24,7 +25,7 @@ interface Word {
   templateUrl: './game-solve-the-word.component.html',
   styleUrl: './game-solve-the-word.component.css',
 })
-export class GameSolveTheWordComponent implements OnInit {
+export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private gameConfigService = inject(GameConfigurationService);
 
@@ -57,62 +58,85 @@ export class GameSolveTheWordComponent implements OnInit {
   backgroundColor = '#fff';
   fontColor = '#000';
 
-  ngOnInit() {
+  override ngOnInit() {
+    super.ngOnInit();
+  }
+
+  override ngOnDestroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+    super.ngOnDestroy();
+  }
+
+  onAuthenticationReady(userId: number): void {
     const id = Number(this.route.snapshot.params['id']);
     if (id && !isNaN(id)) {
-      this.loading = true;
-      this.gameConfigService.getGameConfiguration(id).subscribe({
-        next: (response: { success: boolean; data: GameConfiguration; message?: string }) => {
-          if (response.success && response.data) {
-            const data = response.data;
-            this.title = data.game_name;
-            this.description = data.game_description;
-
-            // Leer settings
-            const getSetting = (key: string) => data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)?.value;
-            this.timeLeft = parseInt(getSetting('time_limit') || '347', 10);
-            this.fontFamily = getSetting('font_family') || 'Arial';
-            this.backgroundColor = getSetting('background_color') || '#fff';
-            this.fontColor = getSetting('font_color') || '#000';
-            this.originalTimeLimit = this.timeLeft;
-
-            // Palabras y orientaciones
-            const solveArr: SolveTheWordWord[] = data.solve_the_word || [];
-            this.words = solveArr.map((w) => ({
-              text: w.word.toUpperCase(),
-              found: false,
-              orientation: w.orientation,
-            }));
-            this.totalWords = this.words.length;
-            this.wordsFound = 0;
-
-            // Tamaño de grilla dinámico
-            const maxWordLen = this.words.reduce((max, w) => Math.max(max, w.text.length), 0);
-            this.gridRows = Math.max(12, maxWordLen + 2, this.words.length + 2);
-            this.gridCols = Math.max(12, maxWordLen + 2, this.words.length + 2);
-
-            this.updateGridSize();
-            this.initializeGrid();
-            this.placeWordsOnGrid();
-            this.fillRemainingCells();
-            this.startTimer();
-            this.loading = false;
-          } else {
-            this.showErrorAlert(
-              response.message || 'No se pudo cargar la configuración del juego'
-            );
-            this.loading = false;
-          }
-        },
-        error: (err: unknown) => {
-          this.showErrorAlert('Error al cargar la configuración del juego');
-          this.loading = false;
-        },
-      });
+      this.cargarConfiguracionJuego(id);
     } else {
       this.error = 'No se proporcionó un ID de juego válido';
       this.loading = false;
     }
+  }
+
+  private cargarConfiguracionJuego(id: number): void {
+    this.loading = true;
+    this.error = '';
+
+    this.gameConfigService.getGameConfiguration(id).subscribe({
+      next: (response: { success: boolean; data: GameConfiguration; message?: string }) => {
+        if (response.success && response.data) {
+          this.aplicarConfiguracion(response.data);
+          this.iniciarJuego();
+        } else {
+          this.error = response.message || 'No se pudo cargar la configuración del juego';
+        }
+        this.loading = false;
+      },
+      error: (err: unknown) => {
+        console.error('Error cargando configuración:', err);
+        this.error = 'Error al cargar la configuración del juego';
+        this.loading = false;
+      },
+    });
+  }
+
+  private aplicarConfiguracion(data: GameConfiguration): void {
+    this.title = data.game_name;
+    this.description = data.game_description;
+
+    // Aplicar configuraciones desde settings (con validación)
+    if (data.settings && Array.isArray(data.settings)) {
+      const getSetting = (key: string) => data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)?.value;
+      this.timeLeft = parseInt(getSetting('time_limit') || '347', 10);
+      this.fontFamily = getSetting('font_family') || 'Arial';
+      this.backgroundColor = getSetting('background_color') || '#fff';
+      this.fontColor = getSetting('font_color') || '#000';
+      this.originalTimeLimit = this.timeLeft;
+    }
+
+    // Palabras y orientaciones
+    const solveArr: SolveTheWordWord[] = data.solve_the_word || [];
+    this.words = solveArr.map((w) => ({
+      text: w.word.toUpperCase(),
+      found: false,
+      orientation: w.orientation,
+    }));
+    this.totalWords = this.words.length;
+    this.wordsFound = 0;
+
+    // Tamaño de grilla dinámico
+    const maxWordLen = this.words.reduce((max, w) => Math.max(max, w.text.length), 0);
+    this.gridRows = Math.max(12, maxWordLen + 2, this.words.length + 2);
+    this.gridCols = Math.max(12, maxWordLen + 2, this.words.length + 2);
+  }
+
+  private iniciarJuego(): void {
+    this.updateGridSize();
+    this.initializeGrid();
+    this.placeWordsOnGrid();
+    this.fillRemainingCells();
+    this.startTimer();
   }
 
   originalTimeLimit = 347;

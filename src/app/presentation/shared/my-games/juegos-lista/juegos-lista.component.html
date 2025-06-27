@@ -200,21 +200,23 @@
                       class="flex items-center justify-center w-10 h-10 rounded-xl mr-3"
                       [ngClass]="juego.visibility === 'P' ? 'bg-gradient-to-br from-yellow-100 to-yellow-200 group-hover:from-yellow-200 group-hover:to-yellow-300' : 'bg-gradient-to-br from-blue-100 to-blue-200 group-hover:from-blue-200 group-hover:to-blue-300'"
                     >
+                      <!-- Icono de "hacer restringido" cuando está público -->
                       <svg *ngIf="juego.visibility === 'P'"
                         class="w-5 h-5 text-yellow-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
+                      <!-- Icono de "hacer público" cuando está restringido -->
                       <svg *ngIf="juego.visibility !== 'P'"
                         class="w-5 h-5 text-blue-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div class="text-left flex-1">
@@ -226,7 +228,7 @@
                       </div>
                       <div class="text-xs"
                         [ngClass]="juego.visibility === 'P' ? 'text-yellow-400 group-hover:text-yellow-500' : 'text-blue-400 group-hover:text-blue-500'">
-                        {{ juego.visibility === 'P' ? 'Estado restringido' : 'Estado público' }}
+                        {{ juego.visibility === 'P' ? 'Cambiar a privado' : 'Cambiar a público' }}
                       </div>
                     </div>
                     <svg
@@ -273,7 +275,7 @@
                 [ngClass]="getVisibilityClass(juego.visibility)"
                 class="px-4 py-2 rounded-full text-sm font-medium"
               >
-                {{ juego.visibility === 'P' ? 'Público' : 'Privado' }}
+                {{ juego.visibility === 'P' ? 'Público' : 'Restringido' }}
               </span>
               <span
                 class="px-4 py-2 rounded-full text-sm font-medium"

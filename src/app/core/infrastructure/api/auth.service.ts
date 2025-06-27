@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Auth, AuthResponse } from '../../domain/model/auth.model';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment.development';
+import { UserSessionService } from '../service/user-session.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,7 @@ import { environment } from '../../../../environments/environment.development';
 export class AuthService {
   private apiUrl = environment.api_base_url;
   private http = inject(HttpClient);
+  private userSessionService = inject(UserSessionService);
 
   /**
    * Realiza el login con el id token de Auth0 y devuelve un observable con la información del usuario autenticado.
@@ -59,12 +61,11 @@ export class AuthService {
    * Nota: la navegación al login debe manejarse en el componente.
    */
   logout(): void {
-    sessionStorage.removeItem('token_jwt');
-    sessionStorage.removeItem('user_id');
+    this.userSessionService.clearSession();
   }
 
   isAuthenticated(): boolean {
-    return !!sessionStorage.getItem('token_jwt');
+    return this.userSessionService.isAuthenticated();
   }
 
 }

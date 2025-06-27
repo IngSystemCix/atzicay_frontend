@@ -31,8 +31,11 @@ export class CreateGameService {
    * Crea un juego de puzzle usando el wrapper { gameType, data }
    */
   createPuzzleGame(userId: number, body: any): Observable<any> {
+    const url = `${this.apiUrl}my-game/create/${userId}`;
+    console.log('POST URL:', url);
+    console.log('POST BODY:', JSON.stringify(body, null, 2));
     return this.http.post<any>(
-      `${this.apiUrl}my-game/create/${userId}`,
+      url,
       body
     );
   }

@@ -2,10 +2,12 @@ import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, switchMap, throwError, of } from 'rxjs';
 import { AuthService } from '../api/auth.service';
+import { UserSessionService } from '../service/user-session.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
-  const token = sessionStorage.getItem('token_jwt');
+  const userSessionService = inject(UserSessionService);
+  const token = userSessionService.getToken();
 
   // Evitar incluir token en la solicitud de refresh-token para no entrar en bucle
   const isRefreshing = req.url.includes('/auth/refresh-token');
@@ -23,14 +25,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       const is401 = error.status === 401;
-      const oldToken = sessionStorage.getItem('token_jwt');
+      const oldToken = userSessionService.getToken();
 
       // Solo intentamos refrescar si el token anterior existe y no estamos ya refrescando
       if (is401 && oldToken && !isRefreshing) {
         return authService.refreshToken(oldToken).pipe(
           switchMap((res: any) => {
             const newToken = res.access_token;
-            sessionStorage.setItem('token_jwt', newToken);
+            userSessionService.setToken(newToken);
 
             // Reenviamos la solicitud original con el nuevo token
             const retryReq = req.clone({
@@ -42,7 +44,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             return next(retryReq);
           }),
           catchError((refreshError) => {
-            sessionStorage.removeItem('token_jwt');
+            userSessionService.clearSession();
             return throwError(() => refreshError);
           })
         );

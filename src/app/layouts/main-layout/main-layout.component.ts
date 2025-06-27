@@ -40,9 +40,19 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       })
     );
 
-    this.userSession.waitForToken().then(() => {
-      this.ensureUserIdLoaded();
-    });
+    this.subscription.add(
+      this.userSession.waitForToken$(5000).subscribe({
+        next: (token) => {
+          console.log('[MainLayout] Token recibido, configurando usuario...');
+          this.ensureUserIdLoaded();
+        },
+        error: (err) => {
+          console.error('[MainLayout] Error esperando token:', err);
+          // Intentar cargar usuario de todas formas
+          this.ensureUserIdLoaded();
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
@@ -84,21 +94,26 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private ensureUserIdLoaded() {
     const userId = this.userSession.getUserId();
     if (!userId) {
-      this.auth0.user$.subscribe((user) => {
-        const email = user?.email;
-        if (email) {
-          this.profileService.getUserIdByEmail(email).subscribe({
-            next: (res) => {
-              if (res && res.data && res.data.user_id) {
-                this.userSession.setUserId(res.data.user_id);
+      this.subscription.add(
+        this.auth0.user$.subscribe((user) => {
+          const email = user?.email;
+          if (email) {
+            this.profileService.getUserIdByEmail(email).subscribe({
+              next: (res) => {
+                if (res && res.data && res.data.user_id) {
+                  this.userSession.setUserId(res.data.user_id);
+                  console.log('[MainLayout] UserId configurado:', res.data.user_id);
+                }
+              },
+              error: (err) => {
+                console.error('No se pudo obtener el id del usuario por email', err);
               }
-            },
-            error: (err) => {
-              console.error('No se pudo obtener el id del usuario por email', err);
-            }
-          });
-        }
-      });
+            });
+          }
+        })
+      );
+    } else {
+      console.log('[MainLayout] UserId ya disponible:', userId);
     }
   }
 }
