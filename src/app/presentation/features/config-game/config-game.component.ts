@@ -135,12 +135,43 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
       .subscribe({
       next: () => {
         this.isLoading = false;
-        Swal.fire(
-        '¡Éxito!',
-        'Programación creada correctamente',
-        'success'
-        ).then(() => {
-        this.router.navigate(['/juegos']);
+        
+        // SweetAlert2 mejorado con información del juego
+        Swal.fire({
+          title: '¡Programación Exitosa!',
+          html: `
+            <div style="text-align: center; margin: 20px 0;">
+              <div style="font-size: 3rem; margin-bottom: 15px;">
+                ${this.getGameIcon(this.tipoJuego)}
+              </div>
+              <h3 style="color: #4a5568; margin-bottom: 10px; font-weight: 600;">
+                ${this.nombreJuego || 'Juego'}
+              </h3>
+              <p style="color: #718096; margin-bottom: 15px;">
+                <strong>Tipo:</strong> ${this.tipoJuego || 'No especificado'}
+              </p>
+              <p style="color: #718096; margin-bottom: 5px;">
+                <strong>Programación:</strong> ${this.programmingGame.Name}
+              </p>
+              <p style="color: #718096; font-size: 0.9rem;">
+                La programación ha sido creada correctamente y está lista para usar.
+              </p>
+            </div>
+          `,
+          icon: 'success',
+          confirmButtonText: 'Ir a Mis Juegos',
+          confirmButtonColor: '#8571FB',
+          showClass: {
+            popup: 'animate__animated animate__fadeInUp animate__faster'
+          },
+          hideClass: {
+            popup: 'animate__animated animate__fadeOutDown animate__faster'
+          },
+          customClass: {
+            confirmButton: 'px-6 py-3 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all duration-200'
+          }
+        }).then(() => {
+          this.router.navigate(['/juegos']);
         });
       },
       error: (err) => {
