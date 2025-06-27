@@ -79,7 +79,8 @@ export const routes: Routes = [
       }
     ]
   },
-  // Juegos jugables en pantalla completa (fuera del layout)
+
+  
   {
     path: 'juegos/jugar-hangman/:id',
     component: GameHangmanComponent,

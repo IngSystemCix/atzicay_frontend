@@ -26,6 +26,21 @@
             <div class="mb-6 sm:mb-10">
                 <h1 class="color-atzicay-heading font-bold text-xl sm:text-2xl mb-3 sm:mb-6">Programación del Juego</h1>
                 <h6 class="color-atzicay-subheading text-sm sm:text-base">Personaliza las reglas y operaciones del juego</h6>
+                
+                <!-- Información del juego -->
+                @if (nombreJuego && tipoJuego) {
+                <div class="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-atzicay-purple-500 rounded-full flex items-center justify-center">
+                            <span class="text-2xl">{{ getGameIcon(tipoJuego) }}</span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800 text-lg">{{ nombreJuego }}</h3>
+                            <span class="text-sm text-gray-600 bg-white px-2 py-1 rounded-full border">{{ tipoJuego }}</span>
+                        </div>
+                    </div>
+                </div>
+                }
             </div>
 
             @if (error) {

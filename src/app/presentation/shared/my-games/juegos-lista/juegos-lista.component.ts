@@ -165,7 +165,17 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
 
   programarJuego(id: number) {
     this.menuAbierto = null;
-    this.router.navigate(['/juegos/configuracion', id]);
+    const juego = this.juegos.find(j => j.game_instance_id === id);
+    if (juego) {
+      this.router.navigate(['/juegos/configuracion', id], {
+        queryParams: {
+          name: juego.name,
+          type: juego.type_game
+        }
+      });
+    } else {
+      this.router.navigate(['/juegos/configuracion', id]);
+    }
   }
 
   eliminarJuego(id: number) {}

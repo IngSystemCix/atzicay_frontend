@@ -21,6 +21,8 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
   isLoading = false;
   error = '';
   currentUserId: number | null = null;
+  nombreJuego: string = '';
+  tipoJuego: string = '';
   private subscription = new Subscription();
 
   programmingGame: ProgrammingGame = {
@@ -43,6 +45,13 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.route.params.subscribe((params) => {
         this.gameId = +params['id'];
+      })
+    );
+    
+    this.subscription.add(
+      this.route.queryParams.subscribe(params => {
+        this.nombreJuego = params['name'] || '';
+        this.tipoJuego = params['type'] || '';
       })
     );
     
@@ -143,6 +152,17 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
 
   private formatDateTime(date: string, time: string): string {
     return `${date}T${time}`;
+  }
+
+  getGameIcon(type: string): string {
+    const iconoMap: { [key: string]: string } = {
+      hangman: '🎯',       
+      memory: '🧠',         
+      puzzle: '🧩',        
+      solve_the_word: '📝', 
+      all: '🎮',          
+    };
+    return iconoMap[type] || '🎮';
   }
 
   cancelar() {

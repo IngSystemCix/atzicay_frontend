@@ -33,8 +33,6 @@ export const optimizedAuthGuard: CanActivateFn = (route, state) => {
         }),
         catchError(err => {
           console.warn('[OptimizedAuthGuard] Timeout esperando token interno, permitiendo acceso de todas formas');
-          // Permitir acceso aunque no tengamos el token interno aún
-          // El componente se encargará de manejarlo
           return of(true);
         })
       );
