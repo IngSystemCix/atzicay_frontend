@@ -10,7 +10,6 @@ export class UserSessionService {
   public userId$ = this.userIdSubject.asObservable();
 
   constructor() {
-    // Inicializar con valores del sessionStorage si existen
     const existingToken = sessionStorage.getItem('token_jwt');
     const existingUserId = sessionStorage.getItem('user_id');
     

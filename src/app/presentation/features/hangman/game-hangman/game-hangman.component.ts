@@ -7,7 +7,10 @@ import {
   HangmanWord,
 } from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
+import { RatingModalComponent } from '../../../shared/rating-modal/rating-modal.component';
+import { RatingService } from '../../../../core/infrastructure/service/rating.service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 
 interface JuegoState {
   palabraActual: string;
@@ -42,7 +45,7 @@ interface JuegoState {
 @Component({
   selector: 'app-game-hangman',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RatingModalComponent],
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
 })
@@ -53,6 +56,7 @@ export class GameHangmanComponent
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
+  private ratingService = inject(RatingService);
 
   readonly INTENTOS_INICIALES = 6;
   private intervaloContador: any;
@@ -96,6 +100,11 @@ export class GameHangmanComponent
   palabrasAdivinadas: string[] = [];
   tiempoRestanteModal = 3;
   headerExpanded: boolean = false;
+  
+  // Rating properties
+  mostrarModalRating = false;
+  gameInstanceId = 0;
+  hasUserRated = false;
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -227,8 +236,10 @@ export class GameHangmanComponent
       next: (response) => {
         if (response.success && response.data) {
           this.state.gameConfig = response.data;
+          this.gameInstanceId = response.data.game_instance_id; // Guardar el gameInstanceId
           this.aplicarConfiguracion();
           this.iniciarJuego();
+          this.checkIfUserHasRated(); // Verificar si ya valoró el juego
         } else {
           this.state.error =
             response.message || 'No se pudo cargar la configuración del juego';
@@ -461,6 +472,8 @@ export class GameHangmanComponent
           } else {
             this.volverAlDashboard();
           }
+          // Mostrar modal de valoración después de la acción (juego terminado sin vidas)
+          setTimeout(() => this.mostrarModalDeValoracion(), 500);
         });
       } else {
         if (this.state.tiempoRestante === 0) {
@@ -542,6 +555,8 @@ export class GameHangmanComponent
           } else {
             this.volverAlDashboard();
           }
+          // Mostrar modal de valoración después de la acción (victoria completa)
+          setTimeout(() => this.mostrarModalDeValoracion(), 500);
         });
       } else {
         this.mostrarModalExito = true;
@@ -764,5 +779,33 @@ export class GameHangmanComponent
     this.state.intentosRestantes = this.INTENTOS_INICIALES;
     this.state.juegoTerminado = false;
     this.state.juegoGanado = false;
+  }
+
+  // Rating methods
+  private async checkIfUserHasRated(): Promise<void> {
+    if (this.gameInstanceId > 0) {
+      try {
+        this.hasUserRated = await firstValueFrom(this.ratingService.hasUserRatedGame(this.gameInstanceId));
+      } catch (error) {
+        console.warn('No se pudo verificar si el usuario ya valoró el juego:', error);
+        this.hasUserRated = false; // Asumir que no ha valorado en caso de error
+      }
+    }
+  }
+
+  private mostrarModalDeValoracion(): void {
+    // Solo mostrar el modal si el usuario no ha valorado aún
+    if (!this.hasUserRated && this.gameInstanceId > 0) {
+      this.mostrarModalRating = true;
+    }
+  }
+
+  onRatingModalClose(): void {
+    this.mostrarModalRating = false;
+  }
+
+  onGameRated(): void {
+    this.hasUserRated = true;
+    console.log('¡Juego valorado exitosamente!');
   }
 }

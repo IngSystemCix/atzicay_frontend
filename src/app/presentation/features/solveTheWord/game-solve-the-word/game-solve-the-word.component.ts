@@ -1,10 +1,13 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration, SolveTheWordWord, GameSetting } from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
+import { RatingModalComponent } from '../../../shared/rating-modal/rating-modal.component';
+import { RatingService } from '../../../../core/infrastructure/service/rating.service';
 import Swal from 'sweetalert2';
+import { firstValueFrom } from 'rxjs';
 interface WordCell {
   letter: string;
   isFound: boolean;
@@ -21,13 +24,15 @@ interface Word {
 @Component({
   selector: 'app-game-solve-the-word',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RatingModalComponent],
   templateUrl: './game-solve-the-word.component.html',
   styleUrl: './game-solve-the-word.component.css',
 })
 export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
+  private ratingService = inject(RatingService);
 
   grid: WordCell[][] = [];
   words: Word[] = [];
@@ -57,6 +62,12 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   fontFamily = 'Arial';
   backgroundColor = '#fff';
   fontColor = '#000';
+  headerExpanded: boolean = false;
+
+  // Rating properties
+  mostrarModalRating = false;
+  gameInstanceId = 0;
+  hasUserRated = false;
 
   override ngOnInit() {
     super.ngOnInit();
@@ -86,8 +97,10 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.gameConfigService.getGameConfiguration(id).subscribe({
       next: (response: { success: boolean; data: GameConfiguration; message?: string }) => {
         if (response.success && response.data) {
+          this.gameInstanceId = response.data.game_instance_id; // Guardar el gameInstanceId
           this.aplicarConfiguracion(response.data);
           this.iniciarJuego();
+          this.checkIfUserHasRated(); // Verificar si ya valoró el juego
         } else {
           this.error = response.message || 'No se pudo cargar la configuración del juego';
         }
@@ -158,67 +171,111 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
   private showWinAlert() {
     Swal.fire({
-      title: '¡Felicidades!',
+      icon: 'success',
+      title: '🏆 ¡Increíble trabajo!',
       html: `
-        <div style="text-align: center;">
-          <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-          <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-            Has encontrado todas las palabras en <strong>${this.formatTime(
-              347 - this.timeLeft
-            )}</strong>
+        <div style="font-family: 'Arial', sans-serif; text-align: center;">
+          <div style="font-size: 80px; margin: 20px 0;">�</div>
+          <p style="font-size: 20px; color: #2e7d32; margin: 15px 0; font-weight: bold;">
+            ¡Encontraste todas las palabras!
+          </p>
+          <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); padding: 20px; border-radius: 15px; margin: 15px 0;">
+            <p style="font-size: 18px; color: #1b5e20; margin: 0;">
+              ⏱️ Tiempo: <strong>${this.formatTime(347 - this.timeLeft)}</strong>
+            </p>
+          </div>
+          <p style="font-size: 16px; color: #555; margin: 10px 0;">
+            🎮 ¿Quieres una nueva aventura?
           </p>
         </div>
       `,
-      icon: 'success',
+      background: 'linear-gradient(135deg, #e8f5e8, #f1f8e9)',
+      confirmButtonColor: '#4caf50',
+      confirmButtonText: '🚀 ¡Jugar de nuevo!',
       showCancelButton: true,
-      confirmButtonText: '🎮 Jugar de nuevo',
-      cancelButtonText: 'Continuar',
-      confirmButtonColor: '#10b981',
-      cancelButtonColor: '#6b7280',
+      cancelButtonText: '🏠 Continuar',
+      cancelButtonColor: '#78909c',
+      allowOutsideClick: false,
       customClass: {
-        popup: 'animated bounceIn',
-      },
+        popup: 'animated-popup',
+        confirmButton: 'kid-friendly-button',
+        cancelButton: 'kid-friendly-button-secondary'
+      }
     }).then((result) => {
       if (result.isConfirmed) {
         this.resetGame();
       }
+      // Mostrar modal de valoración después de la victoria
+      setTimeout(() => this.mostrarModalDeValoracion(), 500);
     });
   }
 
   private showTimeUpAlert() {
     Swal.fire({
-      title: '¡Tiempo agotado!',
-      html: `
-      <div style="text-align: center;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">⏰</div>
-        <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-          Encontraste <strong>${this.wordsFound}</strong> de <strong>${this.totalWords}</strong> palabras
-        </p>
-      </div>
-    `,
       icon: 'warning',
+      title: '⏰ ¡Se acabó el tiempo!',
+      html: `
+        <div style="font-family: 'Arial', sans-serif; text-align: center;">
+          <div style="font-size: 60px; margin: 20px 0;">⏱️</div>
+          <p style="font-size: 18px; color: #f57c00; margin: 15px 0; font-weight: 600;">
+            ¡El tiempo voló muy rápido!
+          </p>
+          <div style="background: linear-gradient(135deg, #fff8e1, #ffecb3); padding: 15px; border-radius: 15px; margin: 15px 0;">
+            <p style="font-size: 16px; color: #e65100; margin: 0;">
+              📝 Encontraste <strong>${this.wordsFound}</strong> de <strong>${this.totalWords}</strong> palabras
+            </p>
+          </div>
+          <p style="font-size: 16px; color: #555; margin: 10px 0;">
+            🚀 ¡Puedes hacerlo mejor!
+          </p>
+        </div>
+      `,
+      background: 'linear-gradient(135deg, #fff8e1, #ffecb3)',
+      confirmButtonColor: '#ff9800',
+      confirmButtonText: '� ¡Intentar de nuevo!',
       showCancelButton: true,
-      confirmButtonText: '🔄 Intentar de nuevo',
-      cancelButtonText: 'Ver palabras',
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
+      cancelButtonText: '📖 Ver palabras',
+      cancelButtonColor: '#78909c',
+      allowOutsideClick: false,
       customClass: {
-        popup: 'animated bounceIn',
-      },
+        popup: 'animated-popup',
+        confirmButton: 'kid-friendly-button',
+        cancelButton: 'kid-friendly-button-secondary'
+      }
     }).then((result) => {
       if (result.isConfirmed) {
         this.resetGame();
       }
+      // Mostrar modal de valoración después del tiempo agotado
+      setTimeout(() => this.mostrarModalDeValoracion(), 500);
     });
   }
 
   private showErrorAlert(message: string) {
     Swal.fire({
-      title: 'Error',
-      text: message,
       icon: 'error',
-      confirmButtonText: 'Reintentar',
-      confirmButtonColor: '#ef4444',
+      title: '😔 ¡Ups! Algo salió mal',
+      html: `
+        <div style="font-family: 'Arial', sans-serif; text-align: center;">
+          <div style="font-size: 60px; margin: 20px 0;">🤖</div>
+          <p style="font-size: 18px; color: #d32f2f; margin: 15px 0; font-weight: 600;">
+            ${message}
+          </p>
+          <div style="background: linear-gradient(135deg, #ffebee, #fce4ec); padding: 15px; border-radius: 15px; margin: 15px 0;">
+            <p style="font-size: 16px; color: #c62828; margin: 0;">
+              💪 ¡No te preocupes, lo solucionaremos!
+            </p>
+          </div>
+        </div>
+      `,
+      background: 'linear-gradient(135deg, #ffebee, #fce4ec)',
+      confirmButtonColor: '#e53935',
+      confirmButtonText: '🔄 Reintentar',
+      allowOutsideClick: false,
+      customClass: {
+        popup: 'animated-popup',
+        confirmButton: 'kid-friendly-button'
+      }
     }).then(() => {
       this.resetGame();
     });
@@ -600,5 +657,41 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
   toggleCompact(): void {
     this.isCompact = !this.isCompact;
+  }
+
+  // Rating methods
+  private async checkIfUserHasRated(): Promise<void> {
+    if (this.gameInstanceId > 0) {
+      try {
+        this.hasUserRated = await firstValueFrom(this.ratingService.hasUserRatedGame(this.gameInstanceId));
+      } catch (error) {
+        console.warn('No se pudo verificar si el usuario ya valoró el juego:', error);
+        this.hasUserRated = false; // Asumir que no ha valorado en caso de error
+      }
+    }
+  }
+
+  private mostrarModalDeValoracion(): void {
+    // Solo mostrar el modal si el usuario no ha valorado aún
+    if (!this.hasUserRated && this.gameInstanceId > 0) {
+      this.mostrarModalRating = true;
+    }
+  }
+
+  onRatingModalClose(): void {
+    this.mostrarModalRating = false;
+  }
+
+  onGameRated(): void {
+    this.hasUserRated = true;
+    console.log('¡Juego valorado exitosamente!');
+  }
+
+  toggleHeader(): void {
+    this.headerExpanded = !this.headerExpanded;
+  }
+
+  volverAlDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 }

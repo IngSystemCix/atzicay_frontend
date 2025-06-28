@@ -1,5 +1,6 @@
 <div
-  class="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 p-4"
+  class="flex flex-col border-8 border-atzicay-border items-center min-h-screen h-screen p-4 overflow-x-hidden"
+  style="background-color: var(--color-atzicay-bg)"
 >
   <!-- Estados de autenticación y carga -->
   @if (isLoading && !loading) {
@@ -39,75 +40,144 @@
   }
   
   @if (!loading && !error && !isLoading && !authError) {
-  <!-- Header Section -->
-  <div class="w-full max-w-4xl mx-auto mb-8">
-    <h1 class="text-3xl font-bold text-purple-700 mb-2 text-center glow-text">
-      {{ gameConfig?.game_name || 'Rompecabezas' }}
-    </h1>
-    <div
-      *ngIf="gameConfig?.game_description"
-      class="text-center text-purple-500 mb-4"
-    >
-      {{ gameConfig?.game_description }}
-    </div>
-    <div
-      *ngIf="puzzleConfig?.clue"
-      class="text-center text-purple-700 mb-4 bg-purple-100 rounded-lg py-2 px-4 shadow-sm"
-    >
-      <span class="font-semibold">Pista:</span> {{ puzzleConfig?.clue }}
-    </div>
-    <div
-      class="flex flex-col bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-lg"
-    >
-      <div class="flex justify-between w-full text-purple-700">
-        <div class="flex items-center space-x-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+  <div class="w-full max-w-6xl mx-auto h-full flex flex-col">
+    <!-- Header Mejorado - Estilo Hangman -->
+    <div class="w-full mb-6 transition-all duration-500 ease-in-out">
+      <!-- Header expandido -->
+      <div
+        *ngIf="headerExpanded"
+        class="bg-white/20 rounded-3xl backdrop-blur-md shadow-2xl border border-white/30 p-8"
+        style="backdrop-filter: blur(20px)"
+      >
+        <!-- Fila superior con título y botón volver -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-4">
+            <button
+              (click)="volverAlDashboard()"
+              class="bg-white/30 hover:bg-white/40 backdrop-blur-sm rounded-full p-3 transition-all duration-200 group"
+              title="Volver al Dashboard"
+            >
+              <svg class="w-6 h-6 text-black group-hover:text-purple-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <div>
+              <h1 class="text-3xl font-bold" style="color: var(--color-text-primary)">
+                {{ gameConfig?.game_name || '🧩 Rompecabezas' }}
+              </h1>
+              <p class="text-lg opacity-80" style="color: var(--color-text-primary)">
+                {{ gameConfig?.game_description || 'Arma el rompecabezas colocando las piezas' }}
+              </p>
+              <div
+                *ngIf="puzzleConfig?.clue"
+                class="mt-2 text-sm bg-purple-100/20 rounded-lg py-1 px-3 backdrop-blur-sm"
+                style="color: var(--color-text-primary)"
+              >
+                <span class="font-semibold">💡 Pista:</span> {{ puzzleConfig?.clue }}
+              </div>
+            </div>
+          </div>
+          <button
+            (click)="toggleHeader()"
+            class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
+            title="Minimizar header"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span
-            >Piezas correctas:
-            <span class="font-bold">{{ correctPieces }}/{{ totalPieces }}</span>
-          </span>
+            <svg class="w-5 h-5" style="color: var(--color-text-primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
         </div>
-        <div class="flex items-center space-x-2">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span
-            >Tiempo:
-            <span class="font-bold">{{ formatTime(timeLeft) }}</span></span
-          >
+
+        <!-- Stats en cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
+            <div class="text-center">
+              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
+                {{ correctPieces }}/{{ totalPieces }}
+              </div>
+              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
+                Piezas correctas
+              </div>
+            </div>
+          </div>
+          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
+            <div class="text-center">
+              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
+                {{ formatTime(timeLeft) }}
+              </div>
+              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
+                Tiempo restante
+              </div>
+            </div>
+          </div>
+          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
+            <div class="text-center">
+              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
+                {{ formatTime(timeElapsed) }}
+              </div>
+              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
+                Tiempo transcurrido
+              </div>
+            </div>
+          </div>
+          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
+            <div class="text-center">
+              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
+                {{ gameCompleted ? '🎉 ¡Ganaste!' : (gameStarted ? '🎮 Jugando' : '🚀 Listo') }}
+              </div>
+              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
+                Estado del juego
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="mt-4">
+          <div class="w-full h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+            <div
+              class="h-full bg-gradient-to-r from-purple-400 to-purple-600 transition-all duration-300 rounded-full"
+              [style.width.%]="(correctPieces / totalPieces) * 100"
+            ></div>
+          </div>
         </div>
       </div>
 
-      <!-- Barra de progreso -->
-      <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-        <div
-          class="h-full bg-purple-400 transition-all duration-300"
-          [style.width.%]="100 - (timeLeft / maxTime) * 100"
-        ></div>
+      <!-- Header minimizado -->
+      <div
+        *ngIf="!headerExpanded"
+        class="bg-white/15 rounded-full backdrop-blur-lg shadow-xl border border-white/20 px-8 py-4"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <button
+              (click)="volverAlDashboard()"
+              class="bg-white/30 hover:bg-white/40 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
+              title="Volver al Dashboard"
+            >
+              <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+            </button>
+            <h2 class="text-xl font-bold" style="color: var(--color-text-primary)">
+              🧩 {{ gameConfig?.game_name || 'Rompecabezas' }}
+            </h2>
+          </div>
+          <div class="flex items-center gap-6">
+            <span class="text-sm font-medium" style="color: var(--color-text-primary)">
+              {{ correctPieces }}/{{ totalPieces }} | {{ formatTime(timeLeft) }}
+            </span>
+            <button
+              (click)="toggleHeader()"
+              class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
+              title="Expandir header"
+            >
+              <svg class="w-5 h-5" style="color: var(--color-text-primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -368,4 +438,12 @@
     </div>
   </div>
   }
+  
+  <!-- Rating Modal -->
+  <app-rating-modal
+    [isVisible]="mostrarModalRating"
+    [gameInstanceId]="gameInstanceId"
+    (close)="onRatingModalClose()"
+    (rated)="onGameRated()"
+  ></app-rating-modal>
 </div>

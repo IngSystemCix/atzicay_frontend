@@ -1,9 +1,12 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration, PuzzleConfig } from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
+import { RatingService } from '../../../../core/infrastructure/service/rating.service';
+import { RatingModalComponent } from '../../../shared/rating-modal/rating-modal.component';
+import Swal from 'sweetalert2';
 
 interface PuzzlePiece {
   id: number;
@@ -23,13 +26,15 @@ interface PuzzlePiece {
 @Component({
   selector: 'app-game-puzzle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RatingModalComponent],
   templateUrl: './game-puzzle.component.html',
   styleUrl: './game-puzzle.component.css',
 })
 export class GamePuzzleComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
+  private ratingService = inject(RatingService);
   pieces: PuzzlePiece[] = [];
   rows = 4; // Reducido para mejor jugabilidad
   cols = 4;
@@ -66,6 +71,12 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   // Nueva propiedad para controlar el panel lateral
   isPanelOpen = true;
 
+  // Rating properties
+  mostrarModalRating = false;
+  gameInstanceId = 0;
+  hasUserRated = false;
+  headerExpanded: boolean = false;
+
   constructor() {
     super();
   }
@@ -84,6 +95,7 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   onAuthenticationReady(userId: number): void {
     const id = Number(this.route.snapshot.params['id']);
     if (id && !isNaN(id)) {
+      this.gameInstanceId = id; // Capture game instance ID
       this.cargarConfiguracionJuego(id);
     } else {
       this.startGame();
@@ -272,7 +284,7 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
         this.timeElapsed++;
       } else {
         clearInterval(this.timer);
-        this.endGame();
+        this.showTimeUpAlert();
       }
     }, 1000);
 
@@ -392,6 +404,7 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
       if (this.timer) {
         clearInterval(this.timer);
       }
+      this.showCompletionAlert();
     }
   }
 
@@ -528,6 +541,143 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   // Método auxiliar para crear arrays en el template
   createArray(length: number): number[] {
     return Array.from({ length }, (_, i) => i);
+  }
+
+  // SweetAlert2 Methods
+  private showCompletionAlert(): void {
+    Swal.fire({
+      title: '¡Felicidades! 🧩',
+      html: `
+        <div style="text-align: center;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+          <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+            ¡Has completado el rompecabezas en <strong>${this.formatTime(this.timeElapsed)}</strong>!
+          </p>
+          <p style="font-size: 1rem; color: #6b7280;">
+            Todas las piezas están en su lugar correcto
+          </p>
+        </div>
+      `,
+      icon: 'success',
+      showCancelButton: true,
+      confirmButtonText: '🎮 Jugar de nuevo',
+      cancelButtonText: 'Continuar',
+      confirmButtonColor: '#10b981',
+      cancelButtonColor: '#6b7280',
+      customClass: {
+        popup: 'animated-popup',
+        confirmButton: 'kid-friendly-button',
+        cancelButton: 'kid-friendly-button-secondary'
+      },
+      backdrop: `
+        rgba(0,0,123,0.4)
+        url("/assets/confetti.gif")
+        left top
+        no-repeat
+      `
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.startGame();
+      } else {
+        // Check if user should rate the game
+        this.checkIfUserHasRated();
+      }
+    });
+  }
+
+  private showTimeUpAlert(): void {
+    Swal.fire({
+      title: '¡Tiempo agotado! ⏰',
+      html: `
+        <div style="text-align: center;">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">😅</div>
+          <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+            Se acabó el tiempo, pero has colocado <strong>${this.correctPieces}</strong> de <strong>${this.totalPieces}</strong> piezas correctamente
+          </p>
+          <p style="font-size: 1rem; color: #6b7280;">
+            ¡Sigue practicando!
+          </p>
+        </div>
+      `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: '🔄 Intentar de nuevo',
+      cancelButtonText: 'Continuar',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      customClass: {
+        popup: 'animated-popup',
+        confirmButton: 'kid-friendly-button',
+        cancelButton: 'kid-friendly-button-secondary'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.startGame();
+      } else {
+        // Check if user should rate the game
+        this.checkIfUserHasRated();
+      }
+    });
+  }
+
+  private showErrorAlert(message: string): void {
+    Swal.fire({
+      title: '¡Ups! 😊',
+      html: `
+        <div style="text-align: center;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🤔</div>
+          <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+            ${message}
+          </p>
+          <p style="font-size: 0.9rem; color: #6b7280;">
+            ¡No te preocupes, vuelve a intentarlo!
+          </p>
+        </div>
+      `,
+      icon: 'info',
+      confirmButtonText: '👍 Entendido',
+      confirmButtonColor: '#3b82f6',
+      customClass: {
+        popup: 'animated-popup',
+        confirmButton: 'kid-friendly-button'
+      }
+    });
+  }
+
+  // Rating methods
+  private async checkIfUserHasRated(): Promise<void> {
+    if (this.gameInstanceId === 0) return;
+
+    try {
+      this.hasUserRated = await this.ratingService.hasUserRatedGame(this.gameInstanceId).toPromise() || false;
+      
+      if (!this.hasUserRated) {
+        this.mostrarModalDeValoracion();
+      }
+    } catch (error) {
+      console.error('Error checking if user has rated:', error);
+    }
+  }
+
+  private mostrarModalDeValoracion(): void {
+    this.mostrarModalRating = true;
+  }
+
+  onRatingModalClose(): void {
+    this.mostrarModalRating = false;
+  }
+
+  onGameRated(): void {
+    this.mostrarModalRating = false;
+    this.hasUserRated = true;
+  }
+
+  volverAlDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  toggleHeader(): void {
+    this.headerExpanded = !this.headerExpanded;
   }
 
   protected readonly Array = Array;

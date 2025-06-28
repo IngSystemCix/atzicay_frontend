@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 
 interface Card {
@@ -28,6 +28,7 @@ export class GameMemoryComponent implements OnInit {
   timerInterval: any;
   loading = false;
   error: string | null = null;
+  headerExpanded: boolean = false;
 
   planets = [
     { name: 'Júpiter', image: 'assets/jupiter.jpg' },
@@ -42,6 +43,7 @@ export class GameMemoryComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private gameConfigService: GameConfigurationService
   ) {}
 
@@ -171,5 +173,13 @@ export class GameMemoryComponent implements OnInit {
     const minutes = Math.floor(this.timer / 60);
     const seconds = this.timer % 60;
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  toggleHeader(): void {
+    this.headerExpanded = !this.headerExpanded;
+  }
+
+  volverAlDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 }
