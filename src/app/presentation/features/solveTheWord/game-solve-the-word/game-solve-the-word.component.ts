@@ -40,7 +40,8 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   gridCols = 12;
   wordsFound = 0;
   totalWords = 0;
-  timeLeft = 347; // default
+  timeLeft = 180; // 3 minutos por defecto
+  timeElapsed = 0; // tiempo transcurrido desde 0
   timer: any;
   selection: WordCell[] = [];
   directions = [
@@ -121,7 +122,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     // Aplicar configuraciones desde settings (con validación)
     if (data.settings && Array.isArray(data.settings)) {
       const getSetting = (key: string) => data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)?.value;
-      this.timeLeft = parseInt(getSetting('time_limit') || '347', 10);
+      this.timeLeft = parseInt(getSetting('time_limit') || '180', 10); // 3 minutos por defecto
       this.fontFamily = getSetting('font_family') || 'Arial';
       this.backgroundColor = getSetting('background_color') || '#fff';
       this.fontColor = getSetting('font_color') || '#000';
@@ -149,10 +150,11 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.initializeGrid();
     this.placeWordsOnGrid();
     this.fillRemainingCells();
+    this.timeElapsed = 0; // Reiniciar tiempo transcurrido
     this.startTimer();
   }
 
-  originalTimeLimit = 347;
+  originalTimeLimit = 180; // 3 minutos por defecto
 
   initializeGrid() {
     this.grid = [];
@@ -181,7 +183,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
           </p>
           <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); padding: 20px; border-radius: 15px; margin: 15px 0;">
             <p style="font-size: 18px; color: #1b5e20; margin: 0;">
-              ⏱️ Tiempo: <strong>${this.formatTime(347 - this.timeLeft)}</strong>
+              ⏱️ Tiempo: <strong>${this.formatTime(this.timeElapsed)}</strong>
             </p>
           </div>
           <p style="font-size: 16px; color: #555; margin: 10px 0;">
@@ -450,6 +452,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
+        this.timeElapsed++; // Incrementar tiempo transcurrido
       } else {
         clearInterval(this.timer);
         this.showTimeUpAlert();
@@ -458,6 +461,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   formatTime(seconds: number): string {
+    // Convierte segundos a formato MM:SS para mostrar tiempo transcurrido y restante
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
@@ -644,6 +648,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.words.forEach((word) => (word.found = false));
 
     this.timeLeft = this.originalTimeLimit;
+    this.timeElapsed = 0; // Reiniciar tiempo transcurrido
 
     this.initializeGrid();
     this.placeWordsOnGrid();

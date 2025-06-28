@@ -66,117 +66,168 @@
     </div>
   </div>
   } @if (!loading && !error && !isLoading && !authError) {
-  <div class="w-full max-w-full mx-auto h-full flex flex-col">
-    <!-- Header Mejorado -->
+  <div class="w-full max-w-full mx-auto flex flex-col">
     <div class="w-full mb-6 transition-all duration-500 ease-in-out">
-      <!-- Header expandido -->
+      <!-- Header expandido con mejor jerarquía -->
       <div
         *ngIf="headerExpanded"
-        class="bg-white/25 rounded-3xl backdrop-blur-xl shadow-2xl border border-white/40 p-8"
-        style="
-          backdrop-filter: blur(24px);
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-        "
+        class="bg-white/20 rounded-3xl backdrop-blur-md shadow-2xl border border-white/30 p-8"
+        style="backdrop-filter: blur(20px)"
       >
-        <!-- Fila superior con título y botón volver -->
-        <div class="flex items-center justify-between mb-8">
-          <div class="flex items-center gap-5">
-            <button
-              (click)="volverAlDashboard()"
-              class="px-8 py-3 bg-atzicay-bg-button text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-            >
-              ← Volver al Dashboard
-            </button>
-            <div>
-              <h1
-                class="text-4xl font-black tracking-tight"
-                style="color: var(--color-text-primary)"
-              >
-                🔍 {{ title || "Sopa de Letras" }}
-              </h1>
-              <p
-                class="text-xl opacity-90 mt-1"
-                style="color: var(--color-text-primary)"
-              >
-                {{ description || "Encuentra todas las palabras ocultas" }}
-              </p>
-            </div>
-          </div>
+        <!-- Fila superior con mejor espaciado -->
+        <div class="flex items-center justify-between mb-6">
           <button
-            (click)="toggleHeader()"
-            class="bg-white/30 hover:bg-white/50 backdrop-blur-sm rounded-2xl p-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-            title="Minimizar header"
+            (click)="volverAlDashboard()"
+            class="group px-6 py-3 bg-white/90 text-purple-700 rounded-xl hover:bg-white font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
           >
             <svg
-              class="w-6 h-6"
-              style="color: var(--color-text-primary)"
+              class="inline w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
-              stroke-width="2.5"
             >
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Volver
+          </button>
+
+          <div class="text-center flex-1 mx-6">
+            <h1
+              class="text-2xl font-black mb-1 tracking-tight"
+              style="
+                color: var(--color-text-primary);
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              "
+            >
+              🔍 {{ title || "Sopa de Letras" }}
+            </h1>
+            <p
+              class="text-sm font-medium opacity-90"
+              style="color: var(--color-text-primary)"
+            >
+              {{ description || "Encuentra todas las palabras ocultas" }}
+            </p>
+          </div>
+
+          <button
+            (click)="toggleHeader()"
+            class="bg-white/90 hover:bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl"
+            title="Minimizar header"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-purple-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
                 d="M5 15l7-7 7 7"
               />
             </svg>
           </button>
         </div>
 
-        <!-- Stats en cards mejoradas -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Stats mejorados con cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Palabras encontradas -->
           <div
-            class="bg-white/30 rounded-3xl p-6 backdrop-blur-sm border border-white/30 shadow-xl transform hover:scale-105 transition-all duration-300"
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
           >
-            <div class="text-center">
-              <div
-                class="text-3xl font-black mb-2"
-                style="color: var(--color-text-primary)"
-              >
-                {{ wordsFound }}/{{ totalWords }}
+            <div class="flex items-center gap-3">
+              <div class="bg-green-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
               </div>
-              <div
-                class="text-base opacity-90 font-medium"
-                style="color: var(--color-text-primary)"
-              >
-                Palabras encontradas
+              <div>
+                <p class="text-lg font-bold text-gray-800">
+                  {{ wordsFound }}/{{ totalWords }}
+                </p>
+                <p class="text-xs text-gray-600 font-medium">
+                  Palabras encontradas
+                </p>
               </div>
             </div>
           </div>
+
+          <!-- Tiempo restante -->
           <div
-            class="bg-white/30 rounded-3xl p-6 backdrop-blur-sm border border-white/30 shadow-xl transform hover:scale-105 transition-all duration-300"
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
           >
-            <div class="text-center">
-              <div
-                class="text-3xl font-black mb-2"
-                style="color: var(--color-text-primary)"
-              >
-                {{ formatTime(timeLeft) }}
+            <div class="flex items-center gap-3">
+              <div class="bg-blue-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
               </div>
-              <div
-                class="text-base opacity-90 font-medium"
-                style="color: var(--color-text-primary)"
-              >
-                Tiempo restante
+              <div>
+                <p class="text-lg font-bold text-gray-800 font-mono">
+                  {{ formatTime(timeLeft) }}
+                </p>
+                <p class="text-xs text-gray-600 font-medium">Tiempo restante</p>
               </div>
             </div>
           </div>
+
+          <!-- Tiempo transcurrido -->
           <div
-            class="bg-white/30 rounded-3xl p-6 backdrop-blur-sm border border-white/30 shadow-xl transform hover:scale-105 transition-all duration-300"
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
           >
-            <div class="text-center">
-              <div
-                class="text-3xl font-black mb-2"
-                style="color: var(--color-text-primary)"
-              >
-                {{ formatTime(originalTimeLimit - timeLeft) }}
+            <div class="flex items-center gap-3">
+              <div class="bg-purple-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-purple-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
               </div>
-              <div
-                class="text-base opacity-90 font-medium"
-                style="color: var(--color-text-primary)"
-              >
-                Tiempo transcurrido
+              <div>
+                <p class="text-lg font-bold text-gray-800 font-mono">
+                  {{ formatTime(timeElapsed) }}
+                </p>
+                <p class="text-xs text-gray-600 font-medium">
+                  Tiempo transcurrido
+                </p>
               </div>
             </div>
           </div>
@@ -184,14 +235,23 @@
 
         <!-- Barra de progreso mejorada -->
         <div class="mt-6">
-          <div
-            class="w-full h-4 bg-white/20 rounded-2xl overflow-hidden backdrop-blur-sm shadow-inner"
-          >
-            <div
-              class="h-full bg-gradient-to-r from-green-400 via-green-500 to-green-600 transition-all duration-500 rounded-2xl shadow-lg"
-              [style.width.%]="(wordsFound / totalWords) * 100"
-              style="box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3)"
-            ></div>
+          <div class="mb-3">
+            <div class="flex items-center justify-between mb-2">
+              <span
+                class="text-sm font-semibold"
+                style="color: var(--color-text-primary)"
+                >Progreso del Desafío</span
+              >
+              <span class="text-sm font-bold text-green-600"
+                >{{ wordsFound }}/{{ totalWords }}</span
+              >
+            </div>
+            <div class="w-full bg-white/30 rounded-full h-3 overflow-hidden">
+              <div
+                class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
+                [style.width.%]="(wordsFound / totalWords) * 100"
+              ></div>
+            </div>
           </div>
         </div>
       </div>
@@ -199,60 +259,97 @@
       <!-- Header minimizado mejorado -->
       <div
         *ngIf="!headerExpanded"
-        class="bg-white/20 rounded-2xl backdrop-blur-xl shadow-2xl border border-white/30 px-8 py-5"
-        style="backdrop-filter: blur(24px)"
+        class="bg-white/15 rounded-full backdrop-blur-lg shadow-xl border border-white/20 px-8 py-4"
       >
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-5">
-            <button
-              (click)="volverAlDashboard()"
-              class="bg-white/40 hover:bg-white/60 backdrop-blur-sm rounded-xl p-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              title="Volver al Dashboard"
+          <!-- Info compacta mejorada -->
+          <div
+            class="flex items-center gap-6 text-sm font-medium"
+            style="color: var(--color-text-primary)"
+          >
+            <span class="text-sm font-bold">🔍 Sopa de Letras</span>
+
+            <!-- Stats compactos con iconos -->
+            <div
+              class="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1"
             >
               <svg
-                class="w-5 h-5 text-black"
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
-                stroke-width="2.5"
+                stroke="currentColor"
               >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-            </button>
-            <h2
-              class="text-2xl font-black"
-              style="color: var(--color-text-primary)"
+              <span class="font-bold">{{ wordsFound }}/{{ totalWords }}</span>
+            </div>
+
+            <!-- Tiempo compacto -->
+            <div
+              class="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1 font-mono"
             >
-              🔍 Sopa de Letras
-            </h2>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span class="font-bold">{{ formatTime(timeLeft) }}</span>
+            </div>
+
+            <!-- Progreso compacto -->
+            <div
+              class="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1"
+            >
+              <span class="text-xs">Progreso:</span>
+              <div class="w-16 bg-white/30 rounded-full h-1.5">
+                <div
+                  class="bg-white h-1.5 rounded-full transition-all duration-500"
+                  [style.width.%]="(wordsFound / totalWords) * 100"
+                ></div>
+              </div>
+            </div>
           </div>
-          <div class="flex items-center gap-8">
-            <span
-              class="text-lg font-bold"
-              style="color: var(--color-text-primary)"
+
+          <!-- Botones de acción mejorados -->
+          <div class="flex items-center gap-3">
+            <button
+              (click)="volverAlDashboard()"
+              class="px-4 py-2 bg-white/90 text-purple-700 rounded-xl hover:bg-white font-semibold text-sm cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
             >
-              {{ wordsFound }}/{{ totalWords }} | {{ formatTime(timeLeft) }}
-            </span>
+              ← Volver
+            </button>
+
             <button
               (click)="toggleHeader()"
-              class="bg-white/30 hover:bg-white/50 backdrop-blur-sm rounded-xl p-3 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              class="bg-white/90 hover:bg-white rounded-xl p-2.5 transition-all duration-200 cursor-pointer active:scale-95 shadow-lg"
               title="Expandir header"
             >
               <svg
-                class="w-5 h-5"
-                style="color: var(--color-text-primary)"
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-purple-600"
                 fill="none"
-                stroke="currentColor"
                 viewBox="0 0 24 24"
-                stroke-width="2.5"
+                stroke="currentColor"
               >
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
+                  stroke-width="2"
                   d="M19 9l-7 7-7-7"
                 />
               </svg>
@@ -327,10 +424,10 @@
             </div>
           </div>
 
-          <div class="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+          <div class="space-y-4 max-h-full overflow-y-auto pr-2 custom-scrollbar">
             @for (word of words; track word.text) {
             <div
-              class="p-5 rounded-2xl text-center transition-all duration-300 border-3 shadow-lg hover:shadow-xl transform hover:scale-105"
+              class="p-5 rounded-2xl text-center transition-all duration-300 border-3 shadow-lg"
               [class.bg-purple-50]="!word.found"
               [class.border-purple-300]="!word.found"
               [class.bg-green-50]="word.found"
@@ -356,42 +453,6 @@
             }
           </div>
 
-          <div class="mt-8 pt-6 border-t-3 border-purple-200">
-            <div class="space-y-4">
-              <div class="flex justify-between items-center text-base">
-                <span class="text-purple-700 font-bold">Progreso:</span>
-                <span class="font-black text-purple-800 text-lg">
-                  {{ ((wordsFound / totalWords) * 100).toFixed(0) }}%
-                </span>
-              </div>
-
-              <div class="flex justify-between items-center text-base">
-                <span class="text-purple-700 font-bold">Tiempo usado:</span>
-                <span class="font-black text-purple-800 text-lg">
-                  {{ formatTime(347 - timeLeft) }}
-                </span>
-              </div>
-
-              <div class="flex justify-between items-center text-base">
-                <span class="text-purple-700 font-bold">Restantes:</span>
-                <span class="font-black text-purple-800 text-lg">
-                  {{ totalWords - wordsFound }} palabras
-                </span>
-              </div>
-            </div>
-
-            <div class="mt-6">
-              <div
-                class="w-full h-3 bg-purple-200 rounded-2xl overflow-hidden shadow-inner"
-              >
-                <div
-                  class="h-full bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 rounded-2xl transition-all duration-500 shadow-lg"
-                  [style.width]="(wordsFound / totalWords) * 100 + '%'"
-                  style="box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3)"
-                ></div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -405,23 +466,3 @@
     (rated)="onGameRated()"
   ></app-rating-modal>
 </div>
-
-<style>
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(147, 51, 234, 0.1);
-    border-radius: 10px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(147, 51, 234, 0.4);
-    border-radius: 10px;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(147, 51, 234, 0.6);
-  }
-</style>

@@ -16,11 +16,6 @@ interface PuzzlePiece {
   currentCol: number;
   inBoard: boolean;
   correctPos: boolean;
-  // Propiedades para las formas
-  topConnector: 'in' | 'out' | 'none';
-  rightConnector: 'in' | 'out' | 'none';
-  bottomConnector: 'in' | 'out' | 'none';
-  leftConnector: 'in' | 'out' | 'none';
 }
 
 @Component({
@@ -53,9 +48,6 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   imageWidth = 600; // Reducido para mejor visualización
   imageHeight = 450;
 
-  // Dimensiones para el área de piezas disponibles
-  sidebarWidth = 200;
-
   // Variables para la configuración del juego
   loading = false;
   error: string | null = null;
@@ -76,6 +68,9 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   gameInstanceId = 0;
   hasUserRated = false;
   headerExpanded: boolean = false;
+
+  // Expose Math for template
+  Math = Math;
 
   constructor() {
     super();
@@ -169,53 +164,7 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   }
 
   generatePuzzleShapes() {
-    // Primero, inicializar todos los conectores
-    this.pieces.forEach((piece) => {
-      piece.topConnector = piece.row === 0 ? 'none' : 'none';
-      piece.rightConnector = piece.col === this.cols - 1 ? 'none' : 'none';
-      piece.bottomConnector = piece.row === this.rows - 1 ? 'none' : 'none';
-      piece.leftConnector = piece.col === 0 ? 'none' : 'none';
-    });
-
-    // Generar conectores de manera coordinada
-    for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.cols; col++) {
-        const piece = this.pieces.find((p) => p.row === row && p.col === col);
-        if (!piece) continue;
-
-        // Conector derecho (solo si no es la última columna)
-        if (col < this.cols - 1) {
-          const rightPiece = this.pieces.find(
-            (p) => p.row === row && p.col === col + 1
-          );
-          if (
-            rightPiece &&
-            piece.rightConnector === 'none' &&
-            rightPiece.leftConnector === 'none'
-          ) {
-            const isOut = Math.random() > 0.5;
-            piece.rightConnector = isOut ? 'out' : 'in';
-            rightPiece.leftConnector = isOut ? 'in' : 'out';
-          }
-        }
-
-        // Conector inferior (solo si no es la última fila)
-        if (row < this.rows - 1) {
-          const bottomPiece = this.pieces.find(
-            (p) => p.row === row + 1 && p.col === col
-          );
-          if (
-            bottomPiece &&
-            piece.bottomConnector === 'none' &&
-            bottomPiece.topConnector === 'none'
-          ) {
-            const isOut = Math.random() > 0.5;
-            piece.bottomConnector = isOut ? 'out' : 'in';
-            bottomPiece.topConnector = isOut ? 'in' : 'out';
-          }
-        }
-      }
-    }
+    // Method removed - no longer using puzzle piece connectors
   }
 
   initializePuzzle() {
@@ -234,40 +183,14 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
           currentCol: -1,
           inBoard: false,
           correctPos: false,
-          // Inicializar conectores
-          topConnector: 'none',
-          rightConnector: 'none',
-          bottomConnector: 'none',
-          leftConnector: 'none',
         });
       }
     }
-
-    // Generar las formas del puzzle
-    this.generatePuzzleShapes();
 
     // Mezclar las piezas en el sidebar
     this.shufflePiecesForSidebar();
 
     this.gameCompleted = false;
-  }
-
-  getPuzzleShapeClasses(piece: PuzzlePiece): string {
-    const classes = ['puzzle-piece'];
-
-    if (piece.topConnector === 'in') classes.push('top-in');
-    else if (piece.topConnector === 'out') classes.push('top-out');
-
-    if (piece.rightConnector === 'in') classes.push('right-in');
-    else if (piece.rightConnector === 'out') classes.push('right-out');
-
-    if (piece.bottomConnector === 'in') classes.push('bottom-in');
-    else if (piece.bottomConnector === 'out') classes.push('bottom-out');
-
-    if (piece.leftConnector === 'in') classes.push('left-in');
-    else if (piece.leftConnector === 'out') classes.push('left-out');
-
-    return classes.join(' ');
   }
 
   startGame() {
@@ -439,43 +362,28 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
 
     const pieceWidth = this.imageWidth / this.cols;
     const pieceHeight = this.imageHeight / this.rows;
-    const scale = this.isInSidebar(piece) ? 0.6 : 1; // Reducir escala en sidebar
     const isInBoard = !this.isInSidebar(piece);
 
     const baseStyle = {
-      width: isInBoard ? '100%' : `${pieceWidth * scale}px`,
-      height: isInBoard ? '100%' : `${pieceHeight * scale}px`,
+      width: isInBoard ? '100%' : '100%', // Uniform size for sidebar pieces (handled by container)
+      height: isInBoard ? '100%' : '100%', // Uniform size for sidebar pieces (handled by container)
       'background-image': `url(${this.puzzleImageUrl})`,
-      'background-position': `-${piece.col * pieceWidth}px -${
-        piece.row * pieceHeight
-      }px`,
+      'background-position': `-${piece.col * pieceWidth}px -${piece.row * pieceHeight}px`,
       'background-size': `${this.imageWidth}px ${this.imageHeight}px`,
       'background-repeat': 'no-repeat',
       cursor: this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
-      border: isInBoard
-        ? '1px solid rgba(147, 51, 234, 0.3)'
-        : '2px solid rgba(102, 102, 102, 0.5)',
-      'border-radius': isInBoard ? '2px' : '8px',
-      'box-shadow':
-        this.selectedPiece?.id === piece.id
-          ? '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2)'
-          : isInBoard
-          ? 'none'
-          : '0 2px 4px rgba(0,0,0,0.1)',
+      'border-radius': '8px',
       display: 'block',
       position: isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
       transition: 'all 0.2s ease',
-      transform:
-        this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
       top: isInBoard ? '0' : 'auto',
       left: isInBoard ? '0' : 'auto',
-      margin: isInBoard ? '0' : '4px',
+      margin: '0',
       padding: '0',
       'object-fit': 'cover',
     };
 
-    // Si la imagen no se carga, agregar un fallback
     return baseStyle;
   }
 
@@ -680,5 +588,8 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
     this.headerExpanded = !this.headerExpanded;
   }
 
+  getSidebarPiecesCount(): number {
+    return this.pieces.filter(p => this.isInSidebar(p)).length;
+  }
   protected readonly Array = Array;
 }

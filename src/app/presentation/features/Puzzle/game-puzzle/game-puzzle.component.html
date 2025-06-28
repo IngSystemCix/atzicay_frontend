@@ -10,170 +10,375 @@
     ></div>
     <p class="text-purple-600 text-lg">Verificando autenticación...</p>
   </div>
-  }
-  
-  @if (authError && !isLoading) {
+  } @if (authError && !isLoading) {
   <div class="flex flex-col items-center justify-center min-h-[400px]">
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    <div
+      class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+    >
       <p class="font-bold">Error de autenticación</p>
       <p>{{ authError }}</p>
     </div>
   </div>
-  }
-  
-  @if (loading && !isLoading) {
+  } @if (loading && !isLoading) {
   <div class="flex flex-col items-center justify-center min-h-[400px]">
     <div
       class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mb-4"
     ></div>
     <p class="text-purple-600 text-lg">Cargando juego...</p>
   </div>
-  }
-  
-  @if (error && !loading && !isLoading) {
+  } @if (error && !loading && !isLoading) {
   <div class="flex flex-col items-center justify-center min-h-[400px]">
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    <div
+      class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+    >
       <p class="font-bold">Error</p>
       <p>{{ error }}</p>
     </div>
   </div>
-  }
-  
-  @if (!loading && !error && !isLoading && !authError) {
+  } @if (!loading && !error && !isLoading && !authError) {
   <div class="w-full max-w-6xl mx-auto h-full flex flex-col">
     <!-- Header Mejorado - Estilo Hangman -->
     <div class="w-full mb-6 transition-all duration-500 ease-in-out">
-      <!-- Header expandido -->
+      <!-- Header expandido con mejor jerarquía -->
       <div
         *ngIf="headerExpanded"
         class="bg-white/20 rounded-3xl backdrop-blur-md shadow-2xl border border-white/30 p-8"
         style="backdrop-filter: blur(20px)"
       >
-        <!-- Fila superior con título y botón volver -->
+        <!-- Fila superior con mejor espaciado -->
         <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-4">
-            <button
-              (click)="volverAlDashboard()"
-              class="bg-white/30 hover:bg-white/40 backdrop-blur-sm rounded-full p-3 transition-all duration-200 group"
-              title="Volver al Dashboard"
+          <button
+            (click)="volverAlDashboard()"
+            class="group px-6 py-3 bg-white/90 text-purple-700 rounded-xl hover:bg-white font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl"
+          >
+            <svg
+              class="inline w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg class="w-6 h-6 text-black group-hover:text-purple-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-            </button>
-            <div>
-              <h1 class="text-3xl font-bold" style="color: var(--color-text-primary)">
-                {{ gameConfig?.game_name || '🧩 Rompecabezas' }}
-              </h1>
-              <p class="text-lg opacity-80" style="color: var(--color-text-primary)">
-                {{ gameConfig?.game_description || 'Arma el rompecabezas colocando las piezas' }}
-              </p>
-              <div
-                *ngIf="puzzleConfig?.clue"
-                class="mt-2 text-sm bg-purple-100/20 rounded-lg py-1 px-3 backdrop-blur-sm"
-                style="color: var(--color-text-primary)"
-              >
-                <span class="font-semibold">💡 Pista:</span> {{ puzzleConfig?.clue }}
-              </div>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Volver
+          </button>
+
+          <div class="text-center flex-1 mx-6">
+            <h1
+              class="text-4xl font-black mb-2 tracking-tight"
+              style="
+                color: var(--color-text-primary);
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              "
+            >
+              {{ gameConfig?.game_name || "🧩 Rompecabezas" }}
+            </h1>
+            <p
+              class="text-lg font-medium opacity-90"
+              style="color: var(--color-text-primary)"
+            >
+              {{
+                gameConfig?.game_description ||
+                  "Arma el rompecabezas colocando las piezas"
+              }}
+            </p>
+            <div
+              *ngIf="puzzleConfig?.clue"
+              class="mt-3 text-sm bg-purple-100/30 rounded-lg py-2 px-4 backdrop-blur-sm inline-block"
+              style="color: var(--color-text-primary)"
+            >
+              <span class="font-semibold">💡 Pista:</span>
+              {{ puzzleConfig?.clue }}
             </div>
           </div>
+
           <button
             (click)="toggleHeader()"
-            class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
+            class="bg-white/90 hover:bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl"
             title="Minimizar header"
           >
-            <svg class="w-5 h-5" style="color: var(--color-text-primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-purple-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 15l7-7 7 7"
+              />
             </svg>
           </button>
         </div>
 
-        <!-- Stats en cards -->
+        <!-- Stats mejorados con cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
-            <div class="text-center">
-              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
-                {{ correctPieces }}/{{ totalPieces }}
+          <!-- Piezas correctas -->
+          <div
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
+          >
+            <div class="flex items-center gap-3">
+              <div class="bg-green-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-green-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h.01M15 6h.01M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"
+                  />
+                </svg>
               </div>
-              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
-                Piezas correctas
+              <div>
+                <p class="text-2xl font-bold text-gray-800">
+                  {{ correctPieces }}/{{ totalPieces }}
+                </p>
+                <p class="text-sm text-gray-600 font-medium">
+                  Piezas correctas
+                </p>
               </div>
             </div>
           </div>
-          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
-            <div class="text-center">
-              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
-                {{ formatTime(timeLeft) }}
+
+          <!-- Tiempo restante -->
+          <div
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
+          >
+            <div class="flex items-center gap-3">
+              <div class="bg-orange-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-orange-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
               </div>
-              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
-                Tiempo restante
+              <div>
+                <p class="text-2xl font-bold text-gray-800 font-mono">
+                  {{ formatTime(timeLeft) }}
+                </p>
+                <p class="text-sm text-gray-600 font-medium">Tiempo restante</p>
               </div>
             </div>
           </div>
-          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
-            <div class="text-center">
-              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
-                {{ formatTime(timeElapsed) }}
+
+          <!-- Tiempo transcurrido -->
+          <div
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
+          >
+            <div class="flex items-center gap-3">
+              <div class="bg-blue-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
               </div>
-              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
-                Tiempo transcurrido
+              <div>
+                <p class="text-2xl font-bold text-gray-800 font-mono">
+                  {{ formatTime(timeElapsed) }}
+                </p>
+                <p class="text-sm text-gray-600 font-medium">
+                  Tiempo transcurrido
+                </p>
               </div>
             </div>
           </div>
-          <div class="bg-white/20 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
-            <div class="text-center">
-              <div class="text-2xl font-bold" style="color: var(--color-text-primary)">
-                {{ gameCompleted ? '🎉 ¡Ganaste!' : (gameStarted ? '🎮 Jugando' : '🚀 Listo') }}
+
+          <!-- Estado del juego -->
+          <div
+            class="bg-white/80 rounded-2xl px-6 py-4 backdrop-blur-sm shadow-lg"
+          >
+            <div class="flex items-center gap-3">
+              <div class="bg-purple-100 rounded-full p-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-purple-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                  />
+                </svg>
               </div>
-              <div class="text-sm opacity-80" style="color: var(--color-text-primary)">
-                Estado del juego
+              <div>
+                <p class="text-2xl font-bold text-gray-800">
+                  {{ gameCompleted ? "🎉" : gameStarted ? "🎮" : "🚀" }}
+                </p>
+                <p class="text-sm text-gray-600 font-medium">
+                  {{
+                    gameCompleted
+                      ? "Completado"
+                      : gameStarted
+                      ? "En progreso"
+                      : "Listo"
+                  }}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Barra de progreso -->
-        <div class="mt-4">
-          <div class="w-full h-3 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+        <!-- Barra de progreso mejorada -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between mb-2">
+            <span
+              class="text-sm font-semibold"
+              style="color: var(--color-text-primary)"
+            >
+              Progreso del Rompecabezas
+            </span>
+            <span class="text-lg font-bold text-purple-600">
+              {{ Math.round((correctPieces / totalPieces) * 100) }}%
+            </span>
+          </div>
+          <div
+            class="w-full h-4 bg-white/30 rounded-full overflow-hidden backdrop-blur-sm shadow-inner"
+          >
             <div
-              class="h-full bg-gradient-to-r from-purple-400 to-purple-600 transition-all duration-300 rounded-full"
+              class="h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-700 ease-out rounded-full shadow-sm"
               [style.width.%]="(correctPieces / totalPieces) * 100"
             ></div>
           </div>
         </div>
       </div>
 
-      <!-- Header minimizado -->
+      <!-- Header minimizado mejorado -->
       <div
         *ngIf="!headerExpanded"
         class="bg-white/15 rounded-full backdrop-blur-lg shadow-xl border border-white/20 px-8 py-4"
       >
         <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
+          <!-- Info compacta mejorada -->
+          <div
+            class="flex items-center gap-6 text-sm font-medium"
+            style="color: var(--color-text-primary)"
+          >
+            <span class="text-lg font-bold">{{
+              gameConfig?.game_name || "🧩 Rompecabezas"
+            }}</span>
+
+            <!-- Piezas compactas con icono -->
+            <div
+              class="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h.01M15 6h.01M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z"
+                />
+              </svg>
+              <span class="font-bold"
+                >{{ correctPieces }}/{{ totalPieces }}</span
+              >
+            </div>
+
+            <!-- Progreso compacto -->
+            <div
+              class="flex items-center gap-2 bg-white/20 rounded-full px-3 py-1"
+            >
+              <span class="font-bold text-xs"
+                >{{ Math.round((correctPieces / totalPieces) * 100) }}%</span
+              >
+              <div class="w-16 bg-white/30 rounded-full h-1.5">
+                <div
+                  class="bg-white h-1.5 rounded-full transition-all duration-500"
+                  [style.width.%]="(correctPieces / totalPieces) * 100"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Tiempo compacto -->
+            <div
+              class="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1 font-mono"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span class="font-bold">{{ formatTime(timeLeft) }}</span>
+            </div>
+          </div>
+
+          <!-- Botones de acción mejorados -->
+          <div class="flex items-center gap-3">
             <button
               (click)="volverAlDashboard()"
-              class="bg-white/30 hover:bg-white/40 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
-              title="Volver al Dashboard"
+              class="px-4 py-2 bg-white/90 text-purple-700 rounded-xl hover:bg-white font-semibold text-sm cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg"
             >
-              <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
+              ← Volver
             </button>
-            <h2 class="text-xl font-bold" style="color: var(--color-text-primary)">
-              🧩 {{ gameConfig?.game_name || 'Rompecabezas' }}
-            </h2>
-          </div>
-          <div class="flex items-center gap-6">
-            <span class="text-sm font-medium" style="color: var(--color-text-primary)">
-              {{ correctPieces }}/{{ totalPieces }} | {{ formatTime(timeLeft) }}
-            </span>
+
             <button
               (click)="toggleHeader()"
-              class="bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
+              class="bg-white/90 hover:bg-white rounded-xl p-2.5 transition-all duration-200 cursor-pointer active:scale-95 shadow-lg"
               title="Expandir header"
             >
-              <svg class="w-5 h-5" style="color: var(--color-text-primary)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-purple-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
           </div>
@@ -185,11 +390,19 @@
     <div class="flex-1 flex justify-center items-center relative w-full my-8">
       <!-- Panel lateral flotante con piezas disponibles -->
       @if (gameStarted && !gameCompleted) {
-      <div class="floating-panel" [class.open]="isPanelOpen">
-        <div class="panel-toggle" (click)="togglePanel()">
+      <div
+        class="fixed top-1/2 transform -translate-y-1/2 w-72 h-4/5 max-h-[calc(100vh-200px)] bg-white/95 backdrop-blur-xl rounded-l-2xl shadow-2xl transition-all duration-300 ease-in-out z-50 p-5 flex flex-col border border-purple-200/50"
+        [class.right-0]="isPanelOpen"
+        [class.-right-72]="!isPanelOpen"
+      >
+        <!-- Toggle button -->
+        <button
+          (click)="togglePanel()"
+          class="absolute -left-12 top-1/2 transform -translate-y-1/2 bg-purple-600 hover:bg-purple-700 text-white w-12 h-12 rounded-l-lg flex items-center justify-center cursor-pointer transition-all duration-200 shadow-lg"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
+            class="h-6 w-6 transition-transform duration-200"
             [class.rotate-180]="!isPanelOpen"
             fill="none"
             viewBox="0 0 24 24"
@@ -202,10 +415,11 @@
               d="M15 19l-7-7 7-7"
             />
           </svg>
-        </div>
+        </button>
 
+        <!-- Panel header -->
         <h3
-          class="text-purple-700 font-bold mb-4 text-center flex items-center justify-center gap-2"
+          class="text-purple-700 font-bold mb-4 text-center flex items-center justify-center gap-2 text-lg"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -218,33 +432,38 @@
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M4 6h16M4 12h16m-7 6h7"
+              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
             />
           </svg>
           Piezas disponibles
         </h3>
 
-        <div class="pieces-container">
+        <!-- Pieces container -->
+        <div class="flex-1 grid grid-cols-2 gap-3 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-purple-100">
           @for (piece of pieces; track piece.id) { @if (isInSidebar(piece)) {
           <div
             [ngStyle]="getPieceStyle(piece)"
-            [class]="
-              'sidebar-piece transition-all duration-300 hover:shadow-lg ' +
-              getPuzzleShapeClasses(piece)
-            "
-            [class.selected]="selectedPiece?.id === piece.id"
+            class="w-full h-24 cursor-grab hover:cursor-grabbing transition-all duration-300 hover:shadow-xl hover:scale-105 rounded-lg overflow-hidden border-2 border-purple-200/50 hover:border-purple-400/70 bg-white/80 backdrop-blur-sm"
+            [class.ring-4]="selectedPiece?.id === piece.id"
+            [class.ring-purple-500]="selectedPiece?.id === piece.id"
+            [class.scale-105]="selectedPiece?.id === piece.id"
             [draggable]="gameStarted && !gameCompleted"
             (click)="onPieceClick(piece)"
             (dragstart)="onDragStart(piece, $event)"
             (dragend)="onDragEnd($event)"
-          >
-            <div class="piece-overlay"></div>
-          </div>
+          ></div>
           } }
+        </div>
+
+        <!-- Panel footer with piece count -->
+        <div class="mt-4 text-center text-sm text-purple-600 bg-purple-50/80 rounded-lg p-3">
+          <span class="font-semibold">
+            {{ getSidebarPiecesCount() }} piezas restantes
+          </span>
         </div>
       </div>
       }
-      <!-- Contenedor principal del puzzle - REEMPLAZA ESTA SECCIÓN -->
+      <!-- Contenedor principal del puzzle -->
       <div
         class="relative mx-auto rounded-2xl shadow-2xl overflow-hidden"
         [ngClass]="{
@@ -284,7 +503,7 @@
               @if (getPieceAt(rowIndex, colIndex)) {
               <div
                 [ngStyle]="getPieceStyle(getPieceAt(rowIndex, colIndex)!)"
-                class="absolute inset-0 w-full h-full rounded-sm overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:z-10 hover:shadow-lg cursor-pointer border border-purple-200/50 bg-clip-padding"
+                class="absolute inset-0 w-full h-full overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:z-10 hover:shadow-lg cursor-pointer bg-clip-padding"
                 [class]="
                   'piece-in-board ' +
                   (selectedPiece?.id === getPieceAt(rowIndex, colIndex)!.id
@@ -301,11 +520,6 @@
                 "
                 (dblclick)="returnToSidebar(getPieceAt(rowIndex, colIndex)!)"
               >
-                <!-- Overlay sutil para mejor contraste -->
-                <div
-                  class="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5 pointer-events-none"
-                ></div>
-
                 <!-- Indicador de pieza correcta -->
                 @if (getPieceAt(rowIndex, colIndex)!.correctPos) {
                 <div
@@ -359,86 +573,119 @@
               Presiona "Iniciar Juego" para comenzar tu aventura en el Sistema
               Solar
             </p>
+            <button
+              (click)="startGame()"
+              class="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            >
+              <span class="flex items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Iniciar Juego
+              </span>
+            </button>
           </div>
         </div>
         }
-      </div>
-    </div>
-    <!-- Footer con botones y mensajes -->
-    <div class="w-full max-w-4xl mx-auto mt-auto">
-      <div class="flex justify-center space-x-4 mb-4">
-        @if (gameStarted && !gameCompleted) {
-        <button
-          (click)="startGame()"
-          class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-        >
-          <span class="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Reiniciar
-          </span>
-        </button>
-        <button
-          (click)="toggleHelp()"
-          class="bg-purple-200 hover:bg-purple-300 text-purple-800 font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-        >
-          <span class="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            {{ allowWrongPlacements ? "Activar ayuda" : "Desactivar ayuda" }}
-          </span>
-        </button>
-        }
-      </div>
-
-      @if (gameStarted && gameCompleted) {
-      <div class="mt-2 text-center">
-        <p class="text-lg text-green-600 font-bold">
-          ¡Felicidades! Has completado el rompecabezas en
-          {{ formatTime(timeElapsed) }}
-        </p>
-      </div>
-      } @if (gameStarted && !gameCompleted) {
-      <div class="mt-4 text-sm text-gray-600">
-        <p>
-          Arrastra las piezas desde el panel izquierdo al tablero. Haz doble
-          clic en una pieza para devolverla.
-        </p>
-        @if (!allowWrongPlacements) {
-        <p>Modo ayuda: Las piezas solo se colocarán en su posición correcta.</p>
-        } @if (allowWrongPlacements) {
-        <p>Modo libre: Las piezas pueden colocarse en cualquier posición.</p>
-        }
-      </div>
-      }
+      </div>  
     </div>
   </div>
   }
-  
+
+  <!-- SweetAlert2 Styles -->
+  <style>
+    /* Kid-friendly SweetAlert2 styles - matching Hangman game */
+    :host ::ng-deep .animated-popup {
+      border-radius: 25px !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+      animation: bounceIn 0.6s ease-out !important;
+      border: 3px solid #e1bee7 !important;
+    }
+
+    :host ::ng-deep .kid-friendly-button {
+      border-radius: 25px !important;
+      font-size: 16px !important;
+      font-weight: bold !important;
+      padding: 12px 24px !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+      transition: all 0.3s ease !important;
+      text-transform: none !important;
+    }
+
+    :host ::ng-deep .kid-friendly-button:hover {
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    :host ::ng-deep .kid-friendly-button-secondary {
+      border-radius: 25px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      padding: 10px 20px !important;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+      transition: all 0.3s ease !important;
+      text-transform: none !important;
+    }
+
+    :host ::ng-deep .kid-toast-alert {
+      border-radius: 20px !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+      border: 2px solid #ffa726 !important;
+    }
+
+    /* Custom bounce animation */
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(-50px);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05) translateY(0);
+      }
+      70% {
+        transform: scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Additional effects for attractive appearance */
+    :host ::ng-deep .swal2-timer-progress-bar {
+      background: linear-gradient(90deg, #4caf50, #8bc34a, #cddc39) !important;
+      height: 6px !important;
+    }
+
+    :host ::ng-deep .swal2-title {
+      margin: 0 0 15px 0 !important;
+      font-family: 'Arial', sans-serif !important;
+    }
+
+    :host ::ng-deep .swal2-html-container {
+      margin: 0 !important;
+      font-family: 'Arial', sans-serif !important;
+    }
+
+    /* Button hover effects */
+    :host ::ng-deep .kid-friendly-button:active {
+      transform: translateY(0px) scale(0.95) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    }
+  </style>
+
   <!-- Rating Modal -->
   <app-rating-modal
     [isVisible]="mostrarModalRating"
