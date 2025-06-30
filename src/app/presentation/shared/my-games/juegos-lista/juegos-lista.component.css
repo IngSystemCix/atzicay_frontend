@@ -1,0 +1,35 @@
+/* Asegurar que el contenedor principal tenga el scroll correcto */
+.juegos-container {
+  height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+/* Asegurar que el grid se expanda correctamente */
+.juegos-grid {
+  min-height: max-content;
+}
+
+/* Estilo del botón "Ver más" para asegurar que sea visible */
+.ver-mas-container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  clear: both;
+}
+
+/* Asegurar que las cards no interfieran con el scroll */
+.juego-card {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Scroll suave para el contenedor */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Ajuste para el padding inferior */
+.scroll-padding-bottom {
+  padding-bottom: 6rem !important;
+}

@@ -203,8 +203,30 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   loadMore(): void {
+    // Marcar la posición actual antes de cargar más
+    const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    const currentActivitiesCount = this.activities.length;
+    
     this.currentPage++;
     this.loadProgrammings(true);
+    
+    // Después de cargar más actividades, hacer scroll suave hacia los nuevos elementos
+    setTimeout(() => {
+      if (this.activities.length > currentActivitiesCount) {
+        // Scroll suave hacia los nuevos elementos
+        const newElements = document.querySelectorAll('.programming-card');
+        if (newElements.length > currentActivitiesCount) {
+          const targetElement = newElements[currentActivitiesCount];
+          if (targetElement) {
+            targetElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'start',
+              inline: 'nearest'
+            });
+          }
+        }
+      }
+    }, 300); // Dar tiempo para que se rendericen los nuevos elementos
   }
 
   resetPagination(): void {

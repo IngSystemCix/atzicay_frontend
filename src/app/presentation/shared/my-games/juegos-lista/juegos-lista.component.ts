@@ -144,7 +144,29 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
 
   loadMoreJuegos(): void {
     if (this.hasMore && !this.cargando) {
+      // Marcar la posición actual antes de cargar más
+      const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+      const currentJuegosCount = this.juegos.length;
+      
       this.cargarJuegos(true);
+      
+      // Después de cargar más juegos, hacer scroll suave hacia los nuevos elementos
+      setTimeout(() => {
+        if (this.juegos.length > currentJuegosCount) {
+          // Scroll suave hacia los nuevos elementos
+          const newElements = document.querySelectorAll('.juego-card');
+          if (newElements.length > currentJuegosCount) {
+            const targetElement = newElements[currentJuegosCount];
+            if (targetElement) {
+              targetElement.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start',
+                inline: 'nearest'
+              });
+            }
+          }
+        }
+      }, 300); // Dar tiempo para que se rendericen los nuevos elementos
     }
   }
 

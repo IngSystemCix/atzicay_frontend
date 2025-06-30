@@ -50,4 +50,33 @@ input[type="date"] {
   }
 }
 
+/* Estilos para mejorar el scroll y contenido */
+.programmings-container {
+  height: 100%;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Asegurar que el grid se expanda correctamente */
+.programmings-grid {
+  min-height: max-content;
+}
+
+/* Asegurar que las cards no interfieran con el scroll */
+.programming-card {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Scroll suave para el contenedor */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Ajuste para el padding inferior */
+.scroll-padding-bottom {
+  padding-bottom: 6rem !important;
+}
+
 

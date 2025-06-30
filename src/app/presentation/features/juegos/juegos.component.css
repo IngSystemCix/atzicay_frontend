@@ -9,3 +9,14 @@
   transform-style: preserve-3d;
 }
 
+/* Mejorar el comportamiento del scroll */
+.juegos-scrollbar {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Asegurar que el contenedor principal tenga la altura correcta */
+.flex-1 {
+  min-height: 0; /* Permite que flexbox funcione correctamente */
+}
+
