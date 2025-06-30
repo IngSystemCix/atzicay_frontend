@@ -41,4 +41,10 @@ export class ProfileService {
       data: { user_id: number };
     }>(`${this.apiUrl}user/id-by-email`, { email });
   }
+
+  // Método para obtener el country_id por nombre de país
+  getCountryIdByName(countryName: string, countries: any[]): number | null {
+    const country = countries.find(c => c.Name === countryName);
+    return country ? country.Id : null;
+  }
 }

@@ -60,7 +60,7 @@
               required
               class="mt-1 w-full h-10 border border-gray-300 rounded-lg px-3"
             >
-              <option value="" disabled selected>Seleccione un país</option>
+              <option value="" disabled>Seleccione un país</option>
               <option *ngFor="let country of countries" [value]="country.Id">
                 {{ country.Name }}
               </option>

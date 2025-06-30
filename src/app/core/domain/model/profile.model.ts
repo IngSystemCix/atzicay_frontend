@@ -4,6 +4,7 @@ export interface Profile {
   gender: string;
   birthdate: string;
   country: string;
+  country_id?: number;
   city: string;
   member_since: string;
 }

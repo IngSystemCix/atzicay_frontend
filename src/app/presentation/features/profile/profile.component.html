@@ -171,7 +171,7 @@
     </div>
   </div>
 
-  @if (showModal) {
+  @if (showModal && user && countriesLoaded) {
   <app-modal-edit-users
     [userData]="user"
     (close)="cerrarModal()"
