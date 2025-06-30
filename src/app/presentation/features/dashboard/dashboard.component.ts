@@ -340,4 +340,18 @@ getTypeIcon(typeValue: string): string {
   trackByTypeValue(_index: number, type: { value: string; label: string }) {
     return type.value;
   }
+
+  // Función para filtrar por autor al hacer click
+  filterByAuthor(author: string): void {
+    this.searchTerm = author;
+    this.selectedType = 'all'; // Resetear filtros de tipo para mostrar todos los juegos del autor
+    this.selectedLevels = []; // Resetear filtros de nivel
+    this.applyFilters(); // Aplicar la búsqueda
+    
+    // Scroll hasta arriba para ver los resultados
+    const scrollElement = document.querySelector('.dashboard-scroll-content');
+    if (scrollElement) {
+      scrollElement.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
 }
