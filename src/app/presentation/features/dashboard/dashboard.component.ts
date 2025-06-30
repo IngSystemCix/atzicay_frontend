@@ -319,7 +319,6 @@ getTypeIcon(typeValue: string): string {
     }
   }
 
-  // Si el usuario escribe en el buscador, aplicar el filtro en frontend
   onSearchTermChange(): void {
     const search = this.searchTerm.trim().toLowerCase();
     if (search) {
@@ -336,19 +335,16 @@ getTypeIcon(typeValue: string): string {
     this.hasMoreGames = this.filteredGames.length === this.PAGE_SIZE;
   }
 
-  // trackBy function for gameTypes ngFor
   trackByTypeValue(_index: number, type: { value: string; label: string }) {
     return type.value;
   }
 
-  // Función para filtrar por autor al hacer click
   filterByAuthor(author: string): void {
     this.searchTerm = author;
-    this.selectedType = 'all'; // Resetear filtros de tipo para mostrar todos los juegos del autor
-    this.selectedLevels = []; // Resetear filtros de nivel
-    this.applyFilters(); // Aplicar la búsqueda
-    
-    // Scroll hasta arriba para ver los resultados
+    this.selectedType = 'all'; 
+    this.selectedLevels = []; 
+    this.applyFilters(); 
+  
     const scrollElement = document.querySelector('.dashboard-scroll-content');
     if (scrollElement) {
       scrollElement.scrollTo({ top: 0, behavior: 'smooth' });

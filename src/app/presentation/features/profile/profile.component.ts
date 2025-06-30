@@ -194,9 +194,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       
       // Mapear el género al formato esperado por el backend
       const genderMap: { [key: string]: string } = {
-        'M': 'Male',
-        'F': 'Female', 
-        'O': 'Other'
+        'Male': 'M',
+        'Female': 'F', 
+        'Other': 'O'
       };
       
       // Validar y formatear los datos antes de enviar
