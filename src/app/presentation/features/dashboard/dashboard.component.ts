@@ -34,7 +34,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isDropdownOpen = false;
   activeDropdownId: number | null = null;
   ratingArray: number[] = [1, 2, 3, 4, 5];
-isHeaderMinimized: boolean = false;
+  isHeaderMinimized: boolean = false;
+  isLoading: boolean = true;
   getGameRoute(gameType: string, id: number): string {
     const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
     switch (normalizedType) {
@@ -91,6 +92,7 @@ getTypeIcon(typeValue: string): string {
   }
 
   private loadGameInstances(): void {
+    this.isLoading = true;
     this.gameInstanceService
       .getGameInstances(this.searchTerm, this.selectedType, this.PAGE_SIZE, 0)
       .subscribe({
@@ -110,13 +112,14 @@ getTypeIcon(typeValue: string): string {
           this.displayedGames = games.slice(0, this.PAGE_SIZE);
           this.currentOffset = games.length;
           this.hasMoreGames = games.length === this.PAGE_SIZE;
-          (this as any).isLoading = false;
+          this.isLoading = false;
         },
         error: (err) => {
           console.error('Error cargando instancias de juegos:', err);
           this.allGames = [];
           this.filteredGames = [];
           this.displayedGames = [];
+          this.isLoading = false;
         },
       });
   }
@@ -185,6 +188,7 @@ getTypeIcon(typeValue: string): string {
 
   applyFilters(): void {
     this.currentPage = 1;
+    this.isLoading = true;
     this.loadGameInstances();
   }
 
