@@ -18,17 +18,26 @@ export class GameConfigurationService {
   private userSessionService = inject(UserSessionService);
   private apiUrl = environment.api_base_url;
 
-  getGameConfiguration(gameInstanceId: number): Observable<GameConfigurationResponse> {
+  getGameConfiguration(gameInstanceId: number, userId?: number, withProgrammings: boolean = false): Observable<GameConfigurationResponse> {
     return this.userSessionService.waitForToken$().pipe(
       switchMap((token) => {
-        return this.http.get<GameConfigurationResponse>(
-          `${this.apiUrl}game/settings/${gameInstanceId}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+        // Construir parámetros de consulta
+        const params = new URLSearchParams();
+        if (userId) {
+          params.append('userId', userId.toString());
+        }
+        params.append('withProgrammings', withProgrammings.toString());
+
+        const queryString = params.toString();
+        const url = `${this.apiUrl}game/settings/${gameInstanceId}${queryString ? '?' + queryString : ''}`;
+
+        console.log('Requesting game configuration:', { url, gameInstanceId, userId, withProgrammings });
+
+        return this.http.get<GameConfigurationResponse>(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
           }
-        );
+        });
       })
     );
   }

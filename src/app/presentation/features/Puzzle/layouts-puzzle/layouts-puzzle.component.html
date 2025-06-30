@@ -1,14 +1,6 @@
 <div class="min-h-screen bg-purple-50 p-2">
   <div class="">
-    <!-- Mensajes de estado -->
-    <div class="mb-4">
-      <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
-        {{ errorMessage }}
-      </div>
-      <div *ngIf="successMessage" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4">
-        {{ successMessage }}
-      </div>
-    </div>
+   
 
     <div class="flex mb-6 p-4 justify-between items-center">
       <!-- Tabs Navigation -->
@@ -36,7 +28,33 @@
         </button>
       </div>
 
-      <!-- Botones de acción -->
+      <div class="flex items-center gap-2 mr-4">
+        @if (contentForm.invalid && (contentForm.dirty || contentForm.touched)) {
+        <div class="flex items-center text-red-500 text-sm">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          <span>Información incompleta</span>
+        </div>
+        }
+        @if (hasImageError) {
+        <div class="flex items-center text-red-500 text-sm">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          <span>Imagen requerida</span>
+        </div>
+        }
+        @if (configForm.invalid && (configForm.dirty || configForm.touched)) {
+        <div class="flex items-center text-red-500 text-sm">
+          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          <span>Configuración con errores</span>
+        </div>
+        }
+      </div>
+
       <div class="flex gap-3">
         <button
           (click)="cancelar()"
@@ -47,8 +65,8 @@
         </button>
         <button
           (click)="guardar()"
-          [disabled]="isLoading"
-          [attr.disabled]="isLoading ? 'true' : null"
+          [disabled]="!isFormValid() || isLoading"
+          [attr.disabled]="!isFormValid() || isLoading ? 'true' : null"
           class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md font-bold disabled:opacity-50 transition-colors"
         >
           {{ isLoading ? "Guardando..." : "Guardar Juego" }}
@@ -67,25 +85,37 @@
         </h2>
         <p class="text-gray-600 mb-6">Configura los datos básicos del puzzle</p>
 
-        <div class="space-y-4">
+        <form [formGroup]="contentForm" class="space-y-4">
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Título del Juego *</label>
             <input
               type="text"
-              [(ngModel)]="tituloJuego"
+              formControlName="tituloJuego"
               placeholder="Ej: Rompecabezas de monumentos"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              [class.border-red-500]="isTitleInvalid"
             />
+            @if (isTitleInvalid) {
+            <span class="text-red-500 text-sm mt-1 block">
+              {{ getTitleErrorMessage() }}
+            </span>
+            }
           </div>
 
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción *</label>
             <textarea
-              [(ngModel)]="descripcion"
+              formControlName="descripcion"
               rows="4"
               placeholder="Describe tu juego de puzzle..."
               class="w-full px-4 py-2 pr-6 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              [class.border-red-500]="isDescriptionInvalid"
             ></textarea>
+            @if (isDescriptionInvalid) {
+            <span class="text-red-500 text-sm mt-1 block">
+              {{ getDescriptionErrorMessage() }}
+            </span>
+            }
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -94,22 +124,34 @@
               <input
                 title="Número de filas"
                 type="number"
-                [(ngModel)]="filas"
+                formControlName="filas"
                 min="2"
                 max="10"
                 class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+                [class.border-red-500]="isRowsInvalid"
               />
+              @if (isRowsInvalid) {
+              <span class="text-red-500 text-sm mt-1 block">
+                {{ getRowsErrorMessage() }}
+              </span>
+              }
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">Columnas (2-10) *</label>
               <input
                 title="Número de columnas"
                 type="number"
-                [(ngModel)]="columnas"
+                formControlName="columnas"
                 min="2"
                 max="10"
                 class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+                [class.border-red-500]="isColumnsInvalid"
               />
+              @if (isColumnsInvalid) {
+              <span class="text-red-500 text-sm mt-1 block">
+                {{ getColumnsErrorMessage() }}
+              </span>
+              }
             </div>
           </div>
 
@@ -117,7 +159,7 @@
             <label class="block text-sm font-semibold text-gray-700 mb-2">Dificultad</label>
             <select
               title="Dificultad del juego"
-              [(ngModel)]="dificultad"
+              formControlName="dificultad"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="E">Fácil</option>
@@ -131,23 +173,29 @@
             <input
               title="Tiempo límite en segundos"
               type="number"
-              [(ngModel)]="tiempo"
+              formControlName="tiempo"
               min="30"
               max="3600"
               class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
+              [class.border-red-500]="isTimeInvalid"
             />
+            @if (isTimeInvalid) {
+            <span class="text-red-500 text-sm mt-1 block">
+              {{ getTimeErrorMessage() }}
+            </span>
+            }
           </div>
 
           <div class="flex items-center space-x-3">
             <label class="flex items-center cursor-pointer">
-              <input type="checkbox" [(ngModel)]="mostrarPista" class="sr-only" />
+              <input type="checkbox" formControlName="mostrarPista" class="sr-only" />
               <div class="relative">
                 <div
-                  [ngClass]="mostrarPista ? 'bg-purple-500' : 'bg-gray-300'"
+                  [ngClass]="contentForm.get('mostrarPista')?.value ? 'bg-purple-500' : 'bg-gray-300'"
                   class="w-11 h-6 rounded-full transition-colors duration-200"
                 ></div>
                 <div
-                  [ngClass]="mostrarPista ? 'translate-x-6' : 'translate-x-1'"
+                  [ngClass]="contentForm.get('mostrarPista')?.value ? 'translate-x-6' : 'translate-x-1'"
                   class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
                 ></div>
               </div>
@@ -155,15 +203,21 @@
             </label>
           </div>
 
-          <div *ngIf="mostrarPista">
+          <div *ngIf="contentForm.get('mostrarPista')?.value">
             <textarea
-              [(ngModel)]="pista"
+              formControlName="pista"
               placeholder="Escriba aquí su pista"
               rows="2"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              [class.border-red-500]="isClueInvalid"
             ></textarea>
+            @if (isClueInvalid) {
+            <span class="text-red-500 text-sm mt-1 block">
+              {{ getClueErrorMessage() }}
+            </span>
+            }
           </div>
-        </div>
+        </form>
       </div>
 
       <!-- Imagen del Rompecabezas (Solo en contenido) -->
@@ -171,7 +225,9 @@
         <h2 class="text-2xl font-bold text-atzicay-purple-500 mb-2">Imagen del Rompecabezas</h2>
         <p class="text-gray-600 mb-6">Sube la imagen que se convertirá en rompecabezas</p>
 
-        <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+        <div class="border-2 border-dashed rounded-lg p-12 text-center"
+             [class.border-red-300]="hasImageError"
+             [class.border-gray-300]="!hasImageError">
           <div class="mx-auto w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
             <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -192,7 +248,14 @@
           >
             Seleccionar archivo
           </button>
-          <div *ngIf="selectedFile" class="mt-2 text-xs text-gray-600"></div>
+          <div *ngIf="selectedFile" class="mt-2 text-xs text-gray-600">
+            {{ selectedFile.name }}
+          </div>
+          @if (hasImageError) {
+          <div class="mt-2 text-red-500 text-sm">
+            <span>La imagen es requerida para crear el puzzle</span>
+          </div>
+          }
         </div>
 
         <div *ngIf="selectedImage" class="mt-4">
@@ -205,14 +268,14 @@
 
         <div class="mt-6 flex items-center space-x-3">
           <label class="flex items-center cursor-pointer">
-            <input type="checkbox" [(ngModel)]="ayudaAutomatica" class="sr-only" />
+            <input type="checkbox" formControlName="ayudaAutomatica" class="sr-only" />
             <div class="relative">
               <div
-                [ngClass]="ayudaAutomatica ? 'bg-purple-500' : 'bg-gray-300'"
+                [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'bg-purple-500' : 'bg-gray-300'"
                 class="w-11 h-6 rounded-full transition-colors duration-200"
               ></div>
               <div
-                [ngClass]="ayudaAutomatica ? 'translate-x-6' : 'translate-x-1'"
+                [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'translate-x-6' : 'translate-x-1'"
                 class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
               ></div>
             </div>
@@ -228,13 +291,13 @@
         <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Configuración del juego</h2>
         <p class="text-gray-600 mb-6 font-semibold">Personaliza las reglas y opciones del juego</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form [formGroup]="configForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Fuente -->
           <div>
             <label class="block text-gray-900 mb-2 font-semibold">Tipo de Letra</label>
             <select
               title="Fuente del Juego"
-              [(ngModel)]="fuente"
+              formControlName="fuente"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option *ngFor="let font of fonts; let i = index" [value]="font">{{ font }}</option>
@@ -248,8 +311,7 @@
               <input
                 title="Color de Fuente"
                 type="color"
-                [(ngModel)]="colorFuente"
-                [value]="colorFuente"
+                formControlName="colorFuente"
                 class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
               />
             </div>
@@ -259,8 +321,7 @@
               <input
                 title="Color de Fondo"
                 type="color"
-                [(ngModel)]="fondo"
-                [value]="fondo"
+                formControlName="fondo"
                 class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
               />
             </div>
@@ -272,7 +333,7 @@
             <input
               title="Mensaje de Éxito"
               type="text"
-              [(ngModel)]="mensajeExito"
+              formControlName="mensajeExito"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
@@ -283,23 +344,23 @@
             <input
               title="Mensaje de Fracaso"
               type="text"
-              [(ngModel)]="mensajeFracaso"
+              formControlName="mensajeFracaso"
               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
-        </div>
+        </form>
 
         <!-- Juego Público -->
         <div class="mt-6">
           <label class="flex items-center cursor-pointer">
-            <input type="checkbox" [(ngModel)]="juegoPublico" class="sr-only" />
+            <input type="checkbox" formControlName="juegoPublico" class="sr-only" />
             <div class="relative">
               <div
-                [ngClass]="juegoPublico ? 'bg-purple-500' : 'bg-gray-300'"
+                [ngClass]="configForm.get('juegoPublico')?.value ? 'bg-purple-500' : 'bg-gray-300'"
                 class="w-11 h-6 rounded-full transition-colors duration-200"
               ></div>
               <div
-                [ngClass]="juegoPublico ? 'translate-x-6' : 'translate-x-1'"
+                [ngClass]="configForm.get('juegoPublico')?.value ? 'translate-x-6' : 'translate-x-1'"
                 class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
               ></div>
             </div>

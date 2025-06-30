@@ -72,15 +72,12 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     this.userId = this.userSession.getUserId() || 0;
     
     if (this.userId && this.userSession.isAuthenticated()) {
-      console.log('[MyProgrammings] Usuario y token disponibles');
       this.loadProgrammings();
     } else {
-      console.log('[MyProgrammings] Esperando token y userId...');
       // Esperar tanto el token como el userId
       this.subscription.add(
         this.userSession.waitForToken$(5000).subscribe({
           next: (token) => {
-            console.log('[MyProgrammings] Token recibido');
             this.waitForUserId();
           },
           error: (err) => {
@@ -95,7 +92,6 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     this.subscription.add(
       this.userSession.userId$.subscribe(userId => {
         if (userId) {
-          console.log('[MyProgrammings] UserId recibido:', userId);
           this.userId = userId;
           this.loadProgrammings();
         }
@@ -166,11 +162,27 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
         next: (res) => {
           if (res && res.data && Array.isArray(res.data.data)) {
             if (loadMore && offset > 0) {
-              this.activities = [...this.activities, ...res.data.data];
+              // Filtrar duplicados antes de agregar
+              const newActivities = res.data.data.filter(newActivity => 
+                !this.activities.some(existingActivity => 
+                  existingActivity.game_instance_id === newActivity.game_instance_id
+                )
+              );
+              this.activities = [...this.activities, ...newActivities];
             } else {
               this.activities = res.data.data;
             }
             this.totalActivities = res.data.total;
+            
+            // Debug: mostrar tipos de juegos únicos
+            const uniqueTypes = [...new Set(this.activities.map(a => a.type_game))];
+            
+            // Debug: verificar duplicados
+            const gameIds = this.activities.map(a => a.game_instance_id);
+            const duplicates = gameIds.filter((id, index) => gameIds.indexOf(id) !== index);
+            if (duplicates.length > 0) {
+              console.warn('⚠️ IDs duplicados encontrados:', duplicates);
+            }
           } else {
             this.activities = [];
           }
@@ -249,7 +261,6 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
 
   editarActividad(id: number) {
     this.menuAbierto = null;
-    console.log('Editar actividad', id);
   }
 
   showOptions(event: MouseEvent, id: number): void {
@@ -395,13 +406,6 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     const successText = isActive ? 'La programación ahora es restringida.' : 'La programación ahora es pública.';
     const confirmButton = isActive ? 'Sí, restringir' : 'Sí, hacer pública';
     
-    console.log('Estado actual de la programación:', {
-      gameInstanceId: activity.game_instance_id,
-      currentStatus: activity.status,
-      isActive: isActive,
-      newStatus: newStatus
-    });
-    
     Swal.fire({
       title: 'Cambiar estado',
       text: confirmText,
@@ -413,39 +417,18 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log('Enviando request:', { gameInstanceId: activity.game_instance_id, status: newStatus });
-        
         this.programmingStatusService.setProgrammingGameStatus(activity.game_instance_id, newStatus).subscribe({
           next: (response) => {
-            console.log('✅ Respuesta del servidor:', response);
             this.menuAbierto = null;
-            
-            // Actualizar localmente el estado usando la respuesta del servidor
             if (response.data && typeof response.data.status === 'number') {
               activity.status = response.data.status;
-              console.log('🎯 Estado actualizado desde servidor:', response.data.status);
             } else {
-              // Fallback en caso de que el backend aún no esté actualizado
               activity.status = newStatus;
-              console.log('🔄 Estado actualizado localmente (fallback):', newStatus);
             }
-            
             Swal.fire('Actualizado', successText, 'success');
-            
-            // Opcional: recargar solo si es necesario
-            // this.resetPagination();
-            // this.loadProgrammings();
           },
           error: (err) => {
-            this.menuAbierto = null;
-            console.error('Error completo al cambiar estado:', {
-              error: err,
-              gameInstanceId: activity.game_instance_id,
-              attemptedStatus: newStatus,
-              errorMessage: err.error?.message || err.message,
-              statusCode: err.status
-            });
-            
+            this.menuAbierto = null;     
             let errorMessage = 'No se pudo cambiar el estado de la programación.';
             if (err.status === 401) {
               errorMessage = 'No tienes autorización para realizar esta acción.';
@@ -458,6 +441,121 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
             Swal.fire('Error', errorMessage, 'error');
           }
         });
+      }
+    });
+  }
+
+  generateGameUrl(activity: MyProgrammingGame): void {
+    
+    // Mapeo más robusto que incluye múltiples variantes
+    const gameRoutes: { [key: string]: string } = {
+      'Ahorcado': 'hangman',
+      'Rompecabezas': 'puzzle', 
+      'Memoria': 'memory',
+      'Pupiletras': 'solve-the-word',
+      'hangman': 'hangman',
+      'Hangman': 'hangman',
+      'HANGMAN': 'hangman',
+      'puzzle': 'puzzle',
+      'Puzzle': 'puzzle',
+      'PUZZLE': 'puzzle',
+      'memory': 'memory',
+      'Memory': 'memory',
+      'MEMORY': 'memory',
+      'solve-the-word': 'solve-the-word',
+      'solve_the_word': 'solve-the-word',
+      'Solve-the-word': 'solve-the-word',
+      'pupiletras': 'solve-the-word',
+      'Hnangman': 'hangman',
+      'hnangman': 'hangman'
+    };
+
+    let gameRoute = gameRoutes[activity.type_game];
+    
+    if (!gameRoute) {
+      const typeGameLower = activity.type_game.toLowerCase();
+      gameRoute = gameRoutes[typeGameLower];
+      
+      if (!gameRoute) {
+        const typeGameKey = Object.keys(gameRoutes).find(key => 
+          key.toLowerCase().includes(typeGameLower) || 
+          typeGameLower.includes(key.toLowerCase())
+        );
+        if (typeGameKey) {
+          gameRoute = gameRoutes[typeGameKey];
+        }
+      }
+    }
+    
+    if (!gameRoute) {
+      console.error('❌ Tipo de juego no reconocido:', {
+        received: activity.type_game,
+        availableTypes: Object.keys(gameRoutes)
+      });
+      Swal.fire('Error', `Tipo de juego no reconocido: "${activity.type_game}".<br>Tipos válidos: ${Object.keys(gameRoutes).slice(0, 4).join(', ')}`, 'error');
+      return;
+    }
+
+    const baseUrl = window.location.origin;
+    const gameUrl = `${baseUrl}/game/${gameRoute}/${activity.game_instance_id}?userId=${this.userId}&withProgrammings=true`;
+
+
+    Swal.fire({
+      title: 'URL del Juego Generada',
+      html: `
+        <div class="text-left">
+          <p class="mb-4"><strong>Juego:</strong> ${activity.name_game}</p>
+          <p class="mb-4"><strong>Programación:</strong> ${activity.programming_name}</p>
+          <p class="mb-4"><strong>Tipo:</strong> ${activity.type_game}</p>
+          <div class="bg-gray-100 p-3 rounded-lg border">
+            <p class="text-sm font-medium mb-2">URL del juego:</p>
+            <input id="gameUrlInput" type="text" value="${gameUrl}" 
+                   class="w-full p-2 text-xs border rounded bg-white" readonly>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">
+            Esta URL incluye el contexto de la programación y permitirá al estudiante jugar con todos los intentos y configuraciones establecidas.
+          </p>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: '📋 Copiar URL',
+      cancelButtonText: '🎮 Jugar Ahora',
+      confirmButtonColor: '#8b5cf6',
+      cancelButtonColor: '#10b981',
+      width: 700,
+      customClass: {
+        popup: 'text-left'
+      },
+      preConfirm: () => {
+        // Copiar al portapapeles
+        const input = document.getElementById('gameUrlInput') as HTMLInputElement;
+        if (input) {
+          input.select();
+          navigator.clipboard.writeText(gameUrl).then(() => {
+            Swal.fire({
+              title: '¡Copiado!',
+              text: 'La URL ha sido copiada al portapapeles',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          }).catch(() => {
+            // Fallback para navegadores más antiguos
+            document.execCommand('copy');
+            Swal.fire({
+              title: '¡Copiado!',
+              text: 'La URL ha sido copiada al portapapeles',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          });
+        }
+      }
+    }).then((result) => {
+      if (result.dismiss === Swal.DismissReason.cancel) {
+        // Abrir el juego en una nueva pestaña
+        window.open(gameUrl, '_blank');
       }
     });
   }

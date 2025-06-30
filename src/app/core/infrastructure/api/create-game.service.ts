@@ -42,7 +42,7 @@ export class CreateGameService {
 
   createSolveTheWordGame(userId: number, body: any): Observable<any> {
     return this.http.post<any>(
-      `${this.apiUrl}my-game/create/${userId}?gameType=solve_the_word`,
+      `${this.apiUrl}my-game/create/${userId}`,
       body
     );
   }

@@ -56,7 +56,6 @@
       }
     </div>
 
-    <!-- Botón de minimizar -->
     <button
       (click)="toggleMinimizado()"
       class="p-2 hover:bg-white/50 rounded-full cursor-pointer transition-colors duration-200 group ml-2"
@@ -129,8 +128,21 @@
     }
 
     <!-- Grid de categorías -->
-    @if (!cargando && !error) {
+    @if (!cargando) {
     <div class="p-6">
+      <!-- Mensaje informativo cuando todas las categorías están vacías -->
+      @if (todasCategoriasVacias && !error) {
+      <div class="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg flex items-center space-x-3">
+        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+        </svg>
+        <div>
+          <p class="font-medium">¡Comienza creando tu primer juego!</p>
+          <p class="text-sm">Aún no tienes juegos creados. Selecciona una categoría para comenzar.</p>
+        </div>
+      </div>
+      }
+
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         @for (categoria of categorias; track categoria.nombre) {
         <div
@@ -152,9 +164,10 @@
                 </div>
               </div>
               <div
-                class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium"
+                [class]="categoria.cantidad === 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                class="px-2 py-1 rounded-full text-xs font-medium"
               >
-                {{ categoria.cantidad }}
+                {{ categoria.cantidad === 0 ? 'Comenzar' : categoria.cantidad }}
               </div>
             </div>
 
@@ -177,7 +190,7 @@
                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                   ></path>
                 </svg>
-                <span>Crear</span>
+                <span>{{ categoria.cantidad === 0 ? 'Crear primero' : 'Crear' }}</span>
               </span>
             </button>
           </div>

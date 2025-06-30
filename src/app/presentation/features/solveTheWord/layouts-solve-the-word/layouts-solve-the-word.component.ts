@@ -6,6 +6,7 @@ import { AtzicayTabsComponent } from '../../../components/atzicay-tabs/atzicay-t
 import { AtzicayButtonComponent } from '../../../components/atzicay-button/atzicay-button.component';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
+import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my-games/base-create-game.component';
 import { CreateGame } from '../../../../core/domain/model/create-game.model';
 
@@ -38,7 +39,7 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
   gameDescription = '';
   gridSize = '10 x 10';
   words: Array<{ id: number; word: string; orientation: string }> = [
-    { id: 1, word: '', orientation: 'HL' }
+    { id: 1, word: '', orientation: 'HR' }
   ];
   fontFamily = 'Arial';
   backgroundColor = '#FFFFFF';
@@ -48,10 +49,10 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
   isPublicGame = true;
   difficulty = 'M';
   colorOptions = [
-    { name: 'gray', class: 'bg-gray-300' },
-    { name: 'cyan', class: 'bg-cyan-300' },
-    { name: 'purple', class: 'bg-purple-300' },
-    { name: 'rainbow', class: 'bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400' }
+    { name: '#FFFFFF', class: 'bg-gray-300' },
+    { name: '#E0F7FA', class: 'bg-cyan-300' },
+    { name: '#F3E5F5', class: 'bg-purple-300' },
+    { name: '#FFEBEE', class: 'bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400' }
   ];
   isLoading = false;
   rows: number = 10;
@@ -60,7 +61,8 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
   constructor(
     private createGameService: CreateGameService,
     private userSession: UserSessionService,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {
     super();
     const userId = this.userSession.getUserId();
@@ -75,7 +77,7 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
 
   addWord() {
     const newId = this.words.length + 1;
-    this.words.push({ id: newId, word: '', orientation: 'HL' });
+    this.words.push({ id: newId, word: '', orientation: 'HR' });
   }
 
   removeWord(id: number) {
@@ -104,18 +106,21 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
       return;
     }
     const gameData = this.buildGameData();
-    const body = { data: gameData };
+    const body = { 
+      gameType: 'solve_the_word',
+      data: gameData 
+    };
     // Mostrar el JSON en consola
     console.log('JSON enviado al backend:', JSON.stringify(body, null, 2));
     this.createGameService.createSolveTheWordGame(this.userId, body).subscribe({
       next: () => {
         this.isLoading = false;
-        alert('¡Juego creado exitosamente!');
-        this.router.navigate(['/juegos']);
+        this.alertService.showGameCreatedSuccess('Juego de encontrar palabras');
+        setTimeout(() => this.router.navigate(['/juegos']), 2000);
       },
       error: (err) => {
         this.isLoading = false;
-        alert('Error al crear el juego: ' + (err?.message || ''));
+        this.alertService.showGameCreationError(err, 'juego de encontrar palabras');
       }
     });
   }
@@ -149,21 +154,21 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
 
   validateForm(): boolean {
     if (!this.gameTitle.trim()) {
-      alert('El título del juego es requerido');
+      this.alertService.showError('El título del juego es requerido');
       return false;
     }
     if (!this.gameDescription.trim()) {
-      alert('La descripción del juego es requerida');
+      this.alertService.showError('La descripción del juego es requerida');
       return false;
     }
     const validWords = this.words.filter(w => w.word.trim().length > 0);
     if (validWords.length === 0) {
-      alert('Debe agregar al menos una palabra');
+      this.alertService.showError('Debe agregar al menos una palabra');
       return false;
     }
     const invalidWords = validWords.filter(w => w.word.trim().length < 2);
     if (invalidWords.length > 0) {
-      alert('Todas las palabras deben tener al menos 2 caracteres');
+      this.alertService.showError('Todas las palabras deben tener al menos 2 caracteres');
       return false;
     }
     return true;

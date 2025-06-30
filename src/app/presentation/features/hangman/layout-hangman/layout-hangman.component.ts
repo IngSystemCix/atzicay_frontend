@@ -8,12 +8,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { AtzicayTabsComponent } from '../../../components/atzicay-tabs/atzicay-tabs.component';
 import { AtzicayButtonComponent } from '../../../components/atzicay-button/atzicay-button.component';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
+import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { CreateGame, HangmanWord } from '../../../../core/domain/model/create-game.model';
 import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my-games/base-create-game.component';
 
@@ -42,8 +42,6 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
   hangmanForm!: FormGroup;
   wordsForm!: FormGroup;
   configForm!: FormGroup;
-  successMessage = '';
-  errorMessage = '';
   isLoading = false;
   fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
   fuenteSeleccionada: string = this.fonts[0];
@@ -52,7 +50,8 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
     private fb: FormBuilder,
     private createGameService: CreateGameService,
     private userSession: UserSessionService,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {
     super();
     this.initializeForms();
@@ -61,7 +60,10 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
   }
 
   ngOnInit(): void {
-    this.addNewWord();
+    // Solo agregar una palabra inicial si no hay palabras existentes
+    if (this.wordsArray.length === 0) {
+      this.addNewWord();
+    }
   }
 
   private initializeForms(): void {
@@ -135,8 +137,9 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
     this.wordsForm.updateValueAndValidity();
   }
 
-  private isFormValid(): boolean {
-    return this.hangmanForm.valid && this.wordsForm.valid && this.wordsArray.length > 0 && this.configForm.valid;
+  isFormValid(): boolean {
+    const hasMinWords = this.wordsArray.length >= 2;
+    return this.hangmanForm.valid && this.wordsForm.valid && hasMinWords && this.configForm.valid;
   }
 
   private markAllAsTouched(): void {
@@ -148,15 +151,11 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
   }
 
   private showSuccess(message: string): void {
-    Swal.fire({ icon: 'success', title: '¡Éxito!', text: message, confirmButtonColor: '#A293FA', timer: 2500, timerProgressBar: true, showConfirmButton: false });
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.alertService.showSuccess(message);
   }
 
   private showError(message: string): void {
-    Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#A293FA', timer: 3500, timerProgressBar: true, showConfirmButton: false });
-    this.successMessage = '';
-    this.errorMessage = '';
+    this.alertService.showError(message);
   }
 
   buildGameData(): CreateGame {
@@ -189,23 +188,38 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
     if (this.isLoading) return;
     this.isLoading = true;
     this.markAllAsTouched();
+    
     if (!this.isFormValid()) {
-      this.showError('Por favor completa todos los campos requeridos correctamente.');
+      let errorMessage = 'Por favor completa todos los campos requeridos correctamente.';
+      
+      if (!this.hasMinimumWords) {
+        errorMessage = 'Se requieren al menos 2 palabras para crear el juego.';
+      } else if (this.hangmanForm.invalid) {
+        errorMessage = 'Por favor completa correctamente la información del juego.';
+      } else if (this.wordsForm.invalid) {
+        errorMessage = 'Por favor revisa las palabras y pistas ingresadas.';
+      } else if (this.configForm.invalid) {
+        errorMessage = 'Por favor revisa la configuración del juego.';
+      }
+      
+      this.showError(errorMessage);
       this.isLoading = false;
       return;
     }
+    
     const gameData = this.buildGameData();
     const body = {
       gameType: 'hangman',
       data: gameData
     };
+    
     this.createGameService.createHangmanGame(this.userId, body).subscribe(() => {
       this.isLoading = false;
-      this.showSuccess('Juego creado exitosamente!');
+      this.alertService.showGameCreatedSuccess('Juego del ahorcado');
       setTimeout(() => this.router.navigate(['/juegos']), 2000);
     }, (err) => {
       this.isLoading = false;
-      this.showError('Error al crear el juego: ' + (err?.message || ''));
+      this.alertService.showGameCreationError(err, 'juego del ahorcado');
     });
   }
 
@@ -224,6 +238,37 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
   get isDescriptionInvalid(): boolean {
     const control = this.hangmanForm.get('description');
     return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  get hasMinimumWords(): boolean {
+    return this.wordsArray.length >= 2;
+  }
+
+  get wordsFormHasErrors(): boolean {
+    return this.wordsForm.invalid || !this.hasMinimumWords;
+  }
+
+  getWordErrorMessage(index: number): string {
+    const control = this.wordsArray.at(index)?.get('word');
+    if (control?.hasError('required')) {
+      return 'La palabra es requerida';
+    }
+    if (control?.hasError('minlength')) {
+      return 'La palabra debe tener al menos 2 caracteres';
+    }
+    return '';
+  }
+
+  getClueErrorMessage(index: number): string {
+    if (!this.showClues) return '';
+    const control = this.wordsArray.at(index)?.get('clue');
+    if (control?.hasError('required')) {
+      return 'La pista es requerida cuando está habilitada';
+    }
+    if (control?.hasError('minlength')) {
+      return 'La pista debe tener al menos 5 caracteres';
+    }
+    return '';
   }
 
   isWordInvalid(index: number): boolean {

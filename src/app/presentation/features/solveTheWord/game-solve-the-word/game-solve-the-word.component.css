@@ -1,0 +1,121 @@
+/* Reemplaza todo el contenido del CSS */
+.highlighted {
+  background-color: rgba(139, 92, 246, 0.3);
+}
+
+:host {
+  display: block;
+  width: 100%;
+  overflow-y: auto;
+}
+
+/* Evitar selección de texto en la grilla */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Animación suave para las celdas */
+.grid > div {
+  transition: all 0.2s ease-in-out;
+}
+
+.grid > div:hover {
+  transform: scale(1.05);
+}
+
+/* Responsividad mejorada */
+@media (max-width: 768px) {
+  .grid {
+    gap: 0.125rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Estilo para celdas seleccionadas */
+.bg-yellow-200 {
+  background-color: rgb(254 240 138);
+  border-color: rgb(245 158 11);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* Scrollbar personalizado */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c084fc;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a855f7;
+}
+
+/* Animaciones suaves */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Media queries para responsividad */
+@media (max-width: 1279px) {
+  .xl\:flex-row {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    gap: 0.125rem;
+    padding: 0.75rem;
+  }
+}
+
+/* Evitar selección de texto */
+.select-none {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Efecto hover mejorado */
+.grid > div:hover {
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+/* Colores personalizados para purple-25 */
+.from-purple-25 {
+  --tw-gradient-from: #faf5ff;
+}
+
+.to-purple-50 {
+  --tw-gradient-to: #f3e8ff;
+}

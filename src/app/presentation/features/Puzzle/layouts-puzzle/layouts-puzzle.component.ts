@@ -1,42 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
+import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 
 @Component({
   selector: 'app-layouts-puzzle',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './layouts-puzzle.component.html',
   styleUrl: './layouts-puzzle.component.css'
 })
 export class LayoutsPuzzleComponent implements OnInit {
   activeTab: string = 'contenido';
   isLoading: boolean = false;
-  errorMessage: string = '';
-  successMessage: string = '';
 
-  // Propiedades para el contenido
-  tituloJuego: string = '';
-  descripcion: string = '';
-  filas: number = 4;
-  columnas: number = 4;
-  mostrarPista: boolean = false;
-  pista: string = '';
-  ayudaAutomatica: boolean = false;
+  // Formularios reactivos
+  contentForm!: FormGroup;
+  configForm!: FormGroup;
+
+  // Propiedades para imagen
   selectedImage: string | ArrayBuffer | null = null;
   selectedFile: File | null = null;
 
-  // Configuración
-  fuente: string = 'Arial';
-  fondo: string = 'gray';
-  colorFuente: string = 'gray';
-  mensajeExito: string = '¡Excelente trabajo!';
-  mensajeFracaso: string = 'Inténtalo de nuevo';
-  juegoPublico: boolean = true;
-  tiempo: number = 180;
-  dificultad: string = 'M'; // 'F' = Fácil, 'M' = Medio, 'H' = Difícil
-
+  // Arrays de opciones
   fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
   colores = [
     { name: 'gray', class: 'bg-gray-400' },
@@ -48,9 +35,47 @@ export class LayoutsPuzzleComponent implements OnInit {
   userId: number = 0;
 
   constructor(
+    private fb: FormBuilder,
     private createGameService: CreateGameService,
-    private userSession: UserSessionService
-  ) {}
+    private userSession: UserSessionService,
+    private alertService: AlertService
+  ) {
+    this.initializeForms();
+  }
+
+  private initializeForms(): void {
+    this.contentForm = this.fb.group({
+      tituloJuego: ['', [Validators.required, Validators.minLength(3)]],
+      descripcion: ['', [Validators.required, Validators.minLength(10)]],
+      filas: [4, [Validators.required, Validators.min(2), Validators.max(10)]],
+      columnas: [4, [Validators.required, Validators.min(2), Validators.max(10)]],
+      mostrarPista: [false],
+      pista: [''],
+      ayudaAutomatica: [false],
+      tiempo: [180, [Validators.required, Validators.min(30), Validators.max(3600)]],
+      dificultad: ['M', Validators.required],
+    });
+
+    this.configForm = this.fb.group({
+      fuente: [this.fonts[0], Validators.required],
+      fondo: ['#cccccc', Validators.required],
+      colorFuente: ['#000000', Validators.required],
+      mensajeExito: ['¡Excelente trabajo!', [Validators.required, Validators.minLength(3)]],
+      mensajeFracaso: ['Inténtalo de nuevo', [Validators.required, Validators.minLength(3)]],
+      juegoPublico: [true]
+    });
+
+    // Configurar validación condicional para la pista
+    this.contentForm.get('mostrarPista')?.valueChanges.subscribe(mostrarPista => {
+      const pistaControl = this.contentForm.get('pista');
+      if (mostrarPista) {
+        pistaControl?.setValidators([Validators.required, Validators.minLength(5)]);
+      } else {
+        pistaControl?.clearValidators();
+      }
+      pistaControl?.updateValueAndValidity();
+    });
+  }
 
   ngOnInit(): void {
     const id = this.userSession.getUserId();
@@ -63,9 +88,9 @@ export class LayoutsPuzzleComponent implements OnInit {
 
   selectColor(tipo: 'fondo' | 'colorFuente', color: string) {
     if (tipo === 'fondo') {
-      this.fondo = color;
+      this.configForm.patchValue({ fondo: color });
     } else {
-      this.colorFuente = color;
+      this.configForm.patchValue({ colorFuente: color });
     }
   }
 
@@ -77,7 +102,6 @@ export class LayoutsPuzzleComponent implements OnInit {
       return;
     }
     this.selectedFile = file;
-    this.errorMessage = '';
     const reader = new FileReader();
     reader.onload = () => {
       this.selectedImage = reader.result;
@@ -88,92 +112,196 @@ export class LayoutsPuzzleComponent implements OnInit {
   private validateImageFile(file: File): boolean {
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
-      this.errorMessage = 'Tipo de archivo no permitido. Solo PNG, JPG, JPEG';
+      this.alertService.showError('Tipo de archivo no permitido. Solo PNG, JPG, JPEG');
       return false;
     }
     if (file.size > 1024 * 1024) {
-      this.errorMessage = 'La imagen debe ser menor a 1MB';
+      this.alertService.showError('La imagen debe ser menor a 1MB');
       return false;
     }
     return true;
   }
 
-  private validateForm(): string[] {
-    const errors: string[] = [];
-    if (!this.tituloJuego || !this.tituloJuego.trim()) {
-      errors.push('El título del juego es requerido');
+  isFormValid(): boolean {
+    return this.contentForm.valid && this.configForm.valid && this.selectedFile !== null;
+  }
+
+  private markAllAsTouched(): void {
+    this.contentForm.markAllAsTouched();
+    this.configForm.markAllAsTouched();
+  }
+
+  // Métodos de validación para el template
+  get isTitleInvalid(): boolean {
+    const control = this.contentForm.get('tituloJuego');
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  get isDescriptionInvalid(): boolean {
+    const control = this.contentForm.get('descripcion');
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  get isRowsInvalid(): boolean {
+    const control = this.contentForm.get('filas');
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  get isColumnsInvalid(): boolean {
+    const control = this.contentForm.get('columnas');
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  get isTimeInvalid(): boolean {
+    const control = this.contentForm.get('tiempo');
+    return !!(control && control.invalid && (control.dirty || control.touched));
+  }
+
+  get isClueInvalid(): boolean {
+    const control = this.contentForm.get('pista');
+    const showClue = this.contentForm.get('mostrarPista')?.value;
+    return !!(showClue && control && control.invalid && (control.dirty || control.touched));
+  }
+
+  get hasImageError(): boolean {
+    const titleTouched = this.contentForm.get('tituloJuego')?.touched || false;
+    const descTouched = this.contentForm.get('descripcion')?.touched || false;
+    return !this.selectedFile && (titleTouched || descTouched);
+  }
+
+  getTitleErrorMessage(): string {
+    const control = this.contentForm.get('tituloJuego');
+    if (control?.hasError('required')) {
+      return 'El título del juego es requerido';
     }
-    if (!this.descripcion || !this.descripcion.trim()) {
-      errors.push('La descripción es requerida');
+    if (control?.hasError('minlength')) {
+      return 'El título debe tener al menos 3 caracteres';
     }
-    if (!this.selectedFile) {
-      errors.push('Debe seleccionar una imagen para el puzzle');
+    return '';
+  }
+
+  getDescriptionErrorMessage(): string {
+    const control = this.contentForm.get('descripcion');
+    if (control?.hasError('required')) {
+      return 'La descripción es requerida';
     }
-    if (this.filas < 2 || this.filas > 10) {
-      errors.push('Las filas deben estar entre 2 y 10');
+    if (control?.hasError('minlength')) {
+      return 'La descripción debe tener al menos 10 caracteres';
     }
-    if (this.columnas < 2 || this.columnas > 10) {
-      errors.push('Las columnas deben estar entre 2 y 10');
+    return '';
+  }
+
+  getRowsErrorMessage(): string {
+    const control = this.contentForm.get('filas');
+    if (control?.hasError('required')) {
+      return 'El número de filas es requerido';
     }
-    if (this.mostrarPista && (!this.pista || !this.pista.trim())) {
-      errors.push('Si activa mostrar pista, debe escribir una pista válida');
+    if (control?.hasError('min') || control?.hasError('max')) {
+      return 'Las filas deben estar entre 2 y 10';
     }
-    if (this.tiempo < 30) {
-      errors.push('El tiempo mínimo es de 30 segundos');
+    return '';
+  }
+
+  getColumnsErrorMessage(): string {
+    const control = this.contentForm.get('columnas');
+    if (control?.hasError('required')) {
+      return 'El número de columnas es requerido';
     }
-    return errors;
+    if (control?.hasError('min') || control?.hasError('max')) {
+      return 'Las columnas deben estar entre 2 y 10';
+    }
+    return '';
+  }
+
+  getTimeErrorMessage(): string {
+    const control = this.contentForm.get('tiempo');
+    if (control?.hasError('required')) {
+      return 'El tiempo límite es requerido';
+    }
+    if (control?.hasError('min')) {
+      return 'El tiempo mínimo es de 30 segundos';
+    }
+    if (control?.hasError('max')) {
+      return 'El tiempo máximo es de 3600 segundos (1 hora)';
+    }
+    return '';
+  }
+
+  getClueErrorMessage(): string {
+    const control = this.contentForm.get('pista');
+    if (control?.hasError('required')) {
+      return 'La pista es requerida cuando está habilitada';
+    }
+    if (control?.hasError('minlength')) {
+      return 'La pista debe tener al menos 5 caracteres';
+    }
+    return '';
   }
 
   async guardar() {
     this.isLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-    const validationErrors = this.validateForm();
-    if (validationErrors.length > 0) {
-      this.errorMessage = validationErrors.join(', ');
+    this.markAllAsTouched();
+    
+    if (!this.isFormValid()) {
+      let errorMessage = 'Por favor completa todos los campos requeridos correctamente.';
+      
+      if (!this.selectedFile) {
+        errorMessage = 'Debe seleccionar una imagen para el puzzle.';
+      } else if (this.contentForm.invalid) {
+        errorMessage = 'Por favor revisa la información del juego.';
+      } else if (this.configForm.invalid) {
+        errorMessage = 'Por favor revisa la configuración del juego.';
+      }
+      
+      this.alertService.showError(errorMessage);
       this.isLoading = false;
       return;
     }
+
     try {
       let pathImg = '';
       if (this.selectedFile) {
-        // Lee la imagen como base64 (el resultado SIEMPRE tiene el prefijo data:image/...;base64,)
         pathImg = await this.readFileAsBase64(this.selectedFile);
       }
+
+      const contentData = this.contentForm.value;
+      const configData = this.configForm.value;
+
       const data = {
-        Name: this.tituloJuego.trim(),
-        Description: this.descripcion.trim(),
+        Name: contentData.tituloJuego.trim(),
+        Description: contentData.descripcion.trim(),
         Activated: true,
-        Difficulty: this.dificultad,
-        Visibility: this.juegoPublico ? 1 : 0,
+        Difficulty: contentData.dificultad,
+        Visibility: configData.juegoPublico ? 1 : 0,
         PathImg: pathImg,
-        Clue: this.mostrarPista ? this.pista : '',
-        Rows: this.filas,
-        Cols: this.columnas,
-        AutomaticHelp: this.ayudaAutomatica ? true : false,
+        Clue: contentData.mostrarPista ? contentData.pista : '',
+        Rows: contentData.filas,
+        Cols: contentData.columnas,
+        AutomaticHelp: contentData.ayudaAutomatica ? true : false,
         Settings: [
-          { Key: 'time_limit', Value: this.tiempo.toString() },
-          { Key: 'Fuente', Value: this.fuente },
-          { Key: 'ColorFondo', Value: this.fondo },
-          { Key: 'ColorTexto', Value: this.colorFuente },
-          { Key: 'MensajeExito', Value: this.mensajeExito },
-          { Key: 'MensajeFallo', Value: this.mensajeFracaso }
+          { Key: 'time_limit', Value: contentData.tiempo.toString() },
+          { Key: 'Fuente', Value: configData.fuente },
+          { Key: 'ColorFondo', Value: configData.fondo },
+          { Key: 'ColorTexto', Value: configData.colorFuente },
+          { Key: 'MensajeExito', Value: configData.mensajeExito },
+          { Key: 'MensajeFallo', Value: configData.mensajeFracaso }
         ]
       };
+
       this.createGameService.createPuzzleGame(this.userId, { gameType: 'puzzle', data }).subscribe({
         next: () => {
-          this.successMessage = '¡Puzzle guardado exitosamente!';
           this.isLoading = false;
+          this.alertService.showGameCreatedSuccess('Puzzle');
           setTimeout(() => this.resetForm(), 2000);
         },
         error: (error) => {
-          this.errorMessage = error.message || 'Error al guardar el puzzle';
           this.isLoading = false;
+          this.alertService.showGameCreationError(error, 'puzzle');
         }
       });
     } catch (error) {
-      this.errorMessage = 'Error inesperado al procesar la imagen o los datos';
       this.isLoading = false;
+      this.alertService.showError('Error inesperado al procesar la imagen o los datos');
     }
   }
 
@@ -198,24 +326,29 @@ export class LayoutsPuzzleComponent implements OnInit {
   }
 
   private resetForm() {
-    this.tituloJuego = '';
-    this.descripcion = '';
-    this.filas = 4;
-    this.columnas = 4;
-    this.mostrarPista = false;
-    this.pista = '';
-    this.ayudaAutomatica = false;
-    this.fuente = 'Arial';
-    this.fondo = 'gray';
-    this.colorFuente = 'gray';
-    this.mensajeExito = '¡Excelente trabajo!';
-    this.mensajeFracaso = 'Inténtalo de nuevo';
-    this.juegoPublico = true;
-    this.tiempo = 180;
-    this.dificultad = 'M';
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.contentForm.reset({
+      tituloJuego: '',
+      descripcion: '',
+      filas: 4,
+      columnas: 4,
+      mostrarPista: false,
+      pista: '',
+      ayudaAutomatica: false,
+      tiempo: 180,
+      dificultad: 'M'
+    });
+
+    this.configForm.reset({
+      fuente: 'Arial',
+      fondo: '#cccccc',
+      colorFuente: '#000000',
+      mensajeExito: '¡Excelente trabajo!',
+      mensajeFracaso: 'Inténtalo de nuevo',
+      juegoPublico: true
+    });
+
     this.selectedImage = null;
     this.selectedFile = null;
+    this.activeTab = 'contenido';
   }
 }

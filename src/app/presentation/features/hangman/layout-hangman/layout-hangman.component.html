@@ -17,6 +17,34 @@
       class="font-bold"
     ></app-atzicay-tabs>
 
+    <!-- Indicadores de validación -->
+    <div class="flex items-center gap-2 mr-4">
+      @if (hangmanForm.invalid && (hangmanForm.dirty || hangmanForm.touched)) {
+      <div class="flex items-center text-red-500 text-sm">
+        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <span>Información incompleta</span>
+      </div>
+      }
+      @if (!hasMinimumWords && wordsArray.length > 0) {
+      <div class="flex items-center text-red-500 text-sm">
+        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <span>Palabras insuficientes</span>
+      </div>
+      }
+      @if (wordsForm.invalid && (wordsForm.dirty || wordsForm.touched)) {
+      <div class="flex items-center text-red-500 text-sm">
+        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <span>Palabras con errores</span>
+      </div>
+      }
+    </div>
+
     <!-- Botones de acción -->
     <div class="ml-auto flex gap-2">
       <app-atzicay-button
@@ -27,7 +55,8 @@
 
       <app-atzicay-button
         type="primary"
-        label="Guardar"
+        [label]="isLoading ? 'Guardando...' : 'Guardar'"
+        [disabled]="!isFormValid() || isLoading"
         (click)="onSubmit()"
       ></app-atzicay-button>
       
@@ -175,10 +204,31 @@
             />
           </svg>
           <span class="ml-1 text-sm"
-            >Se recomienda agregar al menos 2 palabras</span
+            >Se requieren al menos 2 palabras</span
           >
         </div>
       </div>
+
+      <!-- Alerta de validación de palabras mínimas -->
+      @if (!hasMinimumWords && wordsArray.length > 0) {
+      <div class="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">
+              Se requieren al menos 2 palabras
+            </h3>
+            <div class="mt-1 text-sm text-red-700">
+              <p>Agrega al menos una palabra más para poder crear el juego.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
 
       <form [formGroup]="wordsForm">
         <div class="max-h-120 overflow-y-auto space-y-4" formArrayName="words">
@@ -230,7 +280,7 @@
               />
               @if (isWordInvalid($index)) {
               <span class="text-red-500 text-sm mt-1 block">
-                La palabra es requerida (mínimo 2 caracteres)
+                {{ getWordErrorMessage($index) }}
               </span>
               }
             </div>
@@ -256,7 +306,7 @@
               />
               @if (isClueInvalid($index)) {
               <span class="text-red-500 text-sm mt-1 block">
-                La pista debe tener al menos 5 caracteres
+                {{ getClueErrorMessage($index) }}
               </span>
               }
             </div>

@@ -109,8 +109,8 @@
   <!-- Grid de Cards Responsivo -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mx-2"
        *ngIf="activities.length > 0">
-    @for (activity of activities; track activity.game_instance_id) {
-      <div class="rounded-lg p-4 sm:p-6 relative min-h-[280px] flex flex-col bg-white shadow border border-gray-100 transition-all duration-300"
+    @for (activity of activities; track activity.game_instance_id + '_' + $index) {
+      <div class="rounded-lg p-4 sm:p-6 relative min-h-[300px] flex flex-col bg-white shadow border border-gray-100 transition-all duration-300"
            [ngClass]="{
              'bg-gray-50 border-gray-200': activity.status !== 1,
              'hover:shadow-lg': activity.status === 1
@@ -127,14 +127,6 @@
                 {{ activity.programming_name }}
               </h3>
               <div class="flex items-center gap-2 mt-1">
-                <span class="px-2 py-1 rounded-full text-xs font-medium"
-                  [ngClass]="{
-                    'bg-green-200 text-green-800': activity.maximum_time <= 60,
-                    'bg-orange-200 text-orange-800': activity.maximum_time > 60 && activity.maximum_time <= 180,
-                    'bg-red-200 text-red-800': activity.maximum_time > 180
-                  }">
-                  {{ activity.maximum_time <= 60 ? 'Básico' : activity.maximum_time <= 180 ? 'Intermedio' : 'Difícil' }}
-                </span>
                 <span [ngClass]="activity.status === 1 ? 'bg-blue-500 text-white' : 'bg-gray-400 text-white'" class="px-2 py-1 rounded-full text-xs font-medium">
                   {{ activity.status === 1 ? 'Público' : 'Privado' }}
                 </span>
@@ -210,7 +202,9 @@
               {{ activity.status === 1 ? 'Activo' : 'Desactivado' }}
             </div>
           </div>
-          <button class="bg-white/40 hover:bg-white/60 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-900 transition-all duration-300 hover:scale-105 border border-white/50 shadow-sm whitespace-nowrap cursor-pointer">
+          <button 
+            class="bg-white/40 hover:bg-white/60 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-900 transition-all duration-300 hover:scale-105 border border-white/50 shadow-sm whitespace-nowrap cursor-pointer"
+            (click)="generateGameUrl(activity)">
             🔗 <span class="hidden sm:inline">Obtener </span>URL
           </button>
         </div>

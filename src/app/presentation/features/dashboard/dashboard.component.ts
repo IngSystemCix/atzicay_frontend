@@ -3,8 +3,6 @@ import {
   Component,
   OnInit,
   inject,
-  ElementRef,
-  ViewChild,
   HostListener,
   OnDestroy,
 } from '@angular/core';
@@ -33,11 +31,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private backendAuthService = inject(AuthService);
   private subscription = new Subscription();
 
-  @ViewChild('dropdownMenu') dropdownMenu!: ElementRef;
   isDropdownOpen = false;
   activeDropdownId: number | null = null;
   ratingArray: number[] = [1, 2, 3, 4, 5];
-
+isHeaderMinimized: boolean = false;
   getGameRoute(gameType: string, id: number): string {
     const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
     switch (normalizedType) {
@@ -59,14 +56,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Usar el UserSessionService optimizado para esperar el token
     if (this.userSessionService.isAuthenticated()) {
-      console.log('[Dashboard] Token ya disponible, cargando juegos...');
       this.loadGameInstances();
     } else {
-      console.log('[Dashboard] Esperando token...');
       this.subscription.add(
         this.userSessionService.waitForToken$(5000).subscribe({
           next: (token) => {
-            console.log('[Dashboard] Token recibido, cargando juegos...');
             this.loadGameInstances();
           },
           error: (err) => {
@@ -78,7 +72,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
     }
   }
+toggleHeaderSize(): void {
+  this.isHeaderMinimized = !this.isHeaderMinimized;
+}
 
+getTypeIcon(typeValue: string): string {
+  const icons: { [key: string]: string } = {
+    'all': '🎮',
+    'hangman': '🪢',
+    'memory': '🧠',
+    'puzzle': '🧩',
+    'solve_the_word': '🔤'
+  };
+  return icons[typeValue] || '🎮';
+}
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
@@ -212,7 +219,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         return 'bg-[#C9FFD0] text-green-800';
       case 'm':
         return 'bg-[#FFFEC2] text-yellow-800';
-      case 'd':
+      case 'h':
         return 'bg-[#FFB4B4] text-red-800';
       default:
         return 'bg-gray-200 text-gray-800';
@@ -225,7 +232,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         return 'Fácil';
       case 'M':
         return 'Intermedio';
-      case 'D':
+      case 'H':
         return 'Difícil';
       default:
         return 'Desconocido';
@@ -233,6 +240,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   dropdownToggle(gameId: number) {
+  
     if (this.activeDropdownId === gameId) {
       this.activeDropdownId = null;
     } else {
@@ -241,15 +249,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   isDropdownActive(gameId: number): boolean {
-    return this.activeDropdownId === gameId;
+    const isActive = this.activeDropdownId === gameId;
+    return isActive;
   }
 
   @HostListener('document:click', ['$event'])
   clickOutside(event: Event) {
-    if (
-      this.dropdownMenu &&
-      !this.dropdownMenu.nativeElement.contains(event.target)
-    ) {
+    const target = event.target as HTMLElement;
+    const dropdownElement = target.closest('.game-card-dropdown');
+    const buttonElement = target.closest('button[title="Opciones del juego"]');
+    
+    // Si el clic no fue en un dropdown ni en un botón de opciones, cerrar todos los dropdowns
+    if (!dropdownElement && !buttonElement) {
       this.closeDropdown();
     }
   }

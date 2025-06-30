@@ -1,23 +1,23 @@
 <div class="bg-atzicay-bg border-r border-gray-200">
   <div
-    class="bg-gradient-to-br from-[#F2EEFD] to-[#f8f4ff] rounded-xl p-6 mb-1 shadow-sm"
+    class="bg-atzicay-bg rounded-2xl p-4 shadow-lg backdrop-blur-sm"
   >
-    <h1 class="text-atzicay-heading text-2xl font-bold mb-1">
-      Explora Juegos Educativos
-    </h1>
-    <p class="text-atzicay-subheading font-semibold mb-8">
-      Descubre juegos divertidos para aprender mientras juegas
-    </p>
+    <div class="text-center mb-8">
+      <h1 class="text-atzicay-heading text-3xl font-bold mb-2 tracking-tight">
+        Explora Juegos Educativos
+      </h1>
+      <p class="text-atzicay-subheading font-medium text-lg opacity-90">
+        Descubre juegos divertidos para aprender mientras juegas
+      </p>
+    </div>
 
-    <!-- Buscador y filtros -->
-    <div class="flex flex-col sm:flex-row gap-4">
-      <!-- Barra de búsqueda -->
+    <div class="flex flex-col lg:flex-row gap-6 max-w-4xl mx-auto">
       <div class="relative flex-1">
         <div
-          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"
+          class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400"
         >
           <svg
-            class="w-4 h-4"
+            class="w-5 h-5"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -31,23 +31,23 @@
             />
           </svg>
         </div>
-        <div class="w-full flex items-center justify-center space-x-2">
+        <div class="w-full flex items-center justify-center space-x-3">
           <label for="searchInput" class="sr-only">Buscar juegos</label>
           <input
             id="searchInput"
             type="search"
             [(ngModel)]="searchTerm"
-            class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-atzicay-purple-500 focus:border-transparent transition-all duration-200 shadow-sm"
-            placeholder="Buscar juegos..."
+            class="w-full pl-12 pr-5 py-3.5 border-2 border-gray-200/60 rounded-2xl focus:outline-none focus:ring-3 focus:ring-atzicay-purple-500/30 focus:border-atzicay-purple-500 transition-all duration-300 shadow-sm hover:shadow-md bg-white/90 backdrop-blur-sm text-gray-800 placeholder-gray-500"
+            placeholder="¿Qué juego buscas hoy?"
             title="Buscar juegos"
             aria-label="Buscar juegos"
           />
           <button
-            class="cursor-pointer btn-atzicay text-white px-6 py-2.5 rounded-xl transition-all duration-200 flex items-center hover:scale-105 hover:shadow-md active:scale-95"
+            class="cursor-pointer btn-atzicay text-white px-8 py-3.5 rounded-2xl transition-all duration-300 flex items-center hover:scale-105 hover:shadow-lg active:scale-95 font-semibold shadow-md"
             (click)="applyFilters()"
           >
             <svg
-              class="w-4 h-4 mr-1"
+              class="w-5 h-5 mr-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -64,11 +64,11 @@
         </div>
       </div>
 
-      <!-- Botón Filtros -->
+      <!-- Botón Filtros mejorado -->
       <div class="relative">
         <button
           (click)="toggleFilterDropdown()"
-          class="btn-atzicay text-white px-6 py-2.5 rounded-xl transition-all duration-200 flex items-center hover:scale-105 hover:shadow-md cursor-pointer active:scale-95"
+          class="btn-atzicay text-white px-8 py-3.5 rounded-2xl transition-all duration-300 flex items-center hover:scale-105 hover:shadow-lg cursor-pointer active:scale-95 font-semibold shadow-md min-w-[140px] justify-center"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -87,20 +87,20 @@
           Filtros
         </button>
 
-        <!-- Dropdown de filtros -->
+        <!-- Dropdown de filtros mejorado -->
         <div
           [class.hidden]="!isFilterDropdownOpen"
-          class="absolute top-full right-0 mt-2 bg-white rounded-xl shadow-xl py-2 z-10 w-64 border border-gray-100 backdrop-blur-sm"
+          class="absolute top-full right-0 mt-3 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl py-3 z-20 w-72 border border-gray-100/50 ring-1 ring-black/5"
         >
           <div
-            class="px-4 py-3 text-sm text-atzicay-dropdown-text font-medium border-b border-gray-50"
+            class="px-6 py-4 text-sm text-atzicay-dropdown-text font-semibold border-b border-gray-100/70 bg-gray-50/50"
           >
-            Tipo de Juego
+            🎯 Tipo de Juego
           </div>
-          <!-- Filtro de tipo de juego como radio button -->
+          <!-- Filtro de tipo de juego mejorado -->
           <div
             *ngFor="let type of gameTypes; trackBy: trackByTypeValue"
-            class="flex items-center px-4 py-2 text-sm text-atzicay-dropdown-text hover:bg-gray-50 transition-colors duration-150"
+            class="flex items-center px-6 py-3 text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 cursor-pointer rounded-lg mx-2"
           >
             <input
               type="radio"
@@ -108,42 +108,46 @@
               name="gameType"
               [value]="type.value"
               [(ngModel)]="selectedType"
-              class="mr-3 rounded text-atzicay-purple-500 focus:ring-atzicay-purple-500 focus:ring-offset-0"
+              class="mr-4 rounded-full text-atzicay-purple-500 focus:ring-atzicay-purple-500 focus:ring-offset-0 scale-110"
               (change)="applyFilters()"
             />
-            <label [for]="'filterType_' + type.value" class="cursor-pointer">{{
-              type.label
-            }}</label>
+            <label
+              [for]="'filterType_' + type.value"
+              class="cursor-pointer font-medium flex-1"
+            >
+              {{ type.label }}
+            </label>
           </div>
 
-          <div class="border-t border-gray-50 mt-2 pt-2 px-4">
+          <div class="border-t border-gray-100/70 mt-3 pt-3 px-6">
             <button
-              class="w-full text-xs text-atzicay-purple-500 hover:text-atzicay-purple-700 py-2 text-left transition-colors duration-150"
+              class="w-full text-sm text-atzicay-purple-500 hover:text-atzicay-purple-700 py-2.5 text-center transition-all duration-200 font-medium rounded-lg hover:bg-atzicay-purple-50/50"
               (click)="clearFilters()"
             >
-              Limpiar filtros
+              🗑️ Limpiar filtros
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Filtros activos -->
+    <!-- Filtros activos mejorados -->
     <ng-container *ngIf="selectedType !== 'all' || selectedLevels.length > 0">
-      <div class="mt-6 flex flex-wrap gap-2">
+      <div class="mt-8 flex flex-wrap gap-3 justify-center">
         <ng-container *ngIf="selectedType !== 'all'">
           <div
-            class="bg-atzicay-purple-100 text-atzicay-purple-800 text-xs px-3 py-1.5 rounded-full flex items-center transition-all duration-200 hover:bg-atzicay-purple-200"
+            class="bg-gradient-to-r from-atzicay-purple-100 to-atzicay-purple-50 text-atzicay-purple-800 text-sm px-5 py-2.5 rounded-full flex items-center transition-all duration-300 hover:shadow-md border border-atzicay-purple-200/50 font-medium"
           >
+            <span class="mr-2">🎮</span>
             {{ getTypeLabel(selectedType) }}
             <button
-              title="boton de filtro"
+              title="Remover filtro"
               (click)="removeTypeFilter(selectedType)"
-              class="ml-2 text-atzicay-purple-500 hover:text-atzicay-purple-700 transition-colors duration-150"
+              class="ml-3 text-atzicay-purple-500 hover:text-atzicay-purple-700 transition-colors duration-200 p-1 rounded-full hover:bg-atzicay-purple-200/50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-3 w-3"
+                class="h-4 w-4"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -158,17 +162,18 @@
         </ng-container>
         <ng-container *ngFor="let level of selectedLevels">
           <div
-            class="bg-atzicay-blue-100 text-atzicay-blue-800 text-xs px-3 py-1.5 rounded-full flex items-center transition-all duration-200 hover:bg-atzicay-blue-200"
+            class="bg-gradient-to-r from-atzicay-blue-100 to-atzicay-blue-50 text-atzicay-blue-800 text-sm px-5 py-2.5 rounded-full flex items-center transition-all duration-300 hover:shadow-md border border-atzicay-blue-200/50 font-medium"
           >
+            <span class="mr-2">⭐</span>
             {{ getLevelLabel(level) }}
             <button
-              title="boton de filtro"
+              title="Remover filtro"
               (click)="removeLevelFilter(level)"
-              class="ml-2 text-atzicay-blue-500 hover:text-atzicay-blue-700 transition-colors duration-150"
+              class="ml-3 text-atzicay-blue-500 hover:text-atzicay-blue-700 transition-colors duration-200 p-1 rounded-full hover:bg-atzicay-blue-200/50"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-3 w-3"
+                class="h-4 w-4"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -186,31 +191,31 @@
   </div>
 
   <div
-    class="dashboard-scroll-content h-[calc(100vh-220px)] overflow-y-auto relative"
+    class="dashboard-scroll-content h-[calc(100vh-240px)] overflow-y-auto relative"
   >
-    <div class="dashboard-responsive-grid gap-6 p-6 pb-0 max-w-full w-full m-0">
+    <div class="dashboard-responsive-grid gap-8 p-6 max-w-full w-full m-0">
       @for (game of displayedGames; track game.game_instance_id) { @defer {
-      <!-- Inline Game Card -->
       <div
-        class="bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-[520px] group border border-atzicay-border"
+        class="bg-white backdrop-blur-sm rounded-3xl h-[490px] shadow-md overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-atzicay-purple-500/10 flex flex-col  group border border-gray-100/50 hover:border-atzicay-purple-200/50 hover:bg-white"
       >
-        <!-- Game Image -->
         <div
-          class="h-64 bg-gradient-to-br from-gray-100 to-gray-200 flex justify-center items-center relative shrink-0 overflow-hidden"
+          class="h-54 bg-gradient-to-br from-gray-50 to-gray-100 flex justify-center items-center relative shrink-0 rounded-t-3xl"
         >
           <img
             [src]="getGameImage(game.type_game)"
             alt="Game Image"
-            class="w-full h-full object-cover object-center transition-transform duration-300"
+            class="w-full h-full object-cover object-center transition-all duration-500 rounded-t-3xl overflow-hidden"
           />
-          <!-- Overlay gradient -->
+          <!-- Overlay gradient mejorado -->
           <div
-            class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"
           ></div>
+
+          <!-- Botón de menú mejorado -->
           <button
-            title="menu"
+            title="Opciones del juego"
             (click)="dropdownToggle(game.game_instance_id)"
-            class="absolute top-3 right-3 p-2 rounded-full bg-white/90 hover:bg-white transition-all duration-200 shadow-sm hover:shadow-md backdrop-blur-sm"
+            class="absolute top-4 right-4 p-2 rounded-2xl bg-white/90 cursor-pointer hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-md border border-white/50 hover:scale-110"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -227,23 +232,26 @@
               />
             </svg>
           </button>
+
+          <!-- Badge del autor mejorado -->
           <div
-            class="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm"
+            class="absolute bottom-4 right-4 bg-black/80 text-white text-sm px-4 py-2 rounded-full backdrop-blur-md border border-white/20 font-medium"
           >
-            Autor: {{ game.author }}
+            👨‍💻 {{ game.author }}
           </div>
+
+          <!-- Dropdown mejorado -->
           <div
-            #dropdownMenu
             [class.hidden]="!isDropdownActive(game.game_instance_id)"
-            class="absolute top-12 right-3 bg-white rounded-xl shadow-xl py-2 z-10 w-48 border border-gray-100 backdrop-blur-sm"
+            class="game-card-dropdown"
           >
             <a
               href="#"
-              class="flex items-center px-4 py-3 text-sm text-atzicay-dropdown-text hover:bg-gray-50 transition-colors duration-150"
+              class="flex items-center px-5 py-3 text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 rounded-lg mx-2 font-medium"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="h-4 w-4 mr-3"
+                class="h-5 w-5 mr-3 text-atzicay-purple-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -259,66 +267,74 @@
             </a>
             <a
               href="#"
-              class="flex items-center px-4 py-3 text-sm text-atzicay-dropdown-text hover:bg-gray-50 transition-colors duration-150"
+              class="flex items-center px-5 py-3 text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 rounded-lg mx-2 font-medium"
             >
-              <i class="bi bi-plus-circle-dotted mr-3"></i>
+              <i
+                class="bi bi-plus-circle-dotted mr-3 text-atzicay-purple-500"
+              ></i>
               Nuevo Juego plantilla
             </a>
           </div>
         </div>
 
-        <div class="p-5 flex flex-col flex-grow overflow-hidden">
-          <div class="flex justify-between items-start mb-3">
+        <!-- Contenido de la card mejorado -->
+        <div class="p-4 flex flex-col flex-grow overflow-hidden bg-white rounded-2xl">
+          <div class="flex justify-between items-start mb-4">
             <h3
-              class="text-atzicay-purple-500 text-lg font-bold overflow-hidden text-ellipsis line-clamp-2 leading-snug flex-1 mr-3 h-14 truncate"
+              class="text-atzicay-purple-500 text-xl font-bold overflow-hidden text-ellipsis line-clamp-2 leading-tight flex-1 mr-4 tracking-tight"
             >
               {{ game.name }}
             </h3>
             <span
-              class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap"
+              class="px-4 py-2 rounded-2xl text-sm font-semibold whitespace-nowrap shadow-sm border"
               [ngClass]="getLevelClasses(game.difficulty)"
             >
               {{ getLevelText(game.difficulty) }}
             </span>
           </div>
 
-          <!-- Game Info -->
-          <div class="text-gray-500 text-sm mb-4 space-y-1">
+          <!-- Game Info mejorada -->
+          <div
+            class="text-gray-600 text-sm space-y-2 bg-white rounded-2xl p-4"
+          >
             <div class="flex items-center">
-              <span class="text-xs text-gray-400 mr-2">Tipo:</span>
-              <span class="text-xs font-medium">{{
+              <span class="text-sm text-gray-500 font-medium">🎯 Tipo:</span>
+              <span class="text-sm font-semibold text-atzicay-purple-600">{{
                 getTypeLabel(game.type_game)
               }}</span>
             </div>
           </div>
 
-          <!-- Rating -->
-          <div class="text-gray-400 text-xs mb-1">Puntuación</div>
-          <div class="flex items-center mb-4">
-            <span class="text-gray-700 font-semibold mr-3 text-sm">{{
-              game.rating | number : "1.1-1"
-            }}</span>
-            <div class="flex">
-              @for (star of ratingArray; track star) {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                [class]="
-                  star <= game.rating ? 'text-yellow-400' : 'text-gray-300'
-                "
-                class="h-4 w-4 transition-colors duration-200"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
-                />
-              </svg>
-              }
+          <!-- Rating mejorado -->
+          <div class="mb-2">
+            <div
+              class="flex items-center bg-white rounded-2xl p-3"
+            >
+              <span class="text-gray-800 font-bold mr-4 text-lg">{{
+                game.rating | number : "1.1-1"
+              }}</span>
+              <div class="flex space-x-1">
+                @for (star of ratingArray; track star) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  [class]="
+                    star <= game.rating ? 'text-yellow-400' : 'text-gray-300'
+                  "
+                  class="h-5 w-5 transition-all duration-300 hover:scale-110"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  />
+                </svg>
+                }
+              </div>
             </div>
           </div>
 
+          <!-- Play Button mejorado -->
           <div class="w-full">
-            <!-- Play Button -->
             <app-atzicay-button
               type="link"
               label="🎮 Jugar Ahora"
@@ -329,19 +345,22 @@
         </div>
       </div>
       } } @empty {
-      <div class="col-span-full text-center p-8">
+      <div class="col-span-full text-center p-12">
         <ng-container
           *ngIf="
             selectedType !== 'all' || selectedLevels.length > 0 || searchTerm
           "
         >
-          <div class="bg-white rounded-xl p-8 shadow-sm">
-            <div class="text-4xl mb-4">🎯</div>
-            <h3 class="text-lg font-semibold text-gray-700 mb-2">
+          <div
+            class="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-100/50 max-w-md mx-auto"
+          >
+            <div class="text-6xl mb-6">🎯</div>
+            <h3 class="text-2xl font-bold text-gray-700 mb-4">
               No se encontraron juegos
             </h3>
-            <p class="text-gray-500">
-              Intenta ajustar los filtros o términos de búsqueda
+            <p class="text-gray-500 text-lg leading-relaxed">
+              Intenta ajustar los filtros o términos de búsqueda para encontrar
+              el juego perfecto
             </p>
           </div>
         </ng-container>
@@ -350,37 +369,44 @@
             selectedType === 'all' && selectedLevels.length === 0 && !searchTerm
           "
         >
-          <div class="bg-white rounded-xl p-8 shadow-sm">
+          <div
+            class="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-100/50 max-w-md mx-auto"
+          >
             <div
-              class="animate-spin w-8 h-8 border-4 border-atzicay-purple-500 border-t-transparent rounded-full mx-auto mb-4"
+              class="animate-spin w-12 h-12 border-4 border-atzicay-purple-500 border-t-transparent rounded-full mx-auto mb-6"
             ></div>
-            <p class="text-gray-600">Cargando juegos increíbles...</p>
+            <p class="text-gray-600 text-xl font-medium">
+              Cargando juegos increíbles...
+            </p>
           </div>
         </ng-container>
       </div>
       }
     </div>
 
-    <!-- Botón de carga fuera del grid, siempre visible -->
+    <!-- Botón de carga mejorado -->
     <div class="dashboard-grid-footer">
       @if (hasMoreGames && displayedGames.length > 0) {
       <button
-        class="btn-atzicay px-6 py-3 rounded-xl transition-all duration-200 max-w-full sm:w-auto hover:scale-105 hover:shadow-md cursor-pointer active:scale-95 flex items-center"
+        class="btn-atzicay px-10 py-4 rounded-2xl transition-all duration-300 max-w-full sm:w-auto hover:scale-105 hover:shadow-xl cursor-pointer active:scale-95 flex items-center font-semibold text-lg shadow-lg"
         (click)="loadMoreGames()"
       >
-        <!-- Nuevo icono bonito al inicio -->
-        <svg class="w-5 h-5 mr-2 text-white" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 2a8 8 0 108 8 8 8 0 00-8-8zm1 11H9v-2H7a1 1 0 010-2h2V7a1 1 0 012 0v2h2a1 1 0 010 2h-2z"/>
+        <svg
+          class="w-6 h-6 mr-3 text-white"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 2a8 8 0 108 8 8 8 0 00-8-8zm1 11H9v-2H7a1 1 0 010-2h2V7a1 1 0 012 0v2h2a1 1 0 010 2h-2z"
+          />
         </svg>
-        <span class="flex items-center">
-          Ver más juegos
-        </span>
+        <span class="flex items-center">Ver más juegos increíbles</span>
       </button>
       } @else if (!hasMoreGames && displayedGames.length > 0) {
       <div
-        class="text-sm text-gray-500 bg-white px-4 py-2 rounded-full shadow-sm"
+        class="text-lg text-gray-600 bg-white/95 backdrop-blur-sm px-8 py-4 rounded-2xl shadow-lg border border-gray-100/50 font-medium"
       >
-        🎉 Has visto todos los juegos disponibles
+        🎉 Has explorado todos los juegos disponibles
       </div>
       }
     </div>

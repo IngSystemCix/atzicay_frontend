@@ -1,12 +1,18 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
-import { GameConfiguration, PuzzleConfig } from '../../../../core/domain/model/game-configuration.model';
+import {
+  GameConfiguration,
+  PuzzleConfig,
+} from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
-import { RatingService } from '../../../../core/infrastructure/service/rating.service';
-import { RatingModalComponent } from '../../../shared/rating-modal/rating-modal.component';
-import Swal from 'sweetalert2';
+import {
+  GameAlertService,
+  GameAlertConfig,
+} from '../../../../core/infrastructure/service/game-alert.service';
+import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
+import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 
 interface PuzzlePiece {
   id: number;
@@ -16,20 +22,29 @@ interface PuzzlePiece {
   currentCol: number;
   inBoard: boolean;
   correctPos: boolean;
+  // Propiedades para las formas
+  topConnector: 'in' | 'out' | 'none';
+  rightConnector: 'in' | 'out' | 'none';
+  bottomConnector: 'in' | 'out' | 'none';
+  leftConnector: 'in' | 'out' | 'none';
 }
 
 @Component({
   selector: 'app-game-puzzle',
   standalone: true,
-  imports: [CommonModule, RatingModalComponent],
+  imports: [CommonModule],
   templateUrl: './game-puzzle.component.html',
   styleUrl: './game-puzzle.component.css',
 })
-export class GamePuzzleComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
+export class GamePuzzleComponent
+  extends BaseAuthenticatedComponent
+  implements OnInit, OnDestroy
+{
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
-  private ratingService = inject(RatingService);
+  private gameAlertService = inject(GameAlertService);
+  private gameAudioService = inject(GameAudioService);
+  private ratingModalService = inject(RatingModalService);
   pieces: PuzzlePiece[] = [];
   rows = 4; // Reducido para mejor jugabilidad
   cols = 4;
@@ -45,14 +60,23 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   timeLeft = this.maxTime;
 
   // Dimensiones de la imagen
-  imageWidth = 600; // Reducido para mejor visualización
-  imageHeight = 450;
+  imageWidth = 700; // Tamaño fijo del tablero
+  imageHeight = 700; // Tamaño fijo del tablero
+  actualImageWidth = 0; // Ancho real de la imagen
+  actualImageHeight = 0; // Alto real de la imagen
+  imageScale = 1; // Escala para mantener proporción
+
+  // Dimensiones para el área de piezas disponibles
+  sidebarWidth = 200;
 
   // Variables para la configuración del juego
   loading = false;
   error: string | null = null;
   gameConfig: GameConfiguration | null = null;
   puzzleConfig: PuzzleConfig | null = null;
+
+  // Variable para controlar si el usuario ya evaluó el juego
+  userAssessed = false;
 
   // URL de la imagen del puzzle
   puzzleImageUrl = 'assets/pedrito.jpg';
@@ -63,14 +87,17 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   // Nueva propiedad para controlar el panel lateral
   isPanelOpen = true;
 
-  // Rating properties
-  mostrarModalRating = false;
-  gameInstanceId = 0;
-  hasUserRated = false;
-  headerExpanded: boolean = false;
+  // Assessment tracking
+  hasUserAssessed = false;
 
-  // Expose Math for template
-  Math = Math;
+  // Header control
+  headerExpanded = true;
+
+  // Pista control
+  mostrarPista = false;
+
+  // Variable para controlar la advertencia de tiempo
+  private timeWarningSent = false;
 
   constructor() {
     super();
@@ -90,7 +117,6 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   onAuthenticationReady(userId: number): void {
     const id = Number(this.route.snapshot.params['id']);
     if (id && !isNaN(id)) {
-      this.gameInstanceId = id; // Capture game instance ID
       this.cargarConfiguracionJuego(id);
     } else {
       this.startGame();
@@ -101,54 +127,112 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
     this.loading = true;
     this.error = null;
 
-    this.gameConfigService.getGameConfiguration(id).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.aplicarConfiguracion(response.data);
-          this.iniciarJuego();
-        } else {
+    // Get userId from authenticated user
+    const userId = this.currentUserId;
+
+    this.gameConfigService
+      .getGameConfiguration(id, userId || undefined, false)
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.aplicarConfiguracion(response.data);
+            this.iniciarJuego();
+          } else {
+            this.error = 'Error al cargar la configuración del juego';
+            this.loading = false;
+            // Usar imagen por defecto
+            this.puzzleImageUrl = 'assets/rompecabezas.png';
+            this.startGame();
+          }
+        },
+        error: (err) => {
+          console.error('Error loading game config:', err);
           this.error = 'Error al cargar la configuración del juego';
           this.loading = false;
           // Usar imagen por defecto
           this.puzzleImageUrl = 'assets/rompecabezas.png';
           this.startGame();
-        }
-      },
-      error: (err) => {
-        console.error('Error loading game config:', err);
-        this.error = 'Error al cargar la configuración del juego';
-        this.loading = false;
-        // Usar imagen por defecto
-        this.puzzleImageUrl = 'assets/rompecabezas.png';
-        this.startGame();
-      },
-    });
+        },
+      });
   }
 
   private aplicarConfiguracion(data: GameConfiguration): void {
     this.gameConfig = data;
     this.puzzleConfig = data.puzzle;
-    
+
+    console.log('Configuración aplicada:', data);
+    console.log('Puzzle config:', this.puzzleConfig);
+
+    this.userAssessed = data.assessed || false;
+
     if (this.puzzleConfig) {
       this.rows = this.puzzleConfig.rows || 4;
       this.cols = this.puzzleConfig.cols || 4;
       this.totalPieces = this.rows * this.cols;
       this.maxTime = 300;
-      this.imageWidth = 600;
-      this.imageHeight = 450;
       
+      // Inicializar con dimensiones máximas que luego se ajustarán proporcionalmente
+      this.imageWidth = 700;
+      this.imageHeight = 700;
+
       if (this.puzzleConfig.path_img) {
+        console.log('Path original de imagen:', this.puzzleConfig.path_img);
         this.puzzleImageUrl = this.getFrontendImagePath(this.puzzleConfig.path_img);
+        console.log('URL final de imagen:', this.puzzleImageUrl);
       } else {
+        console.log('No hay path_img, usando imagen por defecto');
         this.puzzleImageUrl = 'assets/rompecabezas.png';
       }
-      
+
       this.allowWrongPlacements = !this.puzzleConfig.automatic_help;
     }
+
+    // Iniciar el juego después de aplicar la configuración
+    this.iniciarJuego();
+  }
+
+  private calculateImageDimensions(): void {
+    const img = new Image();
+    img.onload = () => {
+      this.actualImageWidth = img.naturalWidth;
+      this.actualImageHeight = img.naturalHeight;
+
+      // Calcular la escala para que la imagen se ajuste al tablero manteniendo proporción
+      const maxWidth = 700;
+      const maxHeight = 700;
+      const scaleX = maxWidth / this.actualImageWidth;
+      const scaleY = maxHeight / this.actualImageHeight;
+      this.imageScale = Math.min(scaleX, scaleY);
+
+      // Calcular las dimensiones finales de la imagen escalada
+      const scaledWidth = this.actualImageWidth * this.imageScale;
+      const scaledHeight = this.actualImageHeight * this.imageScale;
+
+      // Actualizar las dimensiones del tablero para que coincidan con la imagen escalada
+      this.imageWidth = scaledWidth;
+      this.imageHeight = scaledHeight;
+
+      console.log('🖼️ Cálculo de dimensiones de imagen:');
+      console.log(`   - Imagen original: ${this.actualImageWidth}x${this.actualImageHeight}`);
+      console.log(`   - Imagen escalada: ${scaledWidth}x${scaledHeight}`);
+      console.log(`   - Escala aplicada: ${this.imageScale}`);
+      console.log(`   - Dimensiones finales del tablero: ${this.imageWidth}x${this.imageHeight}`);
+    };
+    img.onerror = () => {
+      console.error('❌ Error al cargar imagen para calcular dimensiones:', this.puzzleImageUrl);
+      // Usar dimensiones por defecto si hay error
+      this.imageWidth = 700;
+      this.imageHeight = 700;
+      this.actualImageWidth = 700;
+      this.actualImageHeight = 700;
+      this.imageScale = 1;
+    };
+    img.src = this.puzzleImageUrl;
   }
 
   private iniciarJuego(): void {
     this.loading = false;
+    console.log('Iniciando juego con imagen:', this.puzzleImageUrl);
     // Esperar un poco antes de iniciar para asegurar que la imagen se cargue
     setTimeout(() => {
       this.startGame();
@@ -156,15 +240,103 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
   }
 
   getFrontendImagePath(path: string): string {
-    // Si la imagen está en public\storage\puzzle, conviértela a una URL relativa accesible
+    if (!path) {
+      console.warn('Path de imagen vacío, usando imagen por defecto');
+      return 'assets/rompecabezas.png';
+    }
+
+    // Normalizar el path reemplazando barras invertidas por barras normales
     const normalized = path.replace(/\\/g, '/');
-    const publicIndex = normalized.toLowerCase().indexOf('public/storage/');
-    const relativePath = normalized.substring(publicIndex + 7); 
-      return `/${relativePath}`;
+    console.log('Path original:', path);
+    console.log('Path normalizado:', normalized);
+    
+    // Buscar el índice de 'public/storage' en la ruta normalizada
+    let publicIndex = normalized.toLowerCase().indexOf('public/storage/');
+    
+    if (publicIndex !== -1) {
+      // Extraer la parte después de 'public/' (storage/puzzle/...)
+      const relativePath = normalized.substring(publicIndex + 7); // +7 para omitir 'public/'
+      const finalPath = relativePath;
+      console.log('Path final construido (public/storage):', finalPath);
+      return finalPath;
+    }
+    
+    // Si no encuentra 'public/storage', buscar solo 'storage/'
+    const storageIndex = normalized.toLowerCase().indexOf('storage/');
+    if (storageIndex !== -1) {
+      const relativePath = normalized.substring(storageIndex);
+      const finalPath = relativePath;
+      console.log('Path final construido (storage):', finalPath);
+      return finalPath;
+    }
+
+    // Buscar específicamente 'puzzle/' como patrón alternativo
+    const puzzleIndex = normalized.toLowerCase().indexOf('puzzle/');
+    if (puzzleIndex !== -1) {
+      // Extraer desde 'storage/' si existe, o construir la ruta
+      let startIndex = normalized.toLowerCase().lastIndexOf('storage/', puzzleIndex);
+      if (startIndex === -1) {
+        startIndex = puzzleIndex;
+      }
+      const relativePath = normalized.substring(startIndex);
+      const finalPath = relativePath.startsWith('storage/') ? relativePath : `storage/puzzle/${normalized.substring(puzzleIndex + 7)}`;
+      console.log('Path final construido (puzzle):', finalPath);
+      return finalPath;
+    }
+    
+    // Como último recurso, usar imagen por defecto
+    console.warn('No se pudo procesar la ruta de imagen, usando imagen por defecto. Path:', path);
+    return 'assets/rompecabezas.png';
   }
 
   generatePuzzleShapes() {
-    // Method removed - no longer using puzzle piece connectors
+    // Primero, inicializar todos los conectores
+    this.pieces.forEach((piece) => {
+      piece.topConnector = piece.row === 0 ? 'none' : 'none';
+      piece.rightConnector = piece.col === this.cols - 1 ? 'none' : 'none';
+      piece.bottomConnector = piece.row === this.rows - 1 ? 'none' : 'none';
+      piece.leftConnector = piece.col === 0 ? 'none' : 'none';
+    });
+
+    // Generar conectores de manera coordinada
+    for (let row = 0; row < this.rows; row++) {
+      for (let col = 0; col < this.cols; col++) {
+        const piece = this.pieces.find((p) => p.row === row && p.col === col);
+        if (!piece) continue;
+
+        // Conector derecho (solo si no es la última columna)
+        if (col < this.cols - 1) {
+          const rightPiece = this.pieces.find(
+            (p) => p.row === row && p.col === col + 1
+          );
+          if (
+            rightPiece &&
+            piece.rightConnector === 'none' &&
+            rightPiece.leftConnector === 'none'
+          ) {
+            const isOut = Math.random() > 0.5;
+            piece.rightConnector = isOut ? 'out' : 'in';
+            rightPiece.leftConnector = isOut ? 'in' : 'out';
+          }
+        }
+
+        // Conector inferior (solo si no es la última fila)
+        if (row < this.rows - 1) {
+          const bottomPiece = this.pieces.find(
+            (p) => p.row === row + 1 && p.col === col
+          );
+          if (
+            bottomPiece &&
+            piece.bottomConnector === 'none' &&
+            bottomPiece.topConnector === 'none'
+          ) {
+            const isOut = Math.random() > 0.5;
+            piece.bottomConnector = isOut ? 'out' : 'in';
+            bottomPiece.topConnector = isOut ? 'in' : 'out';
+          }
+        }
+      }
+    }
   }
 
   initializePuzzle() {
@@ -183,9 +355,17 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
           currentCol: -1,
           inBoard: false,
           correctPos: false,
+          // Inicializar conectores
+          topConnector: 'none',
+          rightConnector: 'none',
+          bottomConnector: 'none',
+          leftConnector: 'none',
         });
       }
     }
+
+    // Generar las formas del puzzle
+    this.generatePuzzleShapes();
 
     // Mezclar las piezas en el sidebar
     this.shufflePiecesForSidebar();
@@ -193,33 +373,92 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
     this.gameCompleted = false;
   }
 
-  startGame() {
+  getPuzzleShapeClasses(piece: PuzzlePiece): string {
+    return 'puzzle-piece';
+  }
+
+  async startGame() {
+    this.gameAudioService.playGameStart();
+    console.log('🎯 Iniciando juego con imagen:', this.puzzleImageUrl);
+    
     if (this.timer) {
       clearInterval(this.timer);
     }
 
     this.timeLeft = this.maxTime;
     this.timeElapsed = 0;
+    this.timeWarningSent = false; // Reset de advertencia de tiempo
 
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
-        this.timeElapsed++;
+        
+        // Reproducir sonido de advertencia cuando quedan 60 segundos
+        if (this.timeLeft === 60 && !this.timeWarningSent) {
+          this.gameAudioService.playTimeWarning();
+          this.timeWarningSent = true;
+        }
+        
+        // Reproducir countdown en los últimos 5 segundos
+        if (this.timeLeft <= 5 && this.timeLeft > 0) {
+          this.gameAudioService.playCountdown();
+        }
       } else {
+        this.gameAudioService.playTimeUp();
         clearInterval(this.timer);
-        this.showTimeUpAlert();
+        this.endGame();
       }
     }, 1000);
 
-    this.initializePuzzle();
-    this.gameStarted = true;
-    this.gameCompleted = false;
-
-    // Verificar que la imagen se cargue
-    this.checkImageLoad();
+    // Validar y cargar la imagen antes de inicializar el puzzle
+    try {
+      const isValidImage = await this.validateImageUrl();
+      if (!isValidImage) {
+        console.warn('⚠️ Imagen no válida, cambiando a imagen por defecto');
+        this.puzzleImageUrl = 'assets/rompecabezas.png';
+      }
+      
+      // Cargar la imagen y calcular dimensiones
+      await this.loadImage();
+      
+      // Calcular las dimensiones correctas de la imagen
+      this.calculateImageDimensions();
+      
+      // Esperar un poco para que se calculen las dimensiones
+      setTimeout(() => {
+        this.initializePuzzle();
+        this.gameStarted = true;
+        this.gameCompleted = false;
+        
+        console.log('🎮 Juego iniciado. Total piezas:', this.totalPieces);
+        console.log('📊 Dimensiones del tablero:', this.imageWidth, 'x', this.imageHeight);
+        console.log('🧩 Piezas por fila/columna:', this.rows, 'x', this.cols);
+        console.log('🎨 Dimensiones de pieza:', this.imageWidth / this.cols, 'x', this.imageHeight / this.rows);
+        
+        // Debug adicional
+        this.debugImageInfo();
+        
+        // Test visual del puzzle
+        this.testPuzzleVisualization();
+      }, 300); // Aumenté el tiempo para asegurar que todo se cargue
+      
+    } catch (error) {
+      console.error('❌ Error al cargar imagen:', error);
+      this.puzzleImageUrl = 'assets/rompecabezas.png';
+      await this.loadImage();
+      this.calculateImageDimensions();
+      
+      setTimeout(() => {
+        this.initializePuzzle();
+        this.gameStarted = true;
+        this.gameCompleted = false;
+        this.debugImageInfo();
+      }, 300);
+    }
   }
 
   shufflePiecesForSidebar() {
+    this.gameAudioService.playPuzzleShuffle();
     // Mezclar las piezas usando Fisher-Yates shuffle
     for (let i = this.pieces.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -275,6 +514,7 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
 
   onDrop(targetRow: number, targetCol: number, event: DragEvent) {
     event.preventDefault();
+    event.stopPropagation();
 
     if (!this.draggedPiece || !this.gameStarted || this.gameCompleted) return;
 
@@ -292,13 +532,28 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
     // Si no permitimos colocaciones incorrectas y la posición no es correcta
     if (!this.allowWrongPlacements && !isCorrectPosition) {
       // Devolver la pieza al sidebar
+      this.gameAudioService.playPuzzlePieceWrongPlace();
       this.returnToSidebar(this.draggedPiece);
+      return;
+    }
+
+    // Si hay una pieza existente (la misma pieza), quitarla primero
+    if (existingPiece && existingPiece.id === this.draggedPiece.id) {
+      this.returnToSidebar(this.draggedPiece);
+      return;
+    }
+
+    // Colocar la pieza en el tablero
+    this.draggedPiece.inBoard = true;
+    this.draggedPiece.currentRow = targetRow;
+    this.draggedPiece.currentCol = targetCol;
+    this.draggedPiece.correctPos = isCorrectPosition;
+
+    // Reproducir sonido si la pieza está en posición correcta
+    if (isCorrectPosition) {
+      this.gameAudioService.playPuzzlePieceSnap();
     } else {
-      // Colocar la pieza en el tablero
-      this.draggedPiece.inBoard = true;
-      this.draggedPiece.currentRow = targetRow;
-      this.draggedPiece.currentCol = targetCol;
-      this.draggedPiece.correctPos = isCorrectPosition;
+      this.gameAudioService.playPuzzlePiecePlace();
     }
 
     this.updateCorrectPiecesCount();
@@ -321,14 +576,152 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
     this.correctPieces = this.pieces.filter((p) => p.correctPos).length;
   }
 
+  private loadImage(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        this.actualImageWidth = img.naturalWidth;
+        this.actualImageHeight = img.naturalHeight;
+
+        // Calcular la escala para mantener proporción
+        const scaleX = this.imageWidth / this.actualImageWidth;
+        const scaleY = this.imageHeight / this.actualImageHeight;
+        this.imageScale = Math.min(scaleX, scaleY);
+
+        console.log('Imagen cargada correctamente:', {
+          url: this.puzzleImageUrl,
+          originalSize: `${this.actualImageWidth}x${this.actualImageHeight}`,
+          targetSize: `${this.imageWidth}x${this.imageHeight}`,
+          scale: this.imageScale
+        });
+        resolve();
+      };
+      img.onerror = (error) => {
+        console.error('Error al cargar la imagen:', error, 'URL:', this.puzzleImageUrl);
+        console.log('Intentando con imagen por defecto...');
+        this.puzzleImageUrl = 'assets/rompecabezas.png';
+        
+        // Intentar cargar la imagen por defecto
+        const fallbackImg = new Image();
+        fallbackImg.onload = () => {
+          this.actualImageWidth = fallbackImg.naturalWidth || this.imageWidth;
+          this.actualImageHeight = fallbackImg.naturalHeight || this.imageHeight;
+          this.imageScale = 1;
+          console.log('Imagen por defecto cargada');
+          resolve();
+        };
+        fallbackImg.onerror = () => {
+          // Si aún falla, usar dimensiones por defecto
+          this.actualImageWidth = this.imageWidth;
+          this.actualImageHeight = this.imageHeight;
+          this.imageScale = 1;
+          console.warn('No se pudo cargar ninguna imagen, usando dimensiones por defecto');
+          resolve();
+        };
+        fallbackImg.src = this.puzzleImageUrl;
+      };
+      img.src = this.puzzleImageUrl;
+    });
+  }
+
   checkGameCompletion() {
     if (this.correctPieces === this.totalPieces) {
+      this.gameAudioService.playPuzzleComplete();
       this.gameCompleted = true;
       if (this.timer) {
         clearInterval(this.timer);
       }
-      this.showCompletionAlert();
+
+      console.log('🧩 Puzzle completado con éxito');
+      console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
+
+      // Reproducir sonido de juego completado
+      this.gameAudioService.playGameComplete();
+
+      // Mostrar modal de éxito (que incluirá el modal de valoración)
+      this.showSuccessAlert();
     }
+  }
+
+  private async showSuccessAlert(): Promise<void> {
+    console.log('🧩 Puzzle completado con éxito en showSuccessAlert');
+    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
+    
+    // Mostrar modal de valoración si el usuario no ha evaluado el juego
+    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
+      console.log('✨ Mostrando modal de valoración...');
+      await this.showRatingAlert();
+    } else {
+      console.log('❌ Modal de valoración NO se muestra porque:', {
+        userAssessed: this.userAssessed,
+        gameAssessed: this.gameConfig?.assessed
+      });
+    }
+    
+    const timeUsed = this.formatTime(this.timeElapsed);
+    const config: GameAlertConfig = {
+      gameType: 'puzzle',
+      gameName: 'Rompecabezas',
+      timeUsed,
+    };
+
+    const result = await this.gameAlertService.showSuccessAlert(config);
+    if (result.isConfirmed) {
+      this.restartGame();
+    }
+  }
+
+  private async showTimeUpAlert(): Promise<void> {
+    console.log('⏰ Tiempo agotado en Puzzle');
+    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
+    
+    // Mostrar modal de valoración si el usuario no ha evaluado el juego
+    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
+      console.log('✨ Mostrando modal de valoración...');
+      await this.showRatingAlert();
+    } else {
+      console.log('❌ Modal de valoración NO se muestra porque:', {
+        userAssessed: this.userAssessed,
+        gameAssessed: this.gameConfig?.assessed
+      });
+    }
+    
+    const config: GameAlertConfig = {
+      gameType: 'puzzle',
+      gameName: 'Rompecabezas',
+    };
+
+    const result = await this.gameAlertService.showTimeUpAlert(config);
+    if (result.isConfirmed) {
+      this.restartGame();
+    }
+  }
+
+  private async showRatingAlert(): Promise<void> {
+    if (!this.gameConfig || !this.currentUserId) return;
+
+    try {
+      const gameInstanceId = this.gameConfig.game_instance_id;
+      const gameName = this.gameConfig.game_name || 'Rompecabezas';
+      
+      const result = await this.ratingModalService.showRatingModal(
+        gameInstanceId, 
+        this.currentUserId, 
+        gameName
+      );
+      
+      if (result) {
+        console.log('Valoración enviada exitosamente');
+        this.userAssessed = true;
+      }
+    } catch (error) {
+      console.error('Error al mostrar modal de valoración:', error);
+    }
+  }
+
+  private showRatingModal() {
+    // Método legacy - usar showRatingAlert en su lugar
+    this.showRatingAlert();
   }
 
   isPieceAt(row: number, col: number): boolean {
@@ -356,48 +749,168 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
 
   togglePanel() {
     this.isPanelOpen = !this.isPanelOpen;
+    this.gameAudioService.playButtonClick();
   }
-  getPieceStyle(piece: PuzzlePiece) {
+  getPieceStyle(piece: PuzzlePiece): any {
     if (!piece) return {};
 
     const pieceWidth = this.imageWidth / this.cols;
     const pieceHeight = this.imageHeight / this.rows;
     const isInBoard = !this.isInSidebar(piece);
+    
+    // Para el sidebar, las piezas mantienen las proporciones exactas pero más pequeñas
+    const sidebarScale = Math.min(100 / pieceWidth, 100 / pieceHeight); // Máximo 100px por lado
+    const displayWidth = isInBoard ? pieceWidth : pieceWidth * sidebarScale;
+    const displayHeight = isInBoard ? pieceHeight : pieceHeight * sidebarScale;
 
-    const baseStyle = {
-      width: isInBoard ? '100%' : '100%', // Uniform size for sidebar pieces (handled by container)
-      height: isInBoard ? '100%' : '100%', // Uniform size for sidebar pieces (handled by container)
-      'background-image': `url(${this.puzzleImageUrl})`,
-      'background-position': `-${piece.col * pieceWidth}px -${piece.row * pieceHeight}px`,
-      'background-size': `${this.imageWidth}px ${this.imageHeight}px`,
+    // Calcular la posición de fondo para mostrar solo la porción correcta de la imagen
+    const backgroundPosX = -piece.col * pieceWidth;
+    const backgroundPosY = -piece.row * pieceHeight;
+    
+    // Para el sidebar, escalar también la posición de fondo proporcionalmente
+    const scaledBackgroundPosX = isInBoard ? backgroundPosX : backgroundPosX * sidebarScale;
+    const scaledBackgroundPosY = isInBoard ? backgroundPosY : backgroundPosY * sidebarScale;
+    
+    // El background-size debe ser el tamaño COMPLETO de la imagen original escalado apropiadamente
+    const backgroundSizeWidth = isInBoard ? this.imageWidth : this.imageWidth * sidebarScale;
+    const backgroundSizeHeight = isInBoard ? this.imageHeight : this.imageHeight * sidebarScale;
+
+    // Asegurar que la URL de la imagen sea válida
+    const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
+    
+    // Determinar el color del borde según el estado de la pieza
+    let borderColor;
+    let boxShadow = 'none';
+    
+    if (piece.correctPos && isInBoard) {
+      // Pieza en posición correcta: borde verde
+      borderColor = '2px solid #22c55e';
+    } else if (this.selectedPiece?.id === piece.id) {
+      // Pieza seleccionada: borde morado
+      borderColor = isInBoard ? 'none' : '2px solid rgba(147, 51, 234, 0.8)';
+      if (!isInBoard) {
+        boxShadow = '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2)';
+      }
+    } else {
+      // Pieza normal - sin bordes en el tablero para que las piezas se vean pegadas
+      borderColor = isInBoard ? 'none' : '2px solid rgba(147, 51, 234, 0.2)';
+      if (!isInBoard) {
+        boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+      }
+    }
+
+    return {
+      'width.px': displayWidth,
+      'height.px': displayHeight,
+      'background-image': `url('${imageUrl}')`,
+      'background-position': `${scaledBackgroundPosX}px ${scaledBackgroundPosY}px`,
+      'background-size': `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
       'background-repeat': 'no-repeat',
-      cursor: this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
-      'border-radius': '8px',
-      display: 'block',
-      position: isInBoard ? 'absolute' : 'relative',
+      'background-clip': 'padding-box',
+      'cursor': this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
+      'border': borderColor,
+      'border-radius': isInBoard ? '0' : '8px',
+      'box-shadow': boxShadow,
+      'display': 'block',
+      'position': isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
-      transition: 'all 0.2s ease',
-      top: isInBoard ? '0' : 'auto',
-      left: isInBoard ? '0' : 'auto',
-      margin: '0',
-      padding: '0',
-      'object-fit': 'cover',
+      'transition': 'all 0.2s ease',
+      'transform': this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
+      'top': isInBoard ? '0' : 'auto',
+      'left': isInBoard ? '0' : 'auto',
+      'margin': isInBoard ? '0' : '6px',
+      'padding': '0',
+      'overflow': 'hidden'
     };
+  }
 
-    return baseStyle;
+  // Método para obtener estilos cuando el juego está completado
+  getPieceStyleCompleted(piece: PuzzlePiece): any {
+    if (!piece) return {};
+
+    const pieceWidth = this.imageWidth / this.cols;
+    const pieceHeight = this.imageHeight / this.rows;
+    const isInBoard = !this.isInSidebar(piece);
+    
+    // Para el sidebar, mantener el mismo scale que en el juego normal
+    const sidebarScale = 0.8;
+    const displayWidth = isInBoard ? pieceWidth : pieceWidth * sidebarScale;
+    const displayHeight = isInBoard ? pieceHeight : pieceHeight * sidebarScale;
+    
+    const backgroundPosX = -piece.col * pieceWidth;
+    const backgroundPosY = -piece.row * pieceHeight;
+    const scaledBackgroundPosX = isInBoard ? backgroundPosX : backgroundPosX * sidebarScale;
+    const scaledBackgroundPosY = isInBoard ? backgroundPosY : backgroundPosY * sidebarScale;
+    const backgroundSizeWidth = isInBoard ? this.imageWidth : this.imageWidth * sidebarScale;
+    const backgroundSizeHeight = isInBoard ? this.imageHeight : this.imageHeight * sidebarScale;
+    
+    const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
+
+    return {
+      'width.px': displayWidth,
+      'height.px': displayHeight,
+      'background-image': `url('${imageUrl}')`,
+      'background-position': `${scaledBackgroundPosX}px ${scaledBackgroundPosY}px`,
+      'background-size': `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
+      'background-repeat': 'no-repeat',
+      'background-clip': 'padding-box',
+      'cursor': 'default',
+      'border': 'none', // SIN BORDES cuando está completado
+      'border-radius': '0',
+      'box-shadow': 'none',
+      'display': 'block',
+      'position': isInBoard ? 'absolute' : 'relative',
+      'box-sizing': 'border-box',
+      'transition': 'all 0.2s ease',
+      'transform': 'scale(1)', // Sin transformaciones
+      'top': isInBoard ? '0' : 'auto',
+      'left': isInBoard ? '0' : 'auto',
+      'margin': isInBoard ? '0' : '4px',
+      'padding': '0',
+      'overflow': 'hidden'
+    };
+  }
+
+  // Método para determinar qué estilo usar
+  getCurrentPieceStyle(piece: PuzzlePiece): any {
+    if (this.gameCompleted) {
+      return this.getPieceStyleCompleted(piece);
+    }
+    return this.getPieceStyle(piece);
   }
 
   checkImageLoad() {
     const img = new Image();
     img.onload = () => {
-      console.log('Imagen cargada correctamente');
+      console.log('Imagen cargada correctamente:', this.puzzleImageUrl);
+      console.log('Dimensiones naturales:', img.naturalWidth, 'x', img.naturalHeight);
+      this.calculateImageDimensions();
     };
-    img.onerror = () => {
-      console.error('Error al cargar la imagen, usando imagen por defecto');
+    img.onerror = (error) => {
+      console.error('Error al cargar la imagen:', error);
+      console.error('URL que falló:', this.puzzleImageUrl);
       this.puzzleImageUrl = 'assets/rompecabezas.png';
+      this.calculateImageDimensions();
     };
     img.src = this.puzzleImageUrl;
   }
+
+  // Nuevo método para validar que la imagen sea accesible
+  validateImageUrl(): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        console.log('✅ Imagen validada correctamente:', this.puzzleImageUrl);
+        resolve(true);
+      };
+      img.onerror = () => {
+        console.error('❌ Error al validar imagen:', this.puzzleImageUrl);
+        resolve(false);
+      };
+      img.src = this.puzzleImageUrl;
+    });
+  }
+
   getDropZoneStyle() {
     const pieceWidth = this.imageWidth / this.cols;
     const pieceHeight = this.imageHeight / this.rows;
@@ -444,6 +957,19 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
     if (this.timer) {
       clearInterval(this.timer);
     }
+
+    // Mostrar modal de valoración si el usuario no ha evaluado el juego
+    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
+      this.showRatingAlert();
+    }
+
+    // Mostrar alerta de tiempo agotado
+    this.showTimeUpAlert();
+  }
+
+  private restartGame(): void {
+    this.timeWarningSent = false;
+    this.startGame();
   }
 
   // Método auxiliar para crear arrays en el template
@@ -451,145 +977,123 @@ export class GamePuzzleComponent extends BaseAuthenticatedComponent implements O
     return Array.from({ length }, (_, i) => i);
   }
 
-  // SweetAlert2 Methods
-  private showCompletionAlert(): void {
-    Swal.fire({
-      title: '¡Felicidades! 🧩',
-      html: `
-        <div style="text-align: center;">
-          <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
-          <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-            ¡Has completado el rompecabezas en <strong>${this.formatTime(this.timeElapsed)}</strong>!
-          </p>
-          <p style="font-size: 1rem; color: #6b7280;">
-            Todas las piezas están en su lugar correcto
-          </p>
-        </div>
-      `,
-      icon: 'success',
-      showCancelButton: true,
-      confirmButtonText: '🎮 Jugar de nuevo',
-      cancelButtonText: 'Continuar',
-      confirmButtonColor: '#10b981',
-      cancelButtonColor: '#6b7280',
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button',
-        cancelButton: 'kid-friendly-button-secondary'
-      },
-      backdrop: `
-        rgba(0,0,123,0.4)
-        url("/assets/confetti.gif")
-        left top
-        no-repeat
-      `
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.startGame();
-      } else {
-        // Check if user should rate the game
-        this.checkIfUserHasRated();
-      }
-    });
+  // Array auxiliares para el template
+  get rowArray(): number[] {
+    return Array(this.rows).fill(0);
   }
 
-  private showTimeUpAlert(): void {
-    Swal.fire({
-      title: '¡Tiempo agotado! ⏰',
-      html: `
-        <div style="text-align: center;">
-          <div style="font-size: 4rem; margin-bottom: 1rem;">😅</div>
-          <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-            Se acabó el tiempo, pero has colocado <strong>${this.correctPieces}</strong> de <strong>${this.totalPieces}</strong> piezas correctamente
-          </p>
-          <p style="font-size: 1rem; color: #6b7280;">
-            ¡Sigue practicando!
-          </p>
-        </div>
-      `,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: '🔄 Intentar de nuevo',
-      cancelButtonText: 'Continuar',
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button',
-        cancelButton: 'kid-friendly-button-secondary'
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.startGame();
-      } else {
-        // Check if user should rate the game
-        this.checkIfUserHasRated();
-      }
-    });
+  get colArray(): number[] {
+    return Array(this.cols).fill(0);
   }
 
-  private showErrorAlert(message: string): void {
-    Swal.fire({
-      title: '¡Ups! 😊',
-      html: `
-        <div style="text-align: center;">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">🤔</div>
-          <p style="font-size: 1.1rem; margin-bottom: 1rem;">
-            ${message}
-          </p>
-          <p style="font-size: 0.9rem; color: #6b7280;">
-            ¡No te preocupes, vuelve a intentarlo!
-          </p>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonText: '👍 Entendido',
-      confirmButtonColor: '#3b82f6',
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button'
-      }
-    });
-  }
-
-  // Rating methods
-  private async checkIfUserHasRated(): Promise<void> {
-    if (this.gameInstanceId === 0) return;
-
-    try {
-      this.hasUserRated = await this.ratingService.hasUserRatedGame(this.gameInstanceId).toPromise() || false;
-      
-      if (!this.hasUserRated) {
-        this.mostrarModalDeValoracion();
-      }
-    } catch (error) {
-      console.error('Error checking if user has rated:', error);
-    }
-  }
-
-  private mostrarModalDeValoracion(): void {
-    this.mostrarModalRating = true;
-  }
-
-  onRatingModalClose(): void {
-    this.mostrarModalRating = false;
-  }
-
-  onGameRated(): void {
-    this.mostrarModalRating = false;
-    this.hasUserRated = true;
-  }
-
-  volverAlDashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
+  // Métodos para el header
   toggleHeader(): void {
     this.headerExpanded = !this.headerExpanded;
   }
 
-  getSidebarPiecesCount(): number {
+  get tituloJuego(): string {
+    return this.gameConfig?.game_name || 'Rompecabezas';
+  }
+
+  get descripcionJuego(): string {
+    return (
+      this.gameConfig?.game_description ||
+      'Completa el rompecabezas colocando todas las piezas en su lugar correcto'
+    );
+  }
+
+  get porcentajeProgreso(): number {
+    return this.totalPieces > 0
+      ? Math.round((this.correctPieces / this.totalPieces) * 100)
+      : 0;
+  }
+
+  volverAlDashboard(): void {
+    // Navegar de vuelta al dashboard o página anterior
+    window.history.back();
+  }
+
+  togglePista(): void {
+    this.mostrarPista = !this.mostrarPista;
+  }
+
+  get pistaTexto(): string {
+    return (
+      this.gameConfig?.game_description ||
+      'Observa la imagen de referencia y fíjate en los colores y formas para colocar cada pieza en su lugar correcto.'
+    );
+  }
+
+  // Método para obtener el estilo del contenedor del tablero
+  getGameBoardContainerStyle(): any {
+    return {
+      width: this.imageWidth + 'px',
+      height: this.imageHeight + 'px',
+      maxWidth: '700px',
+      maxHeight: '700px'
+    };
+  }
+
+  // Método para obtener el estilo del contenedor externo del tablero
+  getGameBoardOuterStyle(): any {
+    return {
+      width: '724px',
+      height: '724px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    };
+  }
+
+  // Método auxiliar para debug de imágenes
+  debugImageInfo(): void {
+    console.log('🔍 Debug de información de imagen:');
+    console.log(`   - URL actual: ${this.puzzleImageUrl}`);
+    console.log(`   - Dimensiones del tablero: ${this.imageWidth}x${this.imageHeight}`);
+    console.log(`   - Dimensiones reales: ${this.actualImageWidth}x${this.actualImageHeight}`);
+    console.log(`   - Escala: ${this.imageScale}`);
+    console.log(`   - Filas x Columnas: ${this.rows}x${this.cols}`);
+    console.log(`   - Tamaño de pieza: ${this.imageWidth / this.cols}x${this.imageHeight / this.rows}`);
+    
+    // Verificar que la imagen es accesible
+    const testImg = new Image();
+    testImg.onload = () => {
+      console.log('✅ Imagen accesible y cargada correctamente');
+    };
+    testImg.onerror = () => {
+      console.error('❌ Error: La imagen no es accesible');
+    };
+    testImg.src = this.puzzleImageUrl;
+  }
+
+  // Método para test visual del puzzle
+  testPuzzleVisualization(): void {
+    console.log('🎨 TEST VISUAL DEL PUZZLE:');
+    console.log('=================================');
+    console.log(`Imagen: ${this.puzzleImageUrl}`);
+    console.log(`Dimensiones del tablero: ${this.imageWidth}x${this.imageHeight}`);
+    console.log(`Grid: ${this.rows} filas x ${this.cols} columnas`);
+    console.log(`Total piezas: ${this.totalPieces}`);
+    console.log(`Tamaño de cada pieza: ${this.imageWidth/this.cols}x${this.imageHeight/this.rows}`);
+    
+    console.log('\n🧩 DETALLES DE CADA PIEZA:');
+    this.pieces.slice(0, Math.min(6, this.pieces.length)).forEach(piece => {
+      const pieceWidth = this.imageWidth / this.cols;
+      const pieceHeight = this.imageHeight / this.rows;
+      const bgPosX = -piece.col * pieceWidth;
+      const bgPosY = -piece.row * pieceHeight;
+      
+      console.log(`Pieza ${piece.id}: Fila ${piece.row}, Col ${piece.col}`);
+      console.log(`  → Debe mostrar porción: X=${bgPosX}px, Y=${bgPosY}px`);
+      console.log(`  → Tamaño: ${pieceWidth}x${pieceHeight}`);
+      console.log('  ───────────────────────');
+    });
+  }
+
+  // Getter para contar piezas restantes en el sidebar
+  get remainingPiecesCount(): number {
     return this.pieces.filter(p => this.isInSidebar(p)).length;
   }
+
   protected readonly Array = Array;
 }

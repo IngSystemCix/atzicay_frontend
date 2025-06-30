@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
+import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 
 interface CardPair {
   id: number;
@@ -72,9 +73,11 @@ export class LayoutsMemoryComponent {
   }
 
   isSaving = false;
-  saveError: string | null = null;
 
-  constructor(public createGameService: CreateGameService) {
+  constructor(
+    public createGameService: CreateGameService,
+    private alertService: AlertService
+  ) {
     this.initializeDefaultData();
   }
 
@@ -217,11 +220,10 @@ export class LayoutsMemoryComponent {
 
   // Action methods
   async onSave(): Promise<void> {
-    this.saveError = null;
     if (!this.isFormValid()) {
       const errors = this.getValidationErrors();
       console.error('Cannot save game:', errors);
-      this.saveError = errors.join(', ');
+      this.alertService.showError(errors.join(', '));
       return;
     }
     this.isSaving = true;
@@ -238,18 +240,17 @@ export class LayoutsMemoryComponent {
         next: (res: any) => {
           this.isSaving = false;
           this.logAction('Game saved', res);
-          alert('Juego de memoria guardado correctamente');
+          this.alertService.showGameCreatedSuccess('Juego de memoria');
           this.resetForm();
         },
         error: (err: any) => {
           this.isSaving = false;
-          this.saveError = 'Error al guardar el juego';
-          console.error(err);
+          this.alertService.showGameCreationError(err, 'juego de memoria');
         }
       });
     } catch (e) {
       this.isSaving = false;
-      this.saveError = 'Error procesando imágenes';
+      this.alertService.showError('Error procesando imágenes');
       console.error(e);
     }
   }

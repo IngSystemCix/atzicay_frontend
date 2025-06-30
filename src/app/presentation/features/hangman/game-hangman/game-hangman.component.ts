@@ -2,15 +2,11 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
-import {
-  GameConfiguration,
-  HangmanWord,
-} from '../../../../core/domain/model/game-configuration.model';
+import { GameConfiguration, HangmanWord } from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
-import { RatingModalComponent } from '../../../shared/rating-modal/rating-modal.component';
-import { RatingService } from '../../../../core/infrastructure/service/rating.service';
-import Swal from 'sweetalert2';
-import { firstValueFrom } from 'rxjs';
+import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructure/service/game-alert.service';
+import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
+import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 
 interface JuegoState {
   palabraActual: string;
@@ -40,23 +36,23 @@ interface JuegoState {
   totalPalabras: number;
   contadorCambio: number;
   intervaloContador: any;
+  userAssessed: boolean; // Nueva propiedad para controlar valoración
 }
 
 @Component({
   selector: 'app-game-hangman',
   standalone: true,
-  imports: [CommonModule, RatingModalComponent],
+  imports: [CommonModule],
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
 })
-export class GameHangmanComponent
-  extends BaseAuthenticatedComponent
-  implements OnInit, OnDestroy
-{
+export class GameHangmanComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
-  private ratingService = inject(RatingService);
+  private gameAlertService = inject(GameAlertService);
+  private ratingModalService = inject(RatingModalService);
+  private gameAudioService = inject(GameAudioService);
 
   readonly INTENTOS_INICIALES = 6;
   private intervaloContador: any;
@@ -88,6 +84,7 @@ export class GameHangmanComponent
     totalPalabras: 0,
     contadorCambio: 0,
     intervaloContador: null,
+    userAssessed: false,
   };
 
   alfabeto: string[] = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
@@ -100,11 +97,6 @@ export class GameHangmanComponent
   palabrasAdivinadas: string[] = [];
   tiempoRestanteModal = 3;
   headerExpanded: boolean = false;
-  
-  // Rating properties
-  mostrarModalRating = false;
-  gameInstanceId = 0;
-  hasUserRated = false;
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -128,70 +120,32 @@ export class GameHangmanComponent
   }
 
   palabraAdivinada() {
-    this.mostrarModalExito = true;
     this.state.palabrasCompletadas++;
-
+    
     // Marcar palabra como completada en el canvas
     const palabraActual = this.state.palabraActual;
-    const index = this.palabrasAdivinadas.findIndex(
-      (p) => this.limpiarPalabra(p) === palabraActual
+    const index = this.palabrasAdivinadas.findIndex(p => 
+      this.limpiarPalabra(p) === palabraActual
     );
     if (index !== -1) {
       this.palabrasAdivinadas[index] = `~~${palabraActual}~~`;
     }
 
-    // PAUSAR el timer durante la alerta de éxito
-    if (this.state.timerInterval) {
-      clearInterval(this.state.timerInterval);
-      this.state.timerInterval = null;
+    // Verificar si se completaron todas las palabras
+    if (this.state.palabrasCompletadas >= this.state.totalPalabras) {
+      // Juego completado, mostrar modal de valoración si no ha evaluado
+      if (!this.state.userAssessed) {
+        this.showRatingAlert();
+      }
+      this.showSuccessAlert();
+      return;
     }
 
-    // Verificar si hay más palabras para determinar el flujo
-    if (this.state.indicePalabraActual + 1 < this.state.totalPalabras) {
-      // Mostrar SweetAlert de éxito amigable para niños (Evento #2: palabra adivinada correctamente)
-      Swal.fire({
-        icon: 'success',
-        title: '🎉 ¡Súper bien hecho!',
-        html: `
-          <div style="font-family: 'Arial', sans-serif; text-align: center;">
-            <div style="font-size: 60px; margin: 20px 0;">🌟</div>
-            <p style="font-size: 18px; color: #2d5a27; margin: 15px 0; font-weight: 600;">
-              ¡Adivinaste la palabra!
-            </p>
-            <div style="background: linear-gradient(135deg, #a8e6cf, #dcedc8); padding: 15px; border-radius: 15px; margin: 15px 0;">
-              <p style="font-size: 24px; font-weight: bold; color: #2e7d32; margin: 0;">${palabraActual}</p>
-            </div>
-            <p style="font-size: 16px; color: #555; margin: 10px 0;">
-              🚀 ¡Vamos por la siguiente palabra!
-            </p>
-          </div>
-        `,
-        background: 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
-        color: '#1e40af',
-        confirmButtonColor: '#10b981',
-        confirmButtonText: '✨ ¡Continuar aventura!',
-        timer: 5000,
-        timerProgressBar: true,
-        showCloseButton: false,
-        allowOutsideClick: false,
-        customClass: {
-          popup: 'animated-popup',
-          confirmButton: 'kid-friendly-button',
-        },
-      }).then(() => {
-        // Después de exactamente 5 segundos o botón, continuar
-        this.continuarSiguientePalabra();
-      });
-
-      // Iniciar contador de 5 segundos
-      this.iniciarContadorCambio();
-    } else {
-      // Juego completado - finalizar
-      this.finalizarJuego(true);
-    }
+    // Si hay más palabras, mostrar éxito y continuar automáticamente
+    this.showWordSuccessAlert();
   }
 
-  private iniciarContadorCambio() {
+   private iniciarContadorCambio() {
     this.state.contadorCambio = 5;
     if (this.intervaloContador) {
       clearInterval(this.intervaloContador);
@@ -203,43 +157,42 @@ export class GameHangmanComponent
       }
     }, 1000);
   }
-  continuarSiguientePalabra() {
+   continuarSiguientePalabra() {
     // Limpiar intervalo y modal de éxito
     if (this.intervaloContador) {
       clearInterval(this.intervaloContador);
       this.intervaloContador = null;
     }
     this.mostrarModalExito = false;
-
     // Pasar a la siguiente palabra
     this.state.indicePalabraActual++;
     this.configurarPalabraActual();
-    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
-      ''
-    );
+    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
     this.state.letrasSeleccionadas.clear();
     this.state.intentosRestantes = this.INTENTOS_INICIALES;
     this.state.contadorCambio = 0;
     this.state.juegoTerminado = false;
     this.state.juegoGanado = false;
-
-    // REANUDAR el timer después de la pausa de exactamente 5 segundos
-    // El tiempo restante se mantiene igual que cuando se pausó
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval);
+    }
     this.iniciarTimer();
   }
+
 
   cargarConfiguracionJuego(id: number): void {
     this.state.cargando = true;
     this.state.error = '';
 
-    this.gameConfigService.getGameConfiguration(id).subscribe({
+    // Get userId from authenticated user
+    const userId = this.currentUserId;
+
+    this.gameConfigService.getGameConfiguration(id, userId || undefined, false).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.state.gameConfig = response.data;
-          this.gameInstanceId = response.data.game_instance_id; // Guardar el gameInstanceId
           this.aplicarConfiguracion();
           this.iniciarJuego();
-          this.checkIfUserHasRated(); // Verificar si ya valoró el juego
         } else {
           this.state.error =
             response.message || 'No se pudo cargar la configuración del juego';
@@ -257,6 +210,9 @@ export class GameHangmanComponent
   aplicarConfiguracion(): void {
     if (!this.state.gameConfig) return;
     const config = this.state.gameConfig;
+
+    // Guardar el estado de evaluación del usuario
+    this.state.userAssessed = config.assessed || false;
 
     // Aplicar configuraciones desde settings
     if (config.settings && Array.isArray(config.settings)) {
@@ -294,9 +250,7 @@ export class GameHangmanComponent
       this.state.totalPalabras = this.state.palabrasJuego.length;
       this.state.indicePalabraActual = 0;
       // Inicializar palabrasAdivinadas para el canvas flotante
-      this.palabrasAdivinadas = this.state.palabrasJuego.map(
-        (item) => item.word
-      );
+      this.palabrasAdivinadas = this.state.palabrasJuego.map((item) => item.word);
     } else {
       this.state.palabrasJuego = [];
       this.state.totalPalabras = 0;
@@ -314,6 +268,7 @@ export class GameHangmanComponent
   }
 
   iniciarJuego(): void {
+    this.gameAudioService.playGameStart();
     if (!this.state.gameConfig || this.state.palabrasJuego.length === 0) {
       this.state.error = 'No se pudo inicializar el juego';
       return;
@@ -353,27 +308,46 @@ export class GameHangmanComponent
 
     if (this.state.palabraActual.includes(letra)) {
       // Letra correcta
+      this.gameAudioService.playHangmanCorrectLetter();
       for (let i = 0; i < this.state.palabraActual.length; i++) {
         if (this.state.palabraActual[i] === letra) {
           this.state.palabraRevelada[i] = letra;
         }
       }
 
+      // Verificar si la palabra está completa
       if (!this.state.palabraRevelada.includes('')) {
-        this.palabraAdivinada();
+        this.gameAudioService.playHangmanWordComplete();
+        this.tacharPalabraCanvas(this.state.palabraActual);
+        this.state.palabrasCompletadas++;
+
+        // Verificar si hay más palabras
+        if (
+          this.state.indicePalabraActual + 1 <
+          this.state.palabrasJuego.length
+        ) {
+          // Mostrar modal de éxito y esperar 5 segundos o botón
+          this.mostrarModalExito = true;
+          // PAUSAR el timer principal
+          if (this.state.timerInterval) {
+            clearInterval(this.state.timerInterval);
+            this.state.timerInterval = null;
+          }
+          this.iniciarContadorCambio();
+        } else {
+          // Juego completado
+          this.finalizarJuego(true);
+        }
       }
     } else {
+      // Letra incorrecta
+      this.gameAudioService.playHangmanWrongLetter();
+      this.gameAudioService.playHangmanDrawPart();
       this.state.intentosRestantes--;
 
       if (this.state.intentosRestantes <= 0) {
-        if (this.state.vidasRestantes > 1) {
-          this.mostrarAlertaAhorcadoConVidas();
-          setTimeout(() => {
-            this.resetearPalabraParaNuevoIntento();
-          }, 3500);
-        } else {
-          this.finalizarJuego(false);
-        }
+        this.gameAudioService.playHangmanGameOver();
+        this.finalizarJuego(false);
       }
     }
   }
@@ -412,6 +386,7 @@ export class GameHangmanComponent
   }
 
   finalizarJuego(ganado: boolean): void {
+    // Limpiar todos los modales antes de mostrar uno
     this.mostrarModalTiempoAgotado = false;
     this.mostrarModalFallo = false;
     this.mostrarModalExito = false;
@@ -420,7 +395,8 @@ export class GameHangmanComponent
     this.state.juegoTerminado = true;
     this.state.juegoGanado = ganado;
 
-    if (!ganado && this.state.vidasRestantes <= 0) {
+    // Solo limpiar el timer si el juego terminó completamente (sin vidas)
+    if (!ganado && this.state.vidasRestantes - 1 <= 0) {
       if (this.state.timerInterval) {
         clearInterval(this.state.timerInterval);
       }
@@ -431,207 +407,80 @@ export class GameHangmanComponent
     }
 
     if (!ganado) {
+      this.state.vidasRestantes--;
       if (this.state.vidasRestantes <= 0) {
         this.state.juegoFinalizado = true;
-        this.mostrarModalJuegoFinalizado = true;
-
-        Swal.fire({
-          icon: 'error',
-          title: '😢 ¡Oh no, se acabaron las vidas!',
-          html: `
-            <div style="font-family: 'Arial', sans-serif; text-align: center;">
-              <div style="font-size: 80px; margin: 20px 0;">😭</div>
-              <p style="font-size: 18px; color: #d32f2f; margin: 15px 0; font-weight: 600;">
-                ¡No te preocupes, los grandes exploradores también fallan!
-              </p>
-              <div style="background: linear-gradient(135deg, #ffebee, #fce4ec); padding: 15px; border-radius: 15px; margin: 15px 0;">
-                <p style="font-size: 16px; color: #c62828; margin: 0;">
-                  🌟 ¡Cada intento te hace más fuerte!
-                </p>
-              </div>
-              <p style="font-size: 16px; color: #555; margin: 10px 0;">
-                💪 ¿Quieres intentarlo otra vez?
-              </p>
-            </div>
-          `,
-          background: 'linear-gradient(135deg, #fff3e0, #fce4ec)',
-          confirmButtonColor: '#ff6b35',
-          confirmButtonText: '🎮 ¡Jugar de nuevo!',
-          showCancelButton: true,
-          cancelButtonText: '🏠 Volver al menú',
-          cancelButtonColor: '#78909c',
-          allowOutsideClick: false,
-          customClass: {
-            popup: 'animated-popup',
-            confirmButton: 'kid-friendly-button',
-            cancelButton: 'kid-friendly-button-secondary',
-          },
-        }).then((result) => {
-          if (result.isConfirmed) {
-            this.reiniciarJuego();
-          } else {
-            this.volverAlDashboard();
-          }
-          // Mostrar modal de valoración después de la acción (juego terminado sin vidas)
-          setTimeout(() => this.mostrarModalDeValoracion(), 500);
-        });
+        
+        // Mostrar modal de valoración si el usuario no ha evaluado el juego
+        if (!this.state.userAssessed) {
+          this.showRatingAlert();
+        }
+        
+        // Mostrar modal de game over usando el servicio
+        this.showGameOverAlert();
       } else {
+        // Si fue por tiempo, mostrar modal de tiempo agotado
         if (this.state.tiempoRestante === 0) {
-          this.mostrarModalTiempoAgotado = true;
-          Swal.fire({
-            icon: 'warning',
-            title: '⏰ ¡Se acabó el tiempo!',
-            html: `
-              <div style="font-family: 'Arial', sans-serif; text-align: center;">
-                <div style="font-size: 60px; margin: 20px 0;">⏱️</div>
-                <p style="font-size: 18px; color: #f57c00; margin: 15px 0; font-weight: 600;">
-                  ¡El tiempo voló muy rápido!
-                </p>
-                <div style="background: linear-gradient(135deg, #fff8e1, #ffecb3); padding: 15px; border-radius: 15px; margin: 15px 0;">
-                  <p style="font-size: 16px; color: #e65100; margin: 0;">
-                    💝 Te quedan ${this.state.vidasRestantes} ${
-              this.state.vidasRestantes === 1 ? 'vida' : 'vidas'
-            }
-                  </p>
-                </div>
-                <p style="font-size: 16px; color: #555; margin: 10px 0;">
-                  🚀 ¡Puedes hacerlo mejor!
-                </p>
-              </div>
-            `,
-            background: 'linear-gradient(135deg, #fff8e1, #ffecb3)',
-            confirmButtonColor: '#ff9800',
-            confirmButtonText: '💪 ¡Intentar de nuevo!',
-            timer: 4000,
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            customClass: {
-              popup: 'animated-popup',
-              confirmButton: 'kid-friendly-button',
-            },
-          });
+          this.showTimeUpAlert();
+        } else {
+          // Mostrar modal de vida perdida
+          this.showLifeLostAlert();
         }
       }
     } else {
+      // Revelar toda la palabra solo si ganó
       for (let i = 0; i < this.state.palabraActual.length; i++) {
         this.state.palabraRevelada[i] = this.state.palabraActual[i];
       }
-
-      if (this.state.indicePalabraActual + 1 >= this.state.totalPalabras) {
-        Swal.fire({
-          icon: 'success',
-          title: '🏆 ¡Eres un súper héroe de las palabras!',
-          html: `
-            <div style="font-family: 'Arial', sans-serif; text-align: center;">
-              <div style="font-size: 80px; margin: 20px 0;">🎊</div>
-              <p style="font-size: 20px; color: #2e7d32; margin: 15px 0; font-weight: bold;">
-                ¡Completaste TODAS las palabras!
-              </p>
-              <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); padding: 20px; border-radius: 15px; margin: 15px 0;">
-                <p style="font-size: 18px; color: #1b5e20; margin: 0;">
-                  🌟 ¡Eres increíblemente inteligente!
-                </p>
-              </div>
-              <p style="font-size: 16px; color: #555; margin: 10px 0;">
-                🎮 ¿Quieres una nueva aventura?
-              </p>
-            </div>
-          `,
-          background: 'linear-gradient(135deg, #e8f5e8, #f1f8e9)',
-          confirmButtonColor: '#4caf50',
-          confirmButtonText: '🚀 ¡Nueva aventura!',
-          showCancelButton: true,
-          cancelButtonText: '🏠 Volver al menú',
-          cancelButtonColor: '#78909c',
-          allowOutsideClick: false,
-          customClass: {
-            popup: 'animated-popup',
-            confirmButton: 'kid-friendly-button',
-            cancelButton: 'kid-friendly-button-secondary',
-          },
-        }).then((result) => {
-          if (result.isConfirmed) {
-            this.reiniciarJuego();
-          } else {
-            this.volverAlDashboard();
-          }
-          // Mostrar modal de valoración después de la acción (victoria completa)
-          setTimeout(() => this.mostrarModalDeValoracion(), 500);
-        });
-      } else {
-        this.mostrarModalExito = true;
-        this.iniciarContadorCambio();
-      }
+      // Llamar a palabraAdivinada para manejar el éxito
+      this.palabraAdivinada();
     }
   }
+
 
   reiniciarPalabraActual(): void {
-    this.mostrarModalFallo = false;
-    this.mostrarModalTiempoAgotado = false;
+  this.mostrarModalFallo = false;
+  this.mostrarModalTiempoAgotado = false;
+  
+  // Solo reiniciar la palabra actual, NO las vidas
+  this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+  this.state.letrasSeleccionadas = new Set<string>();
+  this.state.intentosRestantes = this.INTENTOS_INICIALES;
+  this.state.tiempoRestante = this.state.tiempoInicial;
+  this.state.juegoTerminado = false;
+  this.state.juegoGanado = false;
 
-    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
-      ''
-    );
-    this.state.letrasSeleccionadas = new Set<string>();
-    this.state.intentosRestantes = this.INTENTOS_INICIALES;
-    this.state.tiempoRestante = this.state.tiempoInicial;
-    this.state.juegoTerminado = false;
-    this.state.juegoGanado = false;
-
-    if (this.state.timerInterval) {
-      clearInterval(this.state.timerInterval);
-    }
-    this.iniciarTimer();
+  if (this.state.timerInterval) {
+    clearInterval(this.state.timerInterval);
   }
+  this.iniciarTimer();
+}
 
-  reiniciarJuego(): void {
-    this.mostrarModalTiempoAgotado = false;
-    this.mostrarModalJuegoFinalizado = false;
-    this.mostrarModalFallo = false;
-    this.mostrarModalExito = false;
+reiniciarJuego(): void {
+  this.mostrarModalTiempoAgotado = false;
+  this.mostrarModalJuegoFinalizado = false;
+  this.mostrarModalFallo = false;
+  this.mostrarModalExito = false;
 
-    Swal.fire({
-      icon: 'success',
-      title: '🎮 ¡Nueva aventura comenzando!',
-      html: `
-      <div style="font-family: 'Arial', sans-serif; text-align: center;">
-        <div style="font-size: 60px; margin: 20px 0;">🚀</div>
-        <p style="font-size: 18px; color: #1565c0; margin: 15px 0; font-weight: 600;">
-          ¡Empezamos un juego completamente nuevo!
-        </p>
-        <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 15px; border-radius: 15px; margin: 15px 0;">
-          <p style="font-size: 16px; color: #0d47a1; margin: 0;">
-            🌟 ¡Prepárate para descubrir palabras increíbles!
-          </p>
-        </div>
-        <p style="font-size: 16px; color: #555; margin: 10px 0;">
-          💪 ¡Tú puedes hacerlo!
-        </p>
-      </div>
-    `,
-      background: 'linear-gradient(135deg, #e3f2fd, #f3e5f5)',
-      confirmButtonColor: '#2196f3',
-      confirmButtonText: '✨ ¡Vamos a jugar!',
-      timer: 2500,
-      timerProgressBar: true,
-      allowOutsideClick: false,
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button',
-      },
-    });
+  // Resetear completamente el estado del juego
+  this.state.indicePalabraActual = 0;
+  this.state.palabrasCompletadas = 0;
+  this.state.vidasRestantes = 3; // Solo aquí se resetean las vidas a 3
+  this.state.juegoFinalizado = false;
 
-    this.state.indicePalabraActual = 0;
-    this.state.palabrasCompletadas = 0;
-    this.state.vidasRestantes = 3;
-    this.state.juegoFinalizado = false;
+  // Restaurar todas las palabras en el canvas
+  this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
+    item.word.toUpperCase()
+  );
 
-    this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
-      item.word.toUpperCase()
-    );
+  this.iniciarJuego();
+}
 
-    this.iniciarJuego();
-  }
+  /**
+   * Obtiene el progreso actual del juego como una cadena de la forma
+   * "Palabra X de Y", donde X es el índice actual de la palabra en el
+   * array de palabras y Y es el total de palabras en el juego.
+   */
   get progresoJuego(): string {
     return `Palabra ${this.state.indicePalabraActual + 1} de ${
       this.state.totalPalabras
@@ -640,9 +489,7 @@ export class GameHangmanComponent
 
   get porcentajeProgreso(): number {
     if (this.state.totalPalabras === 0) return 0;
-    return Math.round(
-      (this.state.palabrasCompletadas / this.state.totalPalabras) * 100
-    );
+    return Math.round((this.state.palabrasCompletadas / this.state.totalPalabras) * 100);
   }
 
   volverAlDashboard(): void {
@@ -665,34 +512,19 @@ export class GameHangmanComponent
     this.state.timerInterval = setInterval(() => {
       if (this.state.tiempoRestante > 0) {
         this.state.tiempoRestante--;
-
+        
+        // Reproducir sonido de advertencia cuando quedan 30 segundos
         if (this.state.tiempoRestante === 30) {
-          Swal.fire({
-            icon: 'warning',
-            title: '⏰ ¡Solo 30 segunditos!',
-            html: `
-              <div style="font-family: 'Arial', sans-serif; text-align: center;">
-                <div style="font-size: 50px; margin: 15px 0;">⏱️</div>
-                <p style="font-size: 16px; color: #f57c00; margin: 10px 0; font-weight: 600;">
-                  ¡Date prisa, pequeño explorador!
-                </p>
-                <p style="font-size: 14px; color: #ef6c00; margin: 5px 0;">
-                  💨 ¡Quedan solo 30 segundos!
-                </p>
-              </div>
-            `,
-            background: 'linear-gradient(135deg, #fff8e1, #ffecb3)',
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 2500,
-            timerProgressBar: true,
-            customClass: {
-              popup: 'kid-toast-alert',
-            },
-          });
+          this.gameAudioService.playTimeWarning();
+        }
+        
+        // Reproducir countdown en los últimos 5 segundos
+        if (this.state.tiempoRestante <= 5 && this.state.tiempoRestante > 0) {
+          this.gameAudioService.playCountdown();
         }
       } else {
+        // Solo mostrar el modal de tiempo agotado
+        this.gameAudioService.playTimeUp();
         this.finalizarJuego(false);
       }
     }, 1000);
@@ -714,6 +546,7 @@ export class GameHangmanComponent
     return palabra.replace(/~~/g, '');
   }
 
+  // Getters para aplicar estilos dinámicos
   get estilosJuego() {
     return {
       'background-color': this.state.colorFondo,
@@ -734,78 +567,123 @@ export class GameHangmanComponent
     this.headerExpanded = !this.headerExpanded;
   }
 
-  private mostrarAlertaAhorcadoConVidas(): void {
-    Swal.fire({
-      icon: 'error',
-      title: '😔 ¡El muñequito necesita ayuda!',
-      html: `
-        <div style="font-family: 'Arial', sans-serif; text-align: center;">
-          <div style="font-size: 60px; margin: 20px 0;">😵</div>
-          <p style="font-size: 18px; color: #d32f2f; margin: 15px 0; font-weight: 600;">
-            ¡Se completó el dibujo del ahorcado!
-          </p>
-          <div style="background: linear-gradient(135deg, #ffebee, #fce4ec); padding: 15px; border-radius: 15px; margin: 15px 0;">
-            <p style="font-size: 16px; color: #c62828; margin: 0;">
-              💖 Pero aún tienes ${this.state.vidasRestantes - 1} ${
-        this.state.vidasRestantes - 1 === 1 ? 'vida' : 'vidas'
-      } para salvarlo
-            </p>
-          </div>
-          <p style="font-size: 16px; color: #555; margin: 10px 0;">
-            🎯 ¡Nueva palabra en 3 segundos!
-          </p>
-        </div>
-      `,
-      background: 'linear-gradient(135deg, #ffebee, #fce4ec)',
-      confirmButtonColor: '#e53935',
-      confirmButtonText: '💪 ¡Entendido!',
-      timer: 3000,
-      timerProgressBar: true,
-      allowOutsideClick: true,
-      showCloseButton: true,
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button',
-      },
-    });
-  }
-  private resetearPalabraParaNuevoIntento(): void {
-    this.state.vidasRestantes--;
+  private async showSuccessAlert(): Promise<void> {
+    console.log('🎮 Juego completado con éxito');
+    console.log('📊 Estado de evaluación:', { userAssessed: this.state.userAssessed, gameAssessed: this.state.gameConfig?.assessed });
+    
+    // Mostrar modal de valoración si el usuario no ha evaluado el juego
+    if (!this.state.userAssessed && this.state.gameConfig && !this.state.gameConfig.assessed) {
+      console.log('✨ Mostrando modal de valoración...');
+      await this.showRatingAlert();
+    } else {
+      console.log('❌ Modal de valoración NO se muestra porque:', {
+        userAssessed: this.state.userAssessed,
+        gameAssessed: this.state.gameConfig?.assessed
+      });
+    }
+    
+    const timeUsed = this.formatTime(this.state.tiempoInicial - this.state.tiempoRestante);
+    const config: GameAlertConfig = {
+      gameType: 'hangman',
+      gameName: 'Ahorcado',
+      timeUsed,
+      wordsCompleted: this.state.palabrasCompletadas,
+      totalWords: this.state.totalPalabras
+    };
 
-    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
-      ''
-    );
-    this.state.letrasSeleccionadas = new Set<string>();
-    this.state.intentosRestantes = this.INTENTOS_INICIALES;
-    this.state.juegoTerminado = false;
-    this.state.juegoGanado = false;
+    const result = await this.gameAlertService.showSuccessAlert(config);
+    if (result.isConfirmed) {
+      this.reiniciarJuego();
+    }
   }
 
-  // Rating methods
-  private async checkIfUserHasRated(): Promise<void> {
-    if (this.gameInstanceId > 0) {
-      try {
-        this.hasUserRated = await firstValueFrom(this.ratingService.hasUserRatedGame(this.gameInstanceId));
-      } catch (error) {
-        console.warn('No se pudo verificar si el usuario ya valoró el juego:', error);
-        this.hasUserRated = false; // Asumir que no ha valorado en caso de error
+  private async showWordSuccessAlert(): Promise<void> {
+    // Mostrar mensaje breve y continuar automáticamente
+    setTimeout(() => {
+      this.continuarSiguientePalabra();
+    }, 2000);
+  }
+
+  private async showTimeUpAlert(): Promise<void> {
+    // Mostrar modal de valoración si el usuario no ha evaluado el juego
+    if (!this.state.userAssessed && this.state.gameConfig && !this.state.gameConfig.assessed) {
+      await this.showRatingAlert();
+    }
+    
+    const config: GameAlertConfig = {
+      gameType: 'hangman',
+      gameName: 'Ahorcado',
+      wordsCompleted: this.state.palabrasCompletadas,
+      totalWords: this.state.totalPalabras
+    };
+
+    const result = await this.gameAlertService.showTimeUpAlert(config);
+    if (result.isConfirmed) {
+      this.reiniciarPalabraActual();
+    }
+  }
+
+  private async showLifeLostAlert(): Promise<void> {
+    const config: GameAlertConfig = {
+      gameType: 'hangman',
+      lives: this.state.vidasRestantes
+    };
+
+    const result = await this.gameAlertService.showLifeLostAlert(config);
+    if (result.isConfirmed) {
+      this.reiniciarPalabraActual();
+    }
+  }
+
+  private async showGameOverAlert(): Promise<void> {
+    // Mostrar modal de valoración si el usuario no ha evaluado el juego
+    if (!this.state.userAssessed && this.state.gameConfig && !this.state.gameConfig.assessed) {
+      await this.showRatingAlert();
+    }
+    
+    const config: GameAlertConfig = {
+      gameType: 'hangman',
+      gameName: 'Ahorcado',
+      wordsCompleted: this.state.palabrasCompletadas,
+      totalWords: this.state.totalPalabras
+    };
+
+    const result = await this.gameAlertService.showGameOverAlert(config);
+    if (result.isConfirmed) {
+      this.reiniciarJuego();
+    }
+  }
+
+  private async showRatingAlert(): Promise<void> {
+    if (!this.state.gameConfig || !this.currentUserId) return;
+
+    try {
+      const gameInstanceId = this.state.gameConfig.game_instance_id;
+      const gameName = this.state.gameConfig.game_name || 'Ahorcado';
+      
+      const result = await this.ratingModalService.showRatingModal(
+        gameInstanceId, 
+        this.currentUserId, 
+        gameName
+      );
+      
+      if (result) {
+        console.log('Valoración enviada exitosamente');
+        this.state.userAssessed = true;
       }
+    } catch (error) {
+      console.error('Error al mostrar modal de valoración:', error);
     }
   }
 
-  private mostrarModalDeValoracion(): void {
-    // Solo mostrar el modal si el usuario no ha valorado aún
-    if (!this.hasUserRated && this.gameInstanceId > 0) {
-      this.mostrarModalRating = true;
-    }
+  private formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
-  onRatingModalClose(): void {
-    this.mostrarModalRating = false;
-  }
-
-  onGameRated(): void {
-    this.hasUserRated = true;
-    console.log('¡Juego valorado exitosamente!');
+  private showRatingModal() {
+    // Método legacy - usar showRatingAlert en su lugar
+    this.showRatingAlert();
   }
 }

@@ -88,7 +88,19 @@ export const routes: Routes = [
     title: "Juego de ahorcado"
   },
   {
+    path: 'game/hangman/:id',
+    component: GameHangmanComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de ahorcado"
+  },
+  {
     path: 'juegos/jugar-puzzle/:id',
+    component: GamePuzzleComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de Rompezabezas"
+  },
+  {
+    path: 'game/puzzle/:id',
     component: GamePuzzleComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas"
@@ -106,7 +118,19 @@ export const routes: Routes = [
     title: "Juego de Memoria"
   },
   {
+    path: 'game/memory/:id',
+    component: GameMemoryComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de Memoria"
+  },
+  {
     path: 'juegos/jugar-solve-the-word/:id',
+    component: GameSolveTheWordComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de Pupiletras"
+  },
+  {
+    path: 'game/solve-the-word/:id',
     component: GameSolveTheWordComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Pupiletras"

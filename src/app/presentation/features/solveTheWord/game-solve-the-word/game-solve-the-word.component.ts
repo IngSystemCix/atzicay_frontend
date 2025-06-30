@@ -1,13 +1,20 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
-import { GameConfiguration, SolveTheWordWord, GameSetting } from '../../../../core/domain/model/game-configuration.model';
+import {
+  GameConfiguration,
+  SolveTheWordWord,
+  GameSetting,
+} from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
-import { RatingModalComponent } from '../../../shared/rating-modal/rating-modal.component';
-import { RatingService } from '../../../../core/infrastructure/service/rating.service';
-import Swal from 'sweetalert2';
-import { firstValueFrom } from 'rxjs';
+import {
+  GameAlertService,
+  GameAlertConfig,
+} from '../../../../core/infrastructure/service/game-alert.service';
+import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
+import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
+
 interface WordCell {
   letter: string;
   isFound: boolean;
@@ -24,15 +31,16 @@ interface Word {
 @Component({
   selector: 'app-game-solve-the-word',
   standalone: true,
-  imports: [CommonModule, RatingModalComponent],
+  imports: [CommonModule],
   templateUrl: './game-solve-the-word.component.html',
   styleUrl: './game-solve-the-word.component.css',
 })
 export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
-  private ratingService = inject(RatingService);
+  private gameAlertService = inject(GameAlertService);
+  private ratingModalService = inject(RatingModalService);
+  private gameAudioService = inject(GameAudioService);
 
   grid: WordCell[][] = [];
   words: Word[] = [];
@@ -40,8 +48,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   gridCols = 12;
   wordsFound = 0;
   totalWords = 0;
-  timeLeft = 180; // 3 minutos por defecto
-  timeElapsed = 0; // tiempo transcurrido desde 0
+  timeLeft = 347; // default
   timer: any;
   selection: WordCell[] = [];
   directions = [
@@ -63,12 +70,14 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   fontFamily = 'Arial';
   backgroundColor = '#fff';
   fontColor = '#000';
-  headerExpanded: boolean = false;
+  userAssessed = false; // Nueva propiedad para controlar valoración
+  gameConfig: GameConfiguration | null = null; // Configuración completa del juego
 
-  // Rating properties
-  mostrarModalRating = false;
-  gameInstanceId = 0;
-  hasUserRated = false;
+  // Header control
+  headerExpanded = true;
+  
+  // Pista control
+  mostrarPista = false;
 
   override ngOnInit() {
     super.ngOnInit();
@@ -95,13 +104,14 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.loading = true;
     this.error = '';
 
-    this.gameConfigService.getGameConfiguration(id).subscribe({
+    // Get userId from authenticated user
+    const userId = this.currentUserId;
+
+    this.gameConfigService.getGameConfiguration(id, userId || undefined, false).subscribe({
       next: (response: { success: boolean; data: GameConfiguration; message?: string }) => {
         if (response.success && response.data) {
-          this.gameInstanceId = response.data.game_instance_id; // Guardar el gameInstanceId
           this.aplicarConfiguracion(response.data);
           this.iniciarJuego();
-          this.checkIfUserHasRated(); // Verificar si ya valoró el juego
         } else {
           this.error = response.message || 'No se pudo cargar la configuración del juego';
         }
@@ -116,13 +126,19 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   private aplicarConfiguracion(data: GameConfiguration): void {
+    // Guardar la configuración completa
+    this.gameConfig = data;
+    
     this.title = data.game_name;
     this.description = data.game_description;
+    
+    // Guardar el estado de evaluación del usuario
+    this.userAssessed = data.assessed || false;
 
     // Aplicar configuraciones desde settings (con validación)
     if (data.settings && Array.isArray(data.settings)) {
       const getSetting = (key: string) => data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)?.value;
-      this.timeLeft = parseInt(getSetting('time_limit') || '180', 10); // 3 minutos por defecto
+      this.timeLeft = parseInt(getSetting('time_limit') || '347', 10);
       this.fontFamily = getSetting('font_family') || 'Arial';
       this.backgroundColor = getSetting('background_color') || '#fff';
       this.fontColor = getSetting('font_color') || '#000';
@@ -146,15 +162,15 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   private iniciarJuego(): void {
+    this.gameAudioService.playGameStart();
     this.updateGridSize();
     this.initializeGrid();
     this.placeWordsOnGrid();
     this.fillRemainingCells();
-    this.timeElapsed = 0; // Reiniciar tiempo transcurrido
     this.startTimer();
   }
 
-  originalTimeLimit = 180; // 3 minutos por defecto
+  originalTimeLimit = 347;
 
   initializeGrid() {
     this.grid = [];
@@ -171,116 +187,98 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     }
   }
 
-  private showWinAlert() {
-    Swal.fire({
-      icon: 'success',
-      title: '🏆 ¡Increíble trabajo!',
-      html: `
-        <div style="font-family: 'Arial', sans-serif; text-align: center;">
-          <div style="font-size: 80px; margin: 20px 0;">�</div>
-          <p style="font-size: 20px; color: #2e7d32; margin: 15px 0; font-weight: bold;">
-            ¡Encontraste todas las palabras!
-          </p>
-          <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); padding: 20px; border-radius: 15px; margin: 15px 0;">
-            <p style="font-size: 18px; color: #1b5e20; margin: 0;">
-              ⏱️ Tiempo: <strong>${this.formatTime(this.timeElapsed)}</strong>
-            </p>
-          </div>
-          <p style="font-size: 16px; color: #555; margin: 10px 0;">
-            🎮 ¿Quieres una nueva aventura?
-          </p>
-        </div>
-      `,
-      background: 'linear-gradient(135deg, #e8f5e8, #f1f8e9)',
-      confirmButtonColor: '#4caf50',
-      confirmButtonText: '🚀 ¡Jugar de nuevo!',
-      showCancelButton: true,
-      cancelButtonText: '🏠 Continuar',
-      cancelButtonColor: '#78909c',
-      allowOutsideClick: false,
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button',
-        cancelButton: 'kid-friendly-button-secondary'
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.resetGame();
-      }
-      // Mostrar modal de valoración después de la victoria
-      setTimeout(() => this.mostrarModalDeValoracion(), 500);
-    });
-  }
+  private async showWinAlert() {
+    this.gameAudioService.playWordSearchAllWordsFound();
+    console.log('🎯 Juego Solve the Word completado con éxito');
+    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
+    
+    // Mostrar modal de valoración solo si el usuario no ha evaluado el juego
+    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
+      console.log('✨ Mostrando modal de valoración...');
+      await this.showRatingAlert();
+    } else {
+      console.log('❌ Modal de valoración NO se muestra porque:', {
+        userAssessed: this.userAssessed,
+        gameAssessed: this.gameConfig?.assessed
+      });
+    }
+    
+    const timeUsed = this.formatTime(347 - this.timeLeft);
+    const config: GameAlertConfig = {
+      gameType: 'solve-the-word',
+      gameName: 'Pupiletras',
+      timeUsed,
+      wordsCompleted: this.wordsFound,
+      totalWords: this.totalWords
+    };
 
-  private showTimeUpAlert() {
-    Swal.fire({
-      icon: 'warning',
-      title: '⏰ ¡Se acabó el tiempo!',
-      html: `
-        <div style="font-family: 'Arial', sans-serif; text-align: center;">
-          <div style="font-size: 60px; margin: 20px 0;">⏱️</div>
-          <p style="font-size: 18px; color: #f57c00; margin: 15px 0; font-weight: 600;">
-            ¡El tiempo voló muy rápido!
-          </p>
-          <div style="background: linear-gradient(135deg, #fff8e1, #ffecb3); padding: 15px; border-radius: 15px; margin: 15px 0;">
-            <p style="font-size: 16px; color: #e65100; margin: 0;">
-              📝 Encontraste <strong>${this.wordsFound}</strong> de <strong>${this.totalWords}</strong> palabras
-            </p>
-          </div>
-          <p style="font-size: 16px; color: #555; margin: 10px 0;">
-            🚀 ¡Puedes hacerlo mejor!
-          </p>
-        </div>
-      `,
-      background: 'linear-gradient(135deg, #fff8e1, #ffecb3)',
-      confirmButtonColor: '#ff9800',
-      confirmButtonText: '� ¡Intentar de nuevo!',
-      showCancelButton: true,
-      cancelButtonText: '📖 Ver palabras',
-      cancelButtonColor: '#78909c',
-      allowOutsideClick: false,
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button',
-        cancelButton: 'kid-friendly-button-secondary'
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.resetGame();
-      }
-      // Mostrar modal de valoración después del tiempo agotado
-      setTimeout(() => this.mostrarModalDeValoracion(), 500);
-    });
-  }
-
-  private showErrorAlert(message: string) {
-    Swal.fire({
-      icon: 'error',
-      title: '😔 ¡Ups! Algo salió mal',
-      html: `
-        <div style="font-family: 'Arial', sans-serif; text-align: center;">
-          <div style="font-size: 60px; margin: 20px 0;">🤖</div>
-          <p style="font-size: 18px; color: #d32f2f; margin: 15px 0; font-weight: 600;">
-            ${message}
-          </p>
-          <div style="background: linear-gradient(135deg, #ffebee, #fce4ec); padding: 15px; border-radius: 15px; margin: 15px 0;">
-            <p style="font-size: 16px; color: #c62828; margin: 0;">
-              💪 ¡No te preocupes, lo solucionaremos!
-            </p>
-          </div>
-        </div>
-      `,
-      background: 'linear-gradient(135deg, #ffebee, #fce4ec)',
-      confirmButtonColor: '#e53935',
-      confirmButtonText: '🔄 Reintentar',
-      allowOutsideClick: false,
-      customClass: {
-        popup: 'animated-popup',
-        confirmButton: 'kid-friendly-button'
-      }
-    }).then(() => {
+    const result = await this.gameAlertService.showSuccessAlert(config);
+    if (result.isConfirmed) {
       this.resetGame();
-    });
+    }
+  }
+  
+  private async showRatingAlert(): Promise<void> {
+    if (!this.gameConfig || !this.currentUserId) return;
+
+    try {
+      const gameInstanceId = this.gameConfig.game_instance_id;
+      const gameName = this.gameConfig.game_name || 'Pupiletras';
+      
+      const result = await this.ratingModalService.showRatingModal(
+        gameInstanceId, 
+        this.currentUserId, 
+        gameName
+      );
+      
+      if (result) {
+        console.log('Valoración enviada exitosamente');
+        this.userAssessed = true;
+      }
+    } catch (error) {
+      console.error('Error al mostrar modal de valoración:', error);
+    }
+  }
+
+  private async showTimeUpAlert() {
+    this.gameAudioService.playTimeUp();
+    console.log('⏰ Tiempo agotado en Solve the Word');
+    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
+    
+    // Mostrar modal de valoración si el usuario no ha evaluado el juego
+    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
+      console.log('✨ Mostrando modal de valoración...');
+      await this.showRatingAlert();
+    } else {
+      console.log('❌ Modal de valoración NO se muestra porque:', {
+        userAssessed: this.userAssessed,
+        gameAssessed: this.gameConfig?.assessed
+      });
+    }
+    
+    const config: GameAlertConfig = {
+      gameType: 'solve-the-word',
+      gameName: 'Pupiletras',
+      wordsCompleted: this.wordsFound,
+      totalWords: this.totalWords
+    };
+
+    const result = await this.gameAlertService.showTimeUpAlert(config);
+    if (result.isConfirmed) {
+      this.resetGame();
+    }
+  }
+
+  private async showErrorAlert(message: string) {
+    const result = await this.gameAlertService.showErrorAlert(message);
+    if (result.isConfirmed) {
+      this.resetGame();
+    }
+  }
+  
+  private showRatingModal() {
+    // Método legacy - usar showRatingAlert en su lugar
+    this.showRatingAlert();
   }
 
   placeWordsOnGrid() {
@@ -452,7 +450,16 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
-        this.timeElapsed++; // Incrementar tiempo transcurrido
+        
+        // Reproducir sonido de advertencia cuando quedan 30 segundos
+        if (this.timeLeft === 30) {
+          this.gameAudioService.playTimeWarning();
+        }
+        
+        // Reproducir countdown en los últimos 5 segundos
+        if (this.timeLeft <= 5 && this.timeLeft > 0) {
+          this.gameAudioService.playCountdown();
+        }
       } else {
         clearInterval(this.timer);
         this.showTimeUpAlert();
@@ -461,13 +468,14 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   formatTime(seconds: number): string {
-    // Convierte segundos a formato MM:SS para mostrar tiempo transcurrido y restante
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   }
 
   onCellMouseDown(cell: WordCell) {
+    if (this.loading) return;
+    this.gameAudioService.playWordSearchLetterSelect();
     this.isSelecting = true;
     this.selection = [cell];
   }
@@ -575,6 +583,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     );
 
     if (foundWord) {
+      this.gameAudioService.playWordSearchWordFound();
       foundWord.found = true;
       this.wordsFound++;
 
@@ -587,6 +596,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
         col: cell.position.col,
       }));
     } else {
+      this.gameAudioService.playWordSearchWordNotFound();
       for (const cell of this.selection) {
         if (!this.cellBelongsToFoundWord(cell)) {
           cell.isFound = false;
@@ -648,7 +658,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.words.forEach((word) => (word.found = false));
 
     this.timeLeft = this.originalTimeLimit;
-    this.timeElapsed = 0; // Reiniciar tiempo transcurrido
 
     this.initializeGrid();
     this.placeWordsOnGrid();
@@ -664,39 +673,37 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.isCompact = !this.isCompact;
   }
 
-  // Rating methods
-  private async checkIfUserHasRated(): Promise<void> {
-    if (this.gameInstanceId > 0) {
-      try {
-        this.hasUserRated = await firstValueFrom(this.ratingService.hasUserRatedGame(this.gameInstanceId));
-      } catch (error) {
-        console.warn('No se pudo verificar si el usuario ya valoró el juego:', error);
-        this.hasUserRated = false; // Asumir que no ha valorado en caso de error
-      }
-    }
-  }
-
-  private mostrarModalDeValoracion(): void {
-    // Solo mostrar el modal si el usuario no ha valorado aún
-    if (!this.hasUserRated && this.gameInstanceId > 0) {
-      this.mostrarModalRating = true;
-    }
-  }
-
-  onRatingModalClose(): void {
-    this.mostrarModalRating = false;
-  }
-
-  onGameRated(): void {
-    this.hasUserRated = true;
-    console.log('¡Juego valorado exitosamente!');
-  }
-
+  // Métodos para el header
   toggleHeader(): void {
     this.headerExpanded = !this.headerExpanded;
   }
 
+  get tituloJuego(): string {
+    return this.title || 'Pupiletras';
+  }
+
+  get descripcionJuego(): string {
+    return this.description || 'Encuentra todas las palabras ocultas en la sopa de letras';
+  }
+
+  get porcentajeProgreso(): number {
+    return this.totalWords > 0 ? Math.round((this.wordsFound / this.totalWords) * 100) : 0;
+  }
+
   volverAlDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    // Navegar de vuelta al dashboard o página anterior
+    window.history.back();
+  }
+
+  formatearTiempo(): string {
+    return this.formatTime(this.timeLeft);
+  }
+
+  togglePista(): void {
+    this.mostrarPista = !this.mostrarPista;
+  }
+
+  get pistaTexto(): string {
+    return this.description || 'Busca las palabras en todas las direcciones: horizontal, vertical y diagonal. Las palabras pueden estar escritas hacia adelante o hacia atrás.';
   }
 }

@@ -11,7 +11,7 @@ export interface HangmanWord {
 
 export interface SolveTheWordWord {
   Word: string;
-  Orientation: 'HR' | 'VR'; // Solo permite los valores válidos
+  Orientation: 'HL' | 'HR' | 'VU' | 'VD' | 'DU' | 'DD'; // Orientaciones válidas según backend
 }
 
 export interface CreateGame {

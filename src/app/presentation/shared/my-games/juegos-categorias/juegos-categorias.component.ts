@@ -68,7 +68,8 @@ export class JuegosCategoriasComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadData();
+    // Inicializar las categorías con cantidad 0 por defecto
+    this.resetCountersToZero();
     this.loadGameTypeCounts();
   }
 
@@ -108,41 +109,70 @@ export class JuegosCategoriasComponent implements OnInit {
       next: (res: any) => {
         if (res && res.data) {
           this.updateCounters(res.data);
+        } else {
+          // Si no hay datos, mantener las categorías con cantidad 0
+          this.resetCountersToZero();
         }
         this.cargando = false;
       },
       error: (err: any) => {
         console.error('Error al obtener conteos de juegos por tipo:', err);
-        this.error = true;
+        // En caso de error, mostrar las categorías con cantidad 0 para que el usuario pueda crear juegos
+        this.resetCountersToZero();
+        this.error = false; // Cambiamos esto para que no muestre error, sino las categorías vacías
         this.cargando = false;
       },
     });
   }
 
+  private resetCountersToZero(): void {
+    // Reiniciar contadores a cero
+    this.contadores = {
+      Ahorcado: 0,
+      Rompecabezas: 0,
+      Memoria: 0,
+      Pupiletras: 0,
+    };
+    
+    // Actualizar las categorías con cantidad 0
+    this.categorias = this.categorias.map((categoria) => ({
+      ...categoria,
+      cantidad: 0
+    }));
+  }
+
   private handleNoUserId(): void {
-    this.error = true;
+    // Si no hay userId, mostrar las categorías con cantidad 0 para que el usuario pueda crear juegos
+    this.resetCountersToZero();
+    this.error = false;
     this.cargando = false;
   }
 
   private updateCounters(data: any): void {
+    // Extraer los conteos con valores por defecto de 0
+    const hangmanCount = data.hangman_count || 0;
+    const puzzleCount = data.puzzle_count || 0;
+    const memoryCount = data.memorygame_count || 0;
+    const solveWordCount = data.solvetheword_count || 0;
+
     // Actualiza también los contadores para pruebas y lógica futura
     this.contadores = {
-      Ahorcado: data.hangman_count,
-      Rompecabezas: data.puzzle_count,
-      Memoria: data.memorygame_count,
-      Pupiletras: data.solvetheword_count,
+      Ahorcado: hangmanCount,
+      Rompecabezas: puzzleCount,
+      Memoria: memoryCount,
+      Pupiletras: solveWordCount,
     };
     
     this.categorias = this.categorias.map((categoria) => {
       switch (categoria.nombre) {
         case 'Ahorcado':
-          return { ...categoria, cantidad: data.hangman_count };
+          return { ...categoria, cantidad: hangmanCount };
         case 'Rompecabezas':
-          return { ...categoria, cantidad: data.puzzle_count };
+          return { ...categoria, cantidad: puzzleCount };
         case 'Memoria':
-          return { ...categoria, cantidad: data.memorygame_count };
+          return { ...categoria, cantidad: memoryCount };
         case 'Pupiletras':
-          return { ...categoria, cantidad: data.solvetheword_count };
+          return { ...categoria, cantidad: solveWordCount };
         default:
           return categoria;
       }
@@ -225,6 +255,11 @@ export class JuegosCategoriasComponent implements OnInit {
     this.categorias[0].cantidad = Math.floor(Math.random() * 10) + 1;
     this.contadores.Ahorcado = this.categorias[0].cantidad;
     console.log('Contador de prueba actualizado:', this.categorias[0].cantidad);
+  }
+
+  // Getter para verificar si todas las categorías tienen 0 juegos
+  get todasCategoriasVacias(): boolean {
+    return this.categorias.every(categoria => categoria.cantidad === 0);
   }
 
   minimizado = true;

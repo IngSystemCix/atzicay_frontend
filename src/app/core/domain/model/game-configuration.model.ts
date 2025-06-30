@@ -29,6 +29,17 @@ export interface GameSetting {
   value: string;
 }
 
+export interface Programming {
+  id: number;
+  name: string;
+  start_time: number;
+  end_time: number;
+  attempts: number;
+  maximum_time: number;
+  activated: boolean;
+  assessed: boolean;
+}
+
 export interface GameConfiguration {
   game_instance_id: number;
   game_name: string;
@@ -36,6 +47,8 @@ export interface GameConfiguration {
   difficulty: string;
   visibility: string;
   activated: boolean;
+  assessed: boolean;
+  programmings?: Programming[];
   hangman_words: HangmanWord[] | null;
   memory_pairs: MemoryPair[] | null;
   puzzle: PuzzleConfig | null;
