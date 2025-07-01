@@ -36,7 +36,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   cards: Card[] = [];
   flippedCards: Card[] = [];
   matches = 0;
-  totalPairs = 8;
+  totalPairs = 0; // Se configurará dinámicamente
   gameStarted = false;
   gameCompleted = false;
   timer = 0;
@@ -52,17 +52,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   
   // Pista control
   mostrarPista = false;
-
-  planets = [
-    { name: 'Júpiter', image: 'assets/jupiter.jpg' },
-    { name: 'Mercurio', image: 'assets/mercurio.jpg' },
-    { name: 'Tierra', image: 'assets/tierra.jpg' },
-    { name: 'Neptuno', image: 'assets/neptuno.jpg' },
-    { name: 'Saturno', image: 'assets/saturno.jpg' },
-    { name: 'Urano', image: 'assets/urano.jpg' },
-    { name: 'Venus', image: 'assets/venus.jpg' },
-    { name: 'Marte', image: 'assets/marte.jpg' }
-  ];
 
   constructor() {
     super();
@@ -172,11 +161,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     }
   }
 
-  private showRatingModal() {
-    // Método legacy - usar showRatingAlert en su lugar
-    this.showRatingAlert();
-  }
-
   initializeGame() {
     this.cards = [];
     this.flippedCards = [];
@@ -184,15 +168,15 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     this.gameStarted = false;
     this.gameCompleted = false;
     this.timer = 0;
-    this.attempts = 0; // Reiniciar contador de intentos
+    this.attempts = 0; 
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
 
-    // Si no hay configuración del juego, usar datos por defecto
+    // Si no hay configuración del juego, mostrar error
     if (!this.gameConfig || !this.gameConfig.memory_pairs || this.gameConfig.memory_pairs.length === 0) {
-      this.initializeDefaultGame();
+      this.error = 'No hay configuración del juego disponible';
       return;
     }
 
@@ -203,24 +187,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     this.shuffleCards();
   }
 
-  private initializeDefaultGame() {
-    // Código original para el juego por defecto con planetas
-    let id = 0;
-    this.planets.forEach(planet => {
-      // Agregar dos cartas idénticas para cada planeta
-      for (let i = 0; i < 2; i++) {
-        this.cards.push({
-          id: id++,
-          image: planet.image,
-          name: planet.name,
-          flipped: false,
-          matched: false,
-          isImageCard: true
-        });
-      }
-    });
-  }
-
   private createCardsFromConfiguration() {
     if (!this.gameConfig?.memory_pairs) return;
 
@@ -229,9 +195,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
 
     this.gameConfig.memory_pairs.forEach((pair, index) => {
       if (mode === 'II') {
-        // Modo Imagen-Imagen: crear dos cartas con imágenes
-        // Ambas cartas deben tener el mismo nombre para que sean reconocidas como pareja
-        const pairName = `pair_${index}`;
+       const pairName = `pair_${index}`;
         
         if (pair.path_image1) {
           this.cards.push({
@@ -393,11 +357,11 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   }
 
   get tituloJuego(): string {
-    return this.gameConfig?.game_name || '🪐 Juego de Memoria - Planetas';
+    return this.gameConfig?.game_name || 'Juego de Memoria';
   }
 
   get descripcionJuego(): string {
-    return this.gameConfig?.game_description || 'Encuentra todas las parejas de planetas para completar el juego';
+    return this.gameConfig?.game_description || 'Encuentra todas las parejas para completar el juego';
   }
 
   get porcentajeProgreso(): number {
@@ -413,7 +377,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   }
 
   get pistaTexto(): string {
-    return this.gameConfig?.game_description || 'Memoriza la posición de los planetas cuando se muestren al inicio. Luego encuentra las parejas haciendo clic en las cartas.';
+    return this.gameConfig?.game_description || 'Memoriza la posición de las cartas cuando se muestren al inicio. Luego encuentra las parejas haciendo clic en las cartas.';
   }
 
   getGridClasses(): string {
