@@ -595,6 +595,9 @@ reiniciarJuego(): void {
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
       this.reiniciarJuego();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 
@@ -621,6 +624,9 @@ reiniciarJuego(): void {
     const result = await this.gameAlertService.showTimeUpAlert(config);
     if (result.isConfirmed) {
       this.reiniciarPalabraActual();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 
@@ -633,6 +639,9 @@ reiniciarJuego(): void {
     const result = await this.gameAlertService.showLifeLostAlert(config);
     if (result.isConfirmed) {
       this.reiniciarPalabraActual();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 
@@ -652,6 +661,9 @@ reiniciarJuego(): void {
     const result = await this.gameAlertService.showGameOverAlert(config);
     if (result.isConfirmed) {
       this.reiniciarJuego();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 

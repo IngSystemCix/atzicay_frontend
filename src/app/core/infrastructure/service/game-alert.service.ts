@@ -29,18 +29,12 @@ export class GameAlertService {
       icon: 'success',
       showCancelButton: true,
       confirmButtonText: '🎮 Jugar de nuevo',
-      cancelButtonText: 'Continuar',
+      cancelButtonText: '🏠 Ir al Dashboard',
       confirmButtonColor: '#10b981',
       cancelButtonColor: '#6b7280',
       customClass: {
         popup: 'animated bounceIn',
-      },
-      backdrop: `
-        rgba(0,0,123,0.4)
-        url("/images/nyan-cat.gif")
-        left top
-        no-repeat
-      `
+      }
     });
   }
 
@@ -56,12 +50,14 @@ export class GameAlertService {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '🔄 Intentar de nuevo',
-      cancelButtonText: 'Ver resultados',
+      cancelButtonText: '🏠 Ir al Dashboard',
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
       customClass: {
         popup: 'animated bounceIn',
       },
+      allowOutsideClick: false,
+      allowEscapeKey: false
     });
   }
 
@@ -77,7 +73,7 @@ export class GameAlertService {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '💪 Continuar',
-      cancelButtonText: 'Rendirse',
+      cancelButtonText: '🏠 Ir al Dashboard',
       confirmButtonColor: '#f59e0b',
       cancelButtonColor: '#6b7280',
       customClass: {
@@ -100,12 +96,14 @@ export class GameAlertService {
       icon: 'error',
       showCancelButton: true,
       confirmButtonText: '🔄 Jugar de nuevo',
-      cancelButtonText: 'Salir',
+      cancelButtonText: '🏠 Ir al Dashboard',
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
       customClass: {
         popup: 'animated bounceIn',
       },
+      allowOutsideClick: false,
+      allowEscapeKey: false
     });
   }
 

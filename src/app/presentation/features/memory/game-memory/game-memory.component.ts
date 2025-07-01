@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import { GameConfiguration } from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
@@ -27,6 +27,7 @@ interface Card {
 })
 export class GameMemoryComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
   private gameAlertService = inject(GameAlertService);
   private ratingModalService = inject(RatingModalService);
@@ -44,6 +45,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   error: string | null = null;
   gameConfig: GameConfiguration | null = null;
   userAssessed = false; // Nueva propiedad para controlar valoración
+  attempts = 0; // Contador de intentos (pares volteados)
 
   // Header control
   headerExpanded = false;
@@ -136,12 +138,15 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       gameType: 'memory',
       gameName: 'Memoria',
       timeUsed,
-      attempts: this.timer // Puedes ajustar esto según tengas una métrica de intentos
+      attempts: this.attempts // Usar el contador real de intentos
     };
 
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
       this.resetGame();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 
@@ -179,6 +184,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     this.gameStarted = false;
     this.gameCompleted = false;
     this.timer = 0;
+    this.attempts = 0; // Reiniciar contador de intentos
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
@@ -224,11 +230,14 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     this.gameConfig.memory_pairs.forEach((pair, index) => {
       if (mode === 'II') {
         // Modo Imagen-Imagen: crear dos cartas con imágenes
+        // Ambas cartas deben tener el mismo nombre para que sean reconocidas como pareja
+        const pairName = `pair_${index}`;
+        
         if (pair.path_image1) {
           this.cards.push({
             id: id++,
-            image: pair.path_image1,
-            name: `pair_${index}_img1`,
+            image: this.convertToWebPath(pair.path_image1),
+            name: pairName,
             flipped: false,
             matched: false,
             isImageCard: true
@@ -238,8 +247,8 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         if (pair.path_image2) {
           this.cards.push({
             id: id++,
-            image: pair.path_image2,
-            name: `pair_${index}_img2`,
+            image: this.convertToWebPath(pair.path_image2),
+            name: pairName,
             flipped: false,
             matched: false,
             isImageCard: true
@@ -250,7 +259,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         if (pair.path_image1) {
           this.cards.push({
             id: id++,
-            image: pair.path_image1,
+            image: this.convertToWebPath(pair.path_image1),
             name: `pair_${index}`,
             flipped: false,
             matched: false,
@@ -318,6 +327,9 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
 
   async checkMatch() {
     const [card1, card2] = this.flippedCards;
+    
+    // Incrementar contador de intentos cada vez que se comparan dos cartas
+    this.attempts++;
 
     if (card1.name === card2.name) {
       // Es una pareja
@@ -333,6 +345,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         clearInterval(this.timerInterval);
         
         console.log('🧠 Juego Memory completado con éxito');
+        console.log('📊 Intentos realizados:', this.attempts);
         console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
         
         // Mostrar modal de valoración si el usuario no ha evaluado el juego
@@ -392,8 +405,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   }
 
   volverAlDashboard(): void {
-    // Navegar de vuelta al dashboard o página anterior
-    window.history.back();
+    this.router.navigate(['/dashboard']);
   }
 
   togglePista(): void {
@@ -422,6 +434,33 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   onImageError(card: Card): void {
     console.warn('Error loading image for card:', card);
     // Opcionalmente, se puede mostrar una imagen por defecto
+  }
+
+  /**
+   * Convierte una ruta absoluta del sistema de archivos a una ruta web válida
+   * @param absolutePath Ruta absoluta del sistema (ej: C:\Users\...\public\storage\memory\imagen.jpg)
+   * @returns Ruta web relativa (ej: storage/memory/imagen.jpg)
+   */
+  private convertToWebPath(absolutePath: string): string {
+    if (!absolutePath) return '';
+    
+    // Buscar la parte "storage" en la ruta
+    const storageIndex = absolutePath.indexOf('storage');
+    if (storageIndex !== -1) {
+      // Extraer desde "storage" hasta el final y normalizar las barras
+      return absolutePath.substring(storageIndex).replace(/\\/g, '/');
+    }
+    
+    // Si no encuentra "storage", buscar "public" y extraer desde ahí
+    const publicIndex = absolutePath.indexOf('public');
+    if (publicIndex !== -1) {
+      const pathFromPublic = absolutePath.substring(publicIndex + 7); // +7 para saltar "public/"
+      return pathFromPublic.replace(/\\/g, '/');
+    }
+    
+    // Como último recurso, intentar extraer solo el nombre del archivo
+    const fileName = absolutePath.split(/[\\\/]/).pop();
+    return `storage/memory/${fileName || ''}`;
   }
 
   // Método para determinar si el juego está en modo imagen-descripción

@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import {
   GameConfiguration,
@@ -42,16 +42,17 @@ export class GamePuzzleComponent
   implements OnInit, OnDestroy
 {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
   private gameAlertService = inject(GameAlertService);
   private gameAudioService = inject(GameAudioService);
   private ratingModalService = inject(RatingModalService);
   pieces: PuzzlePiece[] = [];
-  rows = 4; // Reducido para mejor jugabilidad
+  rows = 4; 
   cols = 4;
   totalPieces = this.rows * this.cols;
   gameStarted = false;
-  gameCompleted = false; // Cambiado a false inicialmente
+  gameCompleted = false; 
   draggedPiece: PuzzlePiece | null = null;
   correctPieces = 0;
   timeElapsed = 0;
@@ -59,45 +60,24 @@ export class GamePuzzleComponent
   allowWrongPlacements = false;
   maxTime = 300;
   timeLeft = this.maxTime;
-
-  // Dimensiones de la imagen
-  imageWidth = 700; // Tamaño fijo del tablero
-  imageHeight = 700; // Tamaño fijo del tablero
-  actualImageWidth = 0; // Ancho real de la imagen
-  actualImageHeight = 0; // Alto real de la imagen
-  imageScale = 1; // Escala para mantener proporción
-
-  // Dimensiones para el área de piezas disponibles
+  imageWidth = 700;
+  imageHeight = 700; 
+  actualImageWidth = 0; 
+  actualImageHeight = 0; 
+  imageScale = 1; 
   sidebarWidth = 200;
-
-  // Variables para la configuración del juego
   loading = false;
   error: string | null = null;
   gameConfig: GameConfiguration | null = null;
   puzzleConfig: PuzzleConfig | null = null;
-
-  // Variable para controlar si el usuario ya evaluó el juego
   userAssessed = false;
-
-  // URL de la imagen del puzzle
   puzzleImageUrl = 'assets/pedrito.jpg';
-
-  // Variable para seguimiento de piezas seleccionadas
   selectedPiece: PuzzlePiece | null = null;
-
-  // Nueva propiedad para controlar el panel lateral
   isPanelOpen = true;
-
-  // Assessment tracking
   hasUserAssessed = false;
-
-  // Header control
   headerExpanded = false;
-
-  // Pista control
   mostrarPista = false;
 
-  // Variable para controlar la advertencia de tiempo
   private timeWarningSent = false;
 
   constructor() {
@@ -160,10 +140,6 @@ export class GamePuzzleComponent
   private aplicarConfiguracion(data: GameConfiguration): void {
     this.gameConfig = data;
     this.puzzleConfig = data.puzzle;
-
-    console.log('Configuración aplicada:', data);
-    console.log('Puzzle config:', this.puzzleConfig);
-
     this.userAssessed = data.assessed || false;
 
     if (this.puzzleConfig) {
@@ -172,23 +148,18 @@ export class GamePuzzleComponent
       this.totalPieces = this.rows * this.cols;
       this.maxTime = 300;
       
-      // Inicializar con dimensiones máximas que luego se ajustarán proporcionalmente
       this.imageWidth = 700;
       this.imageHeight = 700;
 
       if (this.puzzleConfig.path_img) {
-        console.log('Path original de imagen:', this.puzzleConfig.path_img);
         this.puzzleImageUrl = this.getFrontendImagePath(this.puzzleConfig.path_img);
-        console.log('URL final de imagen:', this.puzzleImageUrl);
       } else {
-        console.log('No hay path_img, usando imagen por defecto');
         this.puzzleImageUrl = 'assets/rompecabezas.png';
       }
 
       this.allowWrongPlacements = !this.puzzleConfig.automatic_help;
     }
 
-    // Iniciar el juego después de aplicar la configuración
     this.iniciarJuego();
   }
 
@@ -198,30 +169,19 @@ export class GamePuzzleComponent
       this.actualImageWidth = img.naturalWidth;
       this.actualImageHeight = img.naturalHeight;
 
-      // Calcular la escala para que la imagen se ajuste al tablero manteniendo proporción
       const maxWidth = 700;
       const maxHeight = 700;
       const scaleX = maxWidth / this.actualImageWidth;
       const scaleY = maxHeight / this.actualImageHeight;
       this.imageScale = Math.min(scaleX, scaleY);
 
-      // Calcular las dimensiones finales de la imagen escalada
       const scaledWidth = this.actualImageWidth * this.imageScale;
       const scaledHeight = this.actualImageHeight * this.imageScale;
 
-      // Actualizar las dimensiones del tablero para que coincidan con la imagen escalada
       this.imageWidth = scaledWidth;
       this.imageHeight = scaledHeight;
-
-      console.log('🖼️ Cálculo de dimensiones de imagen:');
-      console.log(`   - Imagen original: ${this.actualImageWidth}x${this.actualImageHeight}`);
-      console.log(`   - Imagen escalada: ${scaledWidth}x${scaledHeight}`);
-      console.log(`   - Escala aplicada: ${this.imageScale}`);
-      console.log(`   - Dimensiones finales del tablero: ${this.imageWidth}x${this.imageHeight}`);
     };
     img.onerror = () => {
-      console.error('❌ Error al cargar imagen para calcular dimensiones:', this.puzzleImageUrl);
-      // Usar dimensiones por defecto si hay error
       this.imageWidth = 700;
       this.imageHeight = 700;
       this.actualImageWidth = 700;
@@ -291,7 +251,6 @@ export class GamePuzzleComponent
   }
 
   generatePuzzleShapes() {
-    // Primero, inicializar todos los conectores
     this.pieces.forEach((piece) => {
       piece.topConnector = piece.row === 0 ? 'none' : 'none';
       piece.rightConnector = piece.col === this.cols - 1 ? 'none' : 'none';
@@ -299,7 +258,6 @@ export class GamePuzzleComponent
       piece.leftConnector = piece.col === 0 ? 'none' : 'none';
     });
 
-    // Generar conectores de manera coordinada
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
         const piece = this.pieces.find((p) => p.row === row && p.col === col);
@@ -344,7 +302,6 @@ export class GamePuzzleComponent
     this.pieces = [];
     this.correctPieces = 0;
 
-    // Crear las piezas en su posición correcta inicialmente
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
         const id = i * this.cols + j;
@@ -388,11 +345,12 @@ export class GamePuzzleComponent
 
     this.timeLeft = this.maxTime;
     this.timeElapsed = 0;
-    this.timeWarningSent = false; // Reset de advertencia de tiempo
+    this.timeWarningSent = false; 
 
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
+        this.timeElapsed = this.maxTime - this.timeLeft; // Actualizar tiempo transcurrido
         
         // Reproducir sonido de advertencia cuando quedan 60 segundos
         if (this.timeLeft === 60 && !this.timeWarningSent) {
@@ -405,6 +363,7 @@ export class GamePuzzleComponent
           this.gameAudioService.playCountdown();
         }
       } else {
+        this.timeElapsed = this.maxTime; // Tiempo total transcurrido cuando se agota
         this.gameAudioService.playTimeUp();
         clearInterval(this.timer);
         this.endGame();
@@ -629,11 +588,16 @@ export class GamePuzzleComponent
     if (this.correctPieces === this.totalPieces) {
       this.gameAudioService.playPuzzleComplete();
       this.gameCompleted = true;
+      
+      // Actualizar tiempo transcurrido antes de limpiar el timer
+      this.timeElapsed = this.maxTime - this.timeLeft;
+      
       if (this.timer) {
         clearInterval(this.timer);
       }
 
       console.log('🧩 Puzzle completado con éxito');
+      console.log('⏰ Tiempo transcurrido:', this.formatTime(this.timeElapsed));
       console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
 
       // Reproducir sonido de juego completado
@@ -669,6 +633,9 @@ export class GamePuzzleComponent
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
       this.restartGame();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 
@@ -695,6 +662,9 @@ export class GamePuzzleComponent
     const result = await this.gameAlertService.showTimeUpAlert(config);
     if (result.isConfirmed) {
       this.restartGame();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 
@@ -1010,8 +980,7 @@ export class GamePuzzleComponent
   }
 
   volverAlDashboard(): void {
-    // Navegar de vuelta al dashboard o página anterior
-    window.history.back();
+    this.router.navigate(['/dashboard']);
   }
 
   togglePista(): void {

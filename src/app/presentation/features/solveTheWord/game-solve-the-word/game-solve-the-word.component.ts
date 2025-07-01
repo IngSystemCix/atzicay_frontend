@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
 import {
   GameConfiguration,
@@ -38,6 +38,7 @@ interface Word {
 })
 export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
   private gameAlertService = inject(GameAlertService);
   private ratingModalService = inject(RatingModalService);
@@ -216,6 +217,9 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
       this.resetGame();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
   
@@ -267,6 +271,9 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     const result = await this.gameAlertService.showTimeUpAlert(config);
     if (result.isConfirmed) {
       this.resetGame();
+    } else if (result.isDismissed) {
+      // Si presiona "Ir al Dashboard" o cierra el modal
+      this.volverAlDashboard();
     }
   }
 
@@ -692,8 +699,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   volverAlDashboard(): void {
-    // Navegar de vuelta al dashboard o página anterior
-    window.history.back();
+    this.router.navigate(['/dashboard']);
   }
 
   formatearTiempo(): string {
