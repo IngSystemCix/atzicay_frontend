@@ -204,8 +204,11 @@
           </div>
           <button 
             class="bg-white/40 hover:bg-white/60 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-900 transition-all duration-300 hover:scale-105 border border-white/50 shadow-sm whitespace-nowrap cursor-pointer"
-            (click)="generateGameUrl(activity)">
-            🔗 <span class="hidden sm:inline">Obtener </span>URL
+            (click)="generateGameUrl(activity)"
+            [disabled]="generatingUrlForActivity === activity.game_instance_id"
+            [ngClass]="{'opacity-50 cursor-not-allowed': generatingUrlForActivity === activity.game_instance_id}">
+            <span *ngIf="generatingUrlForActivity !== activity.game_instance_id">🔗 <span class="hidden sm:inline">Obtener </span>URL</span>
+            <span *ngIf="generatingUrlForActivity === activity.game_instance_id">⏳ Generando...</span>
           </button>
         </div>
       </div>

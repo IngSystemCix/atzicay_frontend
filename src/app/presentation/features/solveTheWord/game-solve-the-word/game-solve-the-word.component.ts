@@ -15,6 +15,7 @@ import {
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
+import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
 
 interface WordCell {
   letter: string;
@@ -43,6 +44,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   private gameAlertService = inject(GameAlertService);
   private ratingModalService = inject(RatingModalService);
   private gameAudioService = inject(GameAudioService);
+  private gameUrlService = inject(GameUrlService);
 
   grid: WordCell[][] = [];
   words: Word[] = [];
@@ -93,10 +95,45 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   onAuthenticationReady(userId: number): void {
-    const id = Number(this.route.snapshot.params['id']);
-    if (id && !isNaN(id)) {
-      this.cargarConfiguracionJuego(id);
+    // Capturar parámetros de ruta - puede ser 'id' o 'token'
+    const id = this.route.snapshot.params['id'];
+    const token = this.route.snapshot.params['token'];
+    
+    console.log('🔤 [SolveTheWord] Parámetros capturados:', { id, token, url: this.router.url });
+    
+    if (token) {
+      // Si tenemos un token, validarlo primero
+      console.log('🔐 [SolveTheWord] Validando token de acceso...');
+      this.gameUrlService.validateGameToken(token).subscribe({
+        next: (response) => {
+          if (response.valid && response.gameInstanceId) {
+            console.log('✅ [SolveTheWord] Token válido, cargando juego con ID:', response.gameInstanceId);
+            this.cargarConfiguracionJuego(response.gameInstanceId);
+          } else {
+            console.error('❌ [SolveTheWord] Token inválido o expirado');
+            this.error = 'El enlace del juego ha expirado o no es válido';
+            this.loading = false;
+          }
+        },
+        error: (error) => {
+          console.error('❌ [SolveTheWord] Error validando token:', error);
+          this.error = 'Error al validar el acceso al juego';
+          this.loading = false;
+        }
+      });
+    } else if (id) {
+      // Si tenemos un ID tradicional, usarlo directamente
+      const gameId = Number(id);
+      if (gameId && !isNaN(gameId)) {
+        console.log('🔤 [SolveTheWord] Cargando juego con ID tradicional:', gameId);
+        this.cargarConfiguracionJuego(gameId);
+      } else {
+        console.error('❌ [SolveTheWord] ID de juego inválido:', id);
+        this.error = 'ID de juego inválido';
+        this.loading = false;
+      }
     } else {
+      console.error('❌ [SolveTheWord] No se encontró ID ni token en la URL');
       this.error = 'No se proporcionó un ID de juego válido';
       this.loading = false;
     }

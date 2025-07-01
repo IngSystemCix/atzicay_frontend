@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import { GameReportResponse } from '../../../../core/domain/interface/game-report-response';
 import ApexCharts from 'apexcharts';
 import { GameReportService } from '../../../../core/infrastructure/api/game-report.service';
+import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
 @Component({
   selector: 'app-my-programmings',
   standalone: true,
@@ -41,6 +42,7 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
   totalActivities: number = 0;
   userId: number = 0;
   isScrolled = false;
+  generatingUrlForActivity: number | null = null; // Para mostrar estado de carga
   private subscription = new Subscription();
   constructor(
     private myProgrammingGamesService: MyProgrammingGamesService,
@@ -48,7 +50,8 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     private router: Router,
     private userSession: UserSessionService,
     private programmingStatusService: ProgrammingStatusService,
-    private gameReportService: GameReportService // Corregido: inyectar correctamente el servicio
+    private gameReportService: GameReportService,
+    private gameUrlService: GameUrlService
   ) {}
 
   ngOnInit() {
@@ -468,117 +471,122 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   generateGameUrl(activity: MyProgrammingGame): void {
-    
-    // Mapeo más robusto que incluye múltiples variantes
-    const gameRoutes: { [key: string]: string } = {
-      'Ahorcado': 'hangman',
-      'Rompecabezas': 'puzzle', 
-      'Memoria': 'memory',
-      'Pupiletras': 'solve-the-word',
-      'hangman': 'hangman',
-      'Hangman': 'hangman',
-      'HANGMAN': 'hangman',
-      'puzzle': 'puzzle',
-      'Puzzle': 'puzzle',
-      'PUZZLE': 'puzzle',
-      'memory': 'memory',
-      'Memory': 'memory',
-      'MEMORY': 'memory',
-      'solve-the-word': 'solve-the-word',
-      'solve_the_word': 'solve-the-word',
-      'Solve-the-word': 'solve-the-word',
-      'pupiletras': 'solve-the-word',
-      'Hnangman': 'hangman',
-      'hnangman': 'hangman'
-    };
-
-    let gameRoute = gameRoutes[activity.type_game];
-    
-    if (!gameRoute) {
-      const typeGameLower = activity.type_game.toLowerCase();
-      gameRoute = gameRoutes[typeGameLower];
-      
-      if (!gameRoute) {
-        const typeGameKey = Object.keys(gameRoutes).find(key => 
-          key.toLowerCase().includes(typeGameLower) || 
-          typeGameLower.includes(key.toLowerCase())
-        );
-        if (typeGameKey) {
-          gameRoute = gameRoutes[typeGameKey];
-        }
-      }
-    }
-    
-    if (!gameRoute) {
-      console.error('❌ Tipo de juego no reconocido:', {
-        received: activity.type_game,
-        availableTypes: Object.keys(gameRoutes)
-      });
-      Swal.fire('Error', `Tipo de juego no reconocido: "${activity.type_game}".<br>Tipos válidos: ${Object.keys(gameRoutes).slice(0, 4).join(', ')}`, 'error');
+    // Evitar múltiples llamadas simultáneas para la misma actividad
+    if (this.generatingUrlForActivity === activity.game_instance_id) {
       return;
     }
 
-    const baseUrl = window.location.origin;
-    const gameUrl = `${baseUrl}/game/${gameRoute}/${activity.game_instance_id}?userId=${this.userId}&withProgrammings=true`;
+    // Mapear el tipo de juego a la ruta correspondiente
+    const gameRoute = this.gameUrlService.mapGameTypeToRoute(activity.type_game);
+    
+    if (gameRoute === 'unknown') {
+      console.error('❌ Tipo de juego no reconocido:', {
+        received: activity.type_game,
+        availableTypes: ['hangman', 'puzzle', 'memory', 'solve-the-word']
+      });
+      Swal.fire('Error', `Tipo de juego no reconocido: "${activity.type_game}"`, 'error');
+      return;
+    }
 
+    // Marcar como generando URL
+    this.generatingUrlForActivity = activity.game_instance_id;
 
+    // Mostrar loading mientras se genera el token
     Swal.fire({
-      title: 'URL del Juego Generada',
-      html: `
-        <div class="text-left">
-          <p class="mb-4"><strong>Juego:</strong> ${activity.name_game}</p>
-          <p class="mb-4"><strong>Programación:</strong> ${activity.programming_name}</p>
-          <p class="mb-4"><strong>Tipo:</strong> ${activity.type_game}</p>
-          <div class="bg-gray-100 p-3 rounded-lg border">
-            <p class="text-sm font-medium mb-2">URL del juego:</p>
-            <input id="gameUrlInput" type="text" value="${gameUrl}" 
-                   class="w-full p-2 text-xs border rounded bg-white" readonly>
-          </div>
-          <p class="text-xs text-gray-500 mt-2">
-            Esta URL incluye el contexto de la programación y permitirá al estudiante jugar con todos los intentos y configuraciones establecidas.
-          </p>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: '📋 Copiar URL',
-      cancelButtonText: '🎮 Jugar Ahora',
-      confirmButtonColor: '#8b5cf6',
-      cancelButtonColor: '#10b981',
-      width: 700,
-      customClass: {
-        popup: 'text-left'
-      },
-      preConfirm: () => {
-        // Copiar al portapapeles
-        const input = document.getElementById('gameUrlInput') as HTMLInputElement;
-        if (input) {
-          input.select();
-          navigator.clipboard.writeText(gameUrl).then(() => {
-            Swal.fire({
-              title: '¡Copiado!',
-              text: 'La URL ha sido copiada al portapapeles',
-              icon: 'success',
-              timer: 2000,
-              showConfirmButton: false
-            });
-          }).catch(() => {
-            // Fallback para navegadores más antiguos
-            document.execCommand('copy');
-            Swal.fire({
-              title: '¡Copiado!',
-              text: 'La URL ha sido copiada al portapapeles',
-              icon: 'success',
-              timer: 2000,
-              showConfirmButton: false
-            });
-          });
-        }
-      }
-    }).then((result) => {
-      if (result.dismiss === Swal.DismissReason.cancel) {
-        // Abrir el juego en una nueva pestaña
-        window.open(gameUrl, '_blank');
+      title: 'Generando URL Segura...',
+      text: 'Por favor espera mientras generamos tu enlace de juego',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
       }
     });
+
+    // Generar token seguro
+    this.gameUrlService.generateSecureGameToken(activity.game_instance_id, this.userId)
+      .subscribe({
+        next: (response) => {
+          // Limpiar estado de carga
+          this.generatingUrlForActivity = null;
+          
+          if (response.success) {
+            // Generar URL limpia con el token
+            const secureUrl = this.gameUrlService.generateCleanGameUrl(gameRoute, response.data.token);
+            
+            // Cerrar loading y mostrar URL
+            Swal.fire({
+              title: '🔒 URL Segura Generada',
+              html: `
+                <div class="text-left">
+                  <p class="mb-4"><strong>Juego:</strong> ${activity.name_game}</p>
+                  <p class="mb-4"><strong>Programación:</strong> ${activity.programming_name}</p>
+                  <p class="mb-4"><strong>Tipo:</strong> ${activity.type_game}</p>
+                  <div class="bg-gray-100 p-3 rounded-lg border">
+                    <p class="text-sm font-medium mb-2">URL del juego:</p>
+                    <input id="gameUrlInput" type="text" value="${secureUrl}" 
+                           class="w-full p-2 text-xs border rounded bg-white" readonly>
+                  </div>
+                  <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p class="text-xs text-green-700">
+                      🔒 <strong>URL Segura:</strong> Esta URL utiliza un token de acceso temporal que expira el ${new Date(response.data.expires_at).toLocaleString()}.
+                    </p>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-2">
+                    Esta URL incluye el contexto de la programación y permitirá al estudiante jugar con todos los intentos y configuraciones establecidas.
+                  </p>
+                </div>
+              `,
+              showCancelButton: true,
+              confirmButtonText: '📋 Copiar URL',
+              cancelButtonText: '🎮 Jugar Ahora',
+              confirmButtonColor: '#8b5cf6',
+              cancelButtonColor: '#10b981',
+              width: 700,
+              customClass: {
+                popup: 'text-left'
+              },
+              preConfirm: () => {
+                // Copiar al portapapeles
+                const input = document.getElementById('gameUrlInput') as HTMLInputElement;
+                if (input) {
+                  input.select();
+                  navigator.clipboard.writeText(secureUrl).then(() => {
+                    Swal.fire({
+                      title: '¡Copiado!',
+                      text: 'La URL segura ha sido copiada al portapapeles',
+                      icon: 'success',
+                      timer: 2000,
+                      showConfirmButton: false
+                    });
+                  }).catch(() => {
+                    // Fallback para navegadores más antiguos
+                    document.execCommand('copy');
+                    Swal.fire({
+                      title: '¡Copiado!',
+                      text: 'La URL segura ha sido copiada al portapapeles',
+                      icon: 'success',
+                      timer: 2000,
+                      showConfirmButton: false
+                    });
+                  });
+                }
+              }
+            }).then((result) => {
+              if (result.dismiss === Swal.DismissReason.cancel) {
+                // Abrir el juego en una nueva pestaña
+                window.open(secureUrl, '_blank');
+              }
+            });
+          } else {
+            Swal.fire('Error', response.message || 'No se pudo generar la URL del juego', 'error');
+          }
+        },
+        error: (error) => {
+          // Limpiar estado de carga
+          this.generatingUrlForActivity = null;
+          
+          console.error('Error generando token de acceso:', error);
+          Swal.fire('Error', 'No se pudo generar la URL del juego. Por favor intenta nuevamente.', 'error');
+        }
+      });
   }
 }

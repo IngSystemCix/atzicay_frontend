@@ -8,6 +8,7 @@ import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructu
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
+import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
 
 interface JuegoState {
   palabraActual: string;
@@ -54,6 +55,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   private gameAlertService = inject(GameAlertService);
   private ratingModalService = inject(RatingModalService);
   private gameAudioService = inject(GameAudioService);
+  private gameUrlService = inject(GameUrlService);
 
   readonly INTENTOS_INICIALES = 6;
   private intervaloContador: any;
@@ -101,6 +103,24 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
 
   override ngOnInit(): void {
     super.ngOnInit();
+    
+    // Ejemplo adicional: capturar parámetros de forma reactiva con observables
+    // Esto es útil cuando los parámetros pueden cambiar sin recargar el componente
+    this.subscription.add(
+      this.route.params.subscribe(params => {
+        console.log('📱 Parámetros de ruta cambiaron:', params);
+        
+        // También puedes capturar query parameters
+        this.route.queryParams.subscribe(queryParams => {
+          console.log('🔍 Query parameters:', queryParams);
+          // Ejemplo: ?userId=123&withProgrammings=true
+          const userId = queryParams['userId'];
+          const withProgrammings = queryParams['withProgrammings'];
+          console.log('Usuario ID desde query:', userId);
+          console.log('Con programaciones:', withProgrammings);
+        });
+      })
+    );
   }
 
   override ngOnDestroy(): void {
@@ -111,11 +131,46 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   }
 
   protected onAuthenticationReady(userId: number): void {
-    const id = Number(this.route.snapshot.params['id']);
-    if (id && !isNaN(id)) {
-      this.cargarConfiguracionJuego(id);
+    // Capturar parámetros de ruta - puede ser 'id' o 'token'
+    const id = this.route.snapshot.params['id'];
+    const token = this.route.snapshot.params['token'];
+    
+    console.log('🔍 Parámetros capturados:', { id, token, url: this.router.url });
+    
+    if (token) {
+      // Si tenemos un token, validarlo primero
+      console.log('🔐 Validando token de acceso...');
+      this.gameUrlService.validateGameToken(token).subscribe({
+        next: (response) => {
+          if (response.valid && response.gameInstanceId) {
+            console.log('✅ Token válido, cargando juego con ID:', response.gameInstanceId);
+            this.cargarConfiguracionJuego(response.gameInstanceId);
+          } else {
+            console.error('❌ Token inválido o expirado');
+            this.state.error = 'El enlace del juego ha expirado o no es válido';
+            this.state.cargando = false;
+          }
+        },
+        error: (error) => {
+          console.error('❌ Error validando token:', error);
+          this.state.error = 'Error al validar el acceso al juego';
+          this.state.cargando = false;
+        }
+      });
+    } else if (id) {
+      // Si tenemos un ID tradicional, usarlo directamente
+      const gameId = Number(id);
+      if (gameId && !isNaN(gameId)) {
+        console.log('🎮 Cargando juego con ID tradicional:', gameId);
+        this.cargarConfiguracionJuego(gameId);
+      } else {
+        console.error('❌ ID de juego inválido:', id);
+        this.state.error = 'ID de juego inválido';
+        this.state.cargando = false;
+      }
     } else {
-      this.state.error = 'ID de juego inválido';
+      console.error('❌ No se encontró ID ni token en la URL');
+      this.state.error = 'No se encontró información del juego en la URL';
       this.state.cargando = false;
     }
   }

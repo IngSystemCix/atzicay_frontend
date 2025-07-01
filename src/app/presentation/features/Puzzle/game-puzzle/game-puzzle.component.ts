@@ -14,6 +14,7 @@ import {
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
+import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
 
 interface PuzzlePiece {
   id: number;
@@ -47,6 +48,7 @@ export class GamePuzzleComponent
   private gameAlertService = inject(GameAlertService);
   private gameAudioService = inject(GameAudioService);
   private ratingModalService = inject(RatingModalService);
+  private gameUrlService = inject(GameUrlService);
   pieces: PuzzlePiece[] = [];
   rows = 4; 
   cols = 4;
@@ -96,10 +98,45 @@ export class GamePuzzleComponent
   }
 
   onAuthenticationReady(userId: number): void {
-    const id = Number(this.route.snapshot.params['id']);
-    if (id && !isNaN(id)) {
-      this.cargarConfiguracionJuego(id);
+    // Capturar parámetros de ruta - puede ser 'id' o 'token'
+    const id = this.route.snapshot.params['id'];
+    const token = this.route.snapshot.params['token'];
+    
+    console.log('🧩 [Puzzle] Parámetros capturados:', { id, token, url: this.router.url });
+    
+    if (token) {
+      // Si tenemos un token, validarlo primero
+      console.log('🔐 [Puzzle] Validando token de acceso...');
+      this.gameUrlService.validateGameToken(token).subscribe({
+        next: (response) => {
+          if (response.valid && response.gameInstanceId) {
+            console.log('✅ [Puzzle] Token válido, cargando juego con ID:', response.gameInstanceId);
+            this.cargarConfiguracionJuego(response.gameInstanceId);
+          } else {
+            console.error('❌ [Puzzle] Token inválido o expirado');
+            this.error = 'El enlace del juego ha expirado o no es válido';
+            this.loading = false;
+          }
+        },
+        error: (error) => {
+          console.error('❌ [Puzzle] Error validando token:', error);
+          this.error = 'Error al validar el acceso al juego';
+          this.loading = false;
+        }
+      });
+    } else if (id) {
+      // Si tenemos un ID tradicional, usarlo directamente
+      const gameId = Number(id);
+      if (gameId && !isNaN(gameId)) {
+        console.log('🧩 [Puzzle] Cargando juego con ID tradicional:', gameId);
+        this.cargarConfiguracionJuego(gameId);
+      } else {
+        console.error('❌ [Puzzle] ID de juego inválido:', id);
+        this.error = 'ID de juego inválido';
+        this.loading = false;
+      }
     } else {
+      console.log('🧩 [Puzzle] Sin parámetros específicos, iniciando juego por defecto');
       this.startGame();
     }
   }

@@ -93,6 +93,13 @@ export const routes: Routes = [
     canActivate: [optimizedAuthGuard],
     title: "Juego de ahorcado"
   },
+  // Rutas con tokens seguros
+  {
+    path: 'play/hangman/:token',
+    component: GameHangmanComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de ahorcado"
+  },
   {
     path: 'juegos/jugar-puzzle/:id',
     component: GamePuzzleComponent,
@@ -107,6 +114,12 @@ export const routes: Routes = [
   },
   {
     path: 'game/puzzle/:id',
+    component: GamePuzzleComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de Rompezabezas"
+  },
+  {
+    path: 'play/puzzle/:token',
     component: GamePuzzleComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas"
@@ -130,6 +143,12 @@ export const routes: Routes = [
     title: "Juego de Memoria"
   },
   {
+    path: 'play/memory/:token',
+    component: GameMemoryComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de Memoria"
+  },
+  {
     path: 'juegos/jugar-solve-the-word/:id',
     component: GameSolveTheWordComponent,
     canActivate: [optimizedAuthGuard],
@@ -137,6 +156,12 @@ export const routes: Routes = [
   },
   {
     path: 'game/solve-the-word/:id',
+    component: GameSolveTheWordComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de Pupiletras"
+  },
+  {
+    path: 'play/solve-the-word/:token',
     component: GameSolveTheWordComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Pupiletras"
