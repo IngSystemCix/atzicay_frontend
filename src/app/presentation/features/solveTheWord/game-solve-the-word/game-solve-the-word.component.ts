@@ -14,6 +14,7 @@ import {
 } from '../../../../core/infrastructure/service/game-alert.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
+import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
 
 interface WordCell {
   letter: string;
@@ -31,7 +32,7 @@ interface Word {
 @Component({
   selector: 'app-game-solve-the-word',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FloatingLogoComponent],
   templateUrl: './game-solve-the-word.component.html',
   styleUrl: './game-solve-the-word.component.css',
 })
@@ -74,7 +75,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   gameConfig: GameConfiguration | null = null; // Configuración completa del juego
 
   // Header control
-  headerExpanded = true;
+  headerExpanded = false;
   
   // Pista control
   mostrarPista = false;

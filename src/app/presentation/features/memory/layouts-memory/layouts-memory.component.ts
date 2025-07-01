@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
+import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
+import { AtzicayTabsComponent, Tab } from '../../../components/atzicay-tabs/atzicay-tabs.component';
 
 interface CardPair {
   id: number;
@@ -23,14 +25,21 @@ type CardType = 'imagen-texto' | 'imagenes';
 
 @Component({
   selector: 'app-layouts-memory',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, AtzicayTabsComponent],
   templateUrl: './layouts-memory.component.html',
   styleUrl: './layouts-memory.component.css',
   providers: [CreateGameService],
 })
-export class LayoutsMemoryComponent {
+export class LayoutsMemoryComponent implements OnDestroy {
   // Tab management
   activeTab: TabType = 'contenido';
+  
+  // Tabs configuration for the generic component
+  tabs: Tab<TabType>[] = [
+    { id: 'contenido', label: 'Contenido' },
+    { id: 'configuracion', label: 'Configuración' },
+    { id: 'vista-previa', label: 'Vista Previa' }
+  ];
 
   // Game configuration
   gameTitle: string = '';
@@ -40,11 +49,12 @@ export class LayoutsMemoryComponent {
   // Game settings
   gameSettings = {
     difficulty: 'medio',
-    timeLimit: false,
-    timeLimitMinutes: 5,
-    soundEffects: true,
-    animations: true,
-    showHints: false
+    font: 'Arial',
+    fontColor: '#000000',
+    backgroundColor: '#ffffff',
+    successMessage: '¡Excelente trabajo!',
+    failureMessage: '¡Inténtalo de nuevo!',
+    visibility: 'P', // P = Público, R = Restringido
   };
 
   // Card pairs
@@ -52,19 +62,16 @@ export class LayoutsMemoryComponent {
     {
       id: 1,
       card1: { image: null, text: '', imageUrl: '' },
-      card2: { image: null, text: '', imageUrl: '' }
-    }
+      card2: { image: null, text: '', imageUrl: '' },
+    },
   ];
 
-  // Statistics
   get totalPairs(): number {
     return this.pairs.length;
   }
 
   get completedPairs(): number {
-    return this.pairs.filter(pair =>
-      this.isCardComplete(pair.card1) && this.isCardComplete(pair.card2)
-    ).length;
+    return this.pairs.filter((pair) => this.isPairComplete(pair)).length;
   }
 
   get gameProgress(): number {
@@ -76,7 +83,8 @@ export class LayoutsMemoryComponent {
 
   constructor(
     public createGameService: CreateGameService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private userSessionService: UserSessionService
   ) {
     this.initializeDefaultData();
   }
@@ -87,6 +95,10 @@ export class LayoutsMemoryComponent {
       this.activeTab = tab;
       this.logTabChange(tab);
     }
+  }
+
+  onTabChanged(tabId: TabType): void {
+    this.setActiveTab(tabId);
   }
 
   private isValidTab(tab: string): tab is TabType {
@@ -102,7 +114,7 @@ export class LayoutsMemoryComponent {
     const newPair: CardPair = {
       id: this.generateNewId(),
       card1: { image: null, text: '', imageUrl: '' },
-      card2: { image: null, text: '', imageUrl: '' }
+      card2: { image: null, text: '', imageUrl: '' },
     };
 
     this.pairs.push(newPair);
@@ -114,18 +126,18 @@ export class LayoutsMemoryComponent {
       const removedPair = this.pairs.splice(index, 1)[0];
       this.logAction('Pair removed', removedPair);
     } else {
-      console.warn('Cannot remove pair: Invalid index or minimum pairs requirement not met');
+      console.warn(
+        'Cannot remove pair: Invalid index or minimum pairs requirement not met'
+      );
     }
   }
 
   private canRemovePair(index: number): boolean {
-    return this.pairs.length > 1 &&
-      index >= 0 &&
-      index < this.pairs.length;
+    return this.pairs.length > 1 && index >= 0 && index < this.pairs.length;
   }
 
   private generateNewId(): number {
-    return Math.max(...this.pairs.map(p => p.id), 0) + 1;
+    return Math.max(...this.pairs.map((p) => p.id), 0) + 1;
   }
 
   // Card content validation
@@ -134,9 +146,28 @@ export class LayoutsMemoryComponent {
 
     switch (this.cardType) {
       case 'imagen-texto':
+        // Para imagen-texto, necesita imagen Y texto
         return !!(card.image || card.imageUrl) && !!card.text?.trim();
       case 'imagenes':
+        // Para solo imágenes, solo necesita imagen
         return !!(card.image || card.imageUrl);
+      default:
+        return false;
+    }
+  }
+
+  // Método específico para validar pares según el modo
+  private isPairComplete(pair: CardPair): boolean {
+    if (!pair.card1) return false;
+    
+    switch (this.cardType) {
+      case 'imagen-texto':
+        // En modo imagen-texto, solo necesitamos validar card1 (imagen + texto)
+        return this.isCardComplete(pair.card1);
+      case 'imagenes':
+        // En modo imagen-imagen, necesitamos ambas cards con imágenes
+        return !!(pair.card1?.image || pair.card1?.imageUrl) && 
+               !!(pair.card2?.image || pair.card2?.imageUrl);
       default:
         return false;
     }
@@ -147,15 +178,44 @@ export class LayoutsMemoryComponent {
     const input = event.target as HTMLInputElement;
     const file: File | null = input.files?.[0] || null;
 
-    if (file && this.isValidImageFile(file)) {
-      const cardKey = cardNumber === 1 ? 'card1' : 'card2';
-      if (this.pairs[pairIndex][cardKey]) {
-        this.pairs[pairIndex][cardKey]!.image = file;
-        this.pairs[pairIndex][cardKey]!.imageUrl = URL.createObjectURL(file);
-        this.logAction(`File selected for pair ${pairIndex + 1}, card ${cardNumber}`, file);
+    if (!file) {
+      console.log('No file selected');
+      return;
+    }
+
+    const validation = this.validateImageFile(file);
+
+    if (!validation.isValid) {
+      this.alertService.showError(validation.error || 'Archivo no válido');
+      // Limpiar el input
+      input.value = '';
+      return;
+    }
+
+    const cardKey = cardNumber === 1 ? 'card1' : 'card2';
+    const pair = this.pairs[pairIndex];
+
+    if (pair[cardKey]) {
+      // Liberar URL anterior si existe
+      if (
+        pair[cardKey]!.imageUrl &&
+        pair[cardKey]!.imageUrl!.startsWith('blob:')
+      ) {
+        URL.revokeObjectURL(pair[cardKey]!.imageUrl!);
       }
-    } else {
-      this.showFileError(file);
+
+      // Asignar nueva imagen
+      pair[cardKey]!.image = file;
+      pair[cardKey]!.imageUrl = URL.createObjectURL(file);
+
+      this.logAction(
+        `File selected for pair ${pairIndex + 1}, card ${cardNumber}`,
+        {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        }
+      );
     }
   }
 
@@ -177,7 +237,17 @@ export class LayoutsMemoryComponent {
       // Here you could show a toast notification or modal
     }
   }
-
+  ngOnDestroy(): void {
+    // Liberar todas las URLs de objetos creadas
+    this.pairs.forEach((pair) => {
+      if (pair.card1?.imageUrl && pair.card1.imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(pair.card1.imageUrl);
+      }
+      if (pair.card2?.imageUrl && pair.card2.imageUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(pair.card2.imageUrl);
+      }
+    });
+  }
   // Form validation
   isFormValid(): boolean {
     return this.isBasicInfoValid() && this.arePairsValid();
@@ -188,8 +258,10 @@ export class LayoutsMemoryComponent {
   }
 
   private arePairsValid(): boolean {
-    return this.pairs.length >= 3 &&
-      this.pairs.every(pair => this.isCardComplete(pair.card1) && this.isCardComplete(pair.card2));
+    return (
+      this.pairs.length >= 3 &&
+      this.pairs.every((pair) => this.isPairComplete(pair))
+    );
   }
 
   getValidationErrors(): string[] {
@@ -207,9 +279,7 @@ export class LayoutsMemoryComponent {
       errors.push('Se requieren al menos 3 pares de tarjetas');
     }
 
-    const incompletePairs = this.pairs.filter(pair =>
-      !this.isCardComplete(pair.card1) || !this.isCardComplete(pair.card2)
-    ).length;
+    const incompletePairs = this.pairs.filter((pair) => !this.isPairComplete(pair)).length;
 
     if (incompletePairs > 0) {
       errors.push(`${incompletePairs} pares están incompletos`);
@@ -220,6 +290,9 @@ export class LayoutsMemoryComponent {
 
   // Action methods
   async onSave(): Promise<void> {
+    // Llamar al debug method antes de validar
+    await this.debugPayload();
+    
     if (!this.isFormValid()) {
       const errors = this.getValidationErrors();
       console.error('Cannot save game:', errors);
@@ -228,26 +301,48 @@ export class LayoutsMemoryComponent {
     }
     this.isSaving = true;
     try {
-      const userId = 1; // TODO: obtener el userId real
+      const userId = this.userSessionService.getUserId();
+      
+      if (!userId) {
+        this.alertService.showError('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+        this.isSaving = false;
+        return;
+      }
+      
       const pairsPayload = await this.buildPairsPayload();
-      const body = {
-        title: this.gameTitle,
-        description: this.gameDescription,
-        mode: this.cardType === 'imagenes' ? 'II' : 'ID',
-        pairs: pairsPayload
+      const settingsPayload = this.buildSettingsPayload();
+      
+      // Formato exacto requerido por el backend
+      const gameData = {
+        Name: this.gameTitle,
+        Description: this.gameDescription,
+        Activated: true,
+        Mode: this.cardType === 'imagenes' ? 'II' : 'ID',
+        Pairs: pairsPayload,
+        Settings: settingsPayload
       };
-      this.createGameService.createMemoryGame(userId, { data: body }).subscribe({
-        next: (res: any) => {
-          this.isSaving = false;
-          this.logAction('Game saved', res);
-          this.alertService.showGameCreatedSuccess('Juego de memoria');
-          this.resetForm();
-        },
-        error: (err: any) => {
-          this.isSaving = false;
-          this.alertService.showGameCreationError(err, 'juego de memoria');
-        }
-      });
+
+      const body = {
+        gameType: 'memory',
+        data: gameData
+      };
+      
+      console.log('Enviando datos:', JSON.stringify(body, null, 2));
+      
+      this.createGameService
+        .createMemoryGame(userId, body)
+        .subscribe({
+          next: (res: any) => {
+            this.isSaving = false;
+            this.logAction('Game saved', res);
+            this.alertService.showGameCreatedSuccess('Juego de memoria');
+            this.resetForm();
+          },
+          error: (err: any) => {
+            this.isSaving = false;
+            this.alertService.showGameCreationError(err, 'juego de memoria');
+          },
+        });
     } catch (e) {
       this.isSaving = false;
       this.alertService.showError('Error procesando imágenes');
@@ -258,25 +353,28 @@ export class LayoutsMemoryComponent {
   private async buildPairsPayload(): Promise<any[]> {
     // Convierte imágenes a base64 y arma el array de pares según el modo
     const promises = this.pairs.map(async (pair) => {
-      const PathImage1 = pair.card1?.image
-        ? await this.fileToBase64(pair.card1.image)
-        : pair.card1?.imageUrl || '';
-      const PathImage2 = pair.card2?.image
-        ? await this.fileToBase64(pair.card2.image)
-        : pair.card2?.imageUrl || '';
       if (this.cardType === 'imagenes') {
-        // II: ambos PathImage1 y PathImage2 requeridos
+        // Modo II: Imagen - Imagen
+        const PathImg1 = pair.card1?.image
+          ? await this.fileToBase64(pair.card1.image)
+          : pair.card1?.imageUrl || '';
+        const PathImg2 = pair.card2?.image
+          ? await this.fileToBase64(pair.card2.image)
+          : pair.card2?.imageUrl || '';
+        
         return {
-          PathImage1,
-          PathImage2,
-          Description: ''
+          PathImg1,
+          PathImg2,
         };
       } else {
-        // ID: PathImage1 requerido, Description opcional
+        // Modo ID: Imagen - Descripción
+        const PathImg1 = pair.card1?.image
+          ? await this.fileToBase64(pair.card1.image)
+          : pair.card1?.imageUrl || '';
+        
         return {
-          PathImage1,
-          PathImage2: '',
-          Description: pair.card1?.text || ''
+          PathImg1,
+          DescriptionImg: pair.card1?.text || '',
         };
       }
     });
@@ -287,19 +385,81 @@ export class LayoutsMemoryComponent {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
-        // Asegura el prefijo correcto
-        const base64 = reader.result as string;
-        if (base64.startsWith('data:image/')) {
-          resolve(base64);
+        if (reader.result) {
+          // Retorna la data URI completa, como en el puzzle
+          resolve(reader.result as string);
         } else {
-          // Si falta el prefijo, lo agrega
-          const ext = file.type.split('/')[1] || 'png';
-          resolve(`data:image/${ext};base64,${base64.split(',')[1]}`);
+          reject('Error reading file');
         }
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+  }
+
+  private buildSettingsPayload(): Array<{ ConfigKey: string; ConfigValue: string }> {
+    // Convierte las configuraciones del juego al formato requerido por el backend
+    const settings = [];
+    
+    // Font configuration
+    if (this.gameSettings.font) {
+      settings.push({
+        ConfigKey: 'font',
+        ConfigValue: this.gameSettings.font
+      });
+    }
+    
+    // Font color configuration
+    if (this.gameSettings.fontColor) {
+      settings.push({
+        ConfigKey: 'fontColor',
+        ConfigValue: this.gameSettings.fontColor
+      });
+    }
+    
+    // Background color configuration
+    if (this.gameSettings.backgroundColor) {
+      settings.push({
+        ConfigKey: 'backgroundColor',
+        ConfigValue: this.gameSettings.backgroundColor
+      });
+    }
+    
+    // Success message configuration
+    if (this.gameSettings.successMessage) {
+      settings.push({
+        ConfigKey: 'successMessage',
+        ConfigValue: this.gameSettings.successMessage
+      });
+    }
+    
+    // Failure message configuration
+    if (this.gameSettings.failureMessage) {
+      settings.push({
+        ConfigKey: 'failureMessage',
+        ConfigValue: this.gameSettings.failureMessage
+      });
+    }
+    
+    // Difficulty configuration (en Settings, no en nivel superior)
+    if (this.gameSettings.difficulty) {
+      const difficultyValue = this.gameSettings.difficulty === 'facil' ? 'E' : 
+                             this.gameSettings.difficulty === 'medio' ? 'M' : 'H';
+      settings.push({
+        ConfigKey: 'difficulty',
+        ConfigValue: difficultyValue
+      });
+    }
+    
+    // Visibility configuration (en Settings, no en nivel superior)
+    if (this.gameSettings.visibility) {
+      settings.push({
+        ConfigKey: 'visibility',
+        ConfigValue: this.gameSettings.visibility
+      });
+    }
+    
+    return settings;
   }
 
   // Utility methods
@@ -321,39 +481,58 @@ export class LayoutsMemoryComponent {
       {
         id: 1,
         card1: { image: null, text: '', imageUrl: '' },
-        card2: { image: null, text: '', imageUrl: '' }
-      }
+        card2: { image: null, text: '', imageUrl: '' },
+      },
     ];
   }
 
-  private prepareGameData() {
-    return {
-      title: this.gameTitle,
-      description: this.gameDescription,
-      cardType: this.cardType,
-      settings: this.gameSettings,
-      pairs: this.pairs.map(pair => ({
-        id: pair.id,
-        card1: {
-          text: pair.card1?.text || '',
-          hasImage: !!(pair.card1?.image || pair.card1?.imageUrl)
-        },
-        card2: {
-          text: pair.card2?.text || '',
-          hasImage: !!(pair.card2?.image || pair.card2?.imageUrl)
+  removeImage(pairIndex: number, cardNumber: 1 | 2): void {
+    if (pairIndex >= 0 && pairIndex < this.pairs.length) {
+      const cardKey = cardNumber === 1 ? 'card1' : 'card2';
+      const pair = this.pairs[pairIndex];
+      
+      if (pair[cardKey]) {
+        // Liberar URL si existe
+        if (pair[cardKey]!.imageUrl && pair[cardKey]!.imageUrl!.startsWith('blob:')) {
+          URL.revokeObjectURL(pair[cardKey]!.imageUrl!);
         }
-      })),
-      stats: {
-        totalPairs: this.totalPairs,
-        completedPairs: this.completedPairs,
-        progress: this.gameProgress
-      },
-      createdAt: new Date().toISOString()
-    };
+        
+        // Limpiar la imagen
+        pair[cardKey]!.image = null;
+        pair[cardKey]!.imageUrl = '';
+        
+        this.logAction(`Image removed from pair ${pairIndex + 1}, card ${cardNumber}`);
+      }
+    }
   }
 
-  private logAction(action: string, data?: any): void {
-    console.log(`[MemoryGame] ${action}`, data || '');
+  hasImage(pair: CardPair, cardNumber: 1 | 2): boolean {
+    const cardKey = cardNumber === 1 ? 'card1' : 'card2';
+    const card = pair[cardKey];
+    return !!(card?.image || card?.imageUrl);
+  }
+
+  getCardText(pair: CardPair, cardNumber: 1 | 2): string {
+    const cardKey = cardNumber === 1 ? 'card1' : 'card2';
+    return pair[cardKey]?.text || '';
+  }
+
+  updateCardText(pairIndex: number, cardNumber: 1 | 2, text: string): void {
+    if (pairIndex >= 0 && pairIndex < this.pairs.length) {
+      const cardKey = cardNumber === 1 ? 'card1' : 'card2';
+      const pair = this.pairs[pairIndex];
+      
+      if (pair[cardKey]) {
+        pair[cardKey]!.text = text;
+        this.logAction(`Text updated for pair ${pairIndex + 1}, card ${cardNumber}`, text);
+      }
+    }
+  }
+
+  // Settings management
+  updateGameSettings(setting: keyof typeof this.gameSettings, value: any): void {
+    this.gameSettings = { ...this.gameSettings, [setting]: value };
+    this.logAction(`Setting updated: ${setting}`, value);
   }
 
   // Preview methods
@@ -365,15 +544,145 @@ export class LayoutsMemoryComponent {
       isFlipped: false,
       isMatched: false,
       card1: pair.card1,
-      card2: pair.card2
+      card2: pair.card2,
     }));
   }
 
-  // Settings management
-  updateGameSettings(setting: keyof typeof this.gameSettings, value: any): void {
-    this.gameSettings = { ...this.gameSettings, [setting]: value };
-    this.logAction(`Setting updated: ${setting}`, value);
+  // Debug method para ver exactamente qué se está enviando
+  async debugPayload(): Promise<void> {
+    console.log('=== DEBUG MEMORY GAME PAYLOAD ===');
+    console.log('gameTitle:', this.gameTitle);
+    console.log('gameDescription:', this.gameDescription);
+    console.log('cardType:', this.cardType);
+    console.log('pairs length:', this.pairs.length);
+    
+    // Verificar userId
+    const userId = this.userSessionService.getUserId();
+    console.log('userId from session:', userId);
+    
+    if (!userId) {
+      console.warn('⚠️ WARNING: Usuario no autenticado o userId no disponible');
+      return;
+    }
+    
+    // Validar cada par
+    this.pairs.forEach((pair, index) => {
+      console.log(`--- Par ${index + 1} ---`);
+      console.log('card1:', {
+        hasImage: !!(pair.card1?.image || pair.card1?.imageUrl),
+        text: pair.card1?.text,
+        imageSize: pair.card1?.image?.size,
+        imageType: pair.card1?.image?.type
+      });
+      
+      if (this.cardType === 'imagenes') {
+        console.log('card2:', {
+          hasImage: !!(pair.card2?.image || pair.card2?.imageUrl),
+          text: pair.card2?.text,
+          imageSize: pair.card2?.image?.size,
+          imageType: pair.card2?.image?.type
+        });
+      }
+      
+      console.log('isComplete:', this.isCardComplete(pair.card1) && (this.cardType === 'imagen-texto' || this.isCardComplete(pair.card2)));
+    });
+    
+    try {
+      const pairsPayload = await this.buildPairsPayload();
+      const settingsPayload = this.buildSettingsPayload();
+      
+      console.log('Pairs payload:', pairsPayload);
+      console.log('Settings payload:', settingsPayload);
+      
+      const gameData = {
+        Name: this.gameTitle,
+        Description: this.gameDescription,
+        Activated: true,
+        Mode: this.cardType === 'imagenes' ? 'II' : 'ID',
+        Pairs: pairsPayload,
+        Settings: settingsPayload
+      };
+      
+      const body = {
+        gameType: 'memory',
+        data: gameData
+      };
+      
+      console.log('=== FINAL PAYLOAD ===');
+      console.log(JSON.stringify(body, null, 2));
+      console.log('========================');
+    } catch (error) {
+      console.error('Error generating debug payload:', error);
+    }
   }
 
-  
+  private validateImageFile(file: File): { isValid: boolean; error?: string } {
+    const validTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+    ];
+    const maxSize = 1024 * 1024; // 1MB
+    const minSize = 1024; // 1KB mínimo
+
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      return {
+        isValid: false,
+        error: 'Formato no válido. Solo se permiten: PNG, JPG, JPEG',
+      };
+    }
+
+    if (file.size > maxSize) {
+      return {
+        isValid: false,
+        error: 'El archivo es muy grande. Máximo 1MB permitido',
+      };
+    }
+
+    if (file.size < minSize) {
+      return {
+        isValid: false,
+        error: 'El archivo es muy pequeño. Mínimo 1KB requerido',
+      };
+    }
+
+    return { isValid: true };
+  }
+  private prepareGameData() {
+    return {
+      title: this.gameTitle,
+      description: this.gameDescription,
+      cardType: this.cardType,
+      settings: this.gameSettings,
+      pairs: this.pairs.map((pair) => ({
+        id: pair.id,
+        card1: {
+          text: pair.card1?.text || '',
+          hasImage: !!(pair.card1?.image || pair.card1?.imageUrl),
+        },
+        card2: {
+          text: pair.card2?.text || '',
+          hasImage: !!(pair.card2?.image || pair.card2?.imageUrl),
+        },
+      })),
+      stats: {
+        totalPairs: this.totalPairs,
+        completedPairs: this.completedPairs,
+        progress: this.gameProgress,
+      },
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  private logAction(action: string, data?: any): void {
+    console.log(`[MemoryGame] ${action}`, data || '');
+  }
+
+  // Helper method para verificar autenticación
+  private checkUserAuthentication(): { isAuthenticated: boolean; userId: number | null } {
+    const userId = this.userSessionService.getUserId();
+    const isAuthenticated = this.userSessionService.isAuthenticated();
+    
+    return { isAuthenticated, userId };
+  }
 }

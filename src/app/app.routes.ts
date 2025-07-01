@@ -100,6 +100,12 @@ export const routes: Routes = [
     title: "Juego de Rompezabezas"
   },
   {
+    path: 'juegos/jugar-memory/:id',
+    component: GameMemoryComponent,
+    canActivate: [optimizedAuthGuard],
+    title: "Juego de Memoria"
+  },
+  {
     path: 'game/puzzle/:id',
     component: GamePuzzleComponent,
     canActivate: [optimizedAuthGuard],

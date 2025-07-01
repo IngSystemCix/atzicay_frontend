@@ -50,12 +50,12 @@ export class CreateGameService {
   /**
    * Crea un juego de memoria con pares de imágenes o imagen-descripción
    * @param userId ID del usuario
-   * @param body Objeto con los datos del juego y el array de pares
+   * @param body Objeto con los datos del juego en formato { gameType, data }
    */
   createMemoryGame(userId: number, body: any): Observable<any> {
-    return this.http.post<any>(
-      `${this.apiUrl}my-game/create/${userId}?gameType=memory`,
-      body
-    );
+    const url = `${this.apiUrl}my-game/create/${userId}`;
+    console.log('POST URL:', url);
+    console.log('POST BODY:', JSON.stringify(body, null, 2));
+    return this.http.post<any>(url, body);
   }
 }

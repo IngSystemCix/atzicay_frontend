@@ -7,6 +7,7 @@ import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared
 import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructure/service/game-alert.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
+import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
 
 interface JuegoState {
   palabraActual: string;
@@ -42,7 +43,7 @@ interface JuegoState {
 @Component({
   selector: 'app-game-hangman',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FloatingLogoComponent],
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
 })

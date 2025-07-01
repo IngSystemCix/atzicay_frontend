@@ -80,10 +80,10 @@ toggleHeaderSize(): void {
 getTypeIcon(typeValue: string): string {
   const icons: { [key: string]: string } = {
     'all': '🎮',
-    'hangman': '🪢',
+    'hangman': '🎯',
     'memory': '🧠',
     'puzzle': '🧩',
-    'solve_the_word': '🔤'
+    'solve_the_word': '📝'
   };
   return icons[typeValue] || '🎮';
 }

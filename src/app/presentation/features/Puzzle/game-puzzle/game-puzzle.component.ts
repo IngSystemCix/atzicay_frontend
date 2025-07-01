@@ -13,6 +13,7 @@ import {
 } from '../../../../core/infrastructure/service/game-alert.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
+import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
 
 interface PuzzlePiece {
   id: number;
@@ -32,7 +33,7 @@ interface PuzzlePiece {
 @Component({
   selector: 'app-game-puzzle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FloatingLogoComponent],
   templateUrl: './game-puzzle.component.html',
   styleUrl: './game-puzzle.component.css',
 })
@@ -91,7 +92,7 @@ export class GamePuzzleComponent
   hasUserAssessed = false;
 
   // Header control
-  headerExpanded = true;
+  headerExpanded = false;
 
   // Pista control
   mostrarPista = false;

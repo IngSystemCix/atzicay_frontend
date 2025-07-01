@@ -1,6 +1,9 @@
 <div
   class="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 p-4"
 >
+  <!-- Logo flotante -->
+  <app-floating-logo></app-floating-logo>
+  
   <!-- Estados de autenticación y carga -->
   @if (isLoading && !loading) {
   <div class="flex flex-col items-center justify-center min-h-[400px]">

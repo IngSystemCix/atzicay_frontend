@@ -7,6 +7,7 @@ import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared
 import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructure/service/game-alert.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
+import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
 
 interface Card {
   id: number;
@@ -14,11 +15,13 @@ interface Card {
   name: string;
   flipped: boolean;
   matched: boolean;
+  isImageCard?: boolean; // Para distinguir entre imagen y texto
+  text?: string; // Para modo imagen-descripción
 }
 
 @Component({
   selector: 'app-game-memory',
-  imports: [CommonModule],
+  imports: [CommonModule, FloatingLogoComponent],
   templateUrl: './game-memory.component.html',
   styleUrl: './game-memory.component.css'
 })
@@ -43,7 +46,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   userAssessed = false; // Nueva propiedad para controlar valoración
 
   // Header control
-  headerExpanded = true;
+  headerExpanded = false;
   
   // Pista control
   mostrarPista = false;
@@ -114,8 +117,17 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     // Guardar el estado de evaluación del usuario
     this.userAssessed = data.assessed || false;
     
-    // Aquí puedes aplicar otras configuraciones específicas del juego de memoria
-    // como configuraciones de tiempo, colores, etc.
+    // Verificar que hay pares de memoria configurados
+    if (!data.memory_pairs || data.memory_pairs.length === 0) {
+      this.error = 'No hay pares de memoria configurados para este juego';
+      return;
+    }
+    
+    // Configurar el número total de pares
+    this.totalPairs = data.memory_pairs.length;
+    
+    console.log('Memory pairs loaded:', data.memory_pairs);
+    console.log('Game mode:', data.memory_pairs[0]?.mode);
   }
 
   private async showSuccessAlert(): Promise<void> {
@@ -172,7 +184,21 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       clearInterval(this.timerInterval);
     }
 
-    // Crear pares de cartas
+    // Si no hay configuración del juego, usar datos por defecto
+    if (!this.gameConfig || !this.gameConfig.memory_pairs || this.gameConfig.memory_pairs.length === 0) {
+      this.initializeDefaultGame();
+      return;
+    }
+
+    // Crear cartas desde la configuración del juego
+    this.createCardsFromConfiguration();
+
+    // Mezclar las cartas
+    this.shuffleCards();
+  }
+
+  private initializeDefaultGame() {
+    // Código original para el juego por defecto con planetas
     let id = 0;
     this.planets.forEach(planet => {
       // Agregar dos cartas idénticas para cada planeta
@@ -182,13 +208,71 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
           image: planet.image,
           name: planet.name,
           flipped: false,
-          matched: false
+          matched: false,
+          isImageCard: true
         });
       }
     });
+  }
 
-    // Mezclar las cartas
-    this.shuffleCards();
+  private createCardsFromConfiguration() {
+    if (!this.gameConfig?.memory_pairs) return;
+
+    let id = 0;
+    const mode = this.gameConfig.memory_pairs[0]?.mode || 'II';
+
+    this.gameConfig.memory_pairs.forEach((pair, index) => {
+      if (mode === 'II') {
+        // Modo Imagen-Imagen: crear dos cartas con imágenes
+        if (pair.path_image1) {
+          this.cards.push({
+            id: id++,
+            image: pair.path_image1,
+            name: `pair_${index}_img1`,
+            flipped: false,
+            matched: false,
+            isImageCard: true
+          });
+        }
+        
+        if (pair.path_image2) {
+          this.cards.push({
+            id: id++,
+            image: pair.path_image2,
+            name: `pair_${index}_img2`,
+            flipped: false,
+            matched: false,
+            isImageCard: true
+          });
+        }
+      } else if (mode === 'ID') {
+        // Modo Imagen-Descripción: crear una carta con imagen y una con texto
+        if (pair.path_image1) {
+          this.cards.push({
+            id: id++,
+            image: pair.path_image1,
+            name: `pair_${index}`,
+            flipped: false,
+            matched: false,
+            isImageCard: true
+          });
+        }
+        
+        if (pair.description_image) {
+          this.cards.push({
+            id: id++,
+            image: '', // Sin imagen para la carta de texto
+            name: `pair_${index}`,
+            text: pair.description_image,
+            flipped: false,
+            matched: false,
+            isImageCard: false
+          });
+        }
+      }
+    });
+
+    console.log('Cards created from configuration:', this.cards);
   }
 
   shuffleCards() {
@@ -318,5 +402,35 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
 
   get pistaTexto(): string {
     return this.gameConfig?.game_description || 'Memoriza la posición de los planetas cuando se muestren al inicio. Luego encuentra las parejas haciendo clic en las cartas.';
+  }
+
+  getGridClasses(): string {
+    const numCards = this.cards.length;
+    
+    // Determinar el número de columnas basado en el número de cartas
+    if (numCards <= 8) {
+      return 'grid-cols-4'; // 2 filas de 4
+    } else if (numCards <= 12) {
+      return 'grid-cols-6'; // 2 filas de 6
+    } else if (numCards <= 16) {
+      return 'grid-cols-4'; // 4 filas de 4
+    } else {
+      return 'grid-cols-6'; // Por defecto 6 columnas
+    }
+  }
+
+  onImageError(card: Card): void {
+    console.warn('Error loading image for card:', card);
+    // Opcionalmente, se puede mostrar una imagen por defecto
+  }
+
+  // Método para determinar si el juego está en modo imagen-descripción
+  get isImageDescriptionMode(): boolean {
+    return this.gameConfig?.memory_pairs?.[0]?.mode === 'ID';
+  }
+
+  // Método para determinar si el juego está en modo imagen-imagen
+  get isImageImageMode(): boolean {
+    return this.gameConfig?.memory_pairs?.[0]?.mode === 'II';
   }
 }

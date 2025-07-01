@@ -21,7 +21,6 @@ export class AppComponent implements OnInit {
   private hasLoggedIn = false;
 
   ngOnInit(): void {
-    console.log('[AppComponent] Token actual en sessionStorage:', sessionStorage.getItem('token_jwt'));
 
     this.auth0.isAuthenticated$.pipe(
       filter(authenticated => authenticated && !this.hasLoggedIn),
