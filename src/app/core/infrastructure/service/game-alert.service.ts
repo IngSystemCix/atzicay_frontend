@@ -10,6 +10,7 @@ export interface GameAlertConfig {
   score?: number;
   lives?: number;
   attempts?: number;
+  currentWord?: string; // Para mostrar la palabra actual adivinada
 }
 
 @Injectable({
@@ -81,6 +82,31 @@ export class GameAlertService {
       },
       timer: 5000,
       timerProgressBar: true,
+    });
+  }
+
+  /**
+   * Modal cuando se completa una palabra específica (no todo el juego)
+   */
+  showWordCompletedAlert(config: GameAlertConfig): Promise<any> {
+    const content = this.getWordCompletedContent(config);
+    
+    return Swal.fire({
+      title: '¡Palabra adivinada!',
+      html: content,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 5000,
+      timerProgressBar: true,
+      customClass: {
+        popup: 'animated bounceIn',
+      },
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        // Agregar efecto de confeti o animación especial
+        this.addConfettiEffect();
+      }
     });
   }
 
@@ -356,6 +382,33 @@ export class GameAlertService {
     `;
   }
 
+  private getWordCompletedContent(config: GameAlertConfig): string {
+    const gameIcon = this.getGameIcon(config.gameType);
+    
+    return `
+      <div style="text-align: center;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">${gameIcon}</div>
+        <p style="font-size: 1.3rem; margin-bottom: 1rem; font-weight: bold; color: #10b981;">
+          ¡Excelente!
+        </p>
+        ${config.currentWord ? 
+          `<div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 1rem; border-radius: 1rem; margin: 1rem 0; border: 2px solid #bbf7d0;">
+            <p style="font-size: 1.1rem; color: #166534; margin-bottom: 0.5rem;">Palabra adivinada:</p>
+            <p style="font-size: 1.4rem; font-weight: bold; color: #15803d; letter-spacing: 2px;">${config.currentWord}</p>
+          </div>` : ''}
+        ${config.wordsCompleted && config.totalWords ? 
+          `<p style="font-size: 1rem; color: #6b7280; margin-bottom: 1rem;">
+            Progreso: <strong>${config.wordsCompleted}/${config.totalWords}</strong> palabras completadas
+          </p>` : ''}
+        <div style="background: #eff6ff; padding: 1rem; border-radius: 1rem; border: 2px solid #bfdbfe;">
+          <p style="font-size: 0.95rem; color: #1e40af; font-weight: 500;">
+            Continuando automáticamente en <span id="countdown-timer">5</span> segundos...
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
   private getGameIcon(gameType: string): string {
     switch (gameType) {
       case 'hangman': return '🎯';
@@ -408,5 +461,85 @@ export class GameAlertService {
         });
       });
     });
+  }
+
+  private addConfettiEffect(): void {
+    // Crear efecto de confeti simple usando CSS y JavaScript nativo
+    const confettiContainer = document.createElement('div');
+    confettiContainer.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    `;
+    document.body.appendChild(confettiContainer);
+
+    // Crear partículas de confeti
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd'];
+    
+    for (let i = 0; i < 50; i++) {
+      const confettiPiece = document.createElement('div');
+      confettiPiece.style.cssText = `
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: ${colors[Math.floor(Math.random() * colors.length)]};
+        top: -10px;
+        left: ${Math.random() * 100}%;
+        animation: confetti-fall ${2 + Math.random() * 3}s linear forwards;
+        transform: rotate(${Math.random() * 360}deg);
+      `;
+      confettiContainer.appendChild(confettiPiece);
+    }
+
+    // Agregar keyframes CSS si no existen
+    if (!document.querySelector('#confetti-styles')) {
+      const style = document.createElement('style');
+      style.id = 'confetti-styles';
+      style.textContent = `
+        @keyframes confetti-fall {
+          0% {
+            transform: translateY(-100vh) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh) rotate(720deg);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Limpiar después de la animación
+    setTimeout(() => {
+      if (confettiContainer && confettiContainer.parentNode) {
+        confettiContainer.parentNode.removeChild(confettiContainer);
+      }
+    }, 6000);
+
+    // Agregar contador regresivo
+    this.startCountdown();
+  }
+
+  private startCountdown(): void {
+    let timeLeft = 5;
+    const countdownElement = document.getElementById('countdown-timer');
+    
+    if (countdownElement) {
+      const interval = setInterval(() => {
+        timeLeft--;
+        if (countdownElement) {
+          countdownElement.textContent = timeLeft.toString();
+        }
+        
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
   }
 }

@@ -223,7 +223,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
     // Pasar a la siguiente palabra
     this.state.indicePalabraActual++;
     this.configurarPalabraActual();
-    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+    this.inicializarPalabraRevelada();
     this.state.letrasSeleccionadas.clear();
     this.state.intentosRestantes = this.INTENTOS_INICIALES;
     this.state.contadorCambio = 0;
@@ -340,7 +340,6 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
     // Resetear estado del juego pero mantener configuración
     this.state = {
       ...this.state,
-      palabraRevelada: Array(this.state.palabraActual.length).fill(''),
       letrasSeleccionadas: new Set<string>(),
       intentosRestantes: this.INTENTOS_INICIALES,
       tiempoRestante: this.state.tiempoInicial,
@@ -348,6 +347,9 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
       juegoGanado: false,
       timerInterval: null,
     };
+
+    // Inicializar palabra revelada con espacios pre-revelados
+    this.inicializarPalabraRevelada();
 
     this.iniciarTimer();
   }
@@ -371,25 +373,28 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
         }
       }
 
-      // Verificar si la palabra está completa
-      if (!this.state.palabraRevelada.includes('')) {
+      // Verificar si la palabra está completa (ignorando espacios)
+      const letrasNoEspacio = this.state.palabraActual.split('').filter(c => c !== ' ');
+      const letrasReveladasNoEspacio = this.state.palabraRevelada.filter((c, i) => this.state.palabraActual[i] !== ' ' && c !== '');
+      
+      if (letrasNoEspacio.length === letrasReveladasNoEspacio.length) {
         this.gameAudioService.playHangmanWordComplete();
         this.tacharPalabraCanvas(this.state.palabraActual);
         this.state.palabrasCompletadas++;
+
+        // Pausar el timer principal mientras se muestra la alerta
+        if (this.state.timerInterval) {
+          clearInterval(this.state.timerInterval);
+          this.state.timerInterval = null;
+        }
 
         // Verificar si hay más palabras
         if (
           this.state.indicePalabraActual + 1 <
           this.state.palabrasJuego.length
         ) {
-          // Mostrar modal de éxito y esperar 5 segundos o botón
-          this.mostrarModalExito = true;
-          // PAUSAR el timer principal
-          if (this.state.timerInterval) {
-            clearInterval(this.state.timerInterval);
-            this.state.timerInterval = null;
-          }
-          this.iniciarContadorCambio();
+          // Mostrar la nueva alerta personalizada de palabra completada
+          this.showWordSuccessAlert();
         } else {
           // Juego completado
           this.finalizarJuego(true);
@@ -416,9 +421,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
 
       this.state.indicePalabraActual++;
       this.configurarPalabraActual();
-      this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
-        ''
-      );
+      this.inicializarPalabraRevelada();
       this.state.letrasSeleccionadas = new Set<string>();
       this.state.intentosRestantes = this.INTENTOS_INICIALES;
 
@@ -499,7 +502,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   this.mostrarModalTiempoAgotado = false;
   
   // Solo reiniciar la palabra actual, NO las vidas
-  this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+  this.inicializarPalabraRevelada();
   this.state.letrasSeleccionadas = new Set<string>();
   this.state.intentosRestantes = this.INTENTOS_INICIALES;
   this.state.tiempoRestante = this.state.tiempoInicial;
@@ -602,6 +605,40 @@ reiniciarJuego(): void {
     return palabra.replace(/~~/g, '');
   }
 
+  // Método para procesar palabras y mostrar espacios entre ellas
+  procesarPalabraParaMostrar(): Array<{ caracter: string; esEspacio: boolean; index: number }> {
+    const caracteres = this.state.palabraActual.split('');
+    return caracteres.map((caracter, index) => ({
+      caracter: caracter,
+      esEspacio: caracter === ' ',
+      index: index
+    }));
+  }
+
+  // Verificar si un índice debe mostrarse como espacio
+  esEspacio(index: number): boolean {
+    return this.state.palabraActual[index] === ' ';
+  }
+
+  // Obtener el carácter revelado o el placeholder
+  obtenerCaracterRevelado(index: number): string {
+    if (this.esEspacio(index)) {
+      return ' '; // Espacio siempre visible
+    }
+    return this.state.palabraRevelada[index] || '';
+  }
+
+  // Inicializar palabraRevelada con espacios ya revelados
+  inicializarPalabraRevelada(): void {
+    this.state.palabraRevelada = Array(this.state.palabraActual.length).fill('');
+    // Pre-revelar los espacios
+    for (let i = 0; i < this.state.palabraActual.length; i++) {
+      if (this.state.palabraActual[i] === ' ') {
+        this.state.palabraRevelada[i] = ' ';
+      }
+    }
+  }
+
   // Getters para aplicar estilos dinámicos
   get estilosJuego() {
     return {
@@ -657,10 +694,19 @@ reiniciarJuego(): void {
   }
 
   private async showWordSuccessAlert(): Promise<void> {
-    // Mostrar mensaje breve y continuar automáticamente
-    setTimeout(() => {
-      this.continuarSiguientePalabra();
-    }, 2000);
+    const config: GameAlertConfig = {
+      gameType: 'hangman',
+      gameName: 'Ahorcado',
+      currentWord: this.state.palabraActual,
+      wordsCompleted: this.state.palabrasCompletadas,
+      totalWords: this.state.totalPalabras
+    };
+
+    // Mostrar alerta personalizada que dura 5 segundos
+    await this.gameAlertService.showWordCompletedAlert(config);
+    
+    // Continuar automáticamente después de la alerta
+    this.continuarSiguientePalabra();
   }
 
   private async showTimeUpAlert(): Promise<void> {
