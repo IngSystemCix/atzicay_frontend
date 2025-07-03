@@ -63,14 +63,11 @@ export class JuegosComponent implements OnInit, OnDestroy {
 
   private initializeComponent(): void {
     if (this.userSessionService.isAuthenticated()) {
-      console.log('[Juegos] Autenticación disponible');
       this.isLoading = false;
     } else {
-      console.log('[Juegos] Esperando autenticación...');
       this.subscription.add(
         this.userSessionService.waitForToken$(5000).subscribe({
           next: (token) => {
-            console.log('[Juegos] Token recibido');
             this.isLoading = false;
           },
           error: (err) => {

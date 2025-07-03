@@ -108,16 +108,12 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
     // Esto es útil cuando los parámetros pueden cambiar sin recargar el componente
     this.subscription.add(
       this.route.params.subscribe(params => {
-        console.log('📱 Parámetros de ruta cambiaron:', params);
         
         // También puedes capturar query parameters
         this.route.queryParams.subscribe(queryParams => {
-          console.log('🔍 Query parameters:', queryParams);
           // Ejemplo: ?userId=123&withProgrammings=true
           const userId = queryParams['userId'];
           const withProgrammings = queryParams['withProgrammings'];
-          console.log('Usuario ID desde query:', userId);
-          console.log('Con programaciones:', withProgrammings);
         });
       })
     );
@@ -135,15 +131,11 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
     
-    console.log('🔍 Parámetros capturados:', { id, token, url: this.router.url });
-    
     if (token) {
       // Si tenemos un token, validarlo primero
-      console.log('🔐 Validando token de acceso...');
       this.gameUrlService.validateGameToken(token).subscribe({
         next: (response) => {
           if (response.valid && response.gameInstanceId) {
-            console.log('✅ Token válido, cargando juego con ID:', response.gameInstanceId);
             this.cargarConfiguracionJuego(response.gameInstanceId);
           } else {
             console.error('❌ Token inválido o expirado');
@@ -161,7 +153,6 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
       // Si tenemos un ID tradicional, usarlo directamente
       const gameId = Number(id);
       if (gameId && !isNaN(gameId)) {
-        console.log('🎮 Cargando juego con ID tradicional:', gameId);
         this.cargarConfiguracionJuego(gameId);
       } else {
         console.error('❌ ID de juego inválido:', id);
@@ -661,12 +652,9 @@ reiniciarJuego(): void {
   }
 
   private async showSuccessAlert(): Promise<void> {
-    console.log('🎮 Juego completado con éxito');
-    console.log('📊 Estado de evaluación:', { userAssessed: this.state.userAssessed, gameAssessed: this.state.gameConfig?.assessed });
     
     // Mostrar modal de valoración si el usuario no ha evaluado el juego
     if (!this.state.userAssessed && this.state.gameConfig && !this.state.gameConfig.assessed) {
-      console.log('✨ Mostrando modal de valoración...');
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
@@ -782,7 +770,6 @@ reiniciarJuego(): void {
       );
       
       if (result) {
-        console.log('Valoración enviada exitosamente');
         this.state.userAssessed = true;
       }
     } catch (error) {

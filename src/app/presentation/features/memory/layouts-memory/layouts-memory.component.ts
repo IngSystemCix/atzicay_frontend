@@ -93,7 +93,6 @@ export class LayoutsMemoryComponent implements OnDestroy {
   setActiveTab(tab: TabType): void {
     if (this.isValidTab(tab)) {
       this.activeTab = tab;
-      this.logTabChange(tab);
     }
   }
 
@@ -103,10 +102,6 @@ export class LayoutsMemoryComponent implements OnDestroy {
 
   private isValidTab(tab: string): tab is TabType {
     return ['contenido', 'configuracion', 'vista-previa'].includes(tab);
-  }
-
-  private logTabChange(tab: TabType): void {
-    console.log(`Tab changed to: ${tab}`);
   }
 
   // Card pair management methods
@@ -179,7 +174,6 @@ export class LayoutsMemoryComponent implements OnDestroy {
     const file: File | null = input.files?.[0] || null;
 
     if (!file) {
-      console.log('No file selected');
       return;
     }
 
@@ -326,9 +320,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
         gameType: 'memory',
         data: gameData
       };
-      
-      console.log('Enviando datos:', JSON.stringify(body, null, 2));
-      
+            
       this.createGameService
         .createMemoryGame(userId, body)
         .subscribe({
@@ -464,8 +456,6 @@ export class LayoutsMemoryComponent implements OnDestroy {
 
   // Utility methods
   private initializeDefaultData(): void {
-    // You could load default data or user preferences here
-    console.log('Component initialized');
   }
 
   private hasUnsavedChanges(): boolean {
@@ -550,15 +540,9 @@ export class LayoutsMemoryComponent implements OnDestroy {
 
   // Debug method para ver exactamente qué se está enviando
   async debugPayload(): Promise<void> {
-    console.log('=== DEBUG MEMORY GAME PAYLOAD ===');
-    console.log('gameTitle:', this.gameTitle);
-    console.log('gameDescription:', this.gameDescription);
-    console.log('cardType:', this.cardType);
-    console.log('pairs length:', this.pairs.length);
-    
+   
     // Verificar userId
     const userId = this.userSessionService.getUserId();
-    console.log('userId from session:', userId);
     
     if (!userId) {
       console.warn('⚠️ WARNING: Usuario no autenticado o userId no disponible');
@@ -584,15 +568,12 @@ export class LayoutsMemoryComponent implements OnDestroy {
         });
       }
       
-      console.log('isComplete:', this.isCardComplete(pair.card1) && (this.cardType === 'imagen-texto' || this.isCardComplete(pair.card2)));
     });
     
     try {
       const pairsPayload = await this.buildPairsPayload();
       const settingsPayload = this.buildSettingsPayload();
       
-      console.log('Pairs payload:', pairsPayload);
-      console.log('Settings payload:', settingsPayload);
       
       const gameData = {
         Name: this.gameTitle,
@@ -608,9 +589,6 @@ export class LayoutsMemoryComponent implements OnDestroy {
         data: gameData
       };
       
-      console.log('=== FINAL PAYLOAD ===');
-      console.log(JSON.stringify(body, null, 2));
-      console.log('========================');
     } catch (error) {
       console.error('Error generating debug payload:', error);
     }
@@ -675,7 +653,6 @@ export class LayoutsMemoryComponent implements OnDestroy {
   }
 
   private logAction(action: string, data?: any): void {
-    console.log(`[MemoryGame] ${action}`, data || '');
   }
 
   // Helper method para verificar autenticación

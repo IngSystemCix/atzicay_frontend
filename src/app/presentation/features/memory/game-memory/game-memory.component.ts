@@ -74,16 +74,12 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     // Capturar parámetros de ruta - puede ser 'id' o 'token'
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
-    
-    console.log('🧠 [Memory] Parámetros capturados:', { id, token, url: this.router.url });
-    
+        
     if (token) {
       // Si tenemos un token, validarlo primero
-      console.log('🔐 [Memory] Validando token de acceso...');
       this.gameUrlService.validateGameToken(token).subscribe({
         next: (response) => {
           if (response.valid && response.gameInstanceId) {
-            console.log('✅ [Memory] Token válido, cargando juego con ID:', response.gameInstanceId);
             this.cargarConfiguracionJuego(response.gameInstanceId);
           } else {
             console.error('❌ [Memory] Token inválido o expirado');
@@ -101,7 +97,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       // Si tenemos un ID tradicional, usarlo directamente
       const gameId = Number(id);
       if (gameId && !isNaN(gameId)) {
-        console.log('🧠 [Memory] Cargando juego con ID tradicional:', gameId);
         this.cargarConfiguracionJuego(gameId);
       } else {
         console.error('❌ [Memory] ID de juego inválido:', id);
@@ -129,7 +124,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
           this.aplicarConfiguracion(response.data);
           // Hacer la inicialización async
           this.initializeGame().then(() => {
-            console.log('Juego inicializado correctamente');
           }).catch((error) => {
             console.error('Error inicializando juego:', error);
             this.error = 'Error al inicializar el juego';
@@ -159,9 +153,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     
     // Configurar el número total de pares
     this.totalPairs = data.memory_pairs.length;
-    
-    console.log('Memory pairs loaded:', data.memory_pairs);
-    console.log('Game mode:', data.memory_pairs[0]?.mode);
   }
 
   private async showSuccessAlert(): Promise<void> {
@@ -196,7 +187,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       );
       
       if (result) {
-        console.log('Valoración enviada exitosamente');
         this.userAssessed = true;
       }
     } catch (error) {
@@ -312,7 +302,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       }
     }
 
-    console.log('Cards created from configuration:', this.cards);
   }
 
   shuffleCards() {
@@ -375,13 +364,8 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         this.gameCompleted = true;
         clearInterval(this.timerInterval);
         
-        console.log('🧠 Juego Memory completado con éxito');
-        console.log('📊 Intentos realizados:', this.attempts);
-        console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
-        
         // Mostrar modal de valoración si el usuario no ha evaluado el juego
         if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-          console.log('✨ Mostrando modal de valoración...');
           await this.showRatingAlert();
         } else {
           console.log('❌ Modal de valoración NO se muestra porque:', {
@@ -411,7 +395,6 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     }
     // Hacer la inicialización async
     this.initializeGame().then(() => {
-      console.log('Juego reiniciado correctamente');
     }).catch((error) => {
       console.error('Error reiniciando juego:', error);
       this.error = 'Error al reiniciar el juego';
