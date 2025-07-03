@@ -190,6 +190,13 @@ export class GamePuzzleComponent
 
       if (this.puzzleConfig.path_img) {
         this.puzzleImageUrl = this.getFrontendImagePath(this.puzzleConfig.path_img);
+        // Validar que la imagen sea accesible
+        this.validatePuzzleImage(this.puzzleImageUrl).then(isValid => {
+          if (!isValid) {
+            console.warn('Imagen del puzzle no accesible, usando imagen por defecto');
+            this.puzzleImageUrl = 'assets/rompecabezas.png';
+          }
+        });
       } else {
         this.puzzleImageUrl = 'assets/rompecabezas.png';
       }
@@ -198,6 +205,9 @@ export class GamePuzzleComponent
     }
 
     this.iniciarJuego();
+    
+    // Forzar la recarga de imagen del puzzle
+    this.forceImageReloadPuzzle();
   }
 
   private calculateImageDimensions(): void {
@@ -248,43 +258,48 @@ export class GamePuzzleComponent
     console.log('Path original:', path);
     console.log('Path normalizado:', normalized);
     
+    let webPath = '';
+    
     // Buscar el índice de 'public/storage' en la ruta normalizada
     let publicIndex = normalized.toLowerCase().indexOf('public/storage/');
     
     if (publicIndex !== -1) {
       // Extraer la parte después de 'public/' (storage/puzzle/...)
-      const relativePath = normalized.substring(publicIndex + 7); // +7 para omitir 'public/'
-      const finalPath = relativePath;
-      console.log('Path final construido (public/storage):', finalPath);
-      return finalPath;
-    }
-    
-    // Si no encuentra 'public/storage', buscar solo 'storage/'
-    const storageIndex = normalized.toLowerCase().indexOf('storage/');
-    if (storageIndex !== -1) {
-      const relativePath = normalized.substring(storageIndex);
-      const finalPath = relativePath;
-      console.log('Path final construido (storage):', finalPath);
-      return finalPath;
-    }
-
-    // Buscar específicamente 'puzzle/' como patrón alternativo
-    const puzzleIndex = normalized.toLowerCase().indexOf('puzzle/');
-    if (puzzleIndex !== -1) {
-      // Extraer desde 'storage/' si existe, o construir la ruta
-      let startIndex = normalized.toLowerCase().lastIndexOf('storage/', puzzleIndex);
-      if (startIndex === -1) {
-        startIndex = puzzleIndex;
+      webPath = normalized.substring(publicIndex + 7); // +7 para omitir 'public/'
+      console.log('Path final construido (public/storage):', webPath);
+    } else {
+      // Si no encuentra 'public/storage', buscar solo 'storage/'
+      const storageIndex = normalized.toLowerCase().indexOf('storage/');
+      if (storageIndex !== -1) {
+        webPath = normalized.substring(storageIndex);
+        console.log('Path final construido (storage):', webPath);
+      } else {
+        // Buscar específicamente 'puzzle/' como patrón alternativo
+        const puzzleIndex = normalized.toLowerCase().indexOf('puzzle/');
+        if (puzzleIndex !== -1) {
+          // Extraer desde 'storage/' si existe, o construir la ruta
+          let startIndex = normalized.toLowerCase().lastIndexOf('storage/', puzzleIndex);
+          if (startIndex === -1) {
+            startIndex = puzzleIndex;
+          }
+          const relativePath = normalized.substring(startIndex);
+          webPath = relativePath.startsWith('storage/') ? relativePath : `storage/puzzle/${normalized.substring(puzzleIndex + 7)}`;
+          console.log('Path final construido (puzzle):', webPath);
+        } else {
+          // Como último recurso, usar imagen por defecto
+          console.warn('No se pudo procesar la ruta de imagen, usando imagen por defecto. Path:', path);
+          return 'assets/rompecabezas.png';
+        }
       }
-      const relativePath = normalized.substring(startIndex);
-      const finalPath = relativePath.startsWith('storage/') ? relativePath : `storage/puzzle/${normalized.substring(puzzleIndex + 7)}`;
-      console.log('Path final construido (puzzle):', finalPath);
-      return finalPath;
     }
     
-    // Como último recurso, usar imagen por defecto
-    console.warn('No se pudo procesar la ruta de imagen, usando imagen por defecto. Path:', path);
-    return 'assets/rompecabezas.png';
+    // Agregar cache busting para forzar la recarga de imágenes nuevas
+    const timestamp = Date.now();
+    const separator = webPath.includes('?') ? '&' : '?';
+    const finalPath = `${webPath}${separator}t=${timestamp}`;
+    
+    console.log('Path final con cache busting:', finalPath);
+    return finalPath;
   }
 
   generatePuzzleShapes() {
@@ -1103,4 +1118,52 @@ export class GamePuzzleComponent
   }
 
   protected readonly Array = Array;
+
+  /**
+   * Valida que una imagen sea accesible antes de usarla
+   * @param imagePath Ruta de la imagen a validar
+   * @returns Promise que resuelve true si la imagen es accesible
+   */
+  private validatePuzzleImage(imagePath: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        console.log('✅ Imagen del puzzle cargada correctamente:', imagePath);
+        resolve(true);
+      };
+      img.onerror = () => {
+        console.warn('❌ Imagen del puzzle no encontrada:', imagePath);
+        resolve(false);
+      };
+      img.src = imagePath;
+    });
+  }
+
+  /**
+   * Fuerza la recarga de la imagen del puzzle si hay problemas
+   */
+  private forceImageReloadPuzzle(): void {
+    setTimeout(() => {
+      if (this.puzzleImageUrl && !this.puzzleImageUrl.includes('assets/')) {
+        this.validatePuzzleImage(this.puzzleImageUrl).then(isValid => {
+          if (!isValid) {
+            console.warn(`Reintentando carga de imagen del puzzle: ${this.puzzleImageUrl}`);
+            // Forzar recarga con nuevo timestamp
+            const baseUrl = this.puzzleImageUrl.split('?')[0];
+            this.puzzleImageUrl = `${baseUrl}?t=${Date.now()}`;
+            
+            // Volver a validar después de un momento
+            setTimeout(() => {
+              this.validatePuzzleImage(this.puzzleImageUrl).then(stillInvalid => {
+                if (!stillInvalid) {
+                  console.warn('Imagen del puzzle sigue no disponible, usando imagen por defecto');
+                  this.puzzleImageUrl = 'assets/rompecabezas.png';
+                }
+              });
+            }, 1000);
+          }
+        });
+      }
+    }, 500);
+  }
 }

@@ -127,7 +127,13 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         if (response.success && response.data) {
           this.gameConfig = response.data;
           this.aplicarConfiguracion(response.data);
-          this.initializeGame();
+          // Hacer la inicialización async
+          this.initializeGame().then(() => {
+            console.log('Juego inicializado correctamente');
+          }).catch((error) => {
+            console.error('Error inicializando juego:', error);
+            this.error = 'Error al inicializar el juego';
+          });
         } else {
           this.error = 'Error al cargar la configuración del juego';
         }
@@ -198,7 +204,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     }
   }
 
-  initializeGame() {
+  async initializeGame() {
     this.cards = [];
     this.flippedCards = [];
     this.matches = 0;
@@ -217,55 +223,79 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       return;
     }
 
-    // Crear cartas desde la configuración del juego
-    this.createCardsFromConfiguration();
+    // Crear cartas desde la configuración del juego (ahora es async)
+    await this.createCardsFromConfiguration();
 
     // Mezclar las cartas
     this.shuffleCards();
+    
+    // Forzar la recarga de imágenes
+    this.forceImageReload();
   }
 
-  private createCardsFromConfiguration() {
+  private async createCardsFromConfiguration() {
     if (!this.gameConfig?.memory_pairs) return;
 
     let id = 0;
     const mode = this.gameConfig.memory_pairs[0]?.mode || 'II';
 
-    this.gameConfig.memory_pairs.forEach((pair, index) => {
+    for (const [index, pair] of this.gameConfig.memory_pairs.entries()) {
       if (mode === 'II') {
-       const pairName = `pair_${index}`;
+        const pairName = `pair_${index}`;
         
         if (pair.path_image1) {
-          this.cards.push({
-            id: id++,
-            image: this.convertToWebPath(pair.path_image1),
-            name: pairName,
-            flipped: false,
-            matched: false,
-            isImageCard: true
-          });
+          const imagePath = this.convertToWebPath(pair.path_image1);
+          const isValid = await this.validateImage(imagePath);
+          
+          if (isValid) {
+            this.cards.push({
+              id: id++,
+              image: imagePath,
+              name: pairName,
+              flipped: false,
+              matched: false,
+              isImageCard: true
+            });
+          } else {
+            console.warn(`Imagen 1 no válida para el par ${index}:`, pair.path_image1);
+          }
         }
         
         if (pair.path_image2) {
-          this.cards.push({
-            id: id++,
-            image: this.convertToWebPath(pair.path_image2),
-            name: pairName,
-            flipped: false,
-            matched: false,
-            isImageCard: true
-          });
+          const imagePath = this.convertToWebPath(pair.path_image2);
+          const isValid = await this.validateImage(imagePath);
+          
+          if (isValid) {
+            this.cards.push({
+              id: id++,
+              image: imagePath,
+              name: pairName,
+              flipped: false,
+              matched: false,
+              isImageCard: true
+            });
+          } else {
+            console.warn(`Imagen 2 no válida para el par ${index}:`, pair.path_image2);
+          }
         }
       } else if (mode === 'ID') {
         // Modo Imagen-Descripción: crear una carta con imagen y una con texto
         if (pair.path_image1) {
-          this.cards.push({
-            id: id++,
-            image: this.convertToWebPath(pair.path_image1),
-            name: `pair_${index}`,
-            flipped: false,
-            matched: false,
-            isImageCard: true
-          });
+          const imagePath = this.convertToWebPath(pair.path_image1);
+          const isValid = await this.validateImage(imagePath);
+          
+          if (isValid) {
+            this.cards.push({
+              id: id++,
+              image: imagePath,
+              name: `pair_${index}`,
+              flipped: false,
+              matched: false,
+              isImageCard: true
+            });
+          } else {
+            console.warn(`Imagen no válida para el par ${index}:`, pair.path_image1);
+          }
         }
         
         if (pair.description_image) {
@@ -280,7 +310,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
           });
         }
       }
-    });
+    }
 
     console.log('Cards created from configuration:', this.cards);
   }
@@ -379,7 +409,13 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
     }
-    this.initializeGame();
+    // Hacer la inicialización async
+    this.initializeGame().then(() => {
+      console.log('Juego reiniciado correctamente');
+    }).catch((error) => {
+      console.error('Error reiniciando juego:', error);
+      this.error = 'Error al reiniciar el juego';
+    });
   }
 
   getFormattedTime(): string {
@@ -434,34 +470,80 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
 
   onImageError(card: Card): void {
     console.warn('Error loading image for card:', card);
-    // Opcionalmente, se puede mostrar una imagen por defecto
+    // Asignar imagen por defecto en caso de error
+    card.image = 'assets/default-game.png';
   }
 
   /**
-   * Convierte una ruta absoluta del sistema de archivos a una ruta web válida
+   * Convierte una ruta absoluta del sistema de archivos a una ruta web válida con cache busting
    * @param absolutePath Ruta absoluta del sistema (ej: C:\Users\...\public\storage\memory\imagen.jpg)
-   * @returns Ruta web relativa (ej: storage/memory/imagen.jpg)
+   * @returns Ruta web relativa con timestamp para evitar cache (ej: storage/memory/imagen.jpg?t=12345)
    */
   private convertToWebPath(absolutePath: string): string {
     if (!absolutePath) return '';
+    
+    let webPath = '';
     
     // Buscar la parte "storage" en la ruta
     const storageIndex = absolutePath.indexOf('storage');
     if (storageIndex !== -1) {
       // Extraer desde "storage" hasta el final y normalizar las barras
-      return absolutePath.substring(storageIndex).replace(/\\/g, '/');
+      webPath = absolutePath.substring(storageIndex).replace(/\\/g, '/');
+    } else {
+      // Si no encuentra "storage", buscar "public" y extraer desde ahí
+      const publicIndex = absolutePath.indexOf('public');
+      if (publicIndex !== -1) {
+        const pathFromPublic = absolutePath.substring(publicIndex + 7); // +7 para saltar "public/"
+        webPath = pathFromPublic.replace(/\\/g, '/');
+      } else {
+        // Como último recurso, intentar extraer solo el nombre del archivo
+        const fileName = absolutePath.split(/[\\\/]/).pop();
+        webPath = `storage/memory/${fileName || ''}`;
+      }
     }
     
-    // Si no encuentra "storage", buscar "public" y extraer desde ahí
-    const publicIndex = absolutePath.indexOf('public');
-    if (publicIndex !== -1) {
-      const pathFromPublic = absolutePath.substring(publicIndex + 7); // +7 para saltar "public/"
-      return pathFromPublic.replace(/\\/g, '/');
-    }
-    
-    // Como último recurso, intentar extraer solo el nombre del archivo
-    const fileName = absolutePath.split(/[\\\/]/).pop();
-    return `storage/memory/${fileName || ''}`;
+    // Agregar cache busting para forzar la recarga de imágenes nuevas
+    const timestamp = Date.now();
+    const separator = webPath.includes('?') ? '&' : '?';
+    return `${webPath}${separator}t=${timestamp}`;
+  }
+
+  /**
+   * Valida que una imagen sea accesible antes de usarla
+   * @param imagePath Ruta de la imagen a validar
+   * @returns Promise que resuelve true si la imagen es accesible
+   */
+  private validateImage(imagePath: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => {
+        console.warn(`Imagen no encontrada: ${imagePath}`);
+        resolve(false);
+      };
+      img.src = imagePath;
+    });
+  }
+
+  /**
+   * Fuerza la recarga de todas las imágenes del juego
+   */
+  private forceImageReload(): void {
+    setTimeout(() => {
+      this.cards.forEach(card => {
+        if (card.isImageCard && card.image) {
+          // Verificar que la imagen se puede cargar
+          this.validateImage(card.image).then(isValid => {
+            if (!isValid) {
+              console.warn(`Reintentando carga de imagen: ${card.image}`);
+              // Forzar recarga con nuevo timestamp
+              const baseUrl = card.image.split('?')[0];
+              card.image = `${baseUrl}?t=${Date.now()}`;
+            }
+          });
+        }
+      });
+    }, 500); // Esperar un poco para que se rendericen las cartas
   }
 
   // Método para determinar si el juego está en modo imagen-descripción

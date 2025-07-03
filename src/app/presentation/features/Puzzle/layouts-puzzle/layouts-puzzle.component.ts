@@ -80,10 +80,18 @@ export class LayoutsPuzzleComponent implements OnInit {
   ngOnInit(): void {
     const id = this.userSession.getUserId();
     if (id) this.userId = id;
+    
+    // Forzar la actualización de formularios
+    this.forceFormValuesUpdate();
   }
 
   setActiveTab(tab: string) {
     this.activeTab = tab;
+    
+    // Si cambiamos a la pestaña de configuración, forzar la actualización de valores
+    if (tab === 'configuracion') {
+      this.forceFormValuesUpdate();
+    }
   }
 
   selectColor(tipo: 'fondo' | 'colorFuente', color: string) {
@@ -129,6 +137,27 @@ export class LayoutsPuzzleComponent implements OnInit {
   private markAllAsTouched(): void {
     this.contentForm.markAllAsTouched();
     this.configForm.markAllAsTouched();
+  }
+
+  /**
+   * Fuerza la actualización visual de los formularios
+   */
+  private forceFormValuesUpdate(): void {
+    // Forzar detección de cambios en los formularios
+    setTimeout(() => {
+      this.contentForm.updateValueAndValidity();
+      this.configForm.updateValueAndValidity();
+      
+      // Asegurar que todos los valores por defecto estén visibles
+      this.configForm.patchValue({
+        fuente: this.configForm.get('fuente')?.value || this.fonts[0],
+        fondo: this.configForm.get('fondo')?.value || '#cccccc',
+        colorFuente: this.configForm.get('colorFuente')?.value || '#000000',
+        mensajeExito: this.configForm.get('mensajeExito')?.value || '¡Excelente trabajo!',
+        mensajeFracaso: this.configForm.get('mensajeFracaso')?.value || 'Inténtalo de nuevo',
+        juegoPublico: this.configForm.get('juegoPublico')?.value ?? true
+      });
+    }, 0);
   }
 
   // Métodos de validación para el template
