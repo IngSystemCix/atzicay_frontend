@@ -61,7 +61,6 @@ export abstract class AuthAwareBaseService implements OnDestroy {
         this.subscription.add(
           this.userSessionService.waitForToken$(timeoutMs).subscribe({
             next: (receivedToken) => {
-              console.log('[AuthAwareBase] Token recibido');
               hasToken = true;
               checkAndResolve();
             },
@@ -81,7 +80,6 @@ export abstract class AuthAwareBaseService implements OnDestroy {
         this.subscription.add(
           this.userSessionService.userId$.subscribe(receivedUserId => {
             if (receivedUserId) {
-              console.log('[AuthAwareBase] UserId recibido:', receivedUserId);
               hasUserId = true;
               checkAndResolve();
             }
@@ -124,11 +122,9 @@ export abstract class AuthAwareBaseService implements OnDestroy {
 
     try {
       if (this.canProceed()) {
-        console.log('[AuthAwareBase] Autenticación ya disponible');
         this.isInitialized = true;
         await this.onAuthReady();
       } else {
-        console.log('[AuthAwareBase] Esperando autenticación...');
         await this.waitForAuth();
         this.isInitialized = true;
         await this.onAuthReady();

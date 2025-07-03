@@ -53,21 +53,17 @@ export class ModalEditUsersComponent implements OnInit, OnChanges {
 
   private formatDateForInput(dateString: string): string {
     if (!dateString) {
-      console.log('No se proporcionó fecha');
       return '';
     }
     
-    console.log('Formateando fecha:', dateString);
     
     // Si viene en formato ISO, extraer solo la fecha
     const formattedDate = dateString.split('T')[0];
-    console.log('Fecha formateada:', formattedDate);
     
     return formattedDate;
   }
 
   onSubmit() {
-    console.log('Datos del formulario antes de enviar:', this.user);
       // Validar que todos los campos estén completos
     if (!this.user.name?.trim()) {
       this.alertService.showWarning('El nombre es requerido');
@@ -115,8 +111,6 @@ export class ModalEditUsersComponent implements OnInit, OnChanges {
       country_id: Number(this.user.country_id), // Usar Number() para asegurar conversión
     };
     
-    console.log('Datos validados a enviar:', userData);
-    console.log('Tipo de country_id:', typeof userData.country_id, userData.country_id);
     this.userUpdated.emit(userData);
   }
 

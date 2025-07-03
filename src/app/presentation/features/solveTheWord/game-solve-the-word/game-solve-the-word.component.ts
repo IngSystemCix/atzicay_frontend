@@ -99,15 +99,12 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
     
-    console.log('🔤 [SolveTheWord] Parámetros capturados:', { id, token, url: this.router.url });
     
     if (token) {
       // Si tenemos un token, validarlo primero
-      console.log('🔐 [SolveTheWord] Validando token de acceso...');
       this.gameUrlService.validateGameToken(token).subscribe({
         next: (response) => {
           if (response.valid && response.gameInstanceId) {
-            console.log('✅ [SolveTheWord] Token válido, cargando juego con ID:', response.gameInstanceId);
             this.cargarConfiguracionJuego(response.gameInstanceId);
           } else {
             console.error('❌ [SolveTheWord] Token inválido o expirado');
@@ -125,7 +122,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       // Si tenemos un ID tradicional, usarlo directamente
       const gameId = Number(id);
       if (gameId && !isNaN(gameId)) {
-        console.log('🔤 [SolveTheWord] Cargando juego con ID tradicional:', gameId);
         this.cargarConfiguracionJuego(gameId);
       } else {
         console.error('❌ [SolveTheWord] ID de juego inválido:', id);
@@ -228,12 +224,9 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
   private async showWinAlert() {
     this.gameAudioService.playWordSearchAllWordsFound();
-    console.log('🎯 Juego Solve the Word completado con éxito');
-    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
     
     // Mostrar modal de valoración solo si el usuario no ha evaluado el juego
     if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      console.log('✨ Mostrando modal de valoración...');
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
@@ -274,7 +267,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       );
       
       if (result) {
-        console.log('Valoración enviada exitosamente');
         this.userAssessed = true;
       }
     } catch (error) {
@@ -284,12 +276,9 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
   private async showTimeUpAlert() {
     this.gameAudioService.playTimeUp();
-    console.log('⏰ Tiempo agotado en Solve the Word');
-    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
     
     // Mostrar modal de valoración si el usuario no ha evaluado el juego
     if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      console.log('✨ Mostrando modal de valoración...');
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
@@ -327,13 +316,10 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   placeWordsOnGrid() {
-    console.log('Colocando palabras:', this.words); // Debug
-
     for (const word of this.words) {
       let placed = false;
       let attempts = 0;
 
-      // ✅ MAPEAR ORIENTACIONES DEL JSON A DIRECCIONES CORRECTAS
       const orientationMap: { [key: string]: { row: number; col: number } } = {
         HL: { row: 0, col: 1 }, // Horizontal Left to Right (normal)
         HR: { row: 0, col: 1 }, // Horizontal Right (igual que HL)
@@ -351,7 +337,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       while (!placed && attempts < 100) {
         attempts++;
 
-        // ✅ CALCULAR POSICIÓN INICIAL CONSIDERANDO EL TAMAÑO DE LA PALABRA
         const maxStartRow =
           direction.row === 0
             ? this.gridRows - 1
@@ -367,7 +352,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
         if (this.canPlaceWord(word.text, startRow, startCol, direction)) {
           const positions = [];
 
-          // ✅ COLOCAR CADA LETRA DE LA PALABRA
           for (let i = 0; i < word.text.length; i++) {
             const row = startRow + i * direction.row;
             const col = startCol + i * direction.col;
@@ -377,12 +361,10 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
           word.positions = positions;
           placed = true;
-          console.log(`Palabra "${word.text}" colocada en:`, positions); // Debug
         }
       }
 
       if (!placed) {
-        console.log(`No se pudo colocar "${word.text}", usando fallback`); // Debug
         this.placeFallbackWord(word);
       }
     }
@@ -413,7 +395,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   placeFallbackWord(word: Word) {
-    console.log(`Colocando palabra fallback: ${word.text}`);
 
     // ✅ BUSCAR PRIMERA POSICIÓN HORIZONTAL DISPONIBLE
     for (let row = 0; row < this.gridRows; row++) {
@@ -436,10 +417,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
             positions.push({ row, col: col + i });
           }
           word.positions = positions;
-          console.log(
-            `Palabra fallback "${word.text}" colocada en:`,
-            positions
-          );
           return;
         }
       }
@@ -465,10 +442,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
             positions.push({ row: row + i, col });
           }
           word.positions = positions;
-          console.log(
-            `Palabra fallback vertical "${word.text}" colocada en:`,
-            positions
-          );
           return;
         }
       }

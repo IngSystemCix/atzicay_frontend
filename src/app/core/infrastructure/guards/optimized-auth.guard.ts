@@ -9,18 +9,14 @@ export const optimizedAuthGuard: CanActivateFn = (route, state) => {
   const userSessionService = inject(UserSessionService);
   const router = inject(Router);
 
-  // Si ya tenemos token interno, permitir acceso inmediatamente
   if (userSessionService.isAuthenticated()) {
-    console.log('[OptimizedAuthGuard] Token interno disponible, acceso permitido');
     return true;
   }
 
-  console.log('[OptimizedAuthGuard] Verificando autenticación completa...');
 
   return auth0.isAuthenticated$.pipe(
     switchMap(isAuth0Authenticated => {
       if (!isAuth0Authenticated) {
-        console.log('[OptimizedAuthGuard] No autenticado en Auth0, redirigiendo a login');
         router.navigate(['/login']);
         return of(false);
       }
@@ -28,7 +24,6 @@ export const optimizedAuthGuard: CanActivateFn = (route, state) => {
       // Si está autenticado en Auth0 pero no tenemos token interno, esperar un poco
       return userSessionService.waitForToken$(3000).pipe(
         map(token => {
-          console.log('[OptimizedAuthGuard] Token interno obtenido, acceso permitido');
           return true;
         }),
         catchError(err => {

@@ -19,7 +19,6 @@ export class RatingModalService {
    * @returns Promise<boolean> - true si se envió la valoración, false si se canceló
    */
   async showRatingModal(gameInstanceId: number, userId: number, gameName: string = 'juego'): Promise<boolean> {
-    console.log('🎮 Mostrando modal de valoración para:', { gameInstanceId, userId, gameName });
     
     this.audioService.playButtonClick();
     

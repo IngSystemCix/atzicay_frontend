@@ -919,7 +919,6 @@ export class GameAudioService {
 
   // Método para probar todos los sonidos (útil para debugging)
   testAllSounds(): void {
-    console.log('Probando todos los sonidos...');
     
     // Sonidos generales
     setTimeout(() => this.playButtonClick(), 100);

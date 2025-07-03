@@ -32,8 +32,6 @@ export class CreateGameService {
    */
   createPuzzleGame(userId: number, body: any): Observable<any> {
     const url = `${this.apiUrl}my-game/create/${userId}`;
-    console.log('POST URL:', url);
-    console.log('POST BODY:', JSON.stringify(body, null, 2));
     return this.http.post<any>(
       url,
       body
@@ -54,8 +52,6 @@ export class CreateGameService {
    */
   createMemoryGame(userId: number, body: any): Observable<any> {
     const url = `${this.apiUrl}my-game/create/${userId}`;
-    console.log('POST URL:', url);
-    console.log('POST BODY:', JSON.stringify(body, null, 2));
     return this.http.post<any>(url, body);
   }
 }

@@ -31,13 +31,6 @@ export class ProgrammingStatusService {
     
     const url = `${this.baseUrl}/update-status/${gameInstanceId}`;
     
-    console.log('🔧 ProgrammingStatusService - Enviando petición:');
-    console.log('   URL:', url);
-    console.log('   Game Instance ID:', gameInstanceId);
-    console.log('   Request body:', request);
-    console.log('   Status:', status, '(', status === 1 ? 'PÚBLICO' : 'RESTRINGIDO', ')');
-    console.log('   Headers:', headers);
-    
     return this.http.put<ProgrammingStatusResponse>(url, request, { headers });
   }
 }

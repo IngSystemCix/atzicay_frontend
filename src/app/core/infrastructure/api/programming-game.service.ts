@@ -11,8 +11,6 @@ export class ProgrammingGameService {
 
   createProgrammingGame(gameInstanceId: number, userId: number, data: ProgrammingGame): Observable<any> {
     const url = `${this.baseUrl}/create/${gameInstanceId}/${userId}`;
-    console.log('POST URL:', url);
-    console.log('Payload:', data);
     return this.http.post<any>(url, data);
   }
 }

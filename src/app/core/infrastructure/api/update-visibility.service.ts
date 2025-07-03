@@ -49,12 +49,6 @@ export class UpdateVisibilityService {
     const body: UpdateVisibilityRequest = { status };
     const url = `${this.baseUrl}my-game/update-status/${gameInstanceId}`;
     
-    console.log('🔄 Actualizando visibilidad del juego:');
-    console.log('📍 URL:', url);
-    console.log('📦 Body:', JSON.stringify(body, null, 2));
-    console.log('🎯 Game Instance ID:', gameInstanceId);
-    console.log('✨ Status a enviar:', status ? 'PÚBLICO' : 'RESTRINGIDO');
-    
     return this.http.put<UpdateVisibilityResponse>(url, body, { headers });
   }
 
@@ -65,13 +59,5 @@ export class UpdateVisibilityService {
     const url = `${this.baseUrl}my-game/update-status/${gameInstanceId}`;
     const body: UpdateVisibilityRequest = { status };
     
-    console.log('🧪 PRUEBA DE DEPURACIÓN:');
-    console.log('🌍 Environment base URL:', this.baseUrl);
-    console.log('🎯 Game Instance ID:', gameInstanceId);
-    console.log('📦 Request body:', JSON.stringify(body, null, 2));
-    console.log('🔗 URL completa:', url);
-    console.log('🔍 Tipo de gameInstanceId:', typeof gameInstanceId);
-    console.log('🔍 Tipo de status:', typeof status);
-    console.log('📋 Token en sessionStorage:', !!sessionStorage.getItem('token_jwt'));
   }
 }

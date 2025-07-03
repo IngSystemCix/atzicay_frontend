@@ -240,7 +240,6 @@ export class GamePuzzleComponent
 
   private iniciarJuego(): void {
     this.loading = false;
-    console.log('Iniciando juego con imagen:', this.puzzleImageUrl);
     // Esperar un poco antes de iniciar para asegurar que la imagen se cargue
     setTimeout(() => {
       this.startGame();
@@ -255,8 +254,6 @@ export class GamePuzzleComponent
 
     // Normalizar el path reemplazando barras invertidas por barras normales
     const normalized = path.replace(/\\/g, '/');
-    console.log('Path original:', path);
-    console.log('Path normalizado:', normalized);
     
     let webPath = '';
     
@@ -266,13 +263,11 @@ export class GamePuzzleComponent
     if (publicIndex !== -1) {
       // Extraer la parte después de 'public/' (storage/puzzle/...)
       webPath = normalized.substring(publicIndex + 7); // +7 para omitir 'public/'
-      console.log('Path final construido (public/storage):', webPath);
     } else {
       // Si no encuentra 'public/storage', buscar solo 'storage/'
       const storageIndex = normalized.toLowerCase().indexOf('storage/');
       if (storageIndex !== -1) {
         webPath = normalized.substring(storageIndex);
-        console.log('Path final construido (storage):', webPath);
       } else {
         // Buscar específicamente 'puzzle/' como patrón alternativo
         const puzzleIndex = normalized.toLowerCase().indexOf('puzzle/');
@@ -284,7 +279,6 @@ export class GamePuzzleComponent
           }
           const relativePath = normalized.substring(startIndex);
           webPath = relativePath.startsWith('storage/') ? relativePath : `storage/puzzle/${normalized.substring(puzzleIndex + 7)}`;
-          console.log('Path final construido (puzzle):', webPath);
         } else {
           // Como último recurso, usar imagen por defecto
           console.warn('No se pudo procesar la ruta de imagen, usando imagen por defecto. Path:', path);
@@ -298,7 +292,6 @@ export class GamePuzzleComponent
     const separator = webPath.includes('?') ? '&' : '?';
     const finalPath = `${webPath}${separator}t=${timestamp}`;
     
-    console.log('Path final con cache busting:', finalPath);
     return finalPath;
   }
 
@@ -389,7 +382,6 @@ export class GamePuzzleComponent
 
   async startGame() {
     this.gameAudioService.playGameStart();
-    console.log('🎯 Iniciando juego con imagen:', this.puzzleImageUrl);
     
     if (this.timer) {
       clearInterval(this.timer);
@@ -441,11 +433,6 @@ export class GamePuzzleComponent
         this.initializePuzzle();
         this.gameStarted = true;
         this.gameCompleted = false;
-        
-        console.log('🎮 Juego iniciado. Total piezas:', this.totalPieces);
-        console.log('📊 Dimensiones del tablero:', this.imageWidth, 'x', this.imageHeight);
-        console.log('🧩 Piezas por fila/columna:', this.rows, 'x', this.cols);
-        console.log('🎨 Dimensiones de pieza:', this.imageWidth / this.cols, 'x', this.imageHeight / this.rows);
         
         // Debug adicional
         this.debugImageInfo();
@@ -610,7 +597,6 @@ export class GamePuzzleComponent
       };
       img.onerror = (error) => {
         console.error('Error al cargar la imagen:', error, 'URL:', this.puzzleImageUrl);
-        console.log('Intentando con imagen por defecto...');
         this.puzzleImageUrl = 'assets/rompecabezas.png';
         
         // Intentar cargar la imagen por defecto
@@ -619,7 +605,6 @@ export class GamePuzzleComponent
           this.actualImageWidth = fallbackImg.naturalWidth || this.imageWidth;
           this.actualImageHeight = fallbackImg.naturalHeight || this.imageHeight;
           this.imageScale = 1;
-          console.log('Imagen por defecto cargada');
           resolve();
         };
         fallbackImg.onerror = () => {
@@ -647,11 +632,6 @@ export class GamePuzzleComponent
       if (this.timer) {
         clearInterval(this.timer);
       }
-
-      console.log('🧩 Puzzle completado con éxito');
-      console.log('⏰ Tiempo transcurrido:', this.formatTime(this.timeElapsed));
-      console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
-
       // Reproducir sonido de juego completado
       this.gameAudioService.playGameComplete();
 
@@ -661,12 +641,9 @@ export class GamePuzzleComponent
   }
 
   private async showSuccessAlert(): Promise<void> {
-    console.log('🧩 Puzzle completado con éxito en showSuccessAlert');
-    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
-    
+      
     // Mostrar modal de valoración si el usuario no ha evaluado el juego
     if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      console.log('✨ Mostrando modal de valoración...');
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
@@ -692,12 +669,8 @@ export class GamePuzzleComponent
   }
 
   private async showTimeUpAlert(): Promise<void> {
-    console.log('⏰ Tiempo agotado en Puzzle');
-    console.log('📊 Estado de evaluación:', { userAssessed: this.userAssessed, gameAssessed: this.gameConfig?.assessed });
-    
     // Mostrar modal de valoración si el usuario no ha evaluado el juego
     if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      console.log('✨ Mostrando modal de valoración...');
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
@@ -734,7 +707,6 @@ export class GamePuzzleComponent
       );
       
       if (result) {
-        console.log('Valoración enviada exitosamente');
         this.userAssessed = true;
       }
     } catch (error) {
@@ -905,8 +877,6 @@ export class GamePuzzleComponent
   checkImageLoad() {
     const img = new Image();
     img.onload = () => {
-      console.log('Imagen cargada correctamente:', this.puzzleImageUrl);
-      console.log('Dimensiones naturales:', img.naturalWidth, 'x', img.naturalHeight);
       this.calculateImageDimensions();
     };
     img.onerror = (error) => {
@@ -923,7 +893,6 @@ export class GamePuzzleComponent
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        console.log('✅ Imagen validada correctamente:', this.puzzleImageUrl);
         resolve(true);
       };
       img.onerror = () => {
@@ -1069,13 +1038,6 @@ export class GamePuzzleComponent
 
   // Método auxiliar para debug de imágenes
   debugImageInfo(): void {
-    console.log('🔍 Debug de información de imagen:');
-    console.log(`   - URL actual: ${this.puzzleImageUrl}`);
-    console.log(`   - Dimensiones del tablero: ${this.imageWidth}x${this.imageHeight}`);
-    console.log(`   - Dimensiones reales: ${this.actualImageWidth}x${this.actualImageHeight}`);
-    console.log(`   - Escala: ${this.imageScale}`);
-    console.log(`   - Filas x Columnas: ${this.rows}x${this.cols}`);
-    console.log(`   - Tamaño de pieza: ${this.imageWidth / this.cols}x${this.imageHeight / this.rows}`);
     
     // Verificar que la imagen es accesible
     const testImg = new Image();
@@ -1090,25 +1052,12 @@ export class GamePuzzleComponent
 
   // Método para test visual del puzzle
   testPuzzleVisualization(): void {
-    console.log('🎨 TEST VISUAL DEL PUZZLE:');
-    console.log('=================================');
-    console.log(`Imagen: ${this.puzzleImageUrl}`);
-    console.log(`Dimensiones del tablero: ${this.imageWidth}x${this.imageHeight}`);
-    console.log(`Grid: ${this.rows} filas x ${this.cols} columnas`);
-    console.log(`Total piezas: ${this.totalPieces}`);
-    console.log(`Tamaño de cada pieza: ${this.imageWidth/this.cols}x${this.imageHeight/this.rows}`);
     
-    console.log('\n🧩 DETALLES DE CADA PIEZA:');
     this.pieces.slice(0, Math.min(6, this.pieces.length)).forEach(piece => {
       const pieceWidth = this.imageWidth / this.cols;
       const pieceHeight = this.imageHeight / this.rows;
       const bgPosX = -piece.col * pieceWidth;
       const bgPosY = -piece.row * pieceHeight;
-      
-      console.log(`Pieza ${piece.id}: Fila ${piece.row}, Col ${piece.col}`);
-      console.log(`  → Debe mostrar porción: X=${bgPosX}px, Y=${bgPosY}px`);
-      console.log(`  → Tamaño: ${pieceWidth}x${pieceHeight}`);
-      console.log('  ───────────────────────');
     });
   }
 
@@ -1128,7 +1077,6 @@ export class GamePuzzleComponent
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        console.log('✅ Imagen del puzzle cargada correctamente:', imagePath);
         resolve(true);
       };
       img.onerror = () => {

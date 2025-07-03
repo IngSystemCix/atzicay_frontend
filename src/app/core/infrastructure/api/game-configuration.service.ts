@@ -31,8 +31,6 @@ export class GameConfigurationService {
         const queryString = params.toString();
         const url = `${this.apiUrl}game/settings/${gameInstanceId}${queryString ? '?' + queryString : ''}`;
 
-        console.log('Requesting game configuration:', { url, gameInstanceId, userId, withProgrammings });
-
         return this.http.get<GameConfigurationResponse>(url, {
           headers: {
             'Authorization': `Bearer ${token}`

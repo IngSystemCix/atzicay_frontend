@@ -17,7 +17,6 @@ export class ProfileService {
   constructor(private http: HttpClient) {}
 
   getUserProfile(userId: number): Observable<ProfileResponse> {
-    console.log(`Llamando a: ${this.apiUrl}user/profile/${userId}`);
     return this.http.get<ProfileResponse>(
       `${this.apiUrl}user/profile/${userId}`
     );

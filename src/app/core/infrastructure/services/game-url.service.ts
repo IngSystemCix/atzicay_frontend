@@ -36,7 +36,6 @@ export class GameUrlService {
   constructor(private http: HttpClient) {
     // Eliminar la barra final si existe para evitar dobles barras
     this.apiUrl = environment.api_base_url.replace(/\/$/, '');
-    console.log('🔧 GameUrlService inicializado con URL:', this.apiUrl);
   }
 
   /**
@@ -67,7 +66,6 @@ export class GameUrlService {
       message: 'Token generado exitosamente (modo simulación)'
     };
 
-    console.log('⚠️ Usando respuesta simulada - el endpoint aún no está implementado');
     return of(mockResponse);
 
     // Cuando el backend esté listo, descomenta esta línea:
@@ -94,7 +92,6 @@ export class GameUrlService {
       message: decoded ? 'Token válido (simulación)' : 'Token inválido (simulación)'
     };
 
-    console.log('⚠️ Usando validación simulada - el endpoint aún no está implementado');
     return of(mockResponse);
 
     // Cuando el backend esté listo, descomenta esta línea:
