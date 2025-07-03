@@ -299,8 +299,27 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   formatMemberSince(dateString: string | undefined): string {
     if (!dateString) return 'Fecha no disponible';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Fecha no disponible';
-    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    
+    try {
+      // Si la fecha viene en formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss), parsearla sin zona horaria
+      if (dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
+        const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+        const date = new Date(year, month - 1, day); // month - 1 porque los meses en JS van de 0-11
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+      }
+      
+      // Para otros formatos, usar el método tradicional
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      }
+      
+      return 'Fecha no disponible';
+    } catch (error) {
+      console.error('Error al formatear fecha:', error, 'Fecha original:', dateString);
+      return 'Fecha no disponible';
+    }
   }
 }
