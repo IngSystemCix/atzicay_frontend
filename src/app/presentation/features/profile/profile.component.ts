@@ -9,6 +9,7 @@ import { Country } from '../../../core/domain/model/country.model';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
+import { AlertService } from '../../../core/infrastructure/service/alert.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -33,7 +34,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private countryService: CountryService,
     private auth0: Auth0Service,
-    private userSession: UserSessionService
+    private userSession: UserSessionService,
+    private alertService: AlertService
   ) { }
 
   ngOnInit(): void {
@@ -192,21 +194,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (this.currentUserId) {
       console.log('Datos recibidos del modal:', updatedUserData);
       
-      // Mapear el género al formato esperado por el backend
-      const genderMap: { [key: string]: string } = {
-        'Male': 'M',
-        'Female': 'F', 
-        'Other': 'O'
-      };
-      
       // Validar y formatear los datos antes de enviar
       const payload = {
         name: updatedUserData.name?.trim() || '',
         last_name: updatedUserData.last_name?.trim() || '',
-        gender: genderMap[updatedUserData.gender] || updatedUserData.gender || 'Other',
+        gender: updatedUserData.gender || 'Male', // Mantener el formato original (Male, Female, Other)
         birthdate: this.formatDateForAPI(updatedUserData.birthdate),
         city: updatedUserData.city?.trim() || '',
-        country_id: parseInt(updatedUserData.country_id) || null,
+        country_id: Number(updatedUserData.country_id) || null,
       };
       
       console.log('Payload a enviar:', payload);
@@ -214,7 +209,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       // Validar que todos los campos requeridos estén presentes
       if (!payload.name || !payload.last_name || !payload.birthdate || !payload.city || !payload.country_id) {
         console.error('Datos incompletos:', payload);
-        alert('Por favor, complete todos los campos requeridos');
+        this.alertService.showWarning('Por favor, complete todos los campos requeridos');
         return;
       }
       
@@ -226,16 +221,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
             if (res && res.success && this.currentUserId !== null) {
               this.loadUserProfile(this.currentUserId);
               this.cerrarModal();
-              alert('Perfil actualizado correctamente');
+              this.alertService.showSuccess('Perfil actualizado correctamente', '¡Éxito!');
             }
           },
           error: (error) => {
             console.error('Error al actualizar perfil:', error);
             console.error('Error details:', error.error);
             if (error.status === 422) {
-              alert('Error de validación: Verifique que todos los campos estén correctos');
+              this.alertService.showError('Error de validación: Verifique que todos los campos estén correctos');
             } else {
-              alert('Error al actualizar el perfil. Intente nuevamente.');
+              this.alertService.showError('Error al actualizar el perfil. Intente nuevamente.');
             }
           }
         });
@@ -289,8 +284,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
         const countryId = this.profileService.getCountryIdByName(this.user.country, this.countries);
         if (countryId) {
           this.user.country_id = countryId;
+          console.log('Country ID asignado en modal:', countryId);
         }
       }
+      console.log('Usuario que se pasa al modal:', this.user);
+      console.log('Países que se pasan al modal:', this.countries);
       this.showModal = true;
     }
   }

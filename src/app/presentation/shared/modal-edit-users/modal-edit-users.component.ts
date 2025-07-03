@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { AlertService } from '../../../core/infrastructure/service/alert.service';
 
 @Component({
   selector: 'app-modal-edit-users',
@@ -15,6 +16,8 @@ export class ModalEditUsersComponent implements OnInit, OnChanges {
   @Output() userUpdated = new EventEmitter<any>();
 
   user: any;
+
+  constructor(private alertService: AlertService) {}
 
   ngOnInit() {
     console.log('Modal OnInit - userData:', this.userData);
@@ -34,7 +37,7 @@ export class ModalEditUsersComponent implements OnInit, OnChanges {
       this.user = {
         name: this.userData?.name || '',
         last_name: this.userData?.last_name || '',
-        gender: this.userData?.gender || 'O',
+        gender: this.userData?.gender || 'Male',
         country_id: this.userData?.country_id || '',
         city: this.userData?.city || '',
         birthdate: this.formatDateForInput(this.userData?.birthdate),
@@ -65,41 +68,40 @@ export class ModalEditUsersComponent implements OnInit, OnChanges {
 
   onSubmit() {
     console.log('Datos del formulario antes de enviar:', this.user);
-    
-    // Validar que todos los campos estén completos
+      // Validar que todos los campos estén completos
     if (!this.user.name?.trim()) {
-      alert('El nombre es requerido');
+      this.alertService.showWarning('El nombre es requerido');
       return;
     }
-    
+      
     if (!this.user.last_name?.trim()) {
-      alert('El apellido es requerido');
+      this.alertService.showWarning('El apellido es requerido');
       return;
     }
     
     if (!this.user.gender) {
-      alert('El género es requerido');
+      this.alertService.showWarning('El género es requerido');
       return;
     }
     
     if (!this.user.birthdate) {
-      alert('La fecha de nacimiento es requerida');
+      this.alertService.showWarning('La fecha de nacimiento es requerida');
       return;
     }
     
     if (!this.user.city?.trim()) {
-      alert('La ciudad es requerida');
+      this.alertService.showWarning('La ciudad es requerida');
       return;
     }
     
-    if (!this.user.country_id) {
-      alert('El país es requerido');
+    if (!this.user.country_id || this.user.country_id === '') {
+      this.alertService.showWarning('El país es requerido');
       return;
     }
     
     // Validar formato de fecha
     if (!this.isValidDate(this.user.birthdate)) {
-      alert('Formato de fecha inválido');
+      this.alertService.showError('Formato de fecha inválido');
       return;
     }
     
@@ -110,10 +112,11 @@ export class ModalEditUsersComponent implements OnInit, OnChanges {
       gender: this.user.gender,
       birthdate: this.user.birthdate,
       city: this.user.city.trim(),
-      country_id: this.user.country_id,
+      country_id: Number(this.user.country_id), // Usar Number() para asegurar conversión
     };
     
     console.log('Datos validados a enviar:', userData);
+    console.log('Tipo de country_id:', typeof userData.country_id, userData.country_id);
     this.userUpdated.emit(userData);
   }
 
