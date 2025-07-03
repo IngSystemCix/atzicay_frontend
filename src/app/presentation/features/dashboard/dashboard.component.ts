@@ -13,13 +13,14 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { GameInstance } from '../../../core/domain/model/game-instance.model';
 import { AtzicayButtonComponent } from '../../components/atzicay-button/atzicay-button.component';
+import { FilterDropdownComponent } from '../../components/filter-dropdown/filter-dropdown.component';
 import { GameInstanceService } from '../../../core/infrastructure/api/game-instance.service';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink, AtzicayButtonComponent],
+  imports: [FormsModule, CommonModule, RouterLink, AtzicayButtonComponent, FilterDropdownComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -89,24 +90,18 @@ getTypeIcon(typeValue: string): string {
 }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
   }
 
   private loadGameInstances(): void {
     this.isLoading = true;
     this.gameInstanceService
-      .getGameInstances(this.searchTerm, this.selectedType, this.PAGE_SIZE, 0)
+      .getGameInstances(this.searchTerm, this.selectedType || undefined, this.PAGE_SIZE, 0)
       .subscribe({
         next: (response) => {
-          // Filtrado adicional por nombre o autor en frontend
-          const search = this.searchTerm.trim().toLowerCase();
-          let games = response.data.data;
-          if (search) {
-            games = games.filter(
-              (game) =>
-                game.name.toLowerCase().includes(search) ||
-                game.author.toLowerCase().includes(search)
-            );
-          }
+          const games = response.data.data;
           this.allGames = games;
           this.filteredGames = games;
           this.displayedGames = games.slice(0, this.PAGE_SIZE);
@@ -125,9 +120,8 @@ getTypeIcon(typeValue: string): string {
   }
 
   currentPage = 1;
-  isFilterDropdownOpen = false;
   searchTerm = '';
-  selectedType: string = 'all';
+  selectedType: string | null = null;
   selectedLevels: string[] = [];
 
   gameTypes = [
@@ -149,7 +143,7 @@ getTypeIcon(typeValue: string): string {
 
   toggleTypeFilter(type: string): void {
     if (this.selectedType === type) {
-      this.selectedType = 'all';
+      this.selectedType = null;
     } else {
       this.selectedType = type;
     }
@@ -158,7 +152,7 @@ getTypeIcon(typeValue: string): string {
 
   removeTypeFilter(type: string): void {
     if (this.selectedType === type) {
-      this.selectedType = 'all';
+      this.selectedType = null;
       this.applyFilters();
     }
   }
@@ -179,11 +173,10 @@ getTypeIcon(typeValue: string): string {
   }
 
   clearFilters(): void {
-    this.selectedType = 'all';
+    this.selectedType = null;
     this.selectedLevels = [];
     this.searchTerm = '';
     this.applyFilters();
-    this.isFilterDropdownOpen = false;
   }
 
   applyFilters(): void {
@@ -198,7 +191,7 @@ getTypeIcon(typeValue: string): string {
     const newLimit = this.PAGE_SIZE + 6;
 
     this.gameInstanceService
-      .getGameInstances(this.searchTerm, this.selectedType, newLimit, 0)
+      .getGameInstances(this.searchTerm, this.selectedType || undefined, newLimit, 0)
       .subscribe({
         next: (response) => {
           if (response.data.data.length > this.allGames.length) {
@@ -283,8 +276,15 @@ getTypeIcon(typeValue: string): string {
     return level ? level.label : levelValue;
   }
 
-  toggleFilterDropdown(): void {
-    this.isFilterDropdownOpen = !this.isFilterDropdownOpen;
+  // Métodos para el FilterDropdownComponent
+  onSelectedTypeChange(selectedType: string | null): void {
+    this.selectedType = selectedType;
+    this.applyFilters();
+  }
+
+  onFilterDropdownClosed(): void {
+    // Método llamado cuando se cierra el dropdown
+    // Aquí puedes agregar lógica adicional si es necesario
   }
   totalGamesInDB = 0;
   currentOffset = 0;
@@ -319,20 +319,18 @@ getTypeIcon(typeValue: string): string {
     }
   }
 
+  private searchTimeout: any;
+
   onSearchTermChange(): void {
-    const search = this.searchTerm.trim().toLowerCase();
-    if (search) {
-      this.filteredGames = this.allGames.filter(
-        (game) =>
-          game.name.toLowerCase().includes(search) ||
-          game.author.toLowerCase().includes(search)
-      );
-    } else {
-      this.filteredGames = this.allGames;
+    // Limpiar timeout anterior si existe
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
     }
-    this.displayedGames = this.filteredGames.slice(0, this.PAGE_SIZE);
-    this.currentOffset = this.filteredGames.length;
-    this.hasMoreGames = this.filteredGames.length === this.PAGE_SIZE;
+    
+    // Crear nuevo timeout para debounce
+    this.searchTimeout = setTimeout(() => {
+      this.applyFilters();
+    }, 500); // 500ms de delay
   }
 
   trackByTypeValue(_index: number, type: { value: string; label: string }) {
@@ -341,7 +339,7 @@ getTypeIcon(typeValue: string): string {
 
   filterByAuthor(author: string): void {
     this.searchTerm = author;
-    this.selectedType = 'all'; 
+    this.selectedType = null; 
     this.selectedLevels = []; 
     this.applyFilters(); 
   

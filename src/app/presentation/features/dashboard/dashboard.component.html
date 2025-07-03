@@ -20,6 +20,7 @@
         <div class="w-full flex items-center justify-center space-x-3">
           <label for="searchInput" class="sr-only">Buscar juegos</label>
           <input id="searchInput" type="search" [(ngModel)]="searchTerm"
+            (input)="onSearchTermChange()"
             class="w-full pl-12 pr-5 py-3.5 border-2 border-gray-200/60 rounded-2xl focus:outline-none focus:ring-3 focus:ring-atzicay-purple-500/30 focus:border-atzicay-purple-500 transition-all duration-300 shadow-sm hover:shadow-md bg-white/90 backdrop-blur-sm text-gray-800 placeholder-gray-500"
             placeholder="¿Qué juego buscas hoy?" title="Buscar juegos" aria-label="Buscar juegos" />
           <button
@@ -34,57 +35,24 @@
         </div>
       </div>
 
-      <!-- Botón Filtros mejorado -->
-      <div class="relative">
-        <button (click)="toggleFilterDropdown()"
-          class="btn-atzicay text-white px-8 py-3.5 rounded-2xl transition-all duration-300 flex items-center hover:scale-105 hover:shadow-lg cursor-pointer active:scale-95 font-semibold shadow-md min-w-[140px] justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-          </svg>
-          Filtros
-        </button>
-
-        <!-- Dropdown de filtros mejorado -->
-        <div [class.hidden]="!isFilterDropdownOpen"
-          class="absolute top-full right-0 mt-3 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl py-3 z-50 w-72 border border-gray-100/50 ring-1 ring-black/5">
-          <div
-            class="px-6 py-4 text-sm text-atzicay-dropdown-text font-semibold border-b border-gray-100/70 bg-gray-50/50">
-            🎯 Tipo de Juego
-          </div>
-          <!-- Filtro de tipo de juego mejorado -->
-          <div *ngFor="let type of gameTypes; trackBy: trackByTypeValue"
-            class="flex items-center px-6 py-3 text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 cursor-pointer rounded-lg mx-2">
-            <input type="radio" [id]="'filterType_' + type.value" name="gameType" [value]="type.value"
-              [(ngModel)]="selectedType"
-              class="mr-4 rounded-full text-atzicay-purple-500 focus:ring-atzicay-purple-500 focus:ring-offset-0 scale-110"
-              (change)="applyFilters()" />
-            <label [for]="'filterType_' + type.value" class="cursor-pointer font-medium flex-1">
-              {{ type.label }}
-            </label>
-          </div>
-
-          <div class="border-t border-gray-100/70 mt-3 pt-3 px-6">
-            <button
-              class="w-full text-sm text-atzicay-purple-500 hover:text-atzicay-purple-700 py-2.5 text-center transition-all duration-200 font-medium rounded-lg hover:bg-atzicay-purple-50/50"
-              (click)="clearFilters()">
-              🗑️ Limpiar filtros
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Componente de Filtros -->
+      <app-filter-dropdown 
+        [gameTypes]="gameTypes"
+        [selectedType]="selectedType"
+        (selectedTypeChange)="onSelectedTypeChange($event)"
+        (closed)="onFilterDropdownClosed()">
+      </app-filter-dropdown>
     </div>
 
     <!-- Filtros activos mejorados -->
-    <ng-container *ngIf="selectedType !== 'all' || selectedLevels.length > 0">
+    <ng-container *ngIf="selectedType !== null || selectedLevels.length > 0">
       <div class="mt-8 flex flex-wrap gap-3 justify-center">
-        <ng-container *ngIf="selectedType !== 'all'">
+        <ng-container *ngIf="selectedType !== null">
           <div
             class="bg-gradient-to-r from-atzicay-purple-100 to-atzicay-purple-50 text-atzicay-purple-800 text-sm px-5 py-2.5 rounded-full flex items-center transition-all duration-300 hover:shadow-md border border-atzicay-purple-200/50 font-medium">
             <span class="mr-2">🎮</span>
-            {{ getTypeLabel(selectedType) }}
-            <button title="Remover filtro" (click)="removeTypeFilter(selectedType)"
+            {{ getTypeLabel(selectedType!) }}
+            <button title="Remover filtro" (click)="removeTypeFilter(selectedType!)"
               class="ml-3 text-atzicay-purple-500 hover:text-atzicay-purple-700 transition-colors duration-200 p-1 rounded-full hover:bg-atzicay-purple-200/50">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
@@ -218,7 +186,7 @@
       } } @empty {
       <div class="col-span-full text-center p-12">
         <ng-container *ngIf="
-            selectedType !== 'all' || selectedLevels.length > 0 || searchTerm
+            selectedType !== null || selectedLevels.length > 0 || searchTerm
           ">
           <div
             class="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-100/50 max-w-md mx-auto">
@@ -233,7 +201,7 @@
           </div>
         </ng-container>
         <ng-container *ngIf="
-            selectedType === 'all' && selectedLevels.length === 0 && !searchTerm
+            selectedType === null && selectedLevels.length === 0 && !searchTerm
           ">
           <div *ngIf="isLoading; else noGamesTemplate"
             class="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-lg border border-gray-100/50 max-w-md mx-auto">

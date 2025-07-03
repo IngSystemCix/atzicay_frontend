@@ -1,0 +1,33 @@
+:host {
+  position: relative;
+  display: inline-block;
+}
+
+/* Asegurar que el dropdown dinámico tenga los estilos correctos */
+::ng-deep #filter-dropdown-portal {
+  font-family: inherit;
+}
+
+::ng-deep #filter-dropdown-portal .text-atzicay-dropdown-text {
+  color: rgb(55 65 81);
+}
+
+::ng-deep #filter-dropdown-portal .text-atzicay-purple-500 {
+  color: rgb(139 92 246);
+}
+
+::ng-deep #filter-dropdown-portal .text-atzicay-purple-700 {
+  color: rgb(109 40 217);
+}
+
+::ng-deep #filter-dropdown-portal .hover\:bg-atzicay-purple-50\/70:hover {
+  background-color: rgba(245 243 255, 0.7);
+}
+
+::ng-deep #filter-dropdown-portal .hover\:bg-atzicay-purple-50\/50:hover {
+  background-color: rgba(245 243 255, 0.5);
+}
+
+::ng-deep #filter-dropdown-portal .bg-gray-50\/50 {
+  background-color: rgba(249 250 251, 0.5);
+}

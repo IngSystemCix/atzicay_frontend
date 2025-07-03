@@ -21,15 +21,22 @@ export class GameInstanceService {
 
   getGameInstances(
     search: string = '',
-    type: string = 'all',
+    gameType?: string,
     limit: number = 6,
     offset: number = 0
   ): Observable<GameInstanceResponse> {
     let params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString());
-    if (search) params = params.set('search', search);
-    if (type && type !== 'all') params = params.set('type', type);
+    
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    
+    if (gameType) {
+      params = params.set('gameType', gameType);
+    }
+    
     return this.http.get<GameInstanceResponse>(`${this.apiUrl}game/filter`, { params });
   }
 }
