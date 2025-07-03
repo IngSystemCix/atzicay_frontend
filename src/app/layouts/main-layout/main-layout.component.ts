@@ -43,7 +43,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.userSession.waitForToken$(5000).subscribe({
         next: (token) => {
-          console.log('[MainLayout] Token recibido, configurando usuario...');
           this.ensureUserIdLoaded();
         },
         error: (err) => {
@@ -102,7 +101,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
               next: (res) => {
                 if (res && res.data && res.data.user_id) {
                   this.userSession.setUserId(res.data.user_id);
-                  console.log('[MainLayout] UserId configurado:', res.data.user_id);
                 }
               },
               error: (err) => {
@@ -113,7 +111,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         })
       );
     } else {
-      console.log('[MainLayout] UserId ya disponible:', userId);
     }
   }
 }
