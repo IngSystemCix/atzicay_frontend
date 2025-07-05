@@ -1,7 +1,9 @@
 <div class="flex flex-col border-8 border-atzicay-border items-center min-h-screen h-screen p-4 overflow-x-hidden"
   style="background-color: var(--color-atzicay-bg)">
-  <!-- Logo flotante -->
-  <app-floating-logo></app-floating-logo>
+  <!-- Logo flotante - Oculto en móviles y tablets -->
+  <div class="hidden xl:block">
+    <app-floating-logo></app-floating-logo>
+  </div>
 
   <!-- Loading State (authentication or game) -->
   @if (isLoading || state.cargando) {
@@ -40,238 +42,399 @@
   <!-- Game Content -->
   @if (!isLoading && !authError && !state.cargando && !state.error) {
   <div class="w-full h-full flex flex-col">
-    <!-- Header Mejorado -->
+    <!-- Header Responsivo -->
     <div class="w-full flex justify-center mb-6 transition-all duration-700 ease-in-out max-w-7xl mx-auto">
-      <div *ngIf="headerExpanded"
-        class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 rounded-3xl backdrop-blur-xl shadow-2xl border border-atzicay-border/30 p-6 relative overflow-hidden"
-        style="backdrop-filter: blur(25px)">
-        <!-- Decorative background elements -->
-        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
-        <div
-          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-3xl">
-        </div>
-        <div
-          class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-transparent rounded-full blur-2xl">
-        </div>
-
-        <!-- Content container -->
-        <div class="relative z-10">
-          <!-- Header superior con diseño premium -->
-          <div class="flex items-center justify-between mb-6">
-            <button (click)="volverAlDashboard()"
-              class="group relative px-6 py-3 bg-white text-purple-700 rounded-2xl hover:from-white to-white/95 font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-white/20">
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              </div>
-              <div class="relative flex items-center">
-                <svg class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none"
-                  stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                </svg>
-                Volver
-              </div>
-            </button>
-
-            <div class="text-center flex-1 mx-8">
-              <div class="relative">
-                <h1 class="text-3xl font-black mb-2 tracking-tight text-atzicay-heading">
-                  {{ tituloJuego }}
-                </h1>
-              </div>
-              <p class="text-lg font-medium text-atzicay-subheading mt-3">
-                {{ descripcionJuego }}
-              </p>
-            </div>
-
-            <button (click)="toggleHeader()"
-              class="group bg-white hover:from-white to-white/95 rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl border border-atzicay-border"
-              title="Minimizar header">
-              <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
-              </svg>
-            </button>
+      
+      <!-- Header Desktop (xl y superior) -->
+      <div class="hidden xl:block w-full">
+        <div *ngIf="headerExpanded"
+          class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 rounded-3xl backdrop-blur-xl shadow-2xl border border-atzicay-border/30 p-6 relative overflow-hidden"
+          style="backdrop-filter: blur(25px)">
+          <!-- Decorative background elements -->
+          <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
+          <div
+            class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-3xl">
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Vidas Card -->
-            <div
-              class="group relative bg-white rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-atzicay-border">
-              <div class="relative flex items-center justify-center">
-                <div class="flex items-center justify-center gap-4">
-                  <div class="relative">
-                    <div class="bg-atzicay-bg rounded-2xl p-3 shadow-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
+          <div
+            class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-transparent rounded-full blur-2xl">
+          </div>
+
+          <!-- Content container -->
+          <div class="relative z-10">
+            <!-- Header superior con diseño premium -->
+            <div class="flex items-center justify-between mb-6">
+              <button (click)="volverAlDashboard()"
+                class="group relative px-6 py-3 bg-white text-purple-700 rounded-2xl hover:from-white to-white/95 font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-white/20">
+                <div
+                  class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                </div>
+                <div class="relative flex items-center">
+                  <svg class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Volver
+                </div>
+              </button>
+
+              <div class="text-center flex-1 mx-8">
+                <div class="relative">
+                  <h1 class="text-3xl font-black mb-2 tracking-tight text-atzicay-heading">
+                    {{ tituloJuego }}
+                  </h1>
+                </div>
+                <p class="text-lg font-medium text-atzicay-subheading mt-3">
+                  {{ descripcionJuego }}
+                </p>
+              </div>
+
+              <button (click)="toggleHeader()"
+                class="group bg-white hover:from-white to-white/95 rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl border border-atzicay-border"
+                title="Minimizar header">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                  class="h-6 w-6 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+                </svg>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <!-- Vidas Card -->
+              <div
+                class="group relative bg-white rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-atzicay-border">
+                <div class="relative flex items-center justify-center">
+                  <div class="flex items-center justify-center gap-4">
+                    <div class="relative">
+                      <div class="bg-atzicay-bg rounded-2xl p-3 shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      </div>
+                      <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
                     </div>
-                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-                  </div>
-                  <div>
-                    <p class="text-3xl font-black text-gray-800 mb-1">
-                      {{ state.vidasRestantes }}
-                    </p>
-                    <p class="text-sm text-gray-600 font-semibold uppercase tracking-wide">
-                      {{ state.vidasRestantes === 1 ? "Vida" : "Vidas" }}
-                    </p>
+                    <div>
+                      <p class="text-3xl font-black text-gray-800 mb-1">
+                        {{ state.vidasRestantes }}
+                      </p>
+                      <p class="text-sm text-gray-600 font-semibold uppercase tracking-wide">
+                        {{ state.vidasRestantes === 1 ? "Vida" : "Vidas" }}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Progreso Card -->
-            <div
-              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+              <!-- Progreso Card -->
               <div
-                class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              </div>
-              <div class="relative">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">
-                    Progreso
-                  </h3>
-                  <span class="text-2xl font-black text-purple-700">
-                    {{ state.palabrasCompletadas }}/{{ state.totalPalabras }}
-                  </span>
+                class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+                <div
+                  class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 </div>
                 <div class="relative">
-                  <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
-                    <div
-                      class="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 h-4 rounded-full transition-all duration-1000 ease-out shadow-lg relative"
-                      [style.width.%]="porcentajeProgreso">
-                      <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-full"></div>
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                      Progreso
+                    </h3>
+                    <span class="text-2xl font-black text-purple-700">
+                      {{ state.palabrasCompletadas }}/{{ state.totalPalabras }}
+                    </span>
+                  </div>
+                  <div class="relative">
+                    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
+                      <div
+                        class="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 h-4 rounded-full transition-all duration-1000 ease-out shadow-lg relative"
+                        [style.width.%]="porcentajeProgreso">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-full"></div>
+                      </div>
+                    </div>
+                    <div class="mt-2 text-center">
+                      <span class="text-sm font-semibold text-purple-600">{{ porcentajeProgreso }}% completado</span>
                     </div>
                   </div>
-                  <div class="mt-2 text-center">
-                    <span class="text-sm font-semibold text-purple-600">{{ porcentajeProgreso }}% completado</span>
+                </div>
+              </div>
+
+              <!-- Tiempo Card -->
+              <div
+                class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+                <div
+                  class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                </div>
+                <div class="relative flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl p-3 shadow-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-3xl font-black text-gray-800 font-mono mb-1">
+                        {{ formatearTiempo() }}
+                      </p>
+                      <p class="text-sm text-gray-600 font-semibold uppercase tracking-wide">
+                        Tiempo
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Tiempo Card -->
-            <div
-              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <!-- Header minimizado premium -->
+        <div *ngIf="!headerExpanded"
+          class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-8 py-4 relative overflow-hidden">
+          <!-- Decorative elements -->
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
+          <div
+            class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl">
+          </div>
+
+          <div class="relative z-10 flex items-center justify-between">
+            <!-- Info compacta premium -->
+            <div class="flex items-center gap-4 text-atzicay-heading">
+              <div class="flex items-center gap-3">
+                <span class="text-xl font-black bg-atzicay-heading bg-clip-text text-transparent">
+                  {{ tituloJuego }}
+                </span>
               </div>
-              <div class="relative flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl p-3 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-500" fill="none"
-                      viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-3xl font-black text-gray-800 font-mono mb-1">
-                      {{ formatearTiempo() }}
-                    </p>
-                    <p class="text-sm text-gray-600 font-semibold uppercase tracking-wide">
-                      Tiempo
-                    </p>
+
+              <!-- Stats compactos premium -->
+              <div class="flex items-center gap-3">
+                <!-- Vidas compactas -->
+                <div
+                  class="flex items-center gap-2 bg-white text-red-600 font-bold rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  <span class="font-black">{{ state.vidasRestantes }}</span>
+                </div>
+
+                <!-- Progreso compacto -->
+                <div
+                  class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
+                  <span class="font-black text-atzicay-heading">
+                    {{ state.palabrasCompletadas }}/{{ state.totalPalabras }}
+                  </span>
+                  <div class="w-20 bg-purple-200 rounded-full h-2 shadow-inner">
+                    <div
+                      class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500 shadow-sm"
+                      [style.width.%]="porcentajeProgreso"></div>
                   </div>
                 </div>
+
+                <!-- Tiempo compacto -->
+                <div
+                  class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="font-black">{{ formatearTiempo() }}</span>
+                </div>
               </div>
+            </div>
+
+            <!-- Botones de acción premium -->
+            <div class="flex items-center gap-3">
+              <button (click)="volverAlDashboard()"
+                class="group relative px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border">
+                <div
+                  class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                </div>
+                <div class="relative flex items-center">
+                  <span class="mr-2">←</span>
+                  Volver
+                </div>
+              </button>
+
+              <button (click)="toggleHeader()"
+                class="group bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg border border-atzicay-border"
+                title="Expandir header">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
+                  viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Header minimizado premium -->
-      <div *ngIf="!headerExpanded"
-        class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-8 py-4 relative overflow-hidden">
-        <!-- Decorative elements -->
-        <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
-        <div
-          class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl">
-        </div>
-
-        <div class="relative z-10 flex items-center justify-between">
-          <!-- Info compacta premium -->
-          <div class="flex items-center gap-4 text-atzicay-heading">
+      <!-- Header Mobile y Tablet (hasta xl) -->
+      <div class="xl:hidden w-full">
+        <!-- Barra superior fija con logo Atzicay y menú hamburguesa -->
+        <div class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 backdrop-blur-xl shadow-lg border border-atzicay-border/40 rounded-2xl p-4 relative overflow-hidden">
+          <!-- Decorative elements -->
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
+          
+          <div class="relative z-10 flex items-center justify-between">
+            <!-- Logo Atzicay -->
             <div class="flex items-center gap-3">
-              <span class="text-xl font-black bg-atzicay-heading bg-clip-text text-transparent">
-                {{ tituloJuego }}
+              <div class="bg-white rounded-xl p-2 shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-5 w-5 text-purple-600 flex-shrink-0"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <span class="text-lg font-black text-atzicay-heading tracking-wide">
+                ATZICAY
               </span>
             </div>
 
-            <!-- Stats compactos premium -->
-            <div class="flex items-center gap-3">
-              <!-- Vidas compactas -->
-              <div
-                class="flex items-center gap-2 bg-white text-red-600 font-bold rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span class="font-black">{{ state.vidasRestantes }}</span>
-              </div>
+            <!-- Título del juego centrado -->
+            <div class="flex-1 text-center">
+              <h1 class="text-lg sm:text-xl font-bold text-atzicay-heading truncate">
+                {{ tituloJuego }}
+              </h1>
+            </div>
 
-              <!-- Progreso compacto -->
-              <div
-                class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
-                <span class="font-black text-atzicay-heading">
-                  {{ state.palabrasCompletadas }}/{{ state.totalPalabras }}
-                </span>
-                <div class="w-20 bg-purple-200 rounded-full h-2 shadow-inner">
-                  <div
-                    class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500 shadow-sm"
-                    [style.width.%]="porcentajeProgreso"></div>
+            <!-- Botón menú hamburguesa -->
+            <button (click)="toggleMobileMenu()"
+              class="bg-white hover:bg-white/95 rounded-xl p-2 transition-all duration-300 cursor-pointer active:scale-95 shadow-md border border-atzicay-border">
+              <svg xmlns="http://www.w3.org/2000/svg" 
+                   class="h-6 w-6 text-purple-600 transition-transform duration-300"
+                   [class.rotate-90]="mobileMenuOpen"
+                   fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Menú desplegable -->
+        <div class="overflow-hidden transition-all duration-500 ease-in-out"
+             [class.max-h-96]="mobileMenuOpen"
+             [class.max-h-0]="!mobileMenuOpen">
+          <div class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 backdrop-blur-xl shadow-xl border border-atzicay-border/30 rounded-2xl mt-3 p-4 relative overflow-hidden"
+               style="backdrop-filter: blur(25px)"
+               [class.animate-pulse]="mobileMenuOpen">
+            <!-- Decorative background -->
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
+            
+            <div class="relative z-10 space-y-4">
+              <!-- Estadísticas en grid responsive -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Vidas -->
+                <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+                  <div class="flex items-center gap-3">
+                    <div class="bg-red-50 rounded-lg p-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-lg font-black text-gray-800">{{ state.vidasRestantes }}</p>
+                      <p class="text-xs text-gray-600 font-medium">{{ state.vidasRestantes === 1 ? "Vida" : "Vidas" }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Progreso -->
+                <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+                  <div class="flex items-center gap-3">
+                    <div class="bg-purple-50 rounded-lg p-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-lg font-black text-gray-800">{{ state.palabrasCompletadas }}/{{ state.totalPalabras }}</p>
+                      <p class="text-xs text-gray-600 font-medium">Progreso</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tiempo -->
+                <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border sm:col-span-1 col-span-1">
+                  <div class="flex items-center gap-3">
+                    <div class="bg-blue-50 rounded-lg p-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-lg font-black text-gray-800">{{ formatearTiempo() }}</p>
+                      <p class="text-xs text-gray-600 font-medium">Tiempo</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <!-- Tiempo compacto -->
-              <div
-                class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <!-- Barra de progreso -->
+              <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-bold text-gray-700">Progreso del juego</span>
+                  <span class="text-sm font-bold text-purple-600">{{ porcentajeProgreso }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-1000"
+                       [style.width.%]="porcentajeProgreso">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Palabras del juego (móviles y tablets) -->
+              <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm font-bold text-gray-700">Palabras del juego</span>
+                  <span class="text-xs text-gray-500">{{ state.palabrasCompletadas }}/{{ state.totalPalabras }}</span>
+                </div>
+                <div class="max-h-32 overflow-y-auto">
+                  <ul class="flex flex-col gap-1">
+                    <li *ngFor="let palabra of palabrasAdivinadas" class="text-center select-none text-xs"
+                      [ngClass]="{ 'line-through text-gray-400': palabra.startsWith('~~'), 'text-gray-600': !palabra.startsWith('~~') }"
+                      [style.filter]="palabra.startsWith('~~') ? 'none' : 'blur(2px)'">
+                      {{ limpiarPalabra(palabra) }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Descripción del juego (solo si existe) -->
+              <div *ngIf="descripcionJuego" class="bg-white/80 rounded-xl p-3 shadow-md border border-atzicay-border">
+                <p class="text-sm text-gray-700 leading-relaxed">{{ descripcionJuego }}</p>
+              </div>
+
+              <!-- Botón volver al dashboard -->
+              <button (click)="volverAlDashboard()"
+                class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl py-3 px-4 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
-                <span class="font-black">{{ formatearTiempo() }}</span>
-              </div>
+                Volver al Dashboard
+              </button>
             </div>
-          </div>
-
-          <!-- Botones de acción premium -->
-          <div class="flex items-center gap-3">
-            <button (click)="volverAlDashboard()"
-              class="group relative px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border">
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              </div>
-              <div class="relative flex items-center">
-                <span class="mr-2">←</span>
-                Volver
-              </div>
-            </button>
-
-            <button (click)="toggleHeader()"
-              class="group bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg border border-atzicay-border"
-              title="Expandir header">
-              <svg xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Área principal del juego - Ocupa el resto del espacio -->
-    <div class="flex-1 flex flex-col lg:flex-row justify-between items-stretch gap-6">
+    <div class="flex-1 flex flex-col lg:flex-row justify-between items-stretch gap-4 lg:gap-6">
       <!-- Panel izquierdo: Dibujo del ahorcado -->
       <div class="w-full lg:w-2/5 flex justify-center items-center">
         <div
-          class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-3xl p-8 shadow-xl border border-purple-200 w-full max-w-sm h-fit">
-          <svg width="100%" height="300" viewBox="0 0 200 250" [style.color]="state.colorTexto" class="drop-shadow-md">
+          class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-3xl p-4 md:p-8 shadow-xl border border-purple-200 w-full max-w-sm h-fit">
+          <svg width="100%" height="250" viewBox="0 0 200 250" [style.color]="state.colorTexto" class="drop-shadow-md md:h-[300px]">
             <!-- Base -->
             <line x1="20" y1="230" x2="180" y2="230" stroke="currentColor" stroke-width="4" stroke-linecap="round" />
             <!-- Poste vertical -->
@@ -312,23 +475,23 @@
       </div>
 
       <!-- Panel derecho: Palabra y controles -->
-      <div class="w-full xl:w-3/5 flex flex-col justify-center gap-8">
-        <!-- Palabra con mejor feedback visual -->
+      <div class="w-full xl:w-3/5 flex flex-col justify-center gap-4 lg:gap-8">
+        <!-- Palabra con mejor feedback visual - Tamaño responsivo -->
         <div class="flex justify-center">
-          <div class="bg-white/95 rounded-3xl p-8 shadow-2xl border border-white/50 backdrop-blur-sm">
-            <div class="flex justify-center flex-wrap gap-3 max-w-4xl">
+          <div class="bg-white/95 rounded-3xl p-4 md:p-6 lg:p-8 shadow-2xl border border-white/50 backdrop-blur-sm">
+            <div class="flex justify-center flex-wrap gap-2 md:gap-3 max-w-4xl">
               @for (letra of state.palabraActual.split(''); let i = $index;
               track $index) {
               @if (esEspacio(i)) {
                 <!-- Espacios entre palabras -->
-                <div class="w-4 h-16 lg:w-6 lg:h-20 flex items-end justify-center">
+                <div class="w-2 h-12 md:w-4 md:h-16 lg:w-6 lg:h-20 flex items-end justify-center">
                   <div class="w-full h-1 bg-gray-300 rounded-full opacity-50"></div>
                 </div>
               } @else {
-                <!-- Letras normales -->
+                <!-- Letras normales - Tamaño responsivo -->
                 <div class="relative">
                   <div
-                    class="text-4xl lg:text-5xl font-black h-16 w-16 lg:h-20 lg:w-20 flex items-center justify-center rounded-2xl shadow-lg transition-all duration-500 transform hover:scale-105"
+                    class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black h-12 w-12 md:h-16 md:w-16 lg:h-20 lg:w-20 flex items-center justify-center rounded-2xl shadow-lg transition-all duration-500 transform hover:scale-105"
                     [ngClass]="{
                       'bg-gradient-to-br from-purple-100 to-purple-200 border-2 border-purple-300 text-purple-700 scale-110 shadow-xl animate-bounce':
                         obtenerCaracterRevelado(i) !== '',
@@ -340,7 +503,7 @@
                       obtenerCaracterRevelado(i)
                       }}</span>
                     } @else {
-                    <span class="text-2xl">?</span>
+                    <span class="text-lg md:text-xl lg:text-2xl">?</span>
                     }
                   </div>
 
@@ -357,12 +520,12 @@
           </div>
         </div>
 
-        <!-- Teclado mejorado -->
-        <div class="bg-white/95 rounded-3xl p-8 shadow-2xl border border-white/50 backdrop-blur-sm">
-          <div class="grid grid-cols-6 sm:grid-cols-7 gap-3 mx-auto max-w-3xl">
+        <!-- Teclado mejorado - Tamaño responsivo -->
+        <div class="bg-white/95 rounded-3xl p-4 md:p-6 lg:p-8 shadow-2xl border border-white/50 backdrop-blur-sm">
+          <div class="grid grid-cols-6 sm:grid-cols-7 gap-2 md:gap-3 mx-auto max-w-3xl">
             @for (letra of alfabeto; track letra) {
             <button
-              class="relative w-12 h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center text-sm lg:text-base font-bold transition-all duration-300 transform hover:scale-110 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300/50 overflow-hidden"
+              class="relative w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-xl md:rounded-2xl flex items-center justify-center text-xs md:text-sm lg:text-base font-bold transition-all duration-300 transform hover:scale-110 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-purple-300/50 overflow-hidden"
               [ngClass]="{
                 'bg-gradient-to-br from-purple-100 to-purple-200 text-purple-700 hover:from-purple-200 hover:to-purple-300 border-2 border-purple-300 hover:border-purple-400':
                   !estaLetraSeleccionada(letra),
@@ -621,18 +784,18 @@
 </div>
 }
 
-<!-- Canvas flotante de palabras -->
+<!-- Canvas flotante de palabras - Oculto en móviles y tablets -->
 <div *ngIf="palabrasCanvasVisible"
-  class="fixed right-4 top-1/2 z-40 bg-white/80 rounded-xl shadow-lg p-4 flex flex-col items-center transition-all duration-300"
+  class="fixed right-2 md:right-4 top-1/2 z-40 bg-white/80 rounded-xl shadow-lg p-2 md:p-4 flex-col items-center transition-all duration-300 hidden lg:flex"
   style="
       backdrop-filter: blur(8px);
-      min-width: 180px;
+      min-width: 140px;
       transform: translateY(-50%);
     ">
   <button (click)="togglePalabrasCanvas()"
-    class="absolute -left-8 top-1/2 -translate-y-1/2 bg-purple-100 hover:bg-purple-200 rounded-full p-2 shadow cursor-pointer group"
+    class="absolute -left-6 md:-left-8 top-1/2 -translate-y-1/2 bg-purple-100 hover:bg-purple-200 rounded-full p-1.5 md:p-2 shadow cursor-pointer group"
     title="Ocultar palabras" aria-label="Ocultar palabras" style="z-index: 50">
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500 group-hover:hidden" fill="none"
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-6 md:w-6 text-purple-500 group-hover:hidden" fill="none"
       viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5
@@ -641,7 +804,7 @@
                 -4.477 0-8.268-2.943-9.542-7z" />
     </svg>
 
-    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500 hidden group-hover:block" fill="none"
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-6 md:w-6 text-purple-500 hidden group-hover:block" fill="none"
       viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19
                 c-4.478 0-8.268-2.943-9.542-7
@@ -653,9 +816,9 @@
                 M3 3l18 18" />
     </svg>
   </button>
-  <div class="font-bold text-purple-700 mb-2 text-center">Palabras</div>
-  <ul class="flex flex-col gap-2 w-full">
-    <li *ngFor="let palabra of palabrasAdivinadas" class="text-center select-none"
+  <div class="font-bold text-purple-700 mb-2 text-center text-sm md:text-base">Palabras</div>
+  <ul class="flex flex-col gap-1 md:gap-2 w-full">
+    <li *ngFor="let palabra of palabrasAdivinadas" class="text-center select-none text-xs md:text-sm"
       [ngClass]="{ 'line-through text-gray-400': palabra.startsWith('~~') }"
       [style.filter]="palabra.startsWith('~~') ? 'none' : 'blur(4px)'">
       {{ limpiarPalabra(palabra) }}
@@ -663,12 +826,12 @@
   </ul>
 </div>
 
-<!-- Icono flotante cuando está minimizado -->
+<!-- Icono flotante cuando está minimizado - Oculto en móviles y tablets -->
 <button *ngIf="!palabrasCanvasVisible" (click)="togglePalabrasCanvas()"
-  class="fixed right-4 top-1/2 z-50 bg-purple-100 hover:bg-purple-200 rounded-full p-3 shadow cursor-pointer"
+  class="fixed right-2 md:right-4 top-1/2 z-50 bg-purple-100 hover:bg-purple-200 rounded-full p-2 md:p-3 shadow cursor-pointer hidden lg:block"
   style="transform: translateY(-50%)" title="Mostrar palabras" aria-label="Mostrar palabras">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-    stroke-width="2">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+    stroke-width="2" class="md:w-6 md:h-6">
     <path stroke-linecap="round" stroke-linejoin="round"
       d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.293-3.95m3.326-2.406A9.956 9.956 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.966 9.966 0 01-1.357 2.572M15 12a3 3 0 11-6 0 3 3 0 016 0zM3 3l18 18"
       stroke="#8B5CF6" />

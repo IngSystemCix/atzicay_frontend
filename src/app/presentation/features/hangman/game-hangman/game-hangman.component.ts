@@ -100,6 +100,8 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   palabrasAdivinadas: string[] = [];
   tiempoRestanteModal = 3;
   headerExpanded: boolean = false;
+  // Nueva propiedad para el menú móvil
+  mobileMenuOpen: boolean = false;
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -649,6 +651,11 @@ reiniciarJuego(): void {
 
   toggleHeader(): void {
     this.headerExpanded = !this.headerExpanded;
+  }
+
+  // Nuevo método para el menú móvil
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 
   private async showSuccessAlert(): Promise<void> {
