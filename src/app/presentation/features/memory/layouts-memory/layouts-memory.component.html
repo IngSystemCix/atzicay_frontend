@@ -1,29 +1,29 @@
-<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-6">
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-2 sm:p-4 md:p-6">
   <div class="max-w-7xl mx-auto">
-    <!-- Header with Tabs and Action Buttons -->
-    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 gap-4">
+    <!-- Header with Tabs and Action Buttons - Responsive -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
       <!-- Tab Navigation -->
-      <div class="flex-1">
+      <div class="flex-1 min-w-0">
         <app-atzicay-tabs 
           [tabs]="tabs"
           [activeTab]="activeTab"
           (tabChanged)="onTabChanged($event)"
           [size]="'md'"
+          class="overflow-x-auto"
         ></app-atzicay-tabs>
       </div>
       
-      <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row gap-3 lg:ml-6">
-        
+      <!-- Action Buttons - Responsive -->
+      <div class="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
         <button 
-          class="px-6 py-3 border-2 border-gray-300 text-atzicay-purple-500 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-105 whitespace-nowrap">
+          class="px-4 py-2 sm:px-6 sm:py-3 border-2 border-gray-300 text-atzicay-purple-500 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-[1.02] whitespace-nowrap text-sm sm:text-base">
           <span class="flex items-center justify-center">
             Cancelar
           </span>
         </button>
         <button (click)="onSave()"
           [disabled]="isSaving"
-          class="px-6 py-3 bg-atzicay-bg-button hover:bg-atzicay-purple-700 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+          class="px-4 py-2 sm:px-6 sm:py-3 bg-atzicay-bg-button hover:bg-atzicay-purple-700 text-white rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap text-sm sm:text-base">
           <span class="flex items-center justify-center">
             {{ isSaving ? 'Guardando...' : 'Guardar Juego' }}
           </span>
@@ -31,79 +31,79 @@
       </div>
     </div>
 
-    <!-- Tab Content with Scroll -->
-    <div class="transition-all duration-500 ease-in-out max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
+    <!-- Tab Content with Scroll - Responsive -->
+    <div class="transition-all duration-500 ease-in-out max-h-[calc(100vh-180px)] sm:max-h-[calc(100vh-200px)] overflow-y-auto custom-scrollbar">
       <!-- Contenido Tab -->
-     @if (activeTab === 'contenido') {
+      @if (activeTab === 'contenido') {
       <div class="animate-fade-in">
-        <div class="flex flex-col lg:flex-row gap-8">
-          <!-- Información del juego (Left Panel) -->
+        <div class="flex flex-col lg:flex-row gap-4 md:gap-6 lg:gap-8">
+          <!-- Información del juego (Left Panel) - Responsive -->
           <div class="w-full lg:w-1/3">
-            <div class="bg-white rounded-2xl p-6 shadow-xl border border-gray-100 backdrop-blur-sm">
-              <div class="flex items-center mb-6">
+            <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 backdrop-blur-sm">
+              <div class="flex items-center mb-4 sm:mb-6">
                 <div>
-                  <h2 class="text-2xl font-bold text-atzicay-purple-500">
+                  <h2 class="text-xl sm:text-2xl font-bold text-atzicay-purple-500">
                     Información del juego
                   </h2>
-                  <p class="text-gray-500 text-sm">
+                  <p class="text-gray-500 text-xs sm:text-sm">
                     Configura los detalles básicos
                   </p>
                 </div>
               </div>
-              <div class="space-y-6">
+              <div class="space-y-4 sm:space-y-6">
                 <div class="group">
-                  <label class="block text-sm font-semibold text-gray-700 mb-3">Título del Juego</label>
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Título del Juego</label>
                   <input type="text" [(ngModel)]="gameTitle"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 group-hover:border-gray-300"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 group-hover:border-gray-300 text-sm sm:text-base"
                     placeholder="Ej: Memoria de Animales" />
                 </div>
                 <div class="group">
-                  <label class="block text-sm font-semibold text-gray-700 mb-3">Descripción</label>
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Descripción</label>
                   <textarea [(ngModel)]="gameDescription" rows="4"
-                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 resize-none group-hover:border-gray-300"
+                    class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 resize-none group-hover:border-gray-300 text-sm sm:text-base"
                     placeholder="Describe tu juego de memoria..."></textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-semibold text-gray-700 mb-4">Tipo de tarjeta</label>
-                  <div class="space-y-3">
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-3">Tipo de tarjeta</label>
+                  <div class="space-y-2 sm:space-y-3">
                     <label
-                      class="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-300 transition-all duration-300"
+                      class="flex items-center p-2 sm:p-3 border-2 border-gray-200 rounded-lg sm:rounded-xl cursor-pointer hover:border-purple-300 transition-all duration-300 text-xs sm:text-sm"
                       [class.border-purple-500]="cardType === 'imagen-texto'"
                       [class.bg-purple-50]="cardType === 'imagen-texto'">
                       <input type="radio" name="cardType" value="imagen-texto" [(ngModel)]="cardType"
-                        class="w-5 h-5 border-gray-300 focus:ring-purple-500 text-purple-700"/>
-                      <span class="ml-3 text-sm font-medium text-gray-700">Imagen y Texto</span>
+                        class="w-4 h-4 sm:w-5 sm:h-5 border-gray-300 focus:ring-purple-500 text-purple-700"/>
+                      <span class="ml-2 sm:ml-3 font-medium text-gray-700">Imagen y Texto</span>
                     </label>
                     <label
-                      class="flex items-center p-3 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-purple-300 transition-all duration-300"
+                      class="flex items-center p-2 sm:p-3 border-2 border-gray-200 rounded-lg sm:rounded-xl cursor-pointer hover:border-purple-300 transition-all duration-300 text-xs sm:text-sm"
                       [class.border-purple-500]="cardType === 'imagenes'"
                       [class.bg-purple-50]="cardType === 'imagenes'">
                       <input type="radio" name="cardType" value="imagenes" [(ngModel)]="cardType"
-                        class="w-5 h-5 border-gray-300 focus:ring-purple-500 text-purple-700" />
-                      <span class="ml-3 text-sm font-medium text-gray-700">Solo Imágenes</span>
+                        class="w-4 h-4 sm:w-5 sm:h-5 border-gray-300 focus:ring-purple-500 text-purple-700" />
+                      <span class="ml-2 sm:ml-3 font-medium text-gray-700">Solo Imágenes</span>
                     </label>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- Pares de Tarjetas (Right Panel) -->
+          
+          <!-- Pares de Tarjetas (Right Panel) - Responsive -->
           <div class="flex-1">
-            <div class="bg-white rounded-2xl p-6 shadow-xl border border-gray-100 backdrop-blur-sm">
-              <div class="flex justify-between items-center mb-6">
+            <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg sm:shadow-xl border border-gray-100 backdrop-blur-sm">
+              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
                 <div class="flex items-center">
                   <div>
-                    <h2 class="text-2xl font-bold text-atzicay-purple-500"> Pares de Tarjetas
-                    </h2>
-                    <p class="text-gray-500 text-sm">
+                    <h2 class="text-xl sm:text-2xl font-bold text-atzicay-purple-500">Pares de Tarjetas</h2>
+                    <p class="text-gray-500 text-xs sm:text-sm">
                       {{ pairs.length }} pares creados
                     </p>
                   </div>
                 </div>
                 <button (click)="addPair()"
-                  class="bg-atzicay-bg-button hover:bg-atzicay-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer">
+                  class="bg-atzicay-bg-button hover:bg-atzicay-purple-700 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg cursor-pointer text-sm sm:text-base">
                   <span class="flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd"
                         d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
                         clip-rule="evenodd" />
@@ -112,42 +112,45 @@
                   </span>
                 </button>
               </div>
-              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6">
+              
+              <!-- Recommendation Box - Responsive -->
+              <div class="bg-gray-50 border border-gray-200 rounded-lg sm:rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
                 <div class="flex items-start">
-                  <svg class="w-5 h-5 text-gray-500 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 mt-0.5 mr-2 sm:mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd"
                       d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                       clip-rule="evenodd" />
                   </svg>
                   <div>
-                    <p class="text-sm font-medium text-gray-600">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600">
                       Recomendación
                     </p>
-                    <p class="text-sm text-gray-500 mt-1">
+                    <p class="text-xs sm:text-sm text-gray-500 mt-1">
                       Se recomienda crear al menos 6 pares de tarjetas para un
                       juego completo y entretenido.
                     </p>
                   </div>
                 </div>
               </div>
-              <!-- Pairs Container -->
-              <div class="space-y-6 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+              
+              <!-- Pairs Container - Responsive -->
+              <div class="space-y-4 sm:space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                 @for (pair of pairs; let i = $index; track $index) {
-                <div class="border-2 border-gray-200 rounded-2xl p-6 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg transition-all duration-300 animate-slide-up">
-                  <div class="flex justify-between items-center mb-4">
+                <div class="border-2 border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-gradient-to-r from-gray-50 to-white hover:shadow-md transition-all duration-300 animate-slide-up">
+                  <div class="flex justify-between items-center mb-3 sm:mb-4">
                     <div class="flex items-center">
                       <span
-                        class="bg-atzicay-bg-button text-white px-4 py-2 rounded-full text-sm font-bold">
+                        class="bg-atzicay-bg-button text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold">
                         Par {{ $index + 1 }}
                       </span>
-                      <div class="ml-3 text-xs text-gray-500">
+                      <div class="ml-2 sm:ml-3 text-xxs sm:text-xs text-gray-500">
                         <p>ID: {{ pair.id }}</p>
                       </div>
                     </div>
                     <button title="Eliminar Par" type="button" (click)="removePair($index)"
-                      class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-all duration-300 transform hover:scale-110"
+                      class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 sm:p-2 rounded-full transition-all duration-300 transform hover:scale-110"
                       [disabled]="pairs.length <= 1">
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                           d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                           clip-rule="evenodd" />
@@ -155,10 +158,10 @@
                     </button>
                   </div>
                   
-                  <!-- Grid adaptable según el tipo de carta -->
+                  <!-- Grid adaptable según el tipo de carta - Responsive -->
                   @if (cardType === 'imagenes') {
                     <!-- Modo: Solo Imágenes (Imagen - Imagen) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       <!-- Tarjeta 1 -->
                       <div class="relative">
                         <input type="file" 
@@ -167,34 +170,34 @@
                                (change)="onFileSelected($event, $index, 1)"
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                id="file-input-{{ $index }}-1">
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
                              [class.border-purple-500]="pair.card1?.imageUrl"
                              [class.bg-purple-50]="pair.card1?.imageUrl">
                           @if (pair.card1?.imageUrl) {
                             <div class="relative">
                               <img [src]="pair.card1?.imageUrl" 
                                    [alt]="'Imagen tarjeta 1 del par ' + ($index + 1)"
-                                   class="w-full h-48 object-cover">
+                                   class="w-full h-32 sm:h-40 md:h-48 object-cover">
                               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
                                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                                 </svg>
                               </div>
                             </div>
                           } @else {
-                            <div class="p-6 text-center h-48 flex flex-col items-center justify-center">
-                              <div class="text-gray-400 mb-3 group-hover:text-purple-500 transition-colors duration-300">
-                                <svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                            <div class="p-4 sm:p-6 text-center h-32 sm:h-40 md:h-48 flex flex-col items-center justify-center">
+                              <div class="text-gray-400 mb-2 sm:mb-3 group-hover:text-purple-500 transition-colors duration-300">
+                                <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                                   <path fill-rule="evenodd"
                                     d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
                                     clip-rule="evenodd" />
                                 </svg>
                               </div>
-                              <p class="text-sm text-gray-600 font-medium">Subir imagen</p>
-                              <p class="text-xs text-gray-400 mt-1">Máximo 1 MB</p>
+                              <p class="text-xs sm:text-sm text-gray-600 font-medium">Subir imagen</p>
+                              <p class="text-xxs sm:text-xs text-gray-400 mt-1">Máximo 1 MB</p>
                             </div>
                           }
-                          <span class="absolute top-2 right-2 bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-medium">
+                          <span class="absolute top-2 right-2 bg-purple-100 text-purple-700 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xxs sm:text-xs font-medium">
                             Tarjeta 1
                           </span>
                         </div>
@@ -208,34 +211,34 @@
                                (change)="onFileSelected($event, $index, 2)"
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                id="file-input-{{ $index }}-2">
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
                              [class.border-indigo-500]="pair.card2?.imageUrl"
                              [class.bg-indigo-50]="pair.card2?.imageUrl">
                           @if (pair.card2?.imageUrl) {
                             <div class="relative">
                               <img [src]="pair.card2?.imageUrl" 
                                    [alt]="'Imagen tarjeta 2 del par ' + ($index + 1)"
-                                   class="w-full h-48 object-cover">
+                                   class="w-full h-32 sm:h-40 md:h-48 object-cover">
                               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
                                   <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                                 </svg>
                               </div>
                             </div>
                           } @else {
-                            <div class="p-6 text-center h-48 flex flex-col items-center justify-center">
-                              <div class="text-gray-400 mb-3 group-hover:text-indigo-500 transition-colors duration-300">
-                                <svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                            <div class="p-4 sm:p-6 text-center h-32 sm:h-40 md:h-48 flex flex-col items-center justify-center">
+                              <div class="text-gray-400 mb-2 sm:mb-3 group-hover:text-indigo-500 transition-colors duration-300">
+                                <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                                   <path fill-rule="evenodd"
                                     d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
                                     clip-rule="evenodd" />
                                 </svg>
                               </div>
-                              <p class="text-sm text-gray-600 font-medium">Subir imagen</p>
-                              <p class="text-xs text-gray-400 mt-1">Máximo 1 MB</p>
+                              <p class="text-xs sm:text-sm text-gray-600 font-medium">Subir imagen</p>
+                              <p class="text-xxs sm:text-xs text-gray-400 mt-1">Máximo 1 MB</p>
                             </div>
                           }
-                          <span class="absolute top-2 right-2 bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
+                          <span class="absolute top-2 right-2 bg-indigo-100 text-indigo-700 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xxs sm:text-xs font-medium">
                             Tarjeta 2
                           </span>
                         </div>
@@ -243,9 +246,9 @@
                     </div>
                   } @else {
                     <!-- Modo: Imagen y Texto -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       <!-- Tarjeta 1: Imagen -->
-                      <div class="space-y-4">
+                      <div class="space-y-3 sm:space-y-4">
                         <div class="relative">
                           <input type="file" 
                                  #fileInput1
@@ -253,34 +256,34 @@
                                  (change)="onFileSelected($event, $index, 1)"
                                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                  id="file-input-{{ $index }}-1">
-                          <div class="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
+                          <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
                                [class.border-purple-500]="pair.card1?.imageUrl"
                                [class.bg-purple-50]="pair.card1?.imageUrl">
                             @if (pair.card1?.imageUrl) {
                               <div class="relative">
                                 <img [src]="pair.card1?.imageUrl" 
                                      [alt]="'Imagen del par ' + ($index + 1)"
-                                     class="w-full h-40 object-cover">
+                                     class="w-full h-28 sm:h-32 md:h-40 object-cover">
                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                                  <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                                  <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                                   </svg>
                                 </div>
                               </div>
                             } @else {
-                              <div class="p-6 text-center h-40 flex flex-col items-center justify-center">
-                                <div class="text-gray-400 mb-3 group-hover:text-purple-500 transition-colors duration-300">
-                                  <svg class="w-12 h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                              <div class="p-4 sm:p-6 text-center h-28 sm:h-32 md:h-40 flex flex-col items-center justify-center">
+                                <div class="text-gray-400 mb-2 sm:mb-3 group-hover:text-purple-500 transition-colors duration-300">
+                                  <svg class="w-10 h-10 sm:w-12 sm:h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                       d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
                                       clip-rule="evenodd" />
                                   </svg>
                                 </div>
-                                <p class="text-sm text-gray-600 font-medium">Subir imagen</p>
-                                <p class="text-xs text-gray-400 mt-1">Máximo 1 MB</p>
+                                <p class="text-xs sm:text-sm text-gray-600 font-medium">Subir imagen</p>
+                                <p class="text-xxs sm:text-xs text-gray-400 mt-1">Máximo 1 MB</p>
                               </div>
                             }
-                            <span class="absolute top-2 right-2 bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-medium">
+                            <span class="absolute top-2 right-2 bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xxs sm:text-xs font-medium">
                               Imagen
                             </span>
                           </div>
@@ -288,13 +291,13 @@
                       </div>
                       
                       <!-- Tarjeta 2: Texto -->
-                      <div class="space-y-4">
-                        <div class="border-2 border-gray-300 rounded-xl p-4 hover:border-indigo-400 transition-all duration-300"
+                      <div class="space-y-3 sm:space-y-4">
+                        <div class="border-2 border-gray-300 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-indigo-400 transition-all duration-300 relative"
                              [class.border-indigo-500]="pair.card1?.text?.trim()"
                              [class.bg-indigo-50]="pair.card1?.text?.trim()">
-                          <label class="block text-sm font-medium text-gray-700 mb-3">
+                          <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
                             <span class="flex items-center">
-                              <svg class="w-4 h-4 mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
+                              <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
                                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
                               </svg>
@@ -303,14 +306,14 @@
                           </label>
                           <textarea [(ngModel)]="pair.card1!.text"
                                     rows="4"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-none"
+                                    class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-none text-xs sm:text-sm"
                                     placeholder="Escribe el texto que acompañará a la imagen..."
                                     maxlength="100"></textarea>
-                          <div class="flex justify-between items-center mt-2">
-                            <span class="text-xs text-gray-400">Máximo 100 caracteres</span>
-                            <span class="text-xs text-gray-500">{{ (pair.card1?.text || '').length }}/100</span>
+                          <div class="flex justify-between items-center mt-1 sm:mt-2">
+                            <span class="text-xxs sm:text-xs text-gray-400">Máximo 100 caracteres</span>
+                            <span class="text-xxs sm:text-xs text-gray-500">{{ (pair.card1?.text || '').length }}/100</span>
                           </div>
-                          <span class="absolute top-2 right-2 bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs font-medium">
+                          <span class="absolute top-2 right-2 bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xxs sm:text-xs font-medium">
                             Texto
                           </span>
                         </div>
@@ -325,24 +328,25 @@
         </div>
       </div>
       }
-      <!-- Configuración Tab -->
+      
+      <!-- Configuración Tab - Responsive -->
       @if (activeTab === 'configuracion') {
       <div class="animate-fade-in">
-        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 backdrop-blur-sm max-w-4xl mx-auto">
-          <div class="text-center mb-8">
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">
+        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg sm:shadow-xl border border-gray-100 backdrop-blur-sm max-w-4xl mx-auto">
+          <div class="text-center mb-6 sm:mb-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">
               Configuración del Juego
             </h2>
-            <p class="text-gray-600">Personaliza la experiencia de juego</p>
+            <p class="text-gray-600 text-sm sm:text-base">Personaliza la experiencia de juego</p>
           </div>
           
-          <form class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-6">
+          <form class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            <div class="space-y-4 sm:space-y-6">
               <!-- Tipo de Letra -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo de Letra</label>
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Tipo de Letra</label>
                 <select [(ngModel)]="gameSettings.font" name="font"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300">
+                  class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 text-sm sm:text-base">
                   <option value="Arial">Arial</option>
                   <option value="Helvetica">Helvetica</option>
                   <option value="Times New Roman">Times New Roman</option>
@@ -356,9 +360,9 @@
 
               <!-- Dificultad -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Dificultad</label>
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Dificultad</label>
                 <select [(ngModel)]="gameSettings.difficulty" name="difficulty"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300">
+                  class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 text-sm sm:text-base">
                   <option value="facil">Fácil</option>
                   <option value="medio">Medio</option>
                   <option value="dificil">Difícil</option>
@@ -367,99 +371,100 @@
 
               <!-- Mensaje de Éxito -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Mensaje de Éxito</label>
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Mensaje de Éxito</label>
                 <input type="text" [(ngModel)]="gameSettings.successMessage" name="successMessage"
                   placeholder="¡Excelente trabajo!"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300" />
+                  class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 text-sm sm:text-base" />
               </div>
 
               <!-- Mensaje de Fracaso -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Mensaje de Fracaso</label>
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Mensaje de Fracaso</label>
                 <input type="text" [(ngModel)]="gameSettings.failureMessage" name="failureMessage"
                   placeholder="¡Inténtalo de nuevo!"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300" />
+                  class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 text-sm sm:text-base" />
               </div>
             </div>
 
-            <div class="space-y-6">
-              <!-- Colores -->
-              <div class="flex items-center justify-around gap-6">
+            <div class="space-y-4 sm:space-y-6">
+              <!-- Colores - Responsive -->
+              <div class="flex flex-col xs:flex-row items-center justify-around gap-4 sm:gap-6">
                 <div class="text-center">
-                  <label class="block text-sm font-semibold text-gray-700 mb-3">Color de Letra</label>
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Color de Letra</label>
                   <input type="color" [(ngModel)]="gameSettings.fontColor" name="fontColor"
-                    class="w-16 h-16 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 cursor-pointer" />
+                    class="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 cursor-pointer" />
                 </div>
 
                 <div class="text-center">
-                  <label class="block text-sm font-semibold text-gray-700 mb-3">Color de Fondo</label>
+                  <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Color de Fondo</label>
                   <input type="color" [(ngModel)]="gameSettings.backgroundColor" name="backgroundColor"
-                    class="w-16 h-16 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 cursor-pointer" />
+                    class="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 cursor-pointer" />
                 </div>
               </div>
 
               <!-- Visibilidad del Juego -->
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Visibilidad del Juego</label>
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Visibilidad del Juego</label>
                 <select [(ngModel)]="gameSettings.visibility" name="visibility"
-                  class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300">
+                  class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 text-xs sm:text-sm">
                   <option value="P">Público - Otros usuarios pueden usar este juego</option>
                   <option value="R">Restringido - Solo tú puedes usar este juego</option>
                 </select>
               </div>
-        
             </div>
           </form>
         </div>
       </div>
       }
-      <!-- Vista Previa Tab -->
+      
+      <!-- Vista Previa Tab - Responsive -->
       @if (activeTab === 'vista-previa') {
       <div class="animate-fade-in">
-        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 backdrop-blur-sm max-w-6xl mx-auto">
-          <div class="text-center mb-8">
-            <div class="bg-gradient-to-r from-purple-500 to-indigo-500 p-4 rounded-full w-16 h-16 mx-auto mb-4">
-              <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <div class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-lg sm:shadow-xl border border-gray-100 backdrop-blur-sm max-w-6xl mx-auto">
+          <div class="text-center mb-6 sm:mb-8">
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-500 p-3 sm:p-4 rounded-full w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 mx-auto mb-3 sm:mb-4">
+              <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd"
                   d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
                   clip-rule="evenodd" />
               </svg>
             </div>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">
               Vista Previa del Juego
             </h2>
-            <p class="text-gray-600">Así se verá tu juego de memoria</p>
+            <p class="text-gray-600 text-sm sm:text-base">Así se verá tu juego de memoria</p>
           </div>
-          <div class="bg-gray-50 rounded-xl p-8 min-h-96">
+          
+          <div class="bg-gray-50 rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 min-h-[300px] sm:min-h-[400px]">
             @if (completedPairs > 0) {
-              <!-- Estadísticas del juego -->
-              <div class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-white rounded-lg p-4 text-center shadow-sm">
-                  <div class="text-2xl font-bold text-purple-600">{{ totalPairs }}</div>
-                  <div class="text-sm text-gray-600">Total de pares</div>
+              <!-- Estadísticas del juego - Responsive -->
+              <div class="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                <div class="bg-white rounded-md sm:rounded-lg p-3 sm:p-4 text-center shadow-xs sm:shadow-sm">
+                  <div class="text-xl sm:text-2xl font-bold text-purple-600">{{ totalPairs }}</div>
+                  <div class="text-xs sm:text-sm text-gray-600">Total de pares</div>
                 </div>
-                <div class="bg-white rounded-lg p-4 text-center shadow-sm">
-                  <div class="text-2xl font-bold text-green-600">{{ completedPairs }}</div>
-                  <div class="text-sm text-gray-600">Pares completos</div>
+                <div class="bg-white rounded-md sm:rounded-lg p-3 sm:p-4 text-center shadow-xs sm:shadow-sm">
+                  <div class="text-xl sm:text-2xl font-bold text-green-600">{{ completedPairs }}</div>
+                  <div class="text-xs sm:text-sm text-gray-600">Pares completos</div>
                 </div>
-                <div class="bg-white rounded-lg p-4 text-center shadow-sm">
-                  <div class="text-2xl font-bold text-blue-600">{{ gameSettings.difficulty }}</div>
-                  <div class="text-sm text-gray-600">Dificultad</div>
+                <div class="bg-white rounded-md sm:rounded-lg p-3 sm:p-4 text-center shadow-xs sm:shadow-sm">
+                  <div class="text-xl sm:text-2xl font-bold text-blue-600">{{ gameSettings.difficulty }}</div>
+                  <div class="text-xs sm:text-sm text-gray-600">Dificultad</div>
                 </div>
               </div>
               
-              <!-- Preview de las tarjetas -->
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <!-- Preview de las tarjetas - Responsive -->
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
                 @for (pair of pairs.slice(0, 6); let i = $index; track $index) {
                   <!-- Tarjeta 1 -->
-                  <div class="bg-white rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow duration-300">
+                  <div class="bg-white rounded-md sm:rounded-lg p-2 sm:p-3 shadow-xs sm:shadow-md hover:shadow-sm sm:hover:shadow-lg transition-shadow duration-300">
                     @if (cardType === 'imagenes') {
                       @if (pair.card1?.imageUrl) {
                         <img [src]="pair.card1!.imageUrl" [alt]="'Preview imagen ' + (i + 1)" 
-                             class="w-full h-20 object-cover rounded-lg mb-2">
+                             class="w-full h-16 sm:h-20 object-cover rounded-md sm:rounded-lg mb-1 sm:mb-2">
                       } @else {
-                        <div class="w-full h-20 bg-gray-200 rounded-lg mb-2 flex items-center justify-center">
-                          <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-full h-16 sm:h-20 bg-gray-200 rounded-md sm:rounded-lg mb-1 sm:mb-2 flex items-center justify-center">
+                          <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
                           </svg>
                         </div>
@@ -467,54 +472,54 @@
                     } @else {
                       @if (pair.card1?.imageUrl) {
                         <img [src]="pair.card1!.imageUrl" [alt]="'Preview imagen ' + (i + 1)" 
-                             class="w-full h-16 object-cover rounded-lg mb-2">
-                        <p class="text-xs text-gray-600 truncate">{{ pair.card1?.text || 'Sin texto' }}</p>
+                             class="w-full h-14 sm:h-16 object-cover rounded-md sm:rounded-lg mb-1 sm:mb-2">
+                        <p class="text-xxs sm:text-xs text-gray-600 truncate">{{ pair.card1?.text || 'Sin texto' }}</p>
                       } @else {
-                        <div class="w-full h-16 bg-gray-200 rounded-lg mb-2 flex items-center justify-center">
-                          <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-full h-14 sm:h-16 bg-gray-200 rounded-md sm:rounded-lg mb-1 sm:mb-2 flex items-center justify-center">
+                          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
                           </svg>
                         </div>
-                        <p class="text-xs text-gray-600 truncate">{{ pair.card1?.text || 'Sin texto' }}</p>
+                        <p class="text-xxs sm:text-xs text-gray-600 truncate">{{ pair.card1?.text || 'Sin texto' }}</p>
                       }
                     }
-                    <div class="text-xs text-center text-purple-600 font-medium">Par {{ i + 1 }}</div>
+                    <div class="text-xxs sm:text-xs text-center text-purple-600 font-medium">Par {{ i + 1 }}</div>
                   </div>
                   
                   <!-- Tarjeta 2 (solo para modo imagen-imagen) -->
                   @if (cardType === 'imagenes') {
-                    <div class="bg-white rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div class="bg-white rounded-md sm:rounded-lg p-2 sm:p-3 shadow-xs sm:shadow-md hover:shadow-sm sm:hover:shadow-lg transition-shadow duration-300">
                       @if (pair.card2?.imageUrl) {
                         <img [src]="pair.card2!.imageUrl" [alt]="'Preview imagen ' + (i + 1) + ' B'" 
-                             class="w-full h-20 object-cover rounded-lg mb-2">
+                             class="w-full h-16 sm:h-20 object-cover rounded-md sm:rounded-lg mb-1 sm:mb-2">
                       } @else {
-                        <div class="w-full h-20 bg-gray-200 rounded-lg mb-2 flex items-center justify-center">
-                          <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="w-full h-16 sm:h-20 bg-gray-200 rounded-md sm:rounded-lg mb-1 sm:mb-2 flex items-center justify-center">
+                          <svg class="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
                           </svg>
                         </div>
                       }
-                      <div class="text-xs text-center text-indigo-600 font-medium">Par {{ i + 1 }}</div>
+                      <div class="text-xxs sm:text-xs text-center text-indigo-600 font-medium">Par {{ i + 1 }}</div>
                     </div>
                   }
                 }
               </div>
               
               @if (pairs.length > 6) {
-                <div class="text-center mt-4 text-gray-500 text-sm">
+                <div class="text-center mt-3 sm:mt-4 text-gray-500 text-xs sm:text-sm">
                   Y {{ pairs.length - 6 }} pares más...
                 </div>
               }
             } @else {
               <div class="flex items-center justify-center h-full">
                 <div class="text-center">
-                  <svg class="w-24 h-24 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
+                  <svg class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-gray-400 mx-auto mb-3 sm:mb-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a2 2 0 100-4 2 2 0 000 4zm8 0a2 2 0 100-4 2 2 0 000 4z"/>
                   </svg>
-                  <h3 class="text-xl font-semibold text-gray-700 mb-2">
+                  <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-1 sm:mb-2">
                     Vista Previa del Juego
                   </h3>
-                  <p class="text-gray-500">
+                  <p class="text-gray-500 text-xs sm:text-sm">
                     Agrega algunos pares de tarjetas para ver la vista previa
                   </p>
                 </div>

@@ -8,26 +8,91 @@
     <app-juegos-header></app-juegos-header>
     <app-juegos-categorias></app-juegos-categorias>
 
-    <div class="flex-shrink-0 sticky top-0 z-40 bg-atzicay-bg">
-      <div class="flex items-center gap-4 px-4 pt-2 pb-2"> <!-- pt-2 pb-2 para menos espacio vertical -->
-        <app-juegos-tabs
-          [tabActiva]="activeTab"
-          (tabChanged)="cambiarVista($event)"
-        ></app-juegos-tabs>
-        <ng-container *ngIf="activeTab === 'misJuegos'">
-          <app-atzicay-tabs
-            [tabs]="filtroTabs"
-            [activeTab]="filtroSeleccionado"
-            (tabChanged)="actualizarFiltro($event)"
-            [size]="'sm'"
-            [gap]="'sm'"
-            [padding]="'sm'"
-          ></app-atzicay-tabs>
-        </ng-container>
+    <div class="flex-shrink-0 bg-atzicay-bg">
+      <div class="px-2 sm:px-4 pt-2 pb-2">
+        
+        <!-- Vista móvil: Todo en dropdowns -->
+        <div class="flex sm:hidden flex-col gap-2">
+          <!-- Tabs principales en móvil -->
+          <div class="w-full">
+            <app-juegos-tabs
+              [tabActiva]="activeTab"
+              (tabChanged)="cambiarVista($event)"
+            ></app-juegos-tabs>
+          </div>
+          
+          <!-- Filtros cuando está en misJuegos en móvil -->
+          <ng-container *ngIf="activeTab === 'misJuegos'">
+            <div class="w-full">
+              <div class="relative">
+                <button
+                  (click)="toggleMobileFilters()"
+                  class="w-full flex items-center justify-between bg-[#E5D8F2] rounded-lg p-3 text-sm font-medium text-gray-700"
+                >
+                  <span>{{ getCurrentFilterLabel() }}</span>
+                  <svg 
+                    class="w-4 h-4 transition-transform duration-200"
+                    [class.rotate-180]="mobileFiltersOpen"
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                
+                <!-- Dropdown menu -->
+                <div 
+                  *ngIf="mobileFiltersOpen"
+                  class="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden"
+                >
+                  <div class="py-1">
+                    <button
+                      *ngFor="let tab of filtroTabs"
+                      (click)="selectMobileFilter(tab.id)"
+                      class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
+                      [class.bg-purple-50]="filtroSeleccionado === tab.id"
+                      [class.text-purple-700]="filtroSeleccionado === tab.id"
+                      [class.font-medium]="filtroSeleccionado === tab.id"
+                    >
+                      {{ tab.label }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Vista desktop: Tabs y filtros en la misma fila -->
+        <div class="hidden sm:flex items-center gap-4">
+          <!-- Tabs principales -->
+          <div class="flex-shrink-0">
+            <app-juegos-tabs
+              [tabActiva]="activeTab"
+              (tabChanged)="cambiarVista($event)"
+            ></app-juegos-tabs>
+          </div>
+          
+          <!-- Filtros cuando está en misJuegos -->
+          <ng-container *ngIf="activeTab === 'misJuegos'">
+            <div class="flex-1">
+              <app-atzicay-tabs
+                [tabs]="filtroTabs"
+                [activeTab]="filtroSeleccionado"
+                (tabChanged)="actualizarFiltro($event)"
+                [size]="'sm'"
+                [gap]="'sm'"
+                [padding]="'sm'"
+              ></app-atzicay-tabs>
+            </div>
+          </ng-container>
+        </div>
+        
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto juegos-scrollbar" style="height: calc(100vh - 200px);">
+    <div class="flex-1 overflow-y-auto juegos-scrollbar" style="height: calc(100vh - 140px);">
       @switch (activeTab) { @case ('misJuegos') {
       <app-juegos-lista [filtroActual]="filtroSeleccionado"></app-juegos-lista>
       } @case ('misProgramaciones') {

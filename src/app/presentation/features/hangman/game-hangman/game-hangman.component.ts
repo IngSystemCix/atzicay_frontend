@@ -7,8 +7,8 @@ import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared
 import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructure/service/game-alert.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
-import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
+import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 
 interface JuegoState {
   palabraActual: string;
@@ -38,7 +38,7 @@ interface JuegoState {
   totalPalabras: number;
   contadorCambio: number;
   intervaloContador: any;
-  userAssessed: boolean; // Nueva propiedad para controlar valoración
+  userAssessed: boolean; 
 }
 
 @Component({

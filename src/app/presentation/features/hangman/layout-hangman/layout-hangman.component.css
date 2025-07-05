@@ -1,4 +1,4 @@
-/* Scroll solo si el contenido excede el alto de la página */
+/* Scroll only if content exceeds page height */
 .layout-hangman-scroll {
   max-height: 100vh;
   overflow-y: auto;
@@ -15,4 +15,28 @@
 .layout-hangman-scroll {
   scrollbar-width: thin;
   scrollbar-color: var(--color-atzicay-purple-500) transparent;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .layout-hangman-scroll {
+    padding: 0.5rem;
+  }
+  
+  /* Make form inputs more compact on mobile */
+  input, textarea, select {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Adjust button sizes */
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Reduce margins on mobile */
+  .mb-4, .mb-6 {
+    margin-bottom: 0.75rem;
+  }
 }

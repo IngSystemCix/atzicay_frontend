@@ -1,8 +1,8 @@
-<div class="bg-[#E5D8F2] rounded-lg p-2 flex flex-wrap w-fit gap-x-2">
+<div class="bg-[#E5D8F2] rounded-lg p-1 sm:p-2 flex w-full sm:w-fit gap-x-1 sm:gap-x-2">
   @for (tab of tabs; track tab.id) {
     <button
       (click)="cambiarTab(tab.id)"
-      class="px-6 py-2 rounded-lg font-medium transition-colors"
+      class="px-3 sm:px-6 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base flex-1 sm:flex-none"
       [class]="tabActiva === tab.id ? 'bg-atzicay-bg-button text-white' : 'text-gray-700 hover:bg-gray-100'">
       {{ tab.nombre }}
     </button>

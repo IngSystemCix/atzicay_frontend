@@ -1,16 +1,16 @@
-<!-- Botón mejorado -->
-<div #triggerBtn>
+<!-- Botón responsivo -->
+<div #triggerBtn class="w-full">
   <button
     (click)="toggle()"
-    class="btn-atzicay text-white px-8 py-3.5 rounded-2xl transition-all duration-300 flex items-center hover:shadow-xl cursor-pointer active:scale-95 font-semibold shadow-lg min-w-[160px] justify-center group relative overflow-hidden"
+    class="btn-atzicay text-white px-4 sm:px-8 py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center hover:shadow-xl cursor-pointer active:scale-95 font-semibold shadow-lg w-full lg:w-auto lg:min-w-[160px] group relative overflow-hidden"
   >
     <!-- Efecto de brillo de fondo -->
     <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
     
-    <!-- Icono de filtro mejorado -->
+    <!-- Icono de filtro responsivo -->
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      class="h-5 w-5 mr-3 transition-all duration-300 group-hover:scale-110"
+      class="h-5 w-5 mr-2 sm:mr-3 transition-all duration-300 group-hover:scale-110 flex-shrink-0"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -30,7 +30,7 @@
     
     <!-- Icono de flecha -->
     <svg
-      class="h-4 w-4 ml-2 transition-all duration-300 group-hover:translate-x-1"
+      class="h-4 w-4 ml-2 transition-all duration-300 group-hover:translate-x-1 flex-shrink-0"
       [class.rotate-180]="isOpen"
       fill="none"
       viewBox="0 0 24 24"

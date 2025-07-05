@@ -20,3 +20,44 @@
   min-height: 0; /* Permite que flexbox funcione correctamente */
 }
 
+/* Estilos responsivos adicionales */
+@media (max-width: 640px) {
+  .juegos-scrollbar {
+    height: calc(100vh - 120px) !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .juegos-scrollbar {
+    height: calc(100vh - 130px) !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .juegos-scrollbar {
+    height: calc(100vh - 140px) !important;
+  }
+}
+
+/* Mejoras para touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .juegos-scrollbar {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: auto;
+  }
+}
+
+/* Asegurar que los elementos sticky funcionen correctamente en móvil */
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+/* Mejoras de accesibilidad para dispositivos táctiles */
+@media (max-width: 640px) {
+  button, .cursor-pointer {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+

@@ -34,6 +34,7 @@ export class JuegosComponent implements OnInit, OnDestroy {
   filtroSeleccionado: string = 'all';
   gameIdSeleccionado: number | null = null;
   isLoading: boolean = false;
+  mobileFiltersOpen: boolean = false;
 
   filtroTabs: AtzicayTab<string>[] = [
     { id: 'all', label: 'Todos' },
@@ -55,10 +56,14 @@ export class JuegosComponent implements OnInit, OnDestroy {
         }
       })
     );
+
+    // Cerrar dropdown móvil al hacer click fuera
+    document.addEventListener('click', this.handleClickOutside.bind(this));
   }
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    document.removeEventListener('click', this.handleClickOutside.bind(this));
   }
 
   private initializeComponent(): void {
@@ -88,5 +93,26 @@ export class JuegosComponent implements OnInit, OnDestroy {
 
   actualizarFiltro(filtro: string) {
     this.filtroSeleccionado = filtro;
+  }
+
+  toggleMobileFilters() {
+    this.mobileFiltersOpen = !this.mobileFiltersOpen;
+  }
+
+  selectMobileFilter(filtroId: string) {
+    this.filtroSeleccionado = filtroId;
+    this.mobileFiltersOpen = false;
+  }
+
+  getCurrentFilterLabel(): string {
+    const currentFilter = this.filtroTabs.find(tab => tab.id === this.filtroSeleccionado);
+    return currentFilter ? currentFilter.label : 'Todos';
+  }
+
+  handleClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.relative')) {
+      this.mobileFiltersOpen = false;
+    }
   }
 }

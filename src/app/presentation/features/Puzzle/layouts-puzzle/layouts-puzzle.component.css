@@ -1,18 +1,18 @@
 /* Estilos para el puzzle preview */
 .puzzle-grid {
-  max-width: 400px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
 .puzzle-piece {
   aspect-ratio: 1;
-  min-height: 40px;
+  min-height: 30px;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .puzzle-piece:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
   position: relative;
 }
@@ -40,19 +40,9 @@
 }
 
 /* Responsividad para el grid del puzzle */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .puzzle-grid {
-    max-width: 300px;
-  }
-  
-  .puzzle-piece {
-    min-height: 30px;
-  }
-}
-
-@media (max-width: 480px) {
-  .puzzle-grid {
-    max-width: 250px;
+    max-width: 100%;
   }
   
   .puzzle-piece {
@@ -91,5 +81,34 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Custom scrollbar for tabs on mobile */
+@media (max-width: 640px) {
+  .tabs-container {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .tabs-container::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+}
+
+/* Adjust form elements for mobile */
+@media (max-width: 640px) {
+  input, textarea, select {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .mb-4, .mb-6 {
+    margin-bottom: 0.75rem;
   }
 }

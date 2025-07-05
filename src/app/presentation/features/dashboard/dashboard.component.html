@@ -9,163 +9,178 @@
       </p>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-6 max-w-4xl mx-auto">
-      <div class="relative flex-1">
-        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
-          <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-        <div class="w-full flex items-center justify-center space-x-3">
+    <!-- Layout responsivo: columna en móvil/tablet, fila en desktop -->
+    <div class="flex flex-col lg:flex-row gap-4 lg:gap-6 max-w-4xl mx-auto px-4 sm:px-0">
+      
+      <!-- Contenedor del buscador y botón de buscar -->
+      <div class="flex flex-col sm:flex-row gap-3 lg:flex-1">
+        <!-- Buscador -->
+        <div class="relative w-full lg:flex-1">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
           <label for="searchInput" class="sr-only">Buscar juegos</label>
           <input id="searchInput" type="search" [(ngModel)]="searchTerm"
             (input)="onSearchTermChange()"
             class="w-full pl-12 pr-5 py-3.5 border-2 border-gray-200/60 rounded-2xl focus:outline-none focus:ring-3 focus:ring-atzicay-purple-500/30 focus:border-atzicay-purple-500 transition-all duration-300 shadow-sm hover:shadow-md bg-white/90 backdrop-blur-sm text-gray-800 placeholder-gray-500"
             placeholder="¿Qué juego buscas hoy?" title="Buscar juegos" aria-label="Buscar juegos" />
-          <button
-            class="cursor-pointer btn-atzicay text-white px-8 py-3.5 rounded-2xl transition-all duration-300 flex items-center hover:scale-105 hover:shadow-lg active:scale-95 font-semibold shadow-md"
-            (click)="applyFilters()">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            Buscar
-          </button>
         </div>
+
+        <!-- Botón de buscar -->
+        <button
+          class="cursor-pointer btn-atzicay text-white px-8 py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center hover:scale-105 hover:shadow-lg active:scale-95 font-semibold shadow-md w-full sm:w-auto lg:w-auto"
+          (click)="applyFilters()">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          Buscar
+        </button>
       </div>
 
       <!-- Componente de Filtros -->
-      <app-filter-dropdown 
-        [gameTypes]="gameTypes"
-        [selectedType]="selectedType"
-        (selectedTypeChange)="onSelectedTypeChange($event)"
-        (closed)="onFilterDropdownClosed()">
-      </app-filter-dropdown>
+      <div class="w-full sm:w-full lg:w-auto">
+        <app-filter-dropdown 
+          [gameTypes]="gameTypes"
+          [selectedType]="selectedType"
+          (selectedTypeChange)="onSelectedTypeChange($event)"
+          (closed)="onFilterDropdownClosed()">
+        </app-filter-dropdown>
+      </div>
     </div>
 
-    <!-- Filtros activos mejorados -->
+    <!-- Filtros activos responsivos -->
     <ng-container *ngIf="selectedType !== null || selectedLevels.length > 0">
-      <div class="mt-8 flex flex-wrap gap-3 justify-center">
-        <ng-container *ngIf="selectedType !== null">
-          <div
-            class="bg-gradient-to-r from-atzicay-purple-100 to-atzicay-purple-50 text-atzicay-purple-800 text-sm px-5 py-2.5 rounded-full flex items-center transition-all duration-300 hover:shadow-md border border-atzicay-purple-200/50 font-medium">
-            <span class="mr-2">🎮</span>
-            {{ getTypeLabel(selectedType!) }}
-            <button title="Remover filtro" (click)="removeTypeFilter(selectedType!)"
-              class="ml-3 text-atzicay-purple-500 hover:text-atzicay-purple-700 transition-colors duration-200 p-1 rounded-full hover:bg-atzicay-purple-200/50">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clip-rule="evenodd" />
-              </svg>
-            </button>
-          </div>
-        </ng-container>
-        <ng-container *ngFor="let level of selectedLevels">
-          <div
-            class="bg-gradient-to-r from-atzicay-blue-100 to-atzicay-blue-50 text-atzicay-blue-800 text-sm px-5 py-2.5 rounded-full flex items-center transition-all duration-300 hover:shadow-md border border-atzicay-blue-200/50 font-medium">
-            <span class="mr-2">⭐</span>
-            {{ getLevelLabel(level) }}
-            <button title="Remover filtro" (click)="removeLevelFilter(level)"
-              class="ml-3 text-atzicay-blue-500 hover:text-atzicay-blue-700 transition-colors duration-200 p-1 rounded-full hover:bg-atzicay-blue-200/50">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clip-rule="evenodd" />
-              </svg>
-            </button>
-          </div>
-        </ng-container>
+      <div class="mt-6 px-4 sm:px-0">
+        <div class="flex flex-wrap gap-2 sm:gap-3 justify-start sm:justify-center">
+          <ng-container *ngIf="selectedType !== null">
+            <div
+              class="bg-gradient-to-r from-atzicay-purple-100 to-atzicay-purple-50 text-atzicay-purple-800 text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-full flex items-center transition-all duration-300 hover:shadow-md border border-atzicay-purple-200/50 font-medium">
+              <span class="mr-1 sm:mr-2">🎮</span>
+              <span class="truncate max-w-24 sm:max-w-none">{{ getTypeLabel(selectedType!) }}</span>
+              <button title="Remover filtro" (click)="removeTypeFilter(selectedType!)"
+                class="ml-2 sm:ml-3 text-atzicay-purple-500 hover:text-atzicay-purple-700 transition-colors duration-200 p-1 rounded-full hover:bg-atzicay-purple-200/50 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </ng-container>
+          <ng-container *ngFor="let level of selectedLevels">
+            <div
+              class="bg-gradient-to-r from-atzicay-blue-100 to-atzicay-blue-50 text-atzicay-blue-800 text-xs sm:text-sm px-3 sm:px-5 py-2 sm:py-2.5 rounded-full flex items-center transition-all duration-300 hover:shadow-md border border-atzicay-blue-200/50 font-medium">
+              <span class="mr-1 sm:mr-2">⭐</span>
+              <span class="truncate max-w-20 sm:max-w-none">{{ getLevelLabel(level) }}</span>
+              <button title="Remover filtro" (click)="removeLevelFilter(level)"
+                class="ml-2 sm:ml-3 text-atzicay-blue-500 hover:text-atzicay-blue-700 transition-colors duration-200 p-1 rounded-full hover:bg-atzicay-blue-200/50 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </ng-container>
+        </div>
       </div>
     </ng-container>
   </div>
 
-  <div class="dashboard-scroll-content h-[calc(100vh-240px)] overflow-y-auto relative">
-    <div class="dashboard-responsive-grid gap-8 p-6 max-w-full w-full m-0">
+  <div class="dashboard-scroll-content h-[calc(100vh-280px)] overflow-y-auto relative">
+    <!-- Grid responsivo para las cards (máximo 3 columnas) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 max-w-full w-full m-0">
       @for (game of displayedGames; track game.game_instance_id) { @defer {
       <div
-        class="bg-white backdrop-blur-sm rounded-3xl h-[540px] shadow-md overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-atzicay-purple-500/10 flex flex-col group border border-gray-100/50 hover:border-atzicay-purple-200/50 hover:bg-white">
+        class="bg-white backdrop-blur-sm rounded-3xl h-[480px] sm:h-[520px] lg:h-[540px] shadow-md overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-atzicay-purple-500/10 flex flex-col group hover:border-atzicay-purple-200/50 hover:bg-white w-full">
         <div
-          class="h-72 bg-gradient-to-br from-gray-50 to-gray-100 flex justify-center items-center relative shrink-0 rounded-t-3xl">
+          class="h-48 sm:h-56 lg:h-72 flex justify-center items-center relative shrink-0 rounded-t-3xl overflow-hidden"
+          [style.background-color]="getGameBackgroundColor(game.type_game)">
+          <!-- Imagen principal adaptativa -->
           <img [src]="getGameImage(game.type_game)" alt="Game Image"
-            class="w-full h-full object-cover object-center transition-all duration-500 rounded-t-3xl overflow-hidden" />
+            class="w-full h-full object-cover sm:object-contain transition-all duration-500" />
           <!-- Overlay gradient mejorado -->
           <div
-            class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
+            class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
           </div>
 
-          <!-- Botón de menú mejorado -->
+          <!-- Botón de menú responsivo -->
           <button title="Opciones del juego" (click)="dropdownToggle(game.game_instance_id)"
-            class="absolute top-4 right-4 p-2 rounded-2xl bg-white/90 cursor-pointer hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-md border border-white/50 hover:scale-110">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24"
+            class="absolute top-2 sm:top-4 right-2 sm:right-4 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl bg-white/90 cursor-pointer hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-md border border-white/50 hover:scale-110 z-30">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 text-gray-700" fill="none" viewBox="0 0 24 24"
               stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
             </svg>
           </button>
 
-          <!-- Badge del autor mejorado -->
+          <!-- Badge del autor responsivo - en la posición original pero con mejor z-index -->
           <button title="Buscar juegos de {{ game.author }}" (click)="filterByAuthor(game.author)"
-            class="absolute bottom-4 right-4 bg-black/40 text-white text-sm px-4 py-2 rounded-2xl backdrop-blur-md border border-white/20 font-medium cursor-pointer hover:bg-black/60 hover:scale-105 transition-all duration-300 hover:shadow-lg">
-            👨‍💻 {{ game.author }}
+            class="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 bg-black/50 text-white text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl backdrop-blur-md border border-white/20 font-medium cursor-pointer hover:bg-black/70 hover:scale-105 transition-all duration-300 hover:shadow-lg z-30">
+            <span class="hidden sm:inline">👨‍💻 </span>{{ game.author }}
           </button>
 
           <!-- Dropdown mejorado -->
           <div [class.hidden]="!isDropdownActive(game.game_instance_id)" class="game-card-dropdown">
             <a href="#"
-              class="flex items-center px-5 py-3 text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 rounded-lg mx-2 font-medium">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-atzicay-purple-500" fill="none"
+              class="flex items-center px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 rounded-lg mx-2 font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-2 sm:mr-3 text-atzicay-purple-500" fill="none"
                 viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
-              Programar Juego
+              <span class="hidden sm:inline">Programar Juego</span>
+              <span class="sm:hidden">Programar</span>
             </a>
             <a href="#"
-              class="flex items-center px-5 py-3 text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 rounded-lg mx-2 font-medium">
-              <i class="bi bi-plus-circle-dotted mr-3 text-atzicay-purple-500"></i>
-              Nuevo Juego plantilla
+              class="flex items-center px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm text-atzicay-dropdown-text hover:bg-atzicay-purple-50/70 transition-all duration-200 rounded-lg mx-2 font-medium">
+              <i class="bi bi-plus-circle-dotted mr-2 sm:mr-3 text-atzicay-purple-500"></i>
+              <span class="hidden sm:inline">Nuevo Juego plantilla</span>
+              <span class="sm:hidden">Nuevo</span>
             </a>
           </div>
         </div>
 
-        <!-- Contenido de la card mejorado -->
-        <div class="p-4 flex flex-col flex-grow overflow-hidden bg-white rounded-2xl">
-          <div class="flex justify-between items-start mb-4" style="min-height: 56px; max-height: 56px;">
+        <!-- Contenido de la card responsivo -->
+        <div class="p-3 sm:p-4 flex flex-col flex-grow overflow-hidden bg-white rounded-2xl">
+          <div class="flex justify-between items-start mb-3 sm:mb-4" style="min-height: 48px; max-height: 64px;">
             <h3
-              class="text-atzicay-purple-500 text-xl font-bold overflow-hidden text-ellipsis line-clamp-2 leading-tight flex-1 mr-4 tracking-tight max-h-14"
-              style="min-height: 70px; max-height: 70px; display: -webkit-box; -webkit-box-orient: vertical;">
+              class="text-atzicay-purple-500 text-lg sm:text-xl font-bold overflow-hidden text-ellipsis line-clamp-2 leading-tight flex-1 mr-2 sm:mr-4 tracking-tight max-h-12 sm:max-h-14"
+              style="display: -webkit-box; -webkit-box-orient: vertical;">
               {{ game.name }}
             </h3>
-            <span class="px-4 py-2 rounded-2xl text-sm font-semibold whitespace-nowrap shadow-sm border"
+            <span class="px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-semibold whitespace-nowrap shadow-sm border"
               [ngClass]="getLevelClasses(game.difficulty)"
-              style="min-height: 32px; max-height: 32px; display: flex; align-items: center;">
+              style="min-height: 28px; max-height: 32px; display: flex; align-items: center;">
               {{ getLevelText(game.difficulty) }}
             </span>
           </div>
 
-          <!-- Game Info mejorada -->
-          <div class="text-gray-600 text-smspace-y-2 bg-white rounded-2xl p-2">
+          <!-- Game Info responsiva -->
+          <div class="text-gray-600 text-xs sm:text-sm space-y-1 sm:space-y-2 bg-white rounded-2xl p-2">
             <div class="flex items-center">
-              <span class="text-sm text-gray-500 font-medium">{{ getTypeIcon(game.type_game) }} Tipo:</span>
-              <span class="text-sm font-semibold text-atzicay-purple-600">{{
+              <span class="text-xs sm:text-sm text-gray-500 font-medium mr-1 sm:mr-2">{{ getTypeIcon(game.type_game) }} Tipo:</span>
+              <span class="text-xs sm:text-sm font-semibold text-atzicay-purple-600">{{
                 getTypeLabel(game.type_game)
                 }}</span>
             </div>
           </div>
 
-          <!-- Rating mejorado -->
-          <div class="">
-            <div class="flex items-center bg-white rounded-2xl p-3">
-              <span class="text-gray-800 font-bold mr-4 text-lg">{{
+          <!-- Rating responsivo -->
+          <div class="my-2 sm:my-3">
+            <div class="flex items-center bg-white rounded-2xl p-2 sm:p-3">
+              <span class="text-gray-800 font-bold mr-2 sm:mr-4 text-base sm:text-lg">{{
                 game.rating | number : "1.1-1"
                 }}</span>
-              <div class="flex space-x-1">
+              <div class="flex space-x-0.5 sm:space-x-1">
                 @for (star of ratingArray; track star) {
                 <svg xmlns="http://www.w3.org/2000/svg" [class]="
                     star <= game.rating ? 'text-yellow-400' : 'text-gray-300'
-                  " class="h-5 w-5 transition-all duration-300 hover:scale-110" viewBox="0 0 20 20"
+                  " class="h-4 w-4 sm:h-5 sm:w-5 transition-all duration-300 hover:scale-110" viewBox="0 0 20 20"
                   fill="currentColor">
                   <path
                     d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -175,7 +190,7 @@
             </div>
           </div>
 
-          <!-- Play Button mejorado -->
+          <!-- Play Button responsivo -->
           <div class="w-full">
             <app-atzicay-button type="link" label="🎮 Jugar Ahora"
               [routerLink]="getGameRoute(game.type_game, game.game_instance_id)"

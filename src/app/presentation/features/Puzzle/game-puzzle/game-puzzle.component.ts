@@ -13,8 +13,8 @@ import {
 } from '../../../../core/infrastructure/service/game-alert.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
-import { FloatingLogoComponent } from '../../../shared/components/floating-logo/floating-logo.component';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
+import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 
 interface PuzzlePiece {
   id: number;

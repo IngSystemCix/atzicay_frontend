@@ -58,6 +58,22 @@ input[type="date"] {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Animación para dropdowns */
+.animate-dropdown {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Asegurar que el grid se expanda correctamente */
 .programmings-grid {
   min-height: max-content;
@@ -77,6 +93,38 @@ input[type="date"] {
 /* Ajuste para el padding inferior */
 .scroll-padding-bottom {
   padding-bottom: 6rem !important;
+}
+
+/* Estilos para los dropdowns */
+.filters-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: transparent;
+}
+
+/* Mejoras para dropdowns en móvil */
+@media (max-width: 640px) {
+  .filters-sticky .relative {
+    /* Asegurar que los dropdowns no se corten */
+    overflow: visible;
+  }
+}
+
+/* Animaciones para los dropdowns */
+@keyframes slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dropdown {
+  animation: slide-in-from-top 0.2s ease-out;
 }
 
 

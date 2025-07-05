@@ -1,53 +1,53 @@
-<div class="min-h-screen bg-purple-50 p-2">
-  <div class="">
-   
-
-    <div class="flex mb-6 p-4 justify-between items-center">
-      <!-- Tabs Navigation -->
-      <div class="flex">
+<div class="min-h-screen bg-purple-50 p-2 sm:p-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header with Tabs and Buttons - Responsive -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6 p-2 sm:p-4 justify-between">
+      <!-- Tabs Navigation - Responsive -->
+      <div class="flex overflow-x-auto pb-2 sm:pb-0">
         <button
           (click)="setActiveTab('contenido')"
           [ngClass]="activeTab === 'contenido' ? 'bg-purple-500 text-white' : 'text-gray-500 bg-purple-200'"
-          class="px-6 py-2 rounded-l-lg font-bold cursor-pointer transition-colors"
+          class="px-4 sm:px-6 py-2 rounded-l-lg font-bold cursor-pointer transition-colors text-sm sm:text-base whitespace-nowrap"
         >
           Contenido
         </button>
         <button
           (click)="setActiveTab('configuracion')"
-          [ngClass]="activeTab === 'configuracion' ? 'bg-purple-500 text-white' : 'text-gray-500  bg-purple-200'"
-          class="px-6 py-2 font-bold cursor-pointer transition-colors"
+          [ngClass]="activeTab === 'configuracion' ? 'bg-purple-500 text-white' : 'text-gray-500 bg-purple-200'"
+          class="px-4 sm:px-6 py-2 font-bold cursor-pointer transition-colors text-sm sm:text-base whitespace-nowrap"
         >
           Configuración
         </button>
         <button
           (click)="setActiveTab('vista-previa')"
           [ngClass]="activeTab === 'vista-previa' ? 'bg-purple-500 text-white' : 'text-gray-500 bg-purple-200'"
-          class="px-6 py-2 rounded-r-lg font-bold cursor-pointer transition-colors"
+          class="px-4 sm:px-6 py-2 rounded-r-lg font-bold cursor-pointer transition-colors text-sm sm:text-base whitespace-nowrap"
         >
           Vista Previa
         </button>
       </div>
 
-      <div class="flex items-center gap-2 mr-4">
+      <!-- Error Messages - Responsive -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3 mr-0 sm:mr-4">
         @if (contentForm.invalid && (contentForm.dirty || contentForm.touched)) {
-        <div class="flex items-center text-red-500 text-sm">
-          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+        <div class="flex items-center text-red-500 text-xs sm:text-sm">
+          <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
           </svg>
           <span>Información incompleta</span>
         </div>
         }
         @if (hasImageError) {
-        <div class="flex items-center text-red-500 text-sm">
-          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+        <div class="flex items-center text-red-500 text-xs sm:text-sm">
+          <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
           </svg>
           <span>Imagen requerida</span>
         </div>
         }
         @if (configForm.invalid && (configForm.dirty || configForm.touched)) {
-        <div class="flex items-center text-red-500 text-sm">
-          <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+        <div class="flex items-center text-red-500 text-xs sm:text-sm">
+          <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
           </svg>
           <span>Configuración con errores</span>
@@ -55,324 +55,324 @@
         }
       </div>
 
-      <div class="flex gap-3">
+      <!-- Action Buttons - Responsive -->
+      <div class="flex gap-2 sm:gap-3 mt-2 sm:mt-0">
         <button
           (click)="cancelar()"
           [disabled]="isLoading"
-          class="bg-gray-500 hover:bg-gray-700 text-white px-6 py-3 rounded-md font-bold disabled:opacity-50 transition-colors"
+          class="bg-gray-500 hover:bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-md font-bold disabled:opacity-50 transition-colors text-sm sm:text-base"
         >
           Cancelar
         </button>
         <button
           (click)="guardar()"
           [disabled]="!isFormValid() || isLoading"
-          [attr.disabled]="!isFormValid() || isLoading ? 'true' : null"
-          class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-8 py-3 rounded-md font-bold disabled:opacity-50 transition-colors"
+          class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-md font-bold disabled:opacity-50 transition-colors text-sm sm:text-base"
         >
           {{ isLoading ? "Guardando..." : "Guardar Juego" }}
         </button>
       </div>
     </div>
-  </div>
 
-  <!-- Content Tabs -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-    <!-- Tab Contenido -->
-    <ng-container *ngIf="activeTab === 'contenido'">
-      <div class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">
-          Información del juego
-        </h2>
-        <p class="text-gray-600 mb-6">Configura los datos básicos del puzzle</p>
+    <!-- Content Tabs - Responsive -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+      <!-- Tab Contenido -->
+      <ng-container *ngIf="activeTab === 'contenido'">
+        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+          <h2 class="text-2xl sm:text-3xl font-bold text-atzicay-purple-500 mb-2">
+            Información del juego
+          </h2>
+          <p class="text-gray-600 mb-4 sm:mb-6">Configura los datos básicos del puzzle</p>
 
-        <form [formGroup]="contentForm" class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Título del Juego *</label>
-            <input
-              type="text"
-              formControlName="tituloJuego"
-              placeholder="Ej: Rompecabezas de monumentos"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              [class.border-red-500]="isTitleInvalid"
-            />
-            @if (isTitleInvalid) {
-            <span class="text-red-500 text-sm mt-1 block">
-              {{ getTitleErrorMessage() }}
-            </span>
-            }
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción *</label>
-            <textarea
-              formControlName="descripcion"
-              rows="4"
-              placeholder="Describe tu juego de puzzle..."
-              class="w-full px-4 py-2 pr-6 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-              [class.border-red-500]="isDescriptionInvalid"
-            ></textarea>
-            @if (isDescriptionInvalid) {
-            <span class="text-red-500 text-sm mt-1 block">
-              {{ getDescriptionErrorMessage() }}
-            </span>
-            }
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
+          <form [formGroup]="contentForm" class="space-y-3 sm:space-y-4">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Filas (2-10) *</label>
+              <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Título del Juego *</label>
               <input
-                title="Número de filas"
-                type="number"
-                formControlName="filas"
-                min="2"
-                max="10"
-                class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-                [class.border-red-500]="isRowsInvalid"
+                type="text"
+                formControlName="tituloJuego"
+                placeholder="Ej: Rompecabezas de monumentos"
+                class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+                [class.border-red-500]="isTitleInvalid"
               />
-              @if (isRowsInvalid) {
-              <span class="text-red-500 text-sm mt-1 block">
-                {{ getRowsErrorMessage() }}
+              @if (isTitleInvalid) {
+              <span class="text-red-500 text-xs sm:text-sm mt-1 block">
+                {{ getTitleErrorMessage() }}
               </span>
               }
             </div>
+
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Columnas (2-10) *</label>
-              <input
-                title="Número de columnas"
-                type="number"
-                formControlName="columnas"
-                min="2"
-                max="10"
-                class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-                [class.border-red-500]="isColumnsInvalid"
-              />
-              @if (isColumnsInvalid) {
-              <span class="text-red-500 text-sm mt-1 block">
-                {{ getColumnsErrorMessage() }}
+              <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Descripción *</label>
+              <textarea
+                formControlName="descripcion"
+                rows="4"
+                placeholder="Describe tu juego de puzzle..."
+                class="w-full px-3 sm:px-4 py-2 pr-6 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm sm:text-base"
+                [class.border-red-500]="isDescriptionInvalid"
+              ></textarea>
+              @if (isDescriptionInvalid) {
+              <span class="text-red-500 text-xs sm:text-sm mt-1 block">
+                {{ getDescriptionErrorMessage() }}
               </span>
               }
             </div>
-          </div>
 
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Dificultad</label>
-            <select
-              title="Dificultad del juego"
-              formControlName="dificultad"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            >
-              <option value="E">Fácil</option>
-              <option value="M">Medio</option>
-              <option value="H">Difícil</option>
-            </select>
-          </div>
+            <div class="grid grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Filas (2-10) *</label>
+                <input
+                  title="Número de filas"
+                  type="number"
+                  formControlName="filas"
+                  min="2"
+                  max="10"
+                  class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-sm sm:text-base"
+                  [class.border-red-500]="isRowsInvalid"
+                />
+                @if (isRowsInvalid) {
+                <span class="text-red-500 text-xs sm:text-sm mt-1 block">
+                  {{ getRowsErrorMessage() }}
+                </span>
+                }
+              </div>
+              <div>
+                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Columnas (2-10) *</label>
+                <input
+                  title="Número de columnas"
+                  type="number"
+                  formControlName="columnas"
+                  min="2"
+                  max="10"
+                  class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-sm sm:text-base"
+                  [class.border-red-500]="isColumnsInvalid"
+                />
+                @if (isColumnsInvalid) {
+                <span class="text-red-500 text-xs sm:text-sm mt-1 block">
+                  {{ getColumnsErrorMessage() }}
+                </span>
+                }
+              </div>
+            </div>
 
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Tiempo límite (segundos)</label>
+            <div>
+              <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Dificultad</label>
+              <select
+                title="Dificultad del juego"
+                formControlName="dificultad"
+                class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
+              >
+                <option value="E">Fácil</option>
+                <option value="M">Medio</option>
+                <option value="H">Difícil</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Tiempo límite (segundos)</label>
+              <input
+                title="Tiempo límite en segundos"
+                type="number"
+                formControlName="tiempo"
+                min="30"
+                max="3600"
+                class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right text-sm sm:text-base"
+                [class.border-red-500]="isTimeInvalid"
+              />
+              @if (isTimeInvalid) {
+              <span class="text-red-500 text-xs sm:text-sm mt-1 block">
+                {{ getTimeErrorMessage() }}
+              </span>
+              }
+            </div>
+
+            <div class="flex items-center space-x-3">
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" formControlName="mostrarPista" class="sr-only" />
+                <div class="relative">
+                  <div
+                    [ngClass]="contentForm.get('mostrarPista')?.value ? 'bg-purple-500' : 'bg-gray-300'"
+                    class="w-10 h-5 sm:w-11 sm:h-6 rounded-full transition-colors duration-200"
+                  ></div>
+                  <div
+                    [ngClass]="contentForm.get('mostrarPista')?.value ? 'translate-x-5 sm:translate-x-6' : 'translate-x-1'"
+                    class="absolute top-0.5 sm:top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
+                  ></div>
+                </div>
+                <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700">Mostrar pista</span>
+              </label>
+            </div>
+
+            <div *ngIf="contentForm.get('mostrarPista')?.value">
+              <textarea
+                formControlName="pista"
+                placeholder="Escriba aquí su pista"
+                rows="2"
+                class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm sm:text-base"
+                [class.border-red-500]="isClueInvalid"
+              ></textarea>
+              @if (isClueInvalid) {
+              <span class="text-red-500 text-xs sm:text-sm mt-1 block">
+                {{ getClueErrorMessage() }}
+              </span>
+              }
+            </div>
+          </form>
+        </div>
+
+        <!-- Imagen del Rompecabezas (Solo en contenido) -->
+        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-atzicay-purple-500 mb-2">Imagen del Rompecabezas</h2>
+          <p class="text-gray-600 mb-4 sm:mb-6">Sube la imagen que se convertirá en rompecabezas</p>
+
+          <div class="border-2 border-dashed rounded-lg p-6 sm:p-8 text-center"
+               [class.border-red-300]="hasImageError"
+               [class.border-gray-300]="!hasImageError">
+            <div class="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
+              <svg class="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <p class="text-gray-500 mb-3 sm:mb-4 text-sm sm:text-base">Subir imagen no mayor a 1 Mb</p>
             <input
-              title="Tiempo límite en segundos"
-              type="number"
-              formControlName="tiempo"
-              min="30"
-              max="3600"
-              class="w-full pr-6 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-right"
-              [class.border-red-500]="isTimeInvalid"
+              title="Subir imagen del rompecabezas"
+              type="file"
+              (change)="onFileSelected($event)"
+              accept="image/*"
+              class="hidden"
+              #fileInput
             />
-            @if (isTimeInvalid) {
-            <span class="text-red-500 text-sm mt-1 block">
-              {{ getTimeErrorMessage() }}
-            </span>
+            <button
+              (click)="fileInput.click()"
+              class="px-4 sm:px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-atzicay-purple-700 transition-colors text-sm sm:text-base"
+            >
+              Seleccionar archivo
+            </button>
+            <div *ngIf="selectedFile" class="mt-2 text-xs text-gray-600">
+              {{ selectedFile.name }}
+            </div>
+            @if (hasImageError) {
+            <div class="mt-2 text-red-500 text-xs sm:text-sm">
+              <span>La imagen es requerida para crear el puzzle</span>
+            </div>
             }
           </div>
 
-          <div class="flex items-center space-x-3">
-            <label class="flex items-center cursor-pointer">
-              <input type="checkbox" formControlName="mostrarPista" class="sr-only" />
-              <div class="relative">
-                <div
-                  [ngClass]="contentForm.get('mostrarPista')?.value ? 'bg-purple-500' : 'bg-gray-300'"
-                  class="w-11 h-6 rounded-full transition-colors duration-200"
-                ></div>
-                <div
-                  [ngClass]="contentForm.get('mostrarPista')?.value ? 'translate-x-6' : 'translate-x-1'"
-                  class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
-                ></div>
-              </div>
-              <span class="ml-3 text-sm font-semibold text-gray-700">Mostrar pista</span>
-            </label>
-          </div>
-
-          <div *ngIf="contentForm.get('mostrarPista')?.value">
-            <textarea
-              formControlName="pista"
-              placeholder="Escriba aquí su pista"
-              rows="2"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-              [class.border-red-500]="isClueInvalid"
-            ></textarea>
-            @if (isClueInvalid) {
-            <span class="text-red-500 text-sm mt-1 block">
-              {{ getClueErrorMessage() }}
-            </span>
-            }
-          </div>
-        </form>
-      </div>
-
-      <!-- Imagen del Rompecabezas (Solo en contenido) -->
-      <div class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-atzicay-purple-500 mb-2">Imagen del Rompecabezas</h2>
-        <p class="text-gray-600 mb-6">Sube la imagen que se convertirá en rompecabezas</p>
-
-        <div class="border-2 border-dashed rounded-lg p-12 text-center"
-             [class.border-red-300]="hasImageError"
-             [class.border-gray-300]="!hasImageError">
-          <div class="mx-auto w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-            </svg>
-          </div>
-          <p class="text-gray-500 mb-4">Subir imagen no mayor a 1 Mb</p>
-          <input
-            title="Subir imagen del rompecabezas"
-            type="file"
-            (change)="onFileSelected($event)"
-            accept="image/*"
-            class="hidden"
-            #fileInput
-          />
-          <button
-            (click)="fileInput.click()"
-            class="px-6 py-2 bg-purple-500 text-white rounded-lg hover:bg-atzicay-purple-700 transition-colors"
-          >
-            Seleccionar archivo
-          </button>
-          <div *ngIf="selectedFile" class="mt-2 text-xs text-gray-600">
-            {{ selectedFile.name }}
-          </div>
-          @if (hasImageError) {
-          <div class="mt-2 text-red-500 text-sm">
-            <span>La imagen es requerida para crear el puzzle</span>
-          </div>
-          }
-        </div>
-
-        <div *ngIf="selectedImage" class="mt-4">
-          <img
-            [src]="selectedImage"
-            alt="Imagen seleccionada"
-            class="max-h-40 mx-auto rounded-lg shadow-md"
-          />
-        </div>
-
-        <div class="mt-6 flex items-center space-x-3">
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" formControlName="ayudaAutomatica" class="sr-only" />
-            <div class="relative">
-              <div
-                [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'bg-purple-500' : 'bg-gray-300'"
-                class="w-11 h-6 rounded-full transition-colors duration-200"
-              ></div>
-              <div
-                [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'translate-x-6' : 'translate-x-1'"
-                class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
-              ></div>
-            </div>
-            <span class="ml-3 text-sm font-semibold text-gray-700">Ayuda Automática</span>
-          </label>
-        </div>
-      </div>
-    </ng-container>
-
-    <!-- CONFIGURACIÓN TAB -->
-    <ng-container *ngIf="activeTab === 'configuracion'">
-      <div class="bg-white rounded-xl shadow-lg p-6 lg:col-span-2">
-        <h2 class="text-3xl font-bold text-atzicay-purple-500 mb-2">Configuración del juego</h2>
-        <p class="text-gray-600 mb-6 font-semibold">Personaliza las reglas y opciones del juego</p>
-
-        <form [formGroup]="configForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Fuente -->
-          <div>
-            <label class="block text-gray-900 mb-2 font-semibold">Tipo de Letra</label>
-            <select
-              title="Fuente del Juego"
-              formControlName="fuente"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option *ngFor="let font of fonts; let i = index" [value]="font">{{ font }}</option>
-            </select>
-          </div>
-
-          <!-- Color de Fuente y Fondo -->
-          <div class="flex items-center justify-around gap-6">
-            <div class="text-center">
-              <label class="block text-gray-900 mb-2 font-semibold">Color de Letra</label>
-              <input
-                title="Color de Fuente"
-                type="color"
-                formControlName="colorFuente"
-                class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
-              />
-            </div>
-
-            <div class="text-center">
-              <label class="block text-gray-900 mb-2 font-semibold">Color de Fondo</label>
-              <input
-                title="Color de Fondo"
-                type="color"
-                formControlName="fondo"
-                class="aspect-square size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
-              />
-            </div>
-          </div>
-
-          <!-- Mensaje de Éxito -->
-          <div>
-            <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Éxito</label>
-            <input
-              title="Mensaje de Éxito"
-              type="text"
-              formControlName="mensajeExito"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+          <div *ngIf="selectedImage" class="mt-4">
+            <img
+              [src]="selectedImage"
+              alt="Imagen seleccionada"
+              class="max-h-32 sm:max-h-40 mx-auto rounded-lg shadow-md"
             />
           </div>
 
-          <!-- Mensaje de Fracaso -->
-          <div>
-            <label class="block text-gray-900 mb-2 font-semibold">Mensaje de Fracaso</label>
-            <input
-              title="Mensaje de Fracaso"
-              type="text"
-              formControlName="mensajeFracaso"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-
-          <!-- Juego Público -->
-          <div class="col-span-1 md:col-span-2">
+          <div class="mt-4 sm:mt-6 flex items-center space-x-3">
             <label class="flex items-center cursor-pointer">
-              <input type="checkbox" formControlName="juegoPublico" class="sr-only" />
+              <input type="checkbox" formControlName="ayudaAutomatica" class="sr-only" />
               <div class="relative">
                 <div
-                  [ngClass]="configForm.get('juegoPublico')?.value ? 'bg-purple-500' : 'bg-gray-300'"
-                  class="w-11 h-6 rounded-full transition-colors duration-200"
+                  [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'bg-purple-500' : 'bg-gray-300'"
+                  class="w-10 h-5 sm:w-11 sm:h-6 rounded-full transition-colors duration-200"
                 ></div>
                 <div
-                  [ngClass]="configForm.get('juegoPublico')?.value ? 'translate-x-5' : 'translate-x-0'"
-                  class="absolute top-0 left-0 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-200"
+                  [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'translate-x-5 sm:translate-x-6' : 'translate-x-1'"
+                  class="absolute top-0.5 sm:top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
                 ></div>
               </div>
-              <span class="ml-3 text-sm font-semibold text-gray-700">Juego Público</span>
+              <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700">Ayuda Automática</span>
             </label>
           </div>
-        </form>
-      </div>
-    </ng-container>
+        </div>
+      </ng-container>
 
-    <!-- Tab Vista Previa -->
-    <ng-container *ngIf="activeTab === 'vista-previa'">
-      <!-- Aquí puedes agregar una vista previa del puzzle si lo deseas -->
-    </ng-container>
+      <!-- CONFIGURACIÓN TAB - Responsive -->
+      <ng-container *ngIf="activeTab === 'configuracion'">
+        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:col-span-2">
+          <h2 class="text-2xl sm:text-3xl font-bold text-atzicay-purple-500 mb-2">Configuración del juego</h2>
+          <p class="text-gray-600 mb-4 sm:mb-6 font-semibold">Personaliza las reglas y opciones del juego</p>
+
+          <form [formGroup]="configForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <!-- Fuente -->
+            <div>
+              <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Tipo de Letra</label>
+              <select
+                title="Fuente del Juego"
+                formControlName="fuente"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              >
+                <option *ngFor="let font of fonts; let i = index" [value]="font">{{ font }}</option>
+              </select>
+            </div>
+
+            <!-- Color de Fuente y Fondo - Responsive -->
+            <div class="flex flex-col sm:flex-row items-center justify-around gap-4 sm:gap-6">
+              <div class="text-center">
+                <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Color de Letra</label>
+                <input
+                  title="Color de Fuente"
+                  type="color"
+                  formControlName="colorFuente"
+                  class="aspect-square size-10 sm:size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
+                />
+              </div>
+
+              <div class="text-center">
+                <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Color de Fondo</label>
+                <input
+                  title="Color de Fondo"
+                  type="color"
+                  formControlName="fondo"
+                  class="aspect-square size-10 sm:size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
+                />
+              </div>
+            </div>
+
+            <!-- Mensaje de Éxito -->
+            <div>
+              <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Mensaje de Éxito</label>
+              <input
+                title="Mensaje de Éxito"
+                type="text"
+                formControlName="mensajeExito"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              />
+            </div>
+
+            <!-- Mensaje de Fracaso -->
+            <div>
+              <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Mensaje de Fracaso</label>
+              <input
+                title="Mensaje de Fracaso"
+                type="text"
+                formControlName="mensajeFracaso"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
+              />
+            </div>
+
+            <!-- Juego Público - Responsive -->
+            <div class="col-span-1 md:col-span-2">
+              <label class="flex items-center cursor-pointer">
+                <input type="checkbox" formControlName="juegoPublico" class="sr-only" />
+                <div class="relative">
+                  <div
+                    [ngClass]="configForm.get('juegoPublico')?.value ? 'bg-purple-500' : 'bg-gray-300'"
+                    class="w-10 h-5 sm:w-11 sm:h-6 rounded-full transition-colors duration-200"
+                  ></div>
+                  <div
+                    [ngClass]="configForm.get('juegoPublico')?.value ? 'translate-x-5 sm:translate-x-6' : 'translate-x-1'"
+                    class="absolute top-0.5 sm:top-1 left-0 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-200"
+                  ></div>
+                </div>
+                <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700">Juego Público</span>
+              </label>
+            </div>
+          </form>
+        </div>
+      </ng-container>
+
+      <!-- Tab Vista Previa -->
+      <ng-container *ngIf="activeTab === 'vista-previa'">
+        <!-- Aquí puedes agregar una vista previa del puzzle si lo deseas -->
+      </ng-container>
+    </div>
   </div>
 </div>

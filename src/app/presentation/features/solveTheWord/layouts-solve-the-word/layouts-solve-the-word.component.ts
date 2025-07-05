@@ -9,6 +9,7 @@ import { UserSessionService } from '../../../../core/infrastructure/service/user
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my-games/base-create-game.component';
 import { CreateGame } from '../../../../core/domain/model/create-game.model';
+import { HostListener } from '@angular/core';
 
 // Enum para orientación compatible con backend
 export enum SolveTheWordOrientation {
@@ -23,23 +24,31 @@ export enum SolveTheWordOrientation {
 @Component({
   selector: 'app-layouts-solve-the-word',
   standalone: true,
-  imports: [CommonModule, FormsModule, AtzicayTabsComponent, AtzicayButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    AtzicayTabsComponent,
+    AtzicayButtonComponent,
+  ],
   templateUrl: './layouts-solve-the-word.component.html',
-  styleUrl: './layouts-solve-the-word.component.css'
+  styleUrl: './layouts-solve-the-word.component.css',
 })
-export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implements OnInit {
+export class LayoutsSolveTheWordComponent
+  extends BaseCreateGameComponent
+  implements OnInit
+{
   activeTab = 'contenido';
   tabs = [
     { id: 'contenido', label: 'Contenido' },
     { id: 'configuracion', label: 'Configuración' },
-    { id: 'vista-previa', label: 'Vista Previa' }
+    { id: 'vista-previa', label: 'Vista Previa' },
   ];
   // Datos del juego
   gameTitle = '';
   gameDescription = '';
   gridSize = '10 x 10';
   words: Array<{ id: number; word: string; orientation: string }> = [
-    { id: 1, word: '', orientation: 'HR' }
+    { id: 1, word: '', orientation: 'HR' },
   ];
   fontFamily = 'Arial';
   backgroundColor = '#FFFFFF';
@@ -52,11 +61,15 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
     { name: '#FFFFFF', class: 'bg-gray-300' },
     { name: '#E0F7FA', class: 'bg-cyan-300' },
     { name: '#F3E5F5', class: 'bg-purple-300' },
-    { name: '#FFEBEE', class: 'bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400' }
+    {
+      name: '#FFEBEE',
+      class: 'bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400',
+    },
   ];
   isLoading = false;
   rows: number = 10;
   cols: number = 10;
+  isMobile = false;
 
   constructor(
     private createGameService: CreateGameService,
@@ -69,8 +82,17 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
     if (userId) this.userId = userId;
   }
 
-  ngOnInit(): void {}
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkScreenSize();
+  }
 
+  ngOnInit(): void {
+    this.checkScreenSize();
+  }
+  private checkScreenSize() {
+    this.isMobile = window.innerWidth < 640; 
+  }
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }
@@ -82,7 +104,7 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
 
   removeWord(id: number) {
     if (this.words.length > 1) {
-      this.words = this.words.filter(word => word.id !== id);
+      this.words = this.words.filter((word) => word.id !== id);
     }
   }
 
@@ -106,9 +128,9 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
       return;
     }
     const gameData = this.buildGameData();
-    const body = { 
+    const body = {
       gameType: 'solve_the_word',
-      data: gameData 
+      data: gameData,
     };
     // Mostrar el JSON en consola
     this.createGameService.createSolveTheWordGame(this.userId, body).subscribe({
@@ -119,18 +141,21 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
       },
       error: (err) => {
         this.isLoading = false;
-        this.alertService.showGameCreationError(err, 'juego de encontrar palabras');
-      }
+        this.alertService.showGameCreationError(
+          err,
+          'juego de encontrar palabras'
+        );
+      },
     });
   }
 
   buildGameData(): CreateGame {
     // Usar los valores numéricos de rows y cols
     const solveWords = this.words
-      .filter(w => w.word.trim().length > 0)
-      .map(w => ({
+      .filter((w) => w.word.trim().length > 0)
+      .map((w) => ({
         Word: w.word.toUpperCase().trim(),
-        Orientation: w.orientation // Debe ser HR, VD, etc. según backend
+        Orientation: w.orientation, // Debe ser HR, VD, etc. según backend
       }));
     return {
       Name: this.gameTitle.trim(),
@@ -145,9 +170,15 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
         { Key: 'Fuente', Value: this.fontFamily || 'Arial' },
         { Key: 'ColorFondo', Value: this.backgroundColor },
         { Key: 'ColorTexto', Value: this.fontColor },
-        { Key: 'MensajeExito', Value: this.successMessage || '¡Excelente trabajo!' },
-        { Key: 'MensajeFallo', Value: this.failureMessage || '¡Inténtalo de nuevo!' }
-      ]
+        {
+          Key: 'MensajeExito',
+          Value: this.successMessage || '¡Excelente trabajo!',
+        },
+        {
+          Key: 'MensajeFallo',
+          Value: this.failureMessage || '¡Inténtalo de nuevo!',
+        },
+      ],
     };
   }
 
@@ -160,14 +191,16 @@ export class LayoutsSolveTheWordComponent extends BaseCreateGameComponent implem
       this.alertService.showError('La descripción del juego es requerida');
       return false;
     }
-    const validWords = this.words.filter(w => w.word.trim().length > 0);
+    const validWords = this.words.filter((w) => w.word.trim().length > 0);
     if (validWords.length === 0) {
       this.alertService.showError('Debe agregar al menos una palabra');
       return false;
     }
-    const invalidWords = validWords.filter(w => w.word.trim().length < 2);
+    const invalidWords = validWords.filter((w) => w.word.trim().length < 2);
     if (invalidWords.length > 0) {
-      this.alertService.showError('Todas las palabras deben tener al menos 2 caracteres');
+      this.alertService.showError(
+        'Todas las palabras deben tener al menos 2 caracteres'
+      );
       return false;
     }
     return true;

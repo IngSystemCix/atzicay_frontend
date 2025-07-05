@@ -16,6 +16,7 @@ import { UserSessionService } from '../../../../core/infrastructure/service/user
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { CreateGame, HangmanWord } from '../../../../core/domain/model/create-game.model';
 import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my-games/base-create-game.component';
+import { Platform } from '@angular/cdk/platform';
 
 @Component({
   selector: 'app-layout-hangman',
@@ -45,19 +46,32 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
   isLoading = false;
   fonts = ['Arial', 'Verdana', 'Helvetica', 'Times New Roman', 'Courier New'];
   fuenteSeleccionada: string = this.fonts[0];
-
+  isMobile = false;
   constructor(
     private fb: FormBuilder,
     private createGameService: CreateGameService,
     private userSession: UserSessionService,
     private router: Router,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private platform: Platform
   ) {
     super();
     this.initializeForms();
     const userId = this.userSession.getUserId();
     if (userId) this.userId = userId;
+    this.isMobile = window.innerWidth < 768;
+    window.addEventListener('resize', () => {
+    this.isMobile = window.innerWidth < 768;
+  });
   }
+
+  getPreviewWordDisplay(index: number): string[] {
+  const word = this.getPreviewWord(index);
+  if (this.isMobile && word.length > 10) {
+    return word.slice(0, 10).concat(['...']);
+  }
+  return word;
+}
 
   ngOnInit(): void {
     // Solo agregar una palabra inicial si no hay palabras existentes

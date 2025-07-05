@@ -319,6 +319,21 @@ getTypeIcon(typeValue: string): string {
     }
   }
 
+  getGameBackgroundColor(type: string): string {
+    switch (type) {
+      case 'hangman':
+        return '#3DCE89'; // Verde del ahorcado
+      case 'memory':
+        return '#DBA25F'; // Naranja del memory
+      case 'solve_the_word':
+        return '#C45C5B'; // Rojo del pupiletras
+      case 'puzzle':
+        return '#3399D1'; // Azul del rompecabezas
+      default:
+        return '#94A3B8'; // Gris por defecto
+    }
+  }
+
   private searchTimeout: any;
 
   onSearchTermChange(): void {

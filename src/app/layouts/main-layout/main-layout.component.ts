@@ -1,4 +1,10 @@
-import { Component, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  HostListener,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../../presentation';
 import { SidebarComponent } from '../../presentation';
@@ -14,11 +20,13 @@ import { UserSessionService } from '../../core/infrastructure/service/user-sessi
   standalone: true,
   imports: [RouterOutlet, HeaderComponent, SidebarComponent, CommonModule],
   templateUrl: './main-layout.component.html',
-  styleUrl: './main-layout.component.css'
+  styleUrl: './main-layout.component.css',
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
   sidebarCollapsed = false;
   isMobile = false;
+  isTablet = false;
+  isDesktop = false;
 
   private sidebarService = inject(SidebarService);
   private auth0 = inject(Auth0Service);
@@ -28,6 +36,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.checkScreenSize();
+    this.initializeSidebarState();
 
     if (this.isMobile) {
       this.sidebarCollapsed = true;
@@ -35,7 +44,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     }
 
     this.subscription.add(
-      this.sidebarService.isCollapsed$.subscribe(collapsed => {
+      this.sidebarService.isCollapsed$.subscribe((collapsed) => {
         this.sidebarCollapsed = collapsed;
       })
     );
@@ -49,7 +58,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
           console.error('[MainLayout] Error esperando token:', err);
           // Intentar cargar usuario de todas formas
           this.ensureUserIdLoaded();
-        }
+        },
       })
     );
   }
@@ -61,6 +70,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   @HostListener('window:resize', ['$event'])
   onResize(event: any): void {
     this.checkScreenSize();
+    this.updateSidebarForDevice();
 
     // Auto-colapsar en móvil
     if (this.isMobile && !this.sidebarCollapsed) {
@@ -69,24 +79,74 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   private checkScreenSize(): void {
-    this.isMobile = window.innerWidth < 768; // breakpoint md de Tailwind (768px)
+    const screenWidth = window.innerWidth;
+
+    if (screenWidth < 768) {
+      this.isMobile = true;
+      this.isTablet = false;
+      this.isDesktop = false;
+    } else if (screenWidth >= 768 && screenWidth < 1024) {
+      this.isMobile = false;
+      this.isTablet = true;
+      this.isDesktop = false;
+    } else {
+      this.isMobile = false;
+      this.isTablet = false;
+      this.isDesktop = true;
+    }
+  }
+
+  private initializeSidebarState(): void {
+    if (this.isMobile || this.isTablet) {
+      this.sidebarCollapsed = true;
+      this.sidebarService.setSidebarState(true);
+    } else {
+      const savedState = this.getSavedSidebarState();
+      this.sidebarCollapsed = savedState;
+      this.sidebarService.setSidebarState(savedState);
+    }
+  }
+
+  private updateSidebarForDevice(): void {
+    if (this.isMobile || this.isTablet) {
+      if (!this.sidebarCollapsed) {
+        this.sidebarService.setSidebarState(true);
+      }
+    } else if (this.isDesktop) {
+      const savedState = this.getSavedSidebarState();
+      this.sidebarService.setSidebarState(savedState);
+    }
+  }
+
+  private getSavedSidebarState(): boolean {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  }
+
+  private saveSidebarState(): void {
+    if (this.isDesktop) {
+      localStorage.setItem(
+        'sidebarCollapsed',
+        JSON.stringify(this.sidebarCollapsed)
+      );
+    }
   }
 
   toggleSidebar(): void {
     this.sidebarService.toggleSidebar();
+    this.saveSidebarState();
   }
 
   // Método para cerrar sidebar en móvil (útil para llamar desde el template)
   closeSidebarOnMobile(): void {
-    if (this.isMobile && !this.sidebarCollapsed) {
+    if ((this.isMobile || this.isTablet) && !this.sidebarCollapsed) {
       this.sidebarService.setSidebarState(true);
     }
   }
 
-  // Método para manejar el click en el overlay
   onOverlayClick(): void {
-    if (this.isMobile) {
-      this.toggleSidebar();
+    if (this.isMobile || this.isTablet) {
+      this.sidebarService.setSidebarState(true);
     }
   }
 
@@ -104,8 +164,11 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
                 }
               },
               error: (err) => {
-                console.error('No se pudo obtener el id del usuario por email', err);
-              }
+                console.error(
+                  'No se pudo obtener el id del usuario por email',
+                  err
+                );
+              },
             });
           }
         })

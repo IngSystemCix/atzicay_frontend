@@ -1,10 +1,14 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
-import { AtzicayTabsComponent, Tab } from '../../../components/atzicay-tabs/atzicay-tabs.component';
+import {
+  AtzicayTabsComponent,
+  Tab,
+} from '../../../components/atzicay-tabs/atzicay-tabs.component';
+import { Platform } from '@angular/cdk/platform';
 
 interface CardPair {
   id: number;
@@ -33,12 +37,12 @@ type CardType = 'imagen-texto' | 'imagenes';
 export class LayoutsMemoryComponent implements OnDestroy {
   // Tab management
   activeTab: TabType = 'contenido';
-  
+  isMobile = false;
   // Tabs configuration for the generic component
   tabs: Tab<TabType>[] = [
     { id: 'contenido', label: 'Contenido' },
     { id: 'configuracion', label: 'Configuración' },
-    { id: 'vista-previa', label: 'Vista Previa' }
+    { id: 'vista-previa', label: 'Vista Previa' },
   ];
 
   // Game configuration
@@ -84,9 +88,17 @@ export class LayoutsMemoryComponent implements OnDestroy {
   constructor(
     public createGameService: CreateGameService,
     private alertService: AlertService,
-    private userSessionService: UserSessionService
+    private userSessionService: UserSessionService,
+    private platform: Platform,
+    private renderer: Renderer2,
+    private el: ElementRef
   ) {
     this.initializeDefaultData();
+    this.checkViewport();
+    // Listen for window resize
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', () => this.checkViewport());
+    }
   }
 
   // Tab management methods
@@ -154,15 +166,17 @@ export class LayoutsMemoryComponent implements OnDestroy {
   // Método específico para validar pares según el modo
   private isPairComplete(pair: CardPair): boolean {
     if (!pair.card1) return false;
-    
+
     switch (this.cardType) {
       case 'imagen-texto':
         // En modo imagen-texto, solo necesitamos validar card1 (imagen + texto)
         return this.isCardComplete(pair.card1);
       case 'imagenes':
         // En modo imagen-imagen, necesitamos ambas cards con imágenes
-        return !!(pair.card1?.image || pair.card1?.imageUrl) && 
-               !!(pair.card2?.image || pair.card2?.imageUrl);
+        return (
+          !!(pair.card1?.image || pair.card1?.imageUrl) &&
+          !!(pair.card2?.image || pair.card2?.imageUrl)
+        );
       default:
         return false;
     }
@@ -232,6 +246,9 @@ export class LayoutsMemoryComponent implements OnDestroy {
     }
   }
   ngOnDestroy(): void {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('resize', () => this.checkViewport());
+    }
     // Liberar todas las URLs de objetos creadas
     this.pairs.forEach((pair) => {
       if (pair.card1?.imageUrl && pair.card1.imageUrl.startsWith('blob:')) {
@@ -242,6 +259,14 @@ export class LayoutsMemoryComponent implements OnDestroy {
       }
     });
   }
+
+  private checkViewport() {
+    this.isMobile = window.innerWidth < 768;
+  }
+  getPreviewPairs() {
+  // Show fewer pairs on mobile
+  return this.pairs.slice(0, this.isMobile ? 4 : 6);
+}
   // Form validation
   isFormValid(): boolean {
     return this.isBasicInfoValid() && this.arePairsValid();
@@ -273,7 +298,9 @@ export class LayoutsMemoryComponent implements OnDestroy {
       errors.push('Se requieren al menos 3 pares de tarjetas');
     }
 
-    const incompletePairs = this.pairs.filter((pair) => !this.isPairComplete(pair)).length;
+    const incompletePairs = this.pairs.filter(
+      (pair) => !this.isPairComplete(pair)
+    ).length;
 
     if (incompletePairs > 0) {
       errors.push(`${incompletePairs} pares están incompletos`);
@@ -286,7 +313,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
   async onSave(): Promise<void> {
     // Llamar al debug method antes de validar
     await this.debugPayload();
-    
+
     if (!this.isFormValid()) {
       const errors = this.getValidationErrors();
       console.error('Cannot save game:', errors);
@@ -296,16 +323,18 @@ export class LayoutsMemoryComponent implements OnDestroy {
     this.isSaving = true;
     try {
       const userId = this.userSessionService.getUserId();
-      
+
       if (!userId) {
-        this.alertService.showError('No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.');
+        this.alertService.showError(
+          'No se pudo obtener el ID del usuario. Por favor, inicia sesión nuevamente.'
+        );
         this.isSaving = false;
         return;
       }
-      
+
       const pairsPayload = await this.buildPairsPayload();
       const settingsPayload = this.buildSettingsPayload();
-      
+
       // Formato exacto requerido por el backend
       const gameData = {
         Name: this.gameTitle,
@@ -313,28 +342,26 @@ export class LayoutsMemoryComponent implements OnDestroy {
         Activated: true,
         Mode: this.cardType === 'imagenes' ? 'II' : 'ID',
         Pairs: pairsPayload,
-        Settings: settingsPayload
+        Settings: settingsPayload,
       };
 
       const body = {
         gameType: 'memory',
-        data: gameData
+        data: gameData,
       };
-            
-      this.createGameService
-        .createMemoryGame(userId, body)
-        .subscribe({
-          next: (res: any) => {
-            this.isSaving = false;
-            this.logAction('Game saved', res);
-            this.alertService.showGameCreatedSuccess('Juego de memoria');
-            this.resetForm();
-          },
-          error: (err: any) => {
-            this.isSaving = false;
-            this.alertService.showGameCreationError(err, 'juego de memoria');
-          },
-        });
+
+      this.createGameService.createMemoryGame(userId, body).subscribe({
+        next: (res: any) => {
+          this.isSaving = false;
+          this.logAction('Game saved', res);
+          this.alertService.showGameCreatedSuccess('Juego de memoria');
+          this.resetForm();
+        },
+        error: (err: any) => {
+          this.isSaving = false;
+          this.alertService.showGameCreationError(err, 'juego de memoria');
+        },
+      });
     } catch (e) {
       this.isSaving = false;
       this.alertService.showError('Error procesando imágenes');
@@ -353,7 +380,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
         const PathImg2 = pair.card2?.image
           ? await this.fileToBase64(pair.card2.image)
           : pair.card2?.imageUrl || '';
-        
+
         return {
           PathImg1,
           PathImg2,
@@ -363,7 +390,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
         const PathImg1 = pair.card1?.image
           ? await this.fileToBase64(pair.card1.image)
           : pair.card1?.imageUrl || '';
-        
+
         return {
           PathImg1,
           DescriptionImg: pair.card1?.text || '',
@@ -389,74 +416,80 @@ export class LayoutsMemoryComponent implements OnDestroy {
     });
   }
 
-  private buildSettingsPayload(): Array<{ ConfigKey: string; ConfigValue: string }> {
+  private buildSettingsPayload(): Array<{
+    ConfigKey: string;
+    ConfigValue: string;
+  }> {
     // Convierte las configuraciones del juego al formato requerido por el backend
     const settings = [];
-    
+
     // Font configuration
     if (this.gameSettings.font) {
       settings.push({
         ConfigKey: 'font',
-        ConfigValue: this.gameSettings.font
+        ConfigValue: this.gameSettings.font,
       });
     }
-    
+
     // Font color configuration
     if (this.gameSettings.fontColor) {
       settings.push({
         ConfigKey: 'fontColor',
-        ConfigValue: this.gameSettings.fontColor
+        ConfigValue: this.gameSettings.fontColor,
       });
     }
-    
+
     // Background color configuration
     if (this.gameSettings.backgroundColor) {
       settings.push({
         ConfigKey: 'backgroundColor',
-        ConfigValue: this.gameSettings.backgroundColor
+        ConfigValue: this.gameSettings.backgroundColor,
       });
     }
-    
+
     // Success message configuration
     if (this.gameSettings.successMessage) {
       settings.push({
         ConfigKey: 'successMessage',
-        ConfigValue: this.gameSettings.successMessage
+        ConfigValue: this.gameSettings.successMessage,
       });
     }
-    
+
     // Failure message configuration
     if (this.gameSettings.failureMessage) {
       settings.push({
         ConfigKey: 'failureMessage',
-        ConfigValue: this.gameSettings.failureMessage
+        ConfigValue: this.gameSettings.failureMessage,
       });
     }
-    
+
     // Difficulty configuration (en Settings, no en nivel superior)
     if (this.gameSettings.difficulty) {
-      const difficultyValue = this.gameSettings.difficulty === 'facil' ? 'E' : 
-                             this.gameSettings.difficulty === 'medio' ? 'M' : 'H';
+      const difficultyValue =
+        this.gameSettings.difficulty === 'facil'
+          ? 'E'
+          : this.gameSettings.difficulty === 'medio'
+          ? 'M'
+          : 'H';
       settings.push({
         ConfigKey: 'difficulty',
-        ConfigValue: difficultyValue
+        ConfigValue: difficultyValue,
       });
     }
-    
+
     // Visibility configuration (en Settings, no en nivel superior)
     if (this.gameSettings.visibility) {
       settings.push({
         ConfigKey: 'visibility',
-        ConfigValue: this.gameSettings.visibility
+        ConfigValue: this.gameSettings.visibility,
       });
     }
-    
+
     return settings;
   }
 
   // Utility methods
-  private initializeDefaultData(): void {
-  }
+  private initializeDefaultData(): void {}
 
   private hasUnsavedChanges(): boolean {
     return !!(this.gameTitle || this.gameDescription || this.pairs.length > 1);
@@ -480,18 +513,23 @@ export class LayoutsMemoryComponent implements OnDestroy {
     if (pairIndex >= 0 && pairIndex < this.pairs.length) {
       const cardKey = cardNumber === 1 ? 'card1' : 'card2';
       const pair = this.pairs[pairIndex];
-      
+
       if (pair[cardKey]) {
         // Liberar URL si existe
-        if (pair[cardKey]!.imageUrl && pair[cardKey]!.imageUrl!.startsWith('blob:')) {
+        if (
+          pair[cardKey]!.imageUrl &&
+          pair[cardKey]!.imageUrl!.startsWith('blob:')
+        ) {
           URL.revokeObjectURL(pair[cardKey]!.imageUrl!);
         }
-        
+
         // Limpiar la imagen
         pair[cardKey]!.image = null;
         pair[cardKey]!.imageUrl = '';
-        
-        this.logAction(`Image removed from pair ${pairIndex + 1}, card ${cardNumber}`);
+
+        this.logAction(
+          `Image removed from pair ${pairIndex + 1}, card ${cardNumber}`
+        );
       }
     }
   }
@@ -511,16 +549,22 @@ export class LayoutsMemoryComponent implements OnDestroy {
     if (pairIndex >= 0 && pairIndex < this.pairs.length) {
       const cardKey = cardNumber === 1 ? 'card1' : 'card2';
       const pair = this.pairs[pairIndex];
-      
+
       if (pair[cardKey]) {
         pair[cardKey]!.text = text;
-        this.logAction(`Text updated for pair ${pairIndex + 1}, card ${cardNumber}`, text);
+        this.logAction(
+          `Text updated for pair ${pairIndex + 1}, card ${cardNumber}`,
+          text
+        );
       }
     }
   }
 
   // Settings management
-  updateGameSettings(setting: keyof typeof this.gameSettings, value: any): void {
+  updateGameSettings(
+    setting: keyof typeof this.gameSettings,
+    value: any
+  ): void {
     this.gameSettings = { ...this.gameSettings, [setting]: value };
     this.logAction(`Setting updated: ${setting}`, value);
   }
@@ -540,15 +584,14 @@ export class LayoutsMemoryComponent implements OnDestroy {
 
   // Debug method para ver exactamente qué se está enviando
   async debugPayload(): Promise<void> {
-   
     // Verificar userId
     const userId = this.userSessionService.getUserId();
-    
+
     if (!userId) {
       console.warn('⚠️ WARNING: Usuario no autenticado o userId no disponible');
       return;
     }
-    
+
     // Validar cada par
     this.pairs.forEach((pair, index) => {
       console.log(`--- Par ${index + 1} ---`);
@@ -556,50 +599,43 @@ export class LayoutsMemoryComponent implements OnDestroy {
         hasImage: !!(pair.card1?.image || pair.card1?.imageUrl),
         text: pair.card1?.text,
         imageSize: pair.card1?.image?.size,
-        imageType: pair.card1?.image?.type
+        imageType: pair.card1?.image?.type,
       });
-      
+
       if (this.cardType === 'imagenes') {
         console.log('card2:', {
           hasImage: !!(pair.card2?.image || pair.card2?.imageUrl),
           text: pair.card2?.text,
           imageSize: pair.card2?.image?.size,
-          imageType: pair.card2?.image?.type
+          imageType: pair.card2?.image?.type,
         });
       }
-      
     });
-    
+
     try {
       const pairsPayload = await this.buildPairsPayload();
       const settingsPayload = this.buildSettingsPayload();
-      
-      
+
       const gameData = {
         Name: this.gameTitle,
         Description: this.gameDescription,
         Activated: true,
         Mode: this.cardType === 'imagenes' ? 'II' : 'ID',
         Pairs: pairsPayload,
-        Settings: settingsPayload
+        Settings: settingsPayload,
       };
-      
+
       const body = {
         gameType: 'memory',
-        data: gameData
+        data: gameData,
       };
-      
     } catch (error) {
       console.error('Error generating debug payload:', error);
     }
   }
 
   private validateImageFile(file: File): { isValid: boolean; error?: string } {
-    const validTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-    ];
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     const maxSize = 1024 * 1024; // 1MB
     const minSize = 1024; // 1KB mínimo
 
@@ -652,14 +688,16 @@ export class LayoutsMemoryComponent implements OnDestroy {
     };
   }
 
-  private logAction(action: string, data?: any): void {
-  }
+  private logAction(action: string, data?: any): void {}
 
   // Helper method para verificar autenticación
-  private checkUserAuthentication(): { isAuthenticated: boolean; userId: number | null } {
+  private checkUserAuthentication(): {
+    isAuthenticated: boolean;
+    userId: number | null;
+  } {
     const userId = this.userSessionService.getUserId();
     const isAuthenticated = this.userSessionService.isAuthenticated();
-    
+
     return { isAuthenticated, userId };
   }
 }

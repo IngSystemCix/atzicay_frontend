@@ -23,7 +23,8 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -39,4 +40,29 @@
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #9333ea;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  /* Make form elements more compact on mobile */
+  input, textarea, select {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Adjust button sizes */
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+  
+  /* Reduce margins on mobile */
+  .mb-4, .mb-6, .mb-8 {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Adjust card heights */
+  .h-32, .h-40, .h-48 {
+    height: 8rem;
+  }
 }

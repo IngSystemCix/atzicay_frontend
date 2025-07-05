@@ -24,6 +24,8 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
 
   activities: MyProgrammingGame[] = [];
   mobileMenuOpen = false;
+  categoryDropdownOpen = false;
+  dateDropdownOpen = false;
   private activitiesPerPage = 6;
   private currentPage = 1;
   selectedTab: string = 'Todos';
@@ -68,6 +70,7 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     window.addEventListener('scroll', this.onScroll.bind(this));
     // Agregar listener para cerrar menús al hacer clic fuera
     document.addEventListener('click', this.closeMenus.bind(this));
+    document.addEventListener('click', this.handleClickOutside.bind(this));
   }
 
   private initializeComponent(): void {
@@ -107,6 +110,7 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     // Remover listener cuando se destruya el componente
     window.removeEventListener('scroll', this.onScroll.bind(this));
     document.removeEventListener('click', this.closeMenus.bind(this));
+    document.removeEventListener('click', this.handleClickOutside.bind(this));
   }
 
   onScroll() {
@@ -588,5 +592,66 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
           Swal.fire('Error', 'No se pudo generar la URL del juego. Por favor intenta nuevamente.', 'error');
         }
       });
+  }
+
+  // Métodos para los nuevos dropdowns
+  toggleCategoryDropdown() {
+    this.categoryDropdownOpen = !this.categoryDropdownOpen;
+    if (this.categoryDropdownOpen) {
+      this.dateDropdownOpen = false;
+    }
+  }
+
+  toggleDateDropdown() {
+    this.dateDropdownOpen = !this.dateDropdownOpen;
+    if (this.dateDropdownOpen) {
+      this.categoryDropdownOpen = false;
+    }
+  }
+
+  selectCategory(category: string) {
+    this.selectedTab = category;
+    this.categoryDropdownOpen = false;
+    this.resetPagination();
+    this.loadProgrammings();
+  }
+
+  getDateFilterLabel(): string {
+    if (this.startDate && this.endDate) {
+      return `${this.formatDateShort(this.startDate)} - ${this.formatDateShort(this.endDate)}`;
+    } else if (this.startDate) {
+      return `Desde ${this.formatDateShort(this.startDate)}`;
+    } else if (this.endDate) {
+      return `Hasta ${this.formatDateShort(this.endDate)}`;
+    }
+    return 'Filtrar por fecha';
+  }
+
+  private formatDateShort(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: '2-digit',
+      year: '2-digit'
+    });
+  }
+
+  clearDates() {
+    this.startDate = '';
+    this.endDate = '';
+    this.onDateChange();
+  }
+
+  applyDateFilter() {
+    this.dateDropdownOpen = false;
+    this.onDateChange();
+  }
+
+  handleClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.relative')) {
+      this.categoryDropdownOpen = false;
+      this.dateDropdownOpen = false;
+    }
   }
 }

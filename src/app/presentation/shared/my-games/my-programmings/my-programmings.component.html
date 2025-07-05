@@ -1,109 +1,167 @@
 <div class="sm:p-4 lg:p-2 max-w-full programmings-container smooth-scroll scroll-padding-bottom">
   <!-- Header responsivo -->
-  <div class="filters-sticky flex flex-col gap-4 mb-6">
+  <div class="filters-sticky flex flex-col gap-3 mb-6">
 
-    <div class="md:hidden">
-      <div class="flex justify-between items-center mb-4">
-        <h1 class="text-xl font-bold text-gray-900">Actividades</h1>
-        <button 
-          class="p-2 rounded-lg bg-[#E5D8F2] hover:bg-purple-300 transition-colors cursor-pointer"
-          (click)="toggleMobileMenu()">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            @if (!mobileMenuOpen) {
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            } @else {
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            }
-          </svg>
-        </button>
-      </div>
-
-      @if (mobileMenuOpen) {
-        <div class="bg-atzicay-bg rounded-lg p-4 mb-4 space-y-4 animate-in slide-in-from-top duration-200 mx-2">
-          <!-- Tabs para móvil - Columna vertical -->
-          <div class="space-y-3">
-            <label class="text-sm font-medium text-gray-700 block">Categorías</label>
-            <div class="flex flex-col gap-2">
-              @for (tab of tabs; track tab) {
-                <button
-                  class="px-4 py-3 rounded-lg font-medium transition-colors text-sm text-left w-full cursor-pointer"
-                  [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white cursor-pointer' : 'text-gray-600 hover:bg-gray-200 cursor-pointer'"
-                  (click)="selectedTab = tab; mobileMenuOpen = false; resetPagination(); loadProgrammings()">
-                  {{ tab }}
-                </button>
-              }
+    <!-- Vista móvil: Dropdowns apilados -->
+    <div class="flex sm:hidden flex-col gap-3 mx-2">
+      
+      <!-- Dropdown de categorías -->
+      <div class="w-full">
+        <div class="relative">
+          <button
+            (click)="toggleCategoryDropdown()"
+            class="w-full flex items-center justify-between bg-[#E5D8F2] rounded-lg p-3 text-sm font-medium text-gray-700 hover:bg-[#D4C5F9] transition-colors"
+          >
+            <span>{{ selectedTab }}</span>
+            <svg 
+              class="w-4 h-4 transition-transform duration-200"
+              [class.rotate-180]="categoryDropdownOpen"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- Dropdown menu de categorías -->
+          <div 
+            *ngIf="categoryDropdownOpen"
+            class="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden animate-dropdown"
+          >
+            <div class="py-1">
+              <button
+                *ngFor="let tab of tabs"
+                (click)="selectCategory(tab)"
+                class="w-full text-left px-4 py-3 text-sm hover:bg-gray-50 transition-colors"
+                [class.bg-purple-50]="selectedTab === tab"
+                [class.text-purple-700]="selectedTab === tab"
+                [class.font-medium]="selectedTab === tab"
+              >
+                {{ tab }}
+              </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Filtros de fecha para móvil - Columna vertical -->
-          <div class="space-y-3">
-            <label class="text-sm font-medium text-gray-700 block">Filtros de Fecha</label>
-            <div class="space-y-3">
+      <!-- Dropdown de filtros de fecha -->
+      <div class="w-full">
+        <div class="relative">
+          <button
+            (click)="toggleDateDropdown()"
+            class="w-full flex items-center justify-between bg-[#E5D8F2] rounded-lg p-3 text-sm font-medium text-gray-700 hover:bg-[#D4C5F9] transition-colors"
+          >
+            <span>{{ getDateFilterLabel() }}</span>
+            <svg 
+              class="w-4 h-4 transition-transform duration-200"
+              [class.rotate-180]="dateDropdownOpen"
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          
+          <!-- Dropdown menu de fechas -->
+          <div 
+            *ngIf="dateDropdownOpen"
+            class="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden animate-dropdown"
+          >
+            <div class="p-4 space-y-4">
               <div>
-                <label class="text-xs text-gray-600 block mb-2" for="fechaInicioMobile">Fecha Inicio</label>
+                <label class="text-xs text-gray-600 block mb-2" for="fechaInicio">Fecha Inicio</label>
                 <input
                   title="Fecha de inicio"
                   type="date"
-                  id="fechaInicioMobile"
+                  id="fechaInicio"
                   [(ngModel)]="startDate"
-                  (change)="resetPagination(); loadProgrammings()"
-                  class="bg-purple-200 rounded-lg px-3 py-2 text-sm w-full"/>
+                  (change)="onDateChange()"
+                  class="w-full bg-purple-100 rounded-lg px-3 py-2 text-sm border border-purple-200 focus:border-purple-400 focus:outline-none"/>
               </div>
               <div>
-                <label class="text-xs text-gray-600 block mb-2" for="fechaFinMobile">Fecha Fin</label>
+                <label class="text-xs text-gray-600 block mb-2" for="fechaFin">Fecha Fin</label>
                 <input
                   title="Fecha de fin"
                   type="date"
-                  id="fechaFinMobile"
+                  id="fechaFin"
                   [(ngModel)]="endDate"
-                  (change)="resetPagination(); loadProgrammings()"
-                  class="bg-purple-200 rounded-lg px-3 py-2 text-sm w-full cursor-pointer"/>
+                  (change)="onDateChange()"
+                  class="w-full bg-purple-100 rounded-lg px-3 py-2 text-sm border border-purple-200 focus:border-purple-400 focus:outline-none"/>
+              </div>
+              <div class="flex gap-2 pt-2">
+                <button
+                  (click)="clearDates()"
+                  class="flex-1 px-3 py-2 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Limpiar
+                </button>
+                <button
+                  (click)="applyDateFilter()"
+                  class="flex-1 px-3 py-2 text-xs bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Aplicar
+                </button>
               </div>
             </div>
           </div>
         </div>
-      }
+      </div>
+
     </div>
 
-    <!-- Desktop Header (800px en adelante) -->
-    <div class="hidden md:flex flex-col xl:flex-row justify-between gap-4 mx-2">
-      <!-- Tabs para desktop -->
-      <div class="bg-[#E5D8F2] rounded-lg p-3 flex flex-wrap gap-2 w-fit max-w-full">
+    <!-- Vista desktop: Todo en una fila -->
+    <div class="hidden sm:flex items-center gap-4 mx-2">
+      
+      <!-- Tabs de categorías -->
+      <div class="bg-[#E5D8F2] rounded-lg p-2 flex gap-2">
         @for (tab of tabs; track tab) {
           <button
-            class="px-3 md:px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap text-sm cursor-pointer"
-            [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white cursor-pointer' : 'text-gray-600 hover:bg-gray-200 cursor-pointer'"
-            (click)="selectedTab = tab; resetPagination(); loadProgrammings()">
+            class="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+            [class]="selectedTab === tab ? 'bg-atzicay-bg-button text-white' : 'text-gray-600 hover:bg-gray-200'"
+            (click)="selectCategory(tab)">
             {{ tab }}
           </button>
         }
       </div>
 
-      <!-- Filtros de fecha para desktop -->
-      <div class="bg-[#E5D8F2] rounded-lg p-3 flex flex-col md:flex-row items-start md:items-center gap-3 w-fit max-w-full">
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <label class="text-sm text-gray-600 whitespace-nowrap" for="fechaInicio">Fecha Inicio</label>
+      <!-- Filtros de fecha -->
+      <div class="bg-[#E5D8F2] rounded-lg p-2 flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-600 whitespace-nowrap" for="fechaInicioDesktop">Inicio</label>
           <input
             title="Fecha de inicio"
             type="date"
-            id="fechaInicio"
+            id="fechaInicioDesktop"
             [(ngModel)]="startDate"
-            (change)="resetPagination(); loadProgrammings()"
-            class="bg-purple-200 rounded-lg px-3 py-2 text-sm min-w-0 flex-1 md:flex-none"/>
+            (change)="onDateChange()"
+            class="bg-purple-200 rounded-lg px-3 py-2 text-sm min-w-0 w-32"/>
         </div>
 
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <label class="text-sm text-gray-600 whitespace-nowrap" for="fechaFin">Fecha Fin</label>
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-600 whitespace-nowrap" for="fechaFinDesktop">Fin</label>
           <input
             title="Fecha de fin"
             type="date"
-            id="fechaFin"
+            id="fechaFinDesktop"
             [(ngModel)]="endDate"
-            (change)="resetPagination(); loadProgrammings()"
-            class="bg-purple-200 rounded-lg px-3 py-2 text-sm min-w-0 flex-1 md:flex-none"/>
+            (change)="onDateChange()"
+            class="bg-purple-200 rounded-lg px-3 py-2 text-sm min-w-0 w-32"/>
         </div>
+        
+        @if (startDate || endDate) {
+        <button
+          (click)="clearDates()"
+          class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+        >
+          Limpiar
+        </button>
+        }
       </div>
+
     </div>
+
   </div>
 
   <!-- Grid de Cards Responsivo -->
