@@ -1,42 +1,35 @@
 <div class="min-h-screen bg-atzicay-bg p-4">
   <!-- Logo flotante -->
   <app-floating-logo></app-floating-logo>
-  
+
   <div class="max-w-6xl mx-auto">
     <!-- Header Mejorado -->
     <div class="w-full flex justify-center mb-6 transition-all duration-700 ease-in-out max-w-7xl mx-auto">
-      <div
-        *ngIf="headerExpanded"
+      <div *ngIf="headerExpanded"
         class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 rounded-3xl backdrop-blur-xl shadow-2xl border border-atzicay-border/30 p-6 relative overflow-hidden"
-        style="backdrop-filter: blur(25px)"
-      >
+        style="backdrop-filter: blur(25px)">
         <!-- Decorative background elements -->
         <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
-        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-transparent rounded-full blur-2xl"></div>
-        
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-3xl">
+        </div>
+        <div
+          class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-transparent rounded-full blur-2xl">
+        </div>
+
         <!-- Content container -->
         <div class="relative z-10">
           <!-- Header superior con diseño premium -->
           <div class="flex items-center justify-between mb-6">
-            <button
-              (click)="volverAlDashboard()"
-              class="group relative px-6 py-3 bg-white text-purple-700 rounded-2xl hover:from-white to-white/95 font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-white/20"
-            >
-              <div class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <button (click)="volverAlDashboard()"
+              class="group relative px-6 py-3 bg-white text-purple-700 rounded-2xl hover:from-white to-white/95 font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-white/20">
+              <div
+                class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              </div>
               <div class="relative flex items-center">
-                <svg
-                  class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M15 19l-7-7 7-7"
-                  />
+                <svg class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
                 Volver
               </div>
@@ -53,32 +46,24 @@
               </p>
             </div>
 
-            <button
-              (click)="toggleHeader()"
+            <button (click)="toggleHeader()"
               class="group bg-white hover:from-white to-white/95 rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl border border-atzicay-border"
-              title="Minimizar header"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 text-purple-600 group-hover:text-purple-700 transition-colors duration-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M5 15l7-7 7 7"
-                />
+              title="Minimizar header">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
               </svg>
             </button>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Progreso Card -->
-            <div class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
-              <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div
+              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              </div>
               <div class="relative">
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">Progreso</h3>
@@ -90,8 +75,7 @@
                   <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
                     <div
                       class="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 h-4 rounded-full transition-all duration-1000 ease-out shadow-lg relative"
-                      [style.width.%]="porcentajeProgreso"
-                    >
+                      [style.width.%]="porcentajeProgreso">
                       <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-full"></div>
                     </div>
                   </div>
@@ -103,24 +87,18 @@
             </div>
 
             <!-- Tiempo Card -->
-            <div class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
-              <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div
+              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              </div>
               <div class="relative flex items-center justify-between">
                 <div class="flex items-center gap-4">
                   <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl p-3 shadow-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-7 w-7 text-blue-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-500" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
@@ -134,31 +112,23 @@
             </div>
 
             <!-- Pista Card -->
-            <div class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
-              <div class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div
+              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+              <div
+                class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              </div>
               <div class="relative">
-                <button
-                  (click)="togglePista()"
-                  class="w-full text-left focus:outline-none"
-                >
+                <button (click)="togglePista()" class="w-full text-left focus:outline-none">
                   <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">Pista</h3>
                     <div class="flex items-center gap-2">
                       <div class="bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-xl p-2 shadow-sm">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
+                        <svg xmlns="http://www.w3.org/2000/svg"
                           class="h-5 w-5 text-yellow-600 transition-transform duration-300"
-                          [ngClass]="{ 'rotate-180': mostrarPista }"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9.663 17h4.673M12 3v1m6.364-.636l-.707.707M21 12h-1M17.66 18.364l-.707-.707M12 21v-1m-6.364-.636l.707-.707M3 12h1m2.343-5.657l-.707-.707"
-                          />
+                          [ngClass]="{ 'rotate-180': mostrarPista }" fill="none" viewBox="0 0 24 24"
+                          stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364-.636l-.707.707M21 12h-1M17.66 18.364l-.707-.707M12 21v-1m-6.364-.636l.707-.707M3 12h1m2.343-5.657l-.707-.707" />
                         </svg>
                       </div>
                     </div>
@@ -170,7 +140,8 @@
                   </div>
                 </button>
                 @if (mostrarPista) {
-                <div class="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-200" style="animation: fadeInUp 0.4s ease forwards">
+                <div class="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-200"
+                  style="animation: fadeInUp 0.4s ease forwards">
                   <p class="text-sm font-medium text-yellow-800">
                     {{ pistaTexto }}
                   </p>
@@ -183,14 +154,14 @@
       </div>
 
       <!-- Header minimizado premium -->
-      <div
-        *ngIf="!headerExpanded"
-        class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-8 py-4 relative overflow-hidden"
-      >
+      <div *ngIf="!headerExpanded"
+        class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-8 py-4 relative overflow-hidden">
         <!-- Decorative elements -->
         <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
-        <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl"></div>
-        
+        <div
+          class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl">
+        </div>
+
         <div class="relative z-10 flex items-center justify-between">
           <!-- Info compacta premium -->
           <div class="flex items-center gap-4 text-atzicay-heading">
@@ -203,33 +174,25 @@
             <!-- Stats compactos premium -->
             <div class="flex items-center gap-3">
               <!-- Progreso compacto -->
-              <div class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
+              <div
+                class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
                 <span class="font-black text-atzicay-heading">
                   {{ matches }}/{{ totalPairs }}
                 </span>
                 <div class="w-20 bg-purple-200 rounded-full h-2 shadow-inner">
                   <div
                     class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500 shadow-sm"
-                    [style.width.%]="porcentajeProgreso"
-                  ></div>
+                    [style.width.%]="porcentajeProgreso"></div>
                 </div>
               </div>
 
               <!-- Tiempo compacto -->
-              <div class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
+              <div
+                class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span class="font-black">{{ getFormattedTime() }}</span>
               </div>
@@ -238,35 +201,24 @@
 
           <!-- Botones de acción premium -->
           <div class="flex items-center gap-3">
-            <button
-              (click)="volverAlDashboard()"
-              class="group relative px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border"
-            >
-              <div class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <button (click)="volverAlDashboard()"
+              class="group relative px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border">
+              <div
+                class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              </div>
               <div class="relative flex items-center">
                 <span class="mr-2">←</span>
                 Volver
               </div>
             </button>
 
-            <button
-              (click)="toggleHeader()"
+            <button (click)="toggleHeader()"
               class="group bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg border border-atzicay-border"
-              title="Expandir header"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-purple-600 group-hover:text-purple-700 transition-colors duration-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M19 9l-7 7-7-7"
-                />
+              title="Expandir header">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
           </div>
@@ -290,8 +242,8 @@
       <div class="bg-red-500 bg-opacity-90 backdrop-blur-sm rounded-lg p-6 inline-block">
         <h2 class="text-2xl font-bold text-white mb-2">❌ Error</h2>
         <p class="text-white text-lg">{{ error }}</p>
-        <button (click)="volverAlDashboard()" 
-                class="mt-4 bg-white text-red-500 px-4 py-2 rounded font-semibold hover:bg-gray-100 transition-colors">
+        <button (click)="volverAlDashboard()"
+          class="mt-4 bg-white text-red-500 px-4 py-2 rounded font-semibold hover:bg-gray-100 transition-colors">
           Volver al Dashboard
         </button>
       </div>
@@ -301,8 +253,7 @@
     <!-- Start/Reset Button -->
     @if ((!gameStarted || gameCompleted) && !loading && !error) {
     <div class="text-center mb-8">
-      <button
-        (click)="gameCompleted ? resetGame() : startGame()"
+      <button (click)="gameCompleted ? resetGame() : startGame()"
         class="bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-8 rounded-full text-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
         {{ gameCompleted ? '🔄 Jugar de Nuevo' : '🚀 Comenzar Juego' }}
       </button>
@@ -321,70 +272,68 @@
 
     <!-- Game Board -->
     @if (!loading && !error) {
-    <div class="grid gap-4 max-w-4xl mx-auto" 
-         [ngClass]="getGridClasses()">
+    <div class="grid gap-4 max-w-4xl mx-auto" [ngClass]="getGridClasses()">
       @for (card of cards; track card) {
-      <div
-        class="aspect-square relative cursor-pointer transform transition-all duration-300 hover:scale-105"
+      <div class="aspect-square relative cursor-pointer transform transition-all duration-300 hover:scale-105"
         (click)="flipCard(card)">
 
         <!-- Card Container -->
         <div class="w-full h-full relative perspective-1000">
           <div class="card-inner w-full h-full relative transition-transform duration-600"
-               [class.flipped]="card.flipped || card.matched">
+            [class.flipped]="card.flipped || card.matched">
 
             <!-- Card Back (Question Mark) -->
-            <div class="card-face card-back absolute inset-0 w-full h-full backface-hidden rounded-xl border-4 border-white bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
+            <div
+              class="card-face card-back absolute inset-0 w-full h-full backface-hidden rounded-xl border-4 border-white bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center shadow-lg">
               <div class="text-white text-6xl font-bold opacity-80">
                 <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/>
+                  <path
+                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
                 </svg>
               </div>
             </div>
 
             <!-- Card Front (Image or Text) -->
-            <div class="card-face card-front absolute inset-0 w-full h-full backface-hidden rounded-xl border-4 border-white overflow-hidden shadow-lg"
-                 [class.matched]="card.matched">
-              
+            <div
+              class="card-face card-front absolute inset-0 w-full h-full backface-hidden rounded-xl border-4 border-white overflow-hidden shadow-lg"
+              [class.matched]="card.matched">
+
               <!-- Image Card -->
               @if (card.isImageCard && card.image) {
-                <img
-                  [src]="card.image"
-                  [alt]="card.name"
-                  class="w-full h-full object-cover transition-all duration-300"
-                  [class.brightness-110]="card.matched"
-                  [class.saturate-150]="card.matched"
-                  (error)="onImageError(card)">
+              <img [src]="card.image" [alt]="card.name" class="w-full h-full object-cover transition-all duration-300"
+                [class.brightness-110]="card.matched" [class.saturate-150]="card.matched" (error)="onImageError(card)">
               }
-              
+
               <!-- Text Card -->
               @if (!card.isImageCard && card.text) {
-                <div class="w-full h-full bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center p-3">
-                  <div class="text-center">
-                    <div class="text-blue-900 font-semibold text-xs sm:text-sm leading-tight break-words">
-                      {{ card.text }}
-                    </div>
+              <div
+                class="w-full h-full bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center p-3">
+                <div class="text-center">
+                  <div class="text-blue-900 font-semibold text-xs sm:text-sm leading-tight break-words">
+                    {{ card.text }}
                   </div>
                 </div>
+              </div>
               }
-              
+
               <!-- Fallback for image error -->
               @if (card.isImageCard && !card.image) {
-                <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                  <div class="text-gray-500 text-center">
-                    <svg class="w-8 h-8 mx-auto mb-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                    </svg>
-                    <div class="text-xs">Imagen</div>
-                  </div>
+              <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <div class="text-gray-500 text-center">
+                  <svg class="w-8 h-8 mx-auto mb-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                  </svg>
+                  <div class="text-xs">Imagen</div>
                 </div>
+              </div>
               }
 
               <!-- Matched Indicator -->
               @if (card.matched) {
               <div class="absolute top-2 right-2 bg-green-500 rounded-full p-1">
                 <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
               </div>
               }

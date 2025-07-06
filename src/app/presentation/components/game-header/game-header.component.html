@@ -1,0 +1,367 @@
+<!-- Header Responsivo -->
+<div class="w-full flex justify-center mb-6 transition-all duration-700 ease-in-out max-w-7xl mx-auto">
+  <!-- Header Desktop (xl y superior) -->
+  <div class="hidden xl:block w-full">
+    <div *ngIf="headerExpanded"
+      class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 rounded-3xl backdrop-blur-xl shadow-2xl border border-atzicay-border/30 p-6 relative overflow-hidden"
+      style="backdrop-filter: blur(25px)">
+      <!-- Decorative background elements -->
+      <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
+      <div
+        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-3xl">
+      </div>
+      <div
+        class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-transparent rounded-full blur-2xl">
+      </div>
+
+      <!-- Content container -->
+      <div class="relative z-10">
+        <!-- Header superior con diseño premium -->
+        <div class="flex items-center justify-between mb-6">
+          <button (click)="volverAlDashboard.emit()"
+            class="group relative px-6 py-3 bg-white text-purple-700 rounded-2xl hover:from-white to-white/95 font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-white/20">
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+            <div class="relative flex items-center">
+              <svg class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+              </svg>
+              Volver
+            </div>
+          </button>
+
+          <div class="text-center flex-1 mx-8">
+            <div class="relative">
+              <h1 class="text-3xl font-black mb-2 tracking-tight text-atzicay-heading">
+                {{ tituloJuego }}
+              </h1>
+            </div>
+            <p class="text-lg font-medium text-atzicay-subheading mt-3">
+              {{ descripcionJuego }}
+            </p>
+          </div>
+
+          <button (click)="toggleHeader.emit()"
+            class="group bg-white hover:from-white to-white/95 rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl border border-atzicay-border"
+            title="Minimizar header">
+            <svg xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Vidas Card -->
+          <div
+            class="group relative bg-white rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-atzicay-border">
+            <div class="relative flex items-center justify-center">
+              <div class="flex items-center justify-center gap-4">
+                <div class="relative">
+                  <div class="bg-atzicay-bg rounded-2xl p-3 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </div>
+                  <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                </div>
+                <div>
+                  <p class="text-3xl font-black text-gray-800 mb-1">
+                    {{ vidasRestantes }}
+                  </p>
+                  <p class="text-sm text-gray-600 font-semibold uppercase tracking-wide">
+                    {{ vidasRestantes === 1 ? "Vida" : "Vidas" }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progreso Card -->
+          <div
+            class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                  Progreso
+                </h3>
+                <span class="text-2xl font-black text-purple-700">
+                  {{ palabrasCompletadas }}/{{ totalPalabras }}
+                </span>
+              </div>
+              <div class="relative">
+                <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
+                  <div
+                    class="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 h-4 rounded-full transition-all duration-1000 ease-out shadow-lg relative"
+                    [style.width.%]="porcentajeProgreso">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-full"></div>
+                  </div>
+                </div>
+                <div class="mt-2 text-center">
+                  <span class="text-sm font-semibold text-purple-600">{{ porcentajeProgreso }}% completado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tiempo Card -->
+          <div
+            class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
+            <div
+              class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+            <div class="relative flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl p-3 shadow-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-500" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-3xl font-black text-gray-800 font-mono mb-1">
+                    {{ formatearTiempo() }}
+                  </p>
+                  <p class="text-sm text-gray-600 font-semibold uppercase tracking-wide">
+                    Tiempo
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header minimizado premium -->
+    <div *ngIf="!headerExpanded"
+      class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-8 py-4 relative overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
+      <div
+        class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl">
+      </div>
+
+      <div class="relative z-10 flex items-center justify-between">
+        <!-- Info compacta premium -->
+        <div class="flex items-center gap-4 text-atzicay-heading">
+          <div class="flex items-center gap-3">
+            <span class="text-xl font-black bg-atzicay-heading bg-clip-text text-transparent">
+              {{ tituloJuego }}
+            </span>
+          </div>
+
+          <!-- Stats compactos premium -->
+          <div class="flex items-center gap-3">
+            <!-- Vidas compactas -->
+            <div
+              class="flex items-center gap-2 bg-white text-red-600 font-bold rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              <span class="font-black">{{ vidasRestantes }}</span>
+            </div>
+
+            <!-- Progreso compacto -->
+            <div
+              class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
+              <span class="font-black text-atzicay-heading">
+                {{ palabrasCompletadas }}/{{ totalPalabras }}
+              </span>
+              <div class="w-20 bg-purple-200 rounded-full h-2 shadow-inner">
+                <div
+                  class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500 shadow-sm"
+                  [style.width.%]="porcentajeProgreso"></div>
+              </div>
+            </div>
+
+            <!-- Tiempo compacto -->
+            <div
+              class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="font-black">{{ formatearTiempo() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de acción premium -->
+        <div class="flex items-center gap-3">
+          <button (click)="volverAlDashboard.emit()"
+            class="group relative px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border">
+            <div
+              class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+            <div class="relative flex items-center">
+              <span class="mr-2">←</span>
+              Volver
+            </div>
+          </button>
+
+          <button (click)="toggleHeader.emit()"
+            class="group bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg border border-atzicay-border"
+            title="Expandir header">
+            <svg xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Mobile y Tablet (hasta xl) -->
+  <div class="xl:hidden w-full">
+    <!-- Barra superior fija con logo Atzicay y menú hamburguesa -->
+    <div class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 backdrop-blur-xl shadow-lg border border-atzicay-border/40 rounded-2xl p-4 relative overflow-hidden">
+      <!-- Decorative elements -->
+      <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
+      
+      <div class="relative z-10 flex items-center justify-between">
+        <!-- Logo Atzicay -->
+        <div class="flex items-center gap-3">
+          <div class="bg-white rounded-xl p-2 shadow-md">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="h-5 w-5 text-purple-600 flex-shrink-0"
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <span class="text-lg font-black text-atzicay-heading tracking-wide">
+            ATZICAY
+          </span>
+        </div>
+
+        <!-- Título del juego centrado -->
+        <div class="flex-1 text-center">
+          <h1 class="text-lg sm:text-xl font-bold text-atzicay-heading truncate">
+            {{ tituloJuego }}
+          </h1>
+        </div>
+
+        <!-- Botón menú hamburguesa -->
+        <button (click)="toggleMobileMenu.emit()"
+          class="bg-white hover:bg-white/95 rounded-xl p-2 transition-all duration-300 cursor-pointer active:scale-95 shadow-md border border-atzicay-border">
+          <svg xmlns="http://www.w3.org/2000/svg" 
+               class="h-6 w-6 text-purple-600 transition-transform duration-300"
+               [class.rotate-90]="mobileMenuOpen"
+               fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Menú desplegable -->
+    <div class="overflow-hidden transition-all duration-500 ease-in-out"
+         [class.max-h-96]="mobileMenuOpen"
+         [class.max-h-0]="!mobileMenuOpen">
+      <div class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 backdrop-blur-xl shadow-xl border border-atzicay-border/30 rounded-2xl mt-3 p-4 relative overflow-hidden"
+           style="backdrop-filter: blur(25px)"
+           [class.animate-pulse]="mobileMenuOpen">
+        <!-- Decorative background -->
+        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
+        
+        <div class="relative z-10 space-y-4">
+          <!-- Estadísticas en grid responsive -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Vidas -->
+            <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+              <div class="flex items-center gap-3">
+                <div class="bg-red-50 rounded-lg p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-lg font-black text-gray-800">{{ vidasRestantes }}</p>
+                  <p class="text-xs text-gray-600 font-medium">{{ vidasRestantes === 1 ? "Vida" : "Vidas" }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progreso -->
+            <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+              <div class="flex items-center gap-3">
+                <div class="bg-purple-50 rounded-lg p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-lg font-black text-gray-800">{{ palabrasCompletadas }}/{{ totalPalabras }}</p>
+                  <p class="text-xs text-gray-600 font-medium">Progreso</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tiempo -->
+            <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border sm:col-span-1 col-span-1">
+              <div class="flex items-center gap-3">
+                <div class="bg-blue-50 rounded-lg p-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-lg font-black text-gray-800">{{ formatearTiempo() }}</p>
+                  <p class="text-xs text-gray-600 font-medium">Tiempo</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra de progreso -->
+          <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-bold text-gray-700">Progreso del juego</span>
+              <span class="text-sm font-bold text-purple-600">{{ porcentajeProgreso }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-1000"
+                   [style.width.%]="porcentajeProgreso">
+              </div>
+            </div>
+          </div>
+
+          <!-- Descripción del juego (solo si existe) -->
+          <div *ngIf="descripcionJuego" class="bg-white/80 rounded-xl p-3 shadow-md border border-atzicay-border">
+            <p class="text-sm text-gray-700 leading-relaxed">{{ descripcionJuego }}</p>
+          </div>
+
+          <!-- Botón volver al dashboard -->
+          <button (click)="volverAlDashboard.emit()"
+            class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl py-3 px-4 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver al Dashboard
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -9,7 +9,7 @@ import { RatingModalService } from '../../../../core/infrastructure/service/rati
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
-
+import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
 interface JuegoState {
   palabraActual: string;
   pistaPalabra: string;
@@ -44,7 +44,7 @@ interface JuegoState {
 @Component({
   selector: 'app-game-hangman',
   standalone: true,
-  imports: [CommonModule, FloatingLogoComponent],
+  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
 })
