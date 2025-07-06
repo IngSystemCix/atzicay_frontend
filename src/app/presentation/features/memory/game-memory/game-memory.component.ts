@@ -8,6 +8,7 @@ import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructu
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
+import { GameLoadingService } from '../../../../core/infrastructure/services/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 
 interface Card {
@@ -34,6 +35,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   private ratingModalService = inject(RatingModalService);
   private gameAudioService = inject(GameAudioService);
   private gameUrlService = inject(GameUrlService);
+  private gameLoadingService = inject(GameLoadingService);
   
   cards: Card[] = [];
   flippedCards: Card[] = [];
@@ -71,6 +73,9 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   }
 
   onAuthenticationReady(userId: number): void {
+    // Mostrar loading rápido para el juego de memoria
+    this.gameLoadingService.showFastGameLoading('Cargando Memoria...');
+    
     // Capturar parámetros de ruta - puede ser 'id' o 'token'
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
@@ -85,12 +90,14 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
             console.error('❌ [Memory] Token inválido o expirado');
             this.error = 'El enlace del juego ha expirado o no es válido';
             this.loading = false;
+            this.gameLoadingService.hideFast();
           }
         },
         error: (error) => {
           console.error('❌ [Memory] Error validando token:', error);
           this.error = 'Error al validar el acceso al juego';
           this.loading = false;
+          this.gameLoadingService.hideFast();
         }
       });
     } else if (id) {
@@ -102,11 +109,13 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         console.error('❌ [Memory] ID de juego inválido:', id);
         this.error = 'ID de juego inválido';
         this.loading = false;
+        this.gameLoadingService.hideFast();
       }
     } else {
       console.error('❌ [Memory] No se encontró ID ni token en la URL');
       this.error = 'No se proporcionó un ID de juego válido';
       this.loading = false;
+      this.gameLoadingService.hideFast();
     }
   }
 
@@ -124,12 +133,15 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
           this.aplicarConfiguracion(response.data);
           // Hacer la inicialización async
           this.initializeGame().then(() => {
+            this.gameLoadingService.hideFast();
           }).catch((error) => {
             console.error('Error inicializando juego:', error);
             this.error = 'Error al inicializar el juego';
+            this.gameLoadingService.hideFast();
           });
         } else {
           this.error = 'Error al cargar la configuración del juego';
+          this.gameLoadingService.hideFast();
         }
         this.loading = false;
       },
@@ -137,6 +149,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         console.error('Error al obtener la configuración del juego:', err);
         this.error = 'Error al cargar la configuración del juego';
         this.loading = false;
+        this.gameLoadingService.hideFast();
       }
     });
   }

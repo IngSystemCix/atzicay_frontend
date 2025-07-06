@@ -15,6 +15,7 @@ import {
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
+import { GameLoadingService } from '../../../../core/infrastructure/services/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 
 interface WordCell {
@@ -45,6 +46,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   private ratingModalService = inject(RatingModalService);
   private gameAudioService = inject(GameAudioService);
   private gameUrlService = inject(GameUrlService);
+  private gameLoadingService = inject(GameLoadingService);
 
   grid: WordCell[][] = [];
   words: Word[] = [];
@@ -95,6 +97,9 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   onAuthenticationReady(userId: number): void {
+    // Mostrar loading rápido para la carga del juego
+    this.gameLoadingService.showFastGameLoading('Cargando Pupiletras...');
+    
     // Capturar parámetros de ruta - puede ser 'id' o 'token'
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
@@ -110,12 +115,14 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
             console.error('❌ [SolveTheWord] Token inválido o expirado');
             this.error = 'El enlace del juego ha expirado o no es válido';
             this.loading = false;
+            this.gameLoadingService.hideFast();
           }
         },
         error: (error) => {
           console.error('❌ [SolveTheWord] Error validando token:', error);
           this.error = 'Error al validar el acceso al juego';
           this.loading = false;
+          this.gameLoadingService.hideFast();
         }
       });
     } else if (id) {
@@ -127,11 +134,13 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
         console.error('❌ [SolveTheWord] ID de juego inválido:', id);
         this.error = 'ID de juego inválido';
         this.loading = false;
+        this.gameLoadingService.hideFast();
       }
     } else {
       console.error('❌ [SolveTheWord] No se encontró ID ni token en la URL');
       this.error = 'No se proporcionó un ID de juego válido';
       this.loading = false;
+      this.gameLoadingService.hideFast();
     }
   }
 
@@ -147,8 +156,10 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
         if (response.success && response.data) {
           this.aplicarConfiguracion(response.data);
           this.iniciarJuego();
+          this.gameLoadingService.hideFast();
         } else {
           this.error = response.message || 'No se pudo cargar la configuración del juego';
+          this.gameLoadingService.hideFast();
         }
         this.loading = false;
       },
@@ -156,6 +167,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
         console.error('Error cargando configuración:', err);
         this.error = 'Error al cargar la configuración del juego';
         this.loading = false;
+        this.gameLoadingService.hideFast();
       },
     });
   }

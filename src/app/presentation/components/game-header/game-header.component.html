@@ -53,9 +53,9 @@
             </svg>
           </button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Vidas Card -->
-          <div
+        <div class="grid grid-cols-1" [ngClass]="gridColumns + ' gap-6'">
+          <!-- Vidas Card (solo si mostrarVidas es true) -->
+          <div *ngIf="mostrarVidas"
             class="group relative bg-white rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-atzicay-border">
             <div class="relative flex items-center justify-center">
               <div class="flex items-center justify-center gap-4">
@@ -74,15 +74,15 @@
                     {{ vidasRestantes }}
                   </p>
                   <p class="text-sm text-gray-600 font-semibold uppercase tracking-wide">
-                    {{ vidasRestantes === 1 ? "Vida" : "Vidas" }}
+                    {{ etiquetaVidas }}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Progreso Card -->
-          <div
+          <!-- Progreso Card (solo si mostrarProgreso es true) -->
+          <div *ngIf="mostrarProgreso"
             class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
             <div
               class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -90,7 +90,7 @@
             <div class="relative">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wide">
-                  Progreso
+                  {{ etiquetaProgreso }}
                 </h3>
                 <span class="text-2xl font-black text-purple-700">
                   {{ palabrasCompletadas }}/{{ totalPalabras }}
@@ -111,8 +111,8 @@
             </div>
           </div>
 
-          <!-- Tiempo Card -->
-          <div
+          <!-- Tiempo Card (solo si mostrarTiempo es true) -->
+          <div *ngIf="mostrarTiempo"
             class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20">
             <div
               class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -161,8 +161,8 @@
 
           <!-- Stats compactos premium -->
           <div class="flex items-center gap-3">
-            <!-- Vidas compactas -->
-            <div
+            <!-- Vidas compactas (solo si mostrarVidas es true) -->
+            <div *ngIf="mostrarVidas"
               class="flex items-center gap-2 bg-white text-red-600 font-bold rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -172,8 +172,8 @@
               <span class="font-black">{{ vidasRestantes }}</span>
             </div>
 
-            <!-- Progreso compacto -->
-            <div
+            <!-- Progreso compacto (solo si mostrarProgreso es true) -->
+            <div *ngIf="mostrarProgreso"
               class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
               <span class="font-black text-atzicay-heading">
                 {{ palabrasCompletadas }}/{{ totalPalabras }}
@@ -185,8 +185,8 @@
               </div>
             </div>
 
-            <!-- Tiempo compacto -->
-            <div
+            <!-- Tiempo compacto (solo si mostrarTiempo es true) -->
+            <div *ngIf="mostrarTiempo"
               class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -281,9 +281,9 @@
         
         <div class="relative z-10 space-y-4">
           <!-- Estadísticas en grid responsive -->
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <!-- Vidas -->
-            <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+          <div class="grid gap-3" [ngClass]="mostrarVidas && mostrarProgreso && mostrarTiempo ? 'grid-cols-1 sm:grid-cols-3' : (mostrarProgreso && mostrarTiempo) || (mostrarVidas && mostrarProgreso) || (mostrarVidas && mostrarTiempo) ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'">
+            <!-- Vidas (solo si mostrarVidas es true) -->
+            <div *ngIf="mostrarVidas" class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
               <div class="flex items-center gap-3">
                 <div class="bg-red-50 rounded-lg p-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" fill="none"
@@ -294,13 +294,13 @@
                 </div>
                 <div>
                   <p class="text-lg font-black text-gray-800">{{ vidasRestantes }}</p>
-                  <p class="text-xs text-gray-600 font-medium">{{ vidasRestantes === 1 ? "Vida" : "Vidas" }}</p>
+                  <p class="text-xs text-gray-600 font-medium">{{ etiquetaVidas }}</p>
                 </div>
               </div>
             </div>
 
-            <!-- Progreso -->
-            <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
+            <!-- Progreso (solo si mostrarProgreso es true) -->
+            <div *ngIf="mostrarProgreso" class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
               <div class="flex items-center gap-3">
                 <div class="bg-purple-50 rounded-lg p-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-500" fill="none"
@@ -311,13 +311,13 @@
                 </div>
                 <div>
                   <p class="text-lg font-black text-gray-800">{{ palabrasCompletadas }}/{{ totalPalabras }}</p>
-                  <p class="text-xs text-gray-600 font-medium">Progreso</p>
+                  <p class="text-xs text-gray-600 font-medium">{{ etiquetaProgreso }}</p>
                 </div>
               </div>
             </div>
 
-            <!-- Tiempo -->
-            <div class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border sm:col-span-1 col-span-1">
+            <!-- Tiempo (solo si mostrarTiempo es true) -->
+            <div *ngIf="mostrarTiempo" class="bg-white rounded-xl p-3 shadow-md border border-atzicay-border">
               <div class="flex items-center gap-3">
                 <div class="bg-blue-50 rounded-lg p-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none"

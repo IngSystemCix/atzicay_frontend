@@ -5,6 +5,7 @@ import { routes } from './app.routes';
 import { environment } from '../environments/environment.development';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { authInterceptor } from './core/infrastructure/middleware/auth.interceptor';
+import { loadingInterceptor } from './core/infrastructure/interceptors/loading.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,7 +20,7 @@ export const appConfig: ApplicationConfig = {
       },
     }),
     provideHttpClient(
-      withInterceptors([authInterceptor]),
+      withInterceptors([authInterceptor]), // Interceptor de loading deshabilitado temporalmente para optimizar
     ),
   ]
 };

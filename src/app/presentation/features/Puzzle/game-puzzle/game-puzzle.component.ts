@@ -14,7 +14,9 @@ import {
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
+import { GameLoadingService } from '../../../../core/infrastructure/services/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
+import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
 
 interface PuzzlePiece {
   id: number;
@@ -34,7 +36,7 @@ interface PuzzlePiece {
 @Component({
   selector: 'app-game-puzzle',
   standalone: true,
-  imports: [CommonModule, FloatingLogoComponent],
+  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
   templateUrl: './game-puzzle.component.html',
   styleUrl: './game-puzzle.component.css',
 })
@@ -49,12 +51,13 @@ export class GamePuzzleComponent
   private gameAudioService = inject(GameAudioService);
   private ratingModalService = inject(RatingModalService);
   private gameUrlService = inject(GameUrlService);
+  private gameLoadingService = inject(GameLoadingService);
   pieces: PuzzlePiece[] = [];
-  rows = 4; 
+  rows = 4;
   cols = 4;
   totalPieces = this.rows * this.cols;
   gameStarted = false;
-  gameCompleted = false; 
+  gameCompleted = false;
   draggedPiece: PuzzlePiece | null = null;
   correctPieces = 0;
   timeElapsed = 0;
@@ -63,10 +66,10 @@ export class GamePuzzleComponent
   maxTime = 300;
   timeLeft = this.maxTime;
   imageWidth = 700;
-  imageHeight = 700; 
-  actualImageWidth = 0; 
-  actualImageHeight = 0; 
-  imageScale = 1; 
+  imageHeight = 700;
+  actualImageWidth = 0;
+  actualImageHeight = 0;
+  imageScale = 1;
   sidebarWidth = 200;
   loading = false;
   error: string | null = null;
@@ -79,7 +82,8 @@ export class GamePuzzleComponent
   hasUserAssessed = false;
   headerExpanded = false;
   mostrarPista = false;
-
+  mobileMenuOpen = false;
+  isMobileView = false;
   private timeWarningSent = false;
 
   constructor() {
@@ -88,8 +92,31 @@ export class GamePuzzleComponent
 
   override ngOnInit() {
     super.ngOnInit();
+    this.checkViewport();
+    window.addEventListener('resize', () => this.checkViewport());
   }
 
+  private checkViewport() {
+    this.isMobileView = window.innerWidth < 1024; // Tablet o móvil
+    if (this.isMobileView) {
+      this.isPanelOpen = false; // Por defecto cerrado en móviles
+    } else {
+      this.isPanelOpen = true; // Por defecto abierto en desktop
+    }
+  }
+  getBoardSize(): { width: number; height: number } {
+    if (this.isMobileView) {
+      const maxWidth = window.innerWidth * 0.95;
+      return { width: maxWidth, height: maxWidth }; // Cuadrado
+    } else if (window.innerWidth < 1280) {
+      // Tablet
+      const maxWidth = Math.min(600, window.innerWidth * 0.8);
+      return { width: maxWidth, height: maxWidth };
+    } else {
+      // Desktop
+      return { width: 724, height: 724 }; // Tamaño original
+    }
+  }
   override ngOnDestroy() {
     if (this.timer) {
       clearInterval(this.timer);
@@ -98,31 +125,43 @@ export class GamePuzzleComponent
   }
 
   onAuthenticationReady(userId: number): void {
+    // Mostrar loading rápido para el puzzle
+    this.gameLoadingService.showFastGameLoading('Cargando Rompecabezas...');
+    
     // Capturar parámetros de ruta - puede ser 'id' o 'token'
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
-    
-    console.log('🧩 [Puzzle] Parámetros capturados:', { id, token, url: this.router.url });
-    
+
+    console.log('🧩 [Puzzle] Parámetros capturados:', {
+      id,
+      token,
+      url: this.router.url,
+    });
+
     if (token) {
       // Si tenemos un token, validarlo primero
       console.log('🔐 [Puzzle] Validando token de acceso...');
       this.gameUrlService.validateGameToken(token).subscribe({
         next: (response) => {
           if (response.valid && response.gameInstanceId) {
-            console.log('✅ [Puzzle] Token válido, cargando juego con ID:', response.gameInstanceId);
+            console.log(
+              '✅ [Puzzle] Token válido, cargando juego con ID:',
+              response.gameInstanceId
+            );
             this.cargarConfiguracionJuego(response.gameInstanceId);
           } else {
             console.error('❌ [Puzzle] Token inválido o expirado');
             this.error = 'El enlace del juego ha expirado o no es válido';
             this.loading = false;
+            this.gameLoadingService.hideFast();
           }
         },
         error: (error) => {
           console.error('❌ [Puzzle] Error validando token:', error);
           this.error = 'Error al validar el acceso al juego';
           this.loading = false;
-        }
+          this.gameLoadingService.hideFast();
+        },
       });
     } else if (id) {
       // Si tenemos un ID tradicional, usarlo directamente
@@ -134,9 +173,13 @@ export class GamePuzzleComponent
         console.error('❌ [Puzzle] ID de juego inválido:', id);
         this.error = 'ID de juego inválido';
         this.loading = false;
+        this.gameLoadingService.hideFast();
       }
     } else {
-      console.log('🧩 [Puzzle] Sin parámetros específicos, iniciando juego por defecto');
+      console.log(
+        '🧩 [Puzzle] Sin parámetros específicos, iniciando juego por defecto'
+      );
+      this.gameLoadingService.hideFast();
       this.startGame();
     }
   }
@@ -155,9 +198,11 @@ export class GamePuzzleComponent
           if (response.success && response.data) {
             this.aplicarConfiguracion(response.data);
             this.iniciarJuego();
+            this.gameLoadingService.hideFast();
           } else {
             this.error = 'Error al cargar la configuración del juego';
             this.loading = false;
+            this.gameLoadingService.hideFast();
             // Usar imagen por defecto
             this.puzzleImageUrl = 'assets/rompecabezas.png';
             this.startGame();
@@ -167,6 +212,7 @@ export class GamePuzzleComponent
           console.error('Error loading game config:', err);
           this.error = 'Error al cargar la configuración del juego';
           this.loading = false;
+          this.gameLoadingService.hideFast();
           // Usar imagen por defecto
           this.puzzleImageUrl = 'assets/rompecabezas.png';
           this.startGame();
@@ -184,16 +230,20 @@ export class GamePuzzleComponent
       this.cols = this.puzzleConfig.cols || 4;
       this.totalPieces = this.rows * this.cols;
       this.maxTime = 300;
-      
+
       this.imageWidth = 700;
       this.imageHeight = 700;
 
       if (this.puzzleConfig.path_img) {
-        this.puzzleImageUrl = this.getFrontendImagePath(this.puzzleConfig.path_img);
+        this.puzzleImageUrl = this.getFrontendImagePath(
+          this.puzzleConfig.path_img
+        );
         // Validar que la imagen sea accesible
-        this.validatePuzzleImage(this.puzzleImageUrl).then(isValid => {
+        this.validatePuzzleImage(this.puzzleImageUrl).then((isValid) => {
           if (!isValid) {
-            console.warn('Imagen del puzzle no accesible, usando imagen por defecto');
+            console.warn(
+              'Imagen del puzzle no accesible, usando imagen por defecto'
+            );
             this.puzzleImageUrl = 'assets/rompecabezas.png';
           }
         });
@@ -205,7 +255,7 @@ export class GamePuzzleComponent
     }
 
     this.iniciarJuego();
-    
+
     // Forzar la recarga de imagen del puzzle
     this.forceImageReloadPuzzle();
   }
@@ -254,12 +304,12 @@ export class GamePuzzleComponent
 
     // Normalizar el path reemplazando barras invertidas por barras normales
     const normalized = path.replace(/\\/g, '/');
-    
+
     let webPath = '';
-    
+
     // Buscar el índice de 'public/storage' en la ruta normalizada
     let publicIndex = normalized.toLowerCase().indexOf('public/storage/');
-    
+
     if (publicIndex !== -1) {
       // Extraer la parte después de 'public/' (storage/puzzle/...)
       webPath = normalized.substring(publicIndex + 7); // +7 para omitir 'public/'
@@ -273,25 +323,32 @@ export class GamePuzzleComponent
         const puzzleIndex = normalized.toLowerCase().indexOf('puzzle/');
         if (puzzleIndex !== -1) {
           // Extraer desde 'storage/' si existe, o construir la ruta
-          let startIndex = normalized.toLowerCase().lastIndexOf('storage/', puzzleIndex);
+          let startIndex = normalized
+            .toLowerCase()
+            .lastIndexOf('storage/', puzzleIndex);
           if (startIndex === -1) {
             startIndex = puzzleIndex;
           }
           const relativePath = normalized.substring(startIndex);
-          webPath = relativePath.startsWith('storage/') ? relativePath : `storage/puzzle/${normalized.substring(puzzleIndex + 7)}`;
+          webPath = relativePath.startsWith('storage/')
+            ? relativePath
+            : `storage/puzzle/${normalized.substring(puzzleIndex + 7)}`;
         } else {
           // Como último recurso, usar imagen por defecto
-          console.warn('No se pudo procesar la ruta de imagen, usando imagen por defecto. Path:', path);
+          console.warn(
+            'No se pudo procesar la ruta de imagen, usando imagen por defecto. Path:',
+            path
+          );
           return 'assets/rompecabezas.png';
         }
       }
     }
-    
+
     // Agregar cache busting para forzar la recarga de imágenes nuevas
     const timestamp = Date.now();
     const separator = webPath.includes('?') ? '&' : '?';
     const finalPath = `${webPath}${separator}t=${timestamp}`;
-    
+
     return finalPath;
   }
 
@@ -382,26 +439,26 @@ export class GamePuzzleComponent
 
   async startGame() {
     this.gameAudioService.playGameStart();
-    
+
     if (this.timer) {
       clearInterval(this.timer);
     }
 
     this.timeLeft = this.maxTime;
     this.timeElapsed = 0;
-    this.timeWarningSent = false; 
+    this.timeWarningSent = false;
 
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
         this.timeElapsed = this.maxTime - this.timeLeft; // Actualizar tiempo transcurrido
-        
+
         // Reproducir sonido de advertencia cuando quedan 60 segundos
         if (this.timeLeft === 60 && !this.timeWarningSent) {
           this.gameAudioService.playTimeWarning();
           this.timeWarningSent = true;
         }
-        
+
         // Reproducir countdown en los últimos 5 segundos
         if (this.timeLeft <= 5 && this.timeLeft > 0) {
           this.gameAudioService.playCountdown();
@@ -421,32 +478,31 @@ export class GamePuzzleComponent
         console.warn('⚠️ Imagen no válida, cambiando a imagen por defecto');
         this.puzzleImageUrl = 'assets/rompecabezas.png';
       }
-      
+
       // Cargar la imagen y calcular dimensiones
       await this.loadImage();
-      
+
       // Calcular las dimensiones correctas de la imagen
       this.calculateImageDimensions();
-      
+
       // Esperar un poco para que se calculen las dimensiones
       setTimeout(() => {
         this.initializePuzzle();
         this.gameStarted = true;
         this.gameCompleted = false;
-        
+
         // Debug adicional
         this.debugImageInfo();
-        
+
         // Test visual del puzzle
         this.testPuzzleVisualization();
       }, 300); // Aumenté el tiempo para asegurar que todo se cargue
-      
     } catch (error) {
       console.error('❌ Error al cargar imagen:', error);
       this.puzzleImageUrl = 'assets/rompecabezas.png';
       await this.loadImage();
       this.calculateImageDimensions();
-      
+
       setTimeout(() => {
         this.initializePuzzle();
         this.gameStarted = true;
@@ -591,19 +647,25 @@ export class GamePuzzleComponent
           url: this.puzzleImageUrl,
           originalSize: `${this.actualImageWidth}x${this.actualImageHeight}`,
           targetSize: `${this.imageWidth}x${this.imageHeight}`,
-          scale: this.imageScale
+          scale: this.imageScale,
         });
         resolve();
       };
       img.onerror = (error) => {
-        console.error('Error al cargar la imagen:', error, 'URL:', this.puzzleImageUrl);
+        console.error(
+          'Error al cargar la imagen:',
+          error,
+          'URL:',
+          this.puzzleImageUrl
+        );
         this.puzzleImageUrl = 'assets/rompecabezas.png';
-        
+
         // Intentar cargar la imagen por defecto
         const fallbackImg = new Image();
         fallbackImg.onload = () => {
           this.actualImageWidth = fallbackImg.naturalWidth || this.imageWidth;
-          this.actualImageHeight = fallbackImg.naturalHeight || this.imageHeight;
+          this.actualImageHeight =
+            fallbackImg.naturalHeight || this.imageHeight;
           this.imageScale = 1;
           resolve();
         };
@@ -612,7 +674,9 @@ export class GamePuzzleComponent
           this.actualImageWidth = this.imageWidth;
           this.actualImageHeight = this.imageHeight;
           this.imageScale = 1;
-          console.warn('No se pudo cargar ninguna imagen, usando dimensiones por defecto');
+          console.warn(
+            'No se pudo cargar ninguna imagen, usando dimensiones por defecto'
+          );
           resolve();
         };
         fallbackImg.src = this.puzzleImageUrl;
@@ -625,10 +689,10 @@ export class GamePuzzleComponent
     if (this.correctPieces === this.totalPieces) {
       this.gameAudioService.playPuzzleComplete();
       this.gameCompleted = true;
-      
+
       // Actualizar tiempo transcurrido antes de limpiar el timer
       this.timeElapsed = this.maxTime - this.timeLeft;
-      
+
       if (this.timer) {
         clearInterval(this.timer);
       }
@@ -641,17 +705,16 @@ export class GamePuzzleComponent
   }
 
   private async showSuccessAlert(): Promise<void> {
-      
     // Mostrar modal de valoración si el usuario no ha evaluado el juego
     if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
         userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed
+        gameAssessed: this.gameConfig?.assessed,
       });
     }
-    
+
     const timeUsed = this.formatTime(this.timeElapsed);
     const config: GameAlertConfig = {
       gameType: 'puzzle',
@@ -675,10 +738,10 @@ export class GamePuzzleComponent
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
         userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed
+        gameAssessed: this.gameConfig?.assessed,
       });
     }
-    
+
     const config: GameAlertConfig = {
       gameType: 'puzzle',
       gameName: 'Rompecabezas',
@@ -699,13 +762,13 @@ export class GamePuzzleComponent
     try {
       const gameInstanceId = this.gameConfig.game_instance_id;
       const gameName = this.gameConfig.game_name || 'Rompecabezas';
-      
+
       const result = await this.ratingModalService.showRatingModal(
-        gameInstanceId, 
-        this.currentUserId, 
+        gameInstanceId,
+        this.currentUserId,
         gameName
       );
-      
+
       if (result) {
         this.userAssessed = true;
       }
@@ -752,7 +815,7 @@ export class GamePuzzleComponent
     const pieceWidth = this.imageWidth / this.cols;
     const pieceHeight = this.imageHeight / this.rows;
     const isInBoard = !this.isInSidebar(piece);
-    
+
     // Para el sidebar, las piezas mantienen las proporciones exactas pero más pequeñas
     const sidebarScale = Math.min(100 / pieceWidth, 100 / pieceHeight); // Máximo 100px por lado
     const displayWidth = isInBoard ? pieceWidth : pieceWidth * sidebarScale;
@@ -761,22 +824,30 @@ export class GamePuzzleComponent
     // Calcular la posición de fondo para mostrar solo la porción correcta de la imagen
     const backgroundPosX = -piece.col * pieceWidth;
     const backgroundPosY = -piece.row * pieceHeight;
-    
+
     // Para el sidebar, escalar también la posición de fondo proporcionalmente
-    const scaledBackgroundPosX = isInBoard ? backgroundPosX : backgroundPosX * sidebarScale;
-    const scaledBackgroundPosY = isInBoard ? backgroundPosY : backgroundPosY * sidebarScale;
-    
+    const scaledBackgroundPosX = isInBoard
+      ? backgroundPosX
+      : backgroundPosX * sidebarScale;
+    const scaledBackgroundPosY = isInBoard
+      ? backgroundPosY
+      : backgroundPosY * sidebarScale;
+
     // El background-size debe ser el tamaño COMPLETO de la imagen original escalado apropiadamente
-    const backgroundSizeWidth = isInBoard ? this.imageWidth : this.imageWidth * sidebarScale;
-    const backgroundSizeHeight = isInBoard ? this.imageHeight : this.imageHeight * sidebarScale;
+    const backgroundSizeWidth = isInBoard
+      ? this.imageWidth
+      : this.imageWidth * sidebarScale;
+    const backgroundSizeHeight = isInBoard
+      ? this.imageHeight
+      : this.imageHeight * sidebarScale;
 
     // Asegurar que la URL de la imagen sea válida
     const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
-    
+
     // Determinar el color del borde según el estado de la pieza
     let borderColor;
     let boxShadow = 'none';
-    
+
     if (piece.correctPos && isInBoard) {
       // Pieza en posición correcta: borde verde
       borderColor = '2px solid #22c55e';
@@ -802,20 +873,21 @@ export class GamePuzzleComponent
       'background-size': `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
       'background-repeat': 'no-repeat',
       'background-clip': 'padding-box',
-      'cursor': this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
-      'border': borderColor,
+      cursor: this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
+      border: borderColor,
       'border-radius': isInBoard ? '0' : '8px',
       'box-shadow': boxShadow,
-      'display': 'block',
-      'position': isInBoard ? 'absolute' : 'relative',
+      display: 'block',
+      position: isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
-      'transition': 'all 0.2s ease',
-      'transform': this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
-      'top': isInBoard ? '0' : 'auto',
-      'left': isInBoard ? '0' : 'auto',
-      'margin': isInBoard ? '0' : '6px',
-      'padding': '0',
-      'overflow': 'hidden'
+      transition: 'all 0.2s ease',
+      transform:
+        this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
+      top: isInBoard ? '0' : 'auto',
+      left: isInBoard ? '0' : 'auto',
+      margin: isInBoard ? '0' : '6px',
+      padding: '0',
+      overflow: 'hidden',
     };
   }
 
@@ -826,19 +898,27 @@ export class GamePuzzleComponent
     const pieceWidth = this.imageWidth / this.cols;
     const pieceHeight = this.imageHeight / this.rows;
     const isInBoard = !this.isInSidebar(piece);
-    
+
     // Para el sidebar, mantener el mismo scale que en el juego normal
     const sidebarScale = 0.8;
     const displayWidth = isInBoard ? pieceWidth : pieceWidth * sidebarScale;
     const displayHeight = isInBoard ? pieceHeight : pieceHeight * sidebarScale;
-    
+
     const backgroundPosX = -piece.col * pieceWidth;
     const backgroundPosY = -piece.row * pieceHeight;
-    const scaledBackgroundPosX = isInBoard ? backgroundPosX : backgroundPosX * sidebarScale;
-    const scaledBackgroundPosY = isInBoard ? backgroundPosY : backgroundPosY * sidebarScale;
-    const backgroundSizeWidth = isInBoard ? this.imageWidth : this.imageWidth * sidebarScale;
-    const backgroundSizeHeight = isInBoard ? this.imageHeight : this.imageHeight * sidebarScale;
-    
+    const scaledBackgroundPosX = isInBoard
+      ? backgroundPosX
+      : backgroundPosX * sidebarScale;
+    const scaledBackgroundPosY = isInBoard
+      ? backgroundPosY
+      : backgroundPosY * sidebarScale;
+    const backgroundSizeWidth = isInBoard
+      ? this.imageWidth
+      : this.imageWidth * sidebarScale;
+    const backgroundSizeHeight = isInBoard
+      ? this.imageHeight
+      : this.imageHeight * sidebarScale;
+
     const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
 
     return {
@@ -849,20 +929,20 @@ export class GamePuzzleComponent
       'background-size': `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
       'background-repeat': 'no-repeat',
       'background-clip': 'padding-box',
-      'cursor': 'default',
-      'border': 'none', // SIN BORDES cuando está completado
+      cursor: 'default',
+      border: 'none', // SIN BORDES cuando está completado
       'border-radius': '0',
       'box-shadow': 'none',
-      'display': 'block',
-      'position': isInBoard ? 'absolute' : 'relative',
+      display: 'block',
+      position: isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
-      'transition': 'all 0.2s ease',
-      'transform': 'scale(1)', // Sin transformaciones
-      'top': isInBoard ? '0' : 'auto',
-      'left': isInBoard ? '0' : 'auto',
-      'margin': isInBoard ? '0' : '4px',
-      'padding': '0',
-      'overflow': 'hidden'
+      transition: 'all 0.2s ease',
+      transform: 'scale(1)', // Sin transformaciones
+      top: isInBoard ? '0' : 'auto',
+      left: isInBoard ? '0' : 'auto',
+      margin: isInBoard ? '0' : '4px',
+      padding: '0',
+      overflow: 'hidden',
     };
   }
 
@@ -983,6 +1063,10 @@ export class GamePuzzleComponent
     this.headerExpanded = !this.headerExpanded;
   }
 
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
   get tituloJuego(): string {
     return this.gameConfig?.game_name || 'Rompecabezas';
   }
@@ -998,6 +1082,24 @@ export class GamePuzzleComponent
     return this.totalPieces > 0
       ? Math.round((this.correctPieces / this.totalPieces) * 100)
       : 0;
+  }
+
+  // Propiedades adaptadas para el header genérico del puzzle
+  get vidasRestantes(): number {
+    // En el puzzle no hay vidas, pero podemos mostrar intentos restantes o simplemente 1
+    return this.gameCompleted ? 0 : 1;
+  }
+
+  get palabrasCompletadas(): number {
+    return this.correctPieces;
+  }
+
+  get totalPalabras(): number {
+    return this.totalPieces;
+  }
+
+  get tiempoRestante(): number {
+    return this.timeLeft;
   }
 
   volverAlDashboard(): void {
@@ -1020,8 +1122,6 @@ export class GamePuzzleComponent
     return {
       width: this.imageWidth + 'px',
       height: this.imageHeight + 'px',
-      maxWidth: '700px',
-      maxHeight: '700px'
     };
   }
 
@@ -1030,40 +1130,35 @@ export class GamePuzzleComponent
     return {
       width: '724px',
       height: '724px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
     };
   }
 
   // Método auxiliar para debug de imágenes
   debugImageInfo(): void {
-    
-    // Verificar que la imagen es accesible
-    const testImg = new Image();
-    testImg.onload = () => {
-      console.log('✅ Imagen accesible y cargada correctamente');
-    };
-    testImg.onerror = () => {
-      console.error('❌ Error: La imagen no es accesible');
-    };
-    testImg.src = this.puzzleImageUrl;
+    console.log('🖼️ [Puzzle Debug] Image info:', {
+      puzzleImageUrl: this.puzzleImageUrl,
+      imageWidth: this.imageWidth,
+      imageHeight: this.imageHeight,
+      actualImageWidth: this.actualImageWidth,
+      actualImageHeight: this.actualImageHeight,
+      imageScale: this.imageScale,
+    });
   }
 
   // Método para test visual del puzzle
   testPuzzleVisualization(): void {
-    
-    this.pieces.slice(0, Math.min(6, this.pieces.length)).forEach(piece => {
-      const pieceWidth = this.imageWidth / this.cols;
-      const pieceHeight = this.imageHeight / this.rows;
-      const bgPosX = -piece.col * pieceWidth;
-      const bgPosY = -piece.row * pieceHeight;
+    console.log('🧩 [Puzzle Test] Visualization test:', {
+      rows: this.rows,
+      cols: this.cols,
+      pieces: this.pieces.length,
+      gameStarted: this.gameStarted,
+      gameCompleted: this.gameCompleted,
     });
   }
 
   // Getter para contar piezas restantes en el sidebar
   get remainingPiecesCount(): number {
-    return this.pieces.filter(p => this.isInSidebar(p)).length;
+    return this.pieces.filter((piece) => !piece.inBoard).length;
   }
 
   protected readonly Array = Array;
@@ -1076,13 +1171,8 @@ export class GamePuzzleComponent
   private validatePuzzleImage(imagePath: string): Promise<boolean> {
     return new Promise((resolve) => {
       const img = new Image();
-      img.onload = () => {
-        resolve(true);
-      };
-      img.onerror = () => {
-        console.warn('❌ Imagen del puzzle no encontrada:', imagePath);
-        resolve(false);
-      };
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
       img.src = imagePath;
     });
   }
@@ -1091,27 +1181,16 @@ export class GamePuzzleComponent
    * Fuerza la recarga de la imagen del puzzle si hay problemas
    */
   private forceImageReloadPuzzle(): void {
-    setTimeout(() => {
-      if (this.puzzleImageUrl && !this.puzzleImageUrl.includes('assets/')) {
-        this.validatePuzzleImage(this.puzzleImageUrl).then(isValid => {
-          if (!isValid) {
-            console.warn(`Reintentando carga de imagen del puzzle: ${this.puzzleImageUrl}`);
-            // Forzar recarga con nuevo timestamp
-            const baseUrl = this.puzzleImageUrl.split('?')[0];
-            this.puzzleImageUrl = `${baseUrl}?t=${Date.now()}`;
-            
-            // Volver a validar después de un momento
-            setTimeout(() => {
-              this.validatePuzzleImage(this.puzzleImageUrl).then(stillInvalid => {
-                if (!stillInvalid) {
-                  console.warn('Imagen del puzzle sigue no disponible, usando imagen por defecto');
-                  this.puzzleImageUrl = 'assets/rompecabezas.png';
-                }
-              });
-            }, 1000);
-          }
-        });
-      }
-    }, 500);
+    // Forzar recarga añadiendo timestamp
+    if (this.puzzleImageUrl) {
+      const separator = this.puzzleImageUrl.includes('?') ? '&' : '?';
+      this.puzzleImageUrl = `${
+        this.puzzleImageUrl
+      }${separator}reload=${Date.now()}`;
+      console.log(
+        '🔄 [Puzzle] Forcing image reload with URL:',
+        this.puzzleImageUrl
+      );
+    }
   }
 }

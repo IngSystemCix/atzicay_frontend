@@ -5,11 +5,12 @@ import { CommonModule } from '@angular/common';
 import { filter, switchMap, take, tap } from 'rxjs';
 import { AuthService } from './core/infrastructure/api/auth.service';
 import { UserSessionService } from './core/infrastructure/service/user-session.service';
+import { GlobalLoadingComponent } from './presentation/components/global-loading/global-loading.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, GlobalLoadingComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })

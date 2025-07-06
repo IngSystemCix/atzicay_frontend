@@ -8,6 +8,7 @@ import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructu
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
+import { GameLoadingService } from '../../../../core/infrastructure/services/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
 interface JuegoState {
@@ -56,6 +57,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   private ratingModalService = inject(RatingModalService);
   private gameAudioService = inject(GameAudioService);
   private gameUrlService = inject(GameUrlService);
+  private gameLoadingService = inject(GameLoadingService);
 
   readonly INTENTOS_INICIALES = 6;
   private intervaloContador: any;
@@ -129,6 +131,9 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   }
 
   protected onAuthenticationReady(userId: number): void {
+    // Mostrar loading rápido para el ahorcado
+    this.gameLoadingService.showFastGameLoading('Cargando Ahorcado...');
+    
     // Capturar parámetros de ruta - puede ser 'id' o 'token'
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
@@ -143,12 +148,14 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
             console.error('❌ Token inválido o expirado');
             this.state.error = 'El enlace del juego ha expirado o no es válido';
             this.state.cargando = false;
+            this.gameLoadingService.hideFast();
           }
         },
         error: (error) => {
           console.error('❌ Error validando token:', error);
           this.state.error = 'Error al validar el acceso al juego';
           this.state.cargando = false;
+          this.gameLoadingService.hideFast();
         }
       });
     } else if (id) {
@@ -160,11 +167,13 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
         console.error('❌ ID de juego inválido:', id);
         this.state.error = 'ID de juego inválido';
         this.state.cargando = false;
+        this.gameLoadingService.hideFast();
       }
     } else {
       console.error('❌ No se encontró ID ni token en la URL');
       this.state.error = 'No se encontró información del juego en la URL';
       this.state.cargando = false;
+      this.gameLoadingService.hideFast();
     }
   }
 
@@ -242,9 +251,11 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
           this.state.gameConfig = response.data;
           this.aplicarConfiguracion();
           this.iniciarJuego();
+          this.gameLoadingService.hideFast();
         } else {
           this.state.error =
             response.message || 'No se pudo cargar la configuración del juego';
+          this.gameLoadingService.hideFast();
         }
         this.state.cargando = false;
       },
@@ -252,6 +263,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
         console.error('Error cargando configuración:', error);
         this.state.error = 'Error al cargar la configuración del juego';
         this.state.cargando = false;
+        this.gameLoadingService.hideFast();
       },
     });
   }

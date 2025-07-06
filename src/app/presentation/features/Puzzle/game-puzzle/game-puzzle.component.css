@@ -475,8 +475,70 @@
 
 /* Panel del header */
 .panel-header {
-  padding: 20px 20px 15px 20px;
-  border-bottom: 2px solid rgba(147, 51, 234, 0.1);
-  background: linear-gradient(135deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.02));
+  padding: 20px 15px 15px 15px;
+  border-bottom: 1px solid rgba(147, 51, 234, 0.1);
+  background: linear-gradient(180deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.02));
+  border-radius: 16px 16px 0 0;
 }
 
+/* Estilos responsivos */
+@media (max-width: 1023px) {
+  /* Panel lateral para móviles/tablets */
+  .floating-panel.mobile-bottom {
+    right: auto !important;
+    left: 0;
+    top: auto !important;
+    bottom: -80vh;
+    width: 100%;
+    height: 70vh;
+    max-height: 70vh;
+    border-radius: 20px 20px 0 0;
+    transform: none;
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .floating-panel.mobile-bottom.open {
+    bottom: 0;
+  }
+
+  .floating-panel.mobile-bottom .panel-toggle {
+    left: 50%;
+    top: -48px;
+    transform: translateX(-50%);
+    width: 80px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  /* Ajustar el tablero del puzzle */
+  .puzzle-board-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1/1;
+    padding: 8px;
+  }
+
+  /* Ajustar piezas para móviles */
+  .pieces-container {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+    padding: 10px;
+  }
+
+  /* Ajustar el área del juego */
+  .game-content-area {
+    padding-bottom: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .pieces-container {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
+}
+
+/* Asegurar que el tablero se ajuste */
+.puzzle-board-container {
+  transition: all 0.3s ease;
+  margin: 0 auto;
+}

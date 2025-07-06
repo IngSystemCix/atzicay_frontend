@@ -16,6 +16,7 @@ import { AtzicayButtonComponent } from '../../components/atzicay-button/atzicay-
 import { FilterDropdownComponent } from '../../components/filter-dropdown/filter-dropdown.component';
 import { GameInstanceService } from '../../../core/infrastructure/api/game-instance.service';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
+import { GameLoadingService } from '../../../core/infrastructure/services/game-loading.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,6 +28,7 @@ import { UserSessionService } from '../../../core/infrastructure/service/user-se
 export class DashboardComponent implements OnInit, OnDestroy {
   private gameInstanceService = inject(GameInstanceService);
   private userSessionService = inject(UserSessionService);
+  private gameLoadingService = inject(GameLoadingService);
   protected PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
@@ -36,7 +38,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   activeDropdownId: number | null = null;
   ratingArray: number[] = [1, 2, 3, 4, 5];
   isHeaderMinimized: boolean = false;
-  isLoading: boolean = true;
   getGameRoute(gameType: string, id: number): string {
     const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
     switch (normalizedType) {
@@ -58,15 +59,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Usar el UserSessionService optimizado para esperar el token
     if (this.userSessionService.isAuthenticated()) {
+      // Si ya está autenticado, cargar inmediatamente sin loading adicional
       this.loadGameInstances();
     } else {
+      // Si no está autenticado, esperar brevemente el token
       this.subscription.add(
-        this.userSessionService.waitForToken$(5000).subscribe({
+        this.userSessionService.waitForToken$(1000).subscribe({
           next: (token) => {
             this.loadGameInstances();
           },
           error: (err) => {
-            console.error('[Dashboard] Error esperando token:', err);
+            console.warn('[Dashboard] Timeout esperando token, cargando sin autenticación:', err);
             // Fallback: intentar cargar igualmente
             this.loadGameInstances();
           }
@@ -96,7 +99,14 @@ getTypeIcon(typeValue: string): string {
   }
 
   private loadGameInstances(): void {
-    this.isLoading = true;
+    // Solo mostrar loading si no hay juegos cargados y no es un filtro
+    const isFirstLoad = this.allGames.length === 0;
+    const isFiltering = this.selectedType !== null || this.selectedLevels.length > 0 || this.searchTerm !== '';
+    
+    if (isFirstLoad && !isFiltering) {
+      this.gameLoadingService.showFastGameLoading('Cargando juegos...');
+    }
+    
     this.gameInstanceService
       .getGameInstances(this.searchTerm, this.selectedType || undefined, this.PAGE_SIZE, 0)
       .subscribe({
@@ -107,14 +117,20 @@ getTypeIcon(typeValue: string): string {
           this.displayedGames = games.slice(0, this.PAGE_SIZE);
           this.currentOffset = games.length;
           this.hasMoreGames = games.length === this.PAGE_SIZE;
-          this.isLoading = false;
+          
+          if (isFirstLoad && !isFiltering) {
+            this.gameLoadingService.hideFast();
+          }
         },
         error: (err) => {
           console.error('Error cargando instancias de juegos:', err);
           this.allGames = [];
           this.filteredGames = [];
           this.displayedGames = [];
-          this.isLoading = false;
+          
+          if (isFirstLoad && !isFiltering) {
+            this.gameLoadingService.hideFast();
+          }
         },
       });
   }
@@ -181,7 +197,7 @@ getTypeIcon(typeValue: string): string {
 
   applyFilters(): void {
     this.currentPage = 1;
-    this.isLoading = true;
+    // No mostrar loading para filtros, es una operación rápida
     this.loadGameInstances();
   }
 
