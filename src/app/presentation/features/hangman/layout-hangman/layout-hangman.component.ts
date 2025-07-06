@@ -237,8 +237,10 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
     });
   }
 
-  onCancel(): void {
-    if (confirm('¿Estás seguro de que deseas cancelar? Se perderán todos los datos ingresados.')) {
+  async onCancel(): Promise<void> {
+    const shouldCancel = await this.alertService.showCancelGameCreation('Ahorcado');
+    if (shouldCancel) {
+      this.alertService.showCancellationSuccess('Ahorcado');
       this.router.navigate(['/juegos']);
     }
   }

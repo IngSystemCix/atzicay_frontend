@@ -116,8 +116,12 @@ export class LayoutsSolveTheWordComponent
     }
   }
 
-  cancel() {
-    this.router.navigate(['/juegos']);
+  async cancel(): Promise<void> {
+    const shouldCancel = await this.alertService.showCancelGameCreation('Pupiletras');
+    if (shouldCancel) {
+      this.alertService.showCancellationSuccess('Pupiletras');
+      this.router.navigate(['/juegos']);
+    }
   }
 
   save() {

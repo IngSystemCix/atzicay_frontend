@@ -113,4 +113,44 @@ export class AlertService {
     const errorMessage = error?.message || error?.error?.message || 'Error desconocido';
     this.showError(`Error al crear el ${gameType.toLowerCase()}: ${errorMessage}`);
   }
+
+  /**
+   * Muestra un diálogo de confirmación para cancelar la creación de un juego
+   * @param gameType Tipo de juego que se está creando
+   * @returns Promise<boolean> true si confirma cancelar, false si continúa
+   */
+  async showCancelGameCreation(gameType: string = 'juego'): Promise<boolean> {
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: '¿Cancelar creación?',
+      text: `¿Estás seguro de que quieres cancelar la creación del ${gameType.toLowerCase()}? Se perderán todos los cambios no guardados.`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cancelar',
+      cancelButtonText: 'Continuar creando',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#A293FA',
+      reverseButtons: true,
+      focusCancel: true
+    });
+    return result.isConfirmed;
+  }
+
+  /**
+   * Muestra un mensaje de confirmación cuando se cancela exitosamente
+   * @param gameType Tipo de juego cancelado
+   */
+  showCancellationSuccess(gameType: string = 'juego'): void {
+    Swal.fire({
+      icon: 'info',
+      title: 'Cancelado',
+      text: `Creación del ${gameType.toLowerCase()} cancelada`,
+      timer: 2000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end',
+      background: '#f3f4f6',
+      color: '#374151'
+    });
+  }
 }

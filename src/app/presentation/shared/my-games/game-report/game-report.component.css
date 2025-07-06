@@ -1,0 +1,52 @@
+/* Animación para el dropdown */
+@keyframes dropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dropdown {
+  animation: dropdown 0.2s ease-out;
+}
+
+/* Estilos adicionales para mejorar la apariencia */
+.report-container {
+  min-height: calc(100vh - 80px);
+}
+
+/* Estilos para las cards de comentarios */
+.comment-card {
+  transition: all 0.2s ease;
+}
+
+.comment-card:hover {
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .report-container {
+    padding: 1rem;
+  }
+  
+  .comment-card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Estilos para las estrellas */
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}

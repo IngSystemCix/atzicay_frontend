@@ -1,0 +1,134 @@
+<div class="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header con botón de regreso -->
+    <div class="flex items-center justify-between mb-6">
+      <button 
+        (click)="goBack()"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+      >
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Volver a Programaciones
+      </button>
+      
+    </div>
+
+    <!-- Contenido principal -->
+    <ng-container *ngIf="reportData && !error">
+      
+      <!-- Información del juego -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
+        <div class="flex items-start gap-4">
+          <div class="text-4xl bg-purple-100 rounded-full w-16 h-16 flex items-center justify-center">
+            {{ getGameTypeIcon(reportData.game_type) }}
+          </div>
+          
+          <div class="flex-1">
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">
+              {{ reportData.game_name }}
+            </h1>
+            <div class="flex items-center gap-4 text-sm text-gray-600">
+              <span class="flex items-center gap-1">
+                <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
+                {{ reportData.game_type }}
+              </span>
+              <span class="flex items-center gap-1">
+                <span>💬</span>
+                {{ getCommentsCount() }} comentarios
+              </span>
+              <span class="flex items-center gap-1" *ngIf="getCommentsCount() > 0">
+                <span>⭐</span>
+                {{ getAverageRating() }} promedio
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas rápidas -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" *ngIf="getCommentsCount() > 0">
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100 text-center">
+          <div class="text-2xl font-bold text-purple-600">{{ getCommentsCount() }}</div>
+          <div class="text-sm text-gray-600">Total Comentarios</div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100 text-center">
+          <div class="text-2xl font-bold text-blue-600">{{ getAverageRating() }}</div>
+          <div class="text-sm text-gray-600">Rating Promedio</div>
+        </div>
+        
+        <div class="bg-white rounded-lg p-4 shadow-sm border border-gray-100 text-center">
+          <div class="text-2xl">{{ getRatingStars(getAverageRating().toString()) }}</div>
+          <div class="text-sm text-gray-600">Valoración</div>
+        </div>
+      </div>
+
+      <!-- Lista de comentarios -->
+      <div class="bg-white rounded-xl shadow-lg border border-gray-100">
+        <div class="p-6 border-b border-gray-100">
+          <h2 class="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <span>💬</span>
+            Comentarios y Valoraciones
+          </h2>
+        </div>
+        
+        <div class="p-6" *ngIf="getCommentsCount() > 0">
+          <div class="space-y-4">
+            <div 
+              *ngFor="let comment of reportData.comments; trackBy: trackByComment; let i = index"
+              class="bg-gray-50 rounded-lg p-4 border border-gray-100 hover:shadow-sm transition-shadow"
+            >
+              <!-- Header del comentario -->
+              <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    {{ getUserInitials(comment.user) }}
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">{{ comment.user }}</div>
+                    <div class="text-sm text-gray-500">{{ comment.programming_name }}</div>
+                  </div>
+                </div>
+                
+                <!-- Rating -->
+                <div class="flex items-center gap-2 bg-white rounded-full px-3 py-1 border border-gray-200">
+                  <span class="text-yellow-500">{{ getRatingStars(comment.rating) }}</span>
+                  <span class="text-sm font-medium text-gray-700">{{ comment.rating }}</span>
+                </div>
+              </div>
+              
+              <!-- Comentario -->
+              <div class="text-gray-700 leading-relaxed">
+                "{{ comment.comment }}"
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Estado sin comentarios -->
+        <div class="p-12 text-center" *ngIf="getCommentsCount() === 0">
+          <div class="text-6xl mb-4">💭</div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">Sin comentarios aún</h3>
+          <p class="text-gray-500">Este juego aún no ha recibido comentarios de los usuarios.</p>
+        </div>
+      </div>
+      
+    </ng-container>
+
+    <!-- Estado de error -->
+    <div class="bg-white rounded-xl shadow-lg p-12 text-center" *ngIf="error">
+      <div class="text-6xl mb-4">⚠️</div>
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">Error al cargar reporte</h3>
+      <p class="text-gray-600 mb-6">{{ error }}</p>
+      <button 
+        (click)="goBack()"
+        class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+      >
+        Volver a intentar
+      </button>
+    </div>
+
+  </div>
+</div>

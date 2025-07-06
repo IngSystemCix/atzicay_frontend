@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnDestroy, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
@@ -89,6 +90,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
     public createGameService: CreateGameService,
     private alertService: AlertService,
     private userSessionService: UserSessionService,
+    private router: Router,
     private platform: Platform,
     private renderer: Renderer2,
     private el: ElementRef
@@ -310,6 +312,14 @@ export class LayoutsMemoryComponent implements OnDestroy {
   }
 
   // Action methods
+  async onCancel(): Promise<void> {
+    const shouldCancel = await this.alertService.showCancelGameCreation('Memoria');
+    if (shouldCancel) {
+      this.alertService.showCancellationSuccess('Memoria');
+      this.router.navigate(['/juegos']);
+    }
+  }
+
   async onSave(): Promise<void> {
     // Llamar al debug method antes de validar
     await this.debugPayload();

@@ -55,10 +55,10 @@ export class UserSessionService {
 
   /**
    * Espera a que el token esté disponible usando Observable (más eficiente)
-   * @param timeoutMs Tiempo máximo de espera en milisegundos (default: 5000)
+   * @param timeoutMs Tiempo máximo de espera en milisegundos (default: 2000)
    * @returns Observable que emite el token cuando está disponible
    */
-  waitForToken$(timeoutMs = 5000): Observable<string> {
+  waitForToken$(timeoutMs = 2000): Observable<string> {
     // Si ya tenemos el token, devolverlo inmediatamente
     if (this.tokenSubject.value) {
       return of(this.tokenSubject.value);
@@ -67,20 +67,21 @@ export class UserSessionService {
     return this.token$.pipe(
       filter(token => token !== null), // Solo continuar cuando el token no sea null
       take(1), // Tomar solo el primer valor válido
-      timeout(timeoutMs), // Timeout después de timeoutMs
+      timeout(timeoutMs), // Timeout después de timeoutMs (reducido a 2s)
       catchError(err => {
-        console.error('Timeout esperando token JWT:', err);
-        throw new Error('Token JWT no disponible después del timeout');
+        console.warn('Timeout esperando token JWT (proceeding anyway):', err);
+        // En lugar de fallar, devolver un string vacío para permitir continuar
+        return of('');
       })
     ) as Observable<string>;
   }
 
   /**
    * Versión Promise del waitForToken para compatibilidad
-   * @param maxRetries Número máximo de reintentos
-   * @param interval Intervalo entre reintentos en ms
+   * @param maxRetries Número máximo de reintentos (reducido)
+   * @param interval Intervalo entre reintentos en ms (reducido)
    */
-  waitForToken(maxRetries = 50, interval = 100): Promise<string> {
+  waitForToken(maxRetries = 20, interval = 50): Promise<string> {
     return new Promise((resolve, reject) => {
       // Si ya tenemos el token, resolverlo inmediatamente
       if (this.tokenSubject.value) {
@@ -93,7 +94,8 @@ export class UserSessionService {
         if (token) return resolve(token);
         retries++;
         if (retries >= maxRetries) {
-          return reject(new Error('Token JWT no disponible después de ' + maxRetries + ' intentos'));
+          console.warn('Token JWT no disponible después de ' + maxRetries + ' intentos, continuando...');
+          return resolve(''); // Resolver con string vacío en lugar de rechazar
         }
         setTimeout(check, interval);
       };

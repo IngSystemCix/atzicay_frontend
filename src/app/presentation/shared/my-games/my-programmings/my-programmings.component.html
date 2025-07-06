@@ -276,12 +276,17 @@
   @if (hasMoreActivities()) {
     <div class="flex justify-center ver-mas-container">
       <button 
-        class="bg-atzicay-bg-button hover:bg-atzicay-purple-700 text-white font-bold px-8 py-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base cursor-pointer"
-        (click)="loadMore()">
-        <span>Ver más actividades</span>
-        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        class="bg-atzicay-bg-button hover:bg-atzicay-purple-700 text-white font-bold px-8 py-3 rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl flex items-center gap-2 text-sm sm:text-base cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        (click)="loadMore()"
+        [disabled]="isLoadingMore">
+        <span *ngIf="!isLoadingMore">Ver más actividades</span>
+        <span *ngIf="isLoadingMore">Cargando más actividades...</span>
+        
+        <svg *ngIf="!isLoadingMore" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
         </svg>
+        
+        <div *ngIf="isLoadingMore" class="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white"></div>
       </button>
     </div>
   }

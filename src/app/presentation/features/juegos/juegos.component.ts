@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AtzicayTabsComponent, Tab as AtzicayTab } from '../../components/atzicay-tabs/atzicay-tabs.component';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
+import { GameLoadingService } from '../../../core/infrastructure/services/game-loading.service';
 import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-juegos',
@@ -27,13 +28,13 @@ import { Subscription } from 'rxjs';
 })
 export class JuegosComponent implements OnInit, OnDestroy {
   private userSessionService = inject(UserSessionService);
+  private gameLoadingService = inject(GameLoadingService);
   private route = inject(ActivatedRoute);
   private subscription = new Subscription();
 
   activeTab: 'misJuegos' | 'misProgramaciones' = 'misJuegos';
   filtroSeleccionado: string = 'all';
   gameIdSeleccionado: number | null = null;
-  isLoading: boolean = false;
   mobileFiltersOpen: boolean = false;
 
   filtroTabs: AtzicayTab<string>[] = [
@@ -64,35 +65,70 @@ export class JuegosComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
     document.removeEventListener('click', this.handleClickOutside.bind(this));
+    // Asegurar que se oculte cualquier loading al salir del componente
+    this.gameLoadingService.hideFast();
   }
 
-  private initializeComponent(): void {
-    if (this.userSessionService.isAuthenticated()) {
-      this.isLoading = false;
-    } else {
-      this.subscription.add(
-        this.userSessionService.waitForToken$(5000).subscribe({
-          next: (token) => {
-            this.isLoading = false;
+  private async initializeComponent(): Promise<void> {
+    try {
+      // Mostrar loading rápido al entrar a la sección de juegos
+      this.gameLoadingService.showFastGameLoading('Cargando juegos...');
+      
+      // Verificar autenticación con loading optimizado
+      if (this.userSessionService.isAuthenticated()) {
+        // Usuario ya autenticado, ocultar loading inmediatamente
+        this.gameLoadingService.hideFast();
+      } else {
+        // Esperar token con loading descriptivo
+        await this.gameLoadingService.loadGameData(
+          async () => {
+            return new Promise<void>((resolve, reject) => {
+              this.subscription.add(
+                this.userSessionService.waitForToken$(3000).subscribe({
+                  next: (token) => {
+                    resolve();
+                  },
+                  error: (err) => {
+                    console.error('[Juegos] Error esperando token:', err);
+                    // No rechazar, permitir continuar sin token
+                    resolve();
+                  }
+                })
+              );
+            });
           },
-          error: (err) => {
-            console.error('[Juegos] Error esperando token:', err);
-            this.isLoading = false;
-          }
-        })
-      );
+          'auth'
+        );
+      }
+    } catch (error) {
+      console.error('[Juegos] Error inicializando:', error);
+      // Ocultar loading en caso de error
+      this.gameLoadingService.hideFast();
     }
   }
 
   cambiarVista(tab: string) {
-    this.activeTab = tab as 'misJuegos' | 'misProgramaciones';
-    if (tab !== 'misProgramaciones') {
-      this.gameIdSeleccionado = null;
+    // Para cambios de vista rápidos, mostrar feedback mínimo si es necesario
+    if (tab !== this.activeTab) {
+      this.activeTab = tab as 'misJuegos' | 'misProgramaciones';
+      if (tab !== 'misProgramaciones') {
+        this.gameIdSeleccionado = null;
+      }
+      
+      // Opcional: Loading muy rápido solo para cambios de vista complejos
+      if (tab === 'misProgramaciones' && this.gameIdSeleccionado) {
+        this.gameLoadingService.showFastGameLoading('Cargando programaciones...');
+        // Se ocultará automáticamente cuando el componente cargue
+        setTimeout(() => this.gameLoadingService.hideFast(), 200);
+      }
     }
   }
 
   actualizarFiltro(filtro: string) {
-    this.filtroSeleccionado = filtro;
+    if (filtro !== this.filtroSeleccionado) {
+      this.filtroSeleccionado = filtro;
+      // Los filtros son instantáneos, no necesitan loading
+    }
   }
 
   toggleMobileFilters() {

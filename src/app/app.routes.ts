@@ -14,6 +14,7 @@ import {
 } from './presentation/features/solveTheWord/layouts-solve-the-word/layouts-solve-the-word.component';
 import { ConfigGameComponent } from './presentation/features/config-game/config-game.component';
 import { GameSolveTheWordComponent } from './presentation/features/solveTheWord/game-solve-the-word/game-solve-the-word.component';
+import { GameReportComponent } from './presentation/shared/my-games/game-report/game-report.component';
 import { optimizedAuthGuard } from './core/infrastructure/guards/optimized-auth.guard';
 import { loginGuard } from './core/infrastructure/guards/login.guard';
 
@@ -75,6 +76,11 @@ export const routes: Routes = [
         path: 'configuracion/:id',
         component: ConfigGameComponent,
         title: "Configuración del Juego"
+      },
+      {
+        path: 'reporte/:gameInstanceId',
+        component: GameReportComponent,
+        title: "Reporte del Juego"
       }
     ]
   },

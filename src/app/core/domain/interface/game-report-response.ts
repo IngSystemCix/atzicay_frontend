@@ -1,9 +1,19 @@
-export interface GameReport {
-  users: number;
-  sessions: number;
-  month: string;
+export interface GameComment {
+  comment: string;
+  rating: string;
+  user: string;
+  programming_name: string;
+}
+
+export interface GameReportData {
+  game_name: string;
+  game_type: string;
+  comments: GameComment[];
 }
 
 export interface GameReportResponse {
-  data: GameReport[];
+  success: boolean;
+  code: number;
+  message: string;
+  data: GameReportData;
 }

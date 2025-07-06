@@ -7,6 +7,7 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
@@ -47,6 +48,7 @@ export class LayoutsPuzzleComponent implements OnInit {
     private createGameService: CreateGameService,
     private userSession: UserSessionService,
     private alertService: AlertService,
+    private router: Router,
     private platform: Platform,
     private renderer: Renderer2,
     private el: ElementRef
@@ -436,8 +438,12 @@ export class LayoutsPuzzleComponent implements OnInit {
     });
   }
 
-  cancelar() {
-    this.resetForm();
+  async cancelar(): Promise<void> {
+    const shouldCancel = await this.alertService.showCancelGameCreation('Rompecabezas');
+    if (shouldCancel) {
+      this.alertService.showCancellationSuccess('Rompecabezas');
+      this.router.navigate(['/juegos']);
+    }
   }
 
   private resetForm() {

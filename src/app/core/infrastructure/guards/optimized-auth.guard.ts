@@ -30,7 +30,7 @@ export const optimizedAuthGuard: CanActivateFn = (route, state) => {
       // Si está autenticado en Auth0 pero no tenemos token interno, esperar un poco
       // gameLoadingService.updateMessage('Sincronizando sesión...');
       
-      return userSessionService.waitForToken$(2000).pipe( // Reducido a 2 segundos
+      return userSessionService.waitForToken$(1000).pipe( // Reducido a 1 segundo
         map(token => {
           gameLoadingService.hideFast();
           return true;
@@ -43,7 +43,7 @@ export const optimizedAuthGuard: CanActivateFn = (route, state) => {
       );
     }),
     // Timeout general más agresivo
-    timeout(3000),
+    timeout(1500),
     catchError(error => {
       console.error('[OptimizedAuthGuard] Error en autenticación:', error);
       gameLoadingService.hideFast();

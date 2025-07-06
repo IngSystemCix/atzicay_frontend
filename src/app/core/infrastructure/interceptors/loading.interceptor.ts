@@ -19,7 +19,15 @@ const EXCLUDED_URLS = [
   '/api/user/',
   '/api/session',
   '/connect/',
-  '/callback'
+  '/callback',
+  '/api/game-instances', // Excluir game-instances para que sea más rápido
+  '/api/hangman/', // Excluir hangman para carga rápida
+  '/api/puzzle/', // Excluir puzzle para carga rápida
+  '/api/memory/', // Excluir memory para carga rápida
+  '/api/solve-the-word/', // Excluir solve-the-word para carga rápida
+  '/api/games/', // Excluir todas las peticiones de games
+  '/api/word-search/', // Por si usa otra ruta
+  '/api/game/' // Patrones generales de juegos
 ];
 
 // Headers que indican que no se debe mostrar loading
@@ -35,13 +43,13 @@ export const loadingInterceptor: HttpInterceptorFn = (request, next) => {
     // Incrementar contador de peticiones activas
     activeRequests++;
     
-    // Mostrar loading con un delay más largo para evitar flashes en peticiones rápidas
+    // Mostrar loading inmediatamente para peticiones que realmente lo necesitan
     if (activeRequests === 1) {
       loadingTimeout = setTimeout(() => {
         if (activeRequests > 0) {
           loadingService.show('Cargando datos...', true);
         }
-      }, 500); // Delay de 500ms para evitar mostrar loading en peticiones rápidas
+      }, 100); // Delay mínimo de 100ms
     }
   }
 

@@ -8,9 +8,6 @@ import { UserSessionService } from '../../../../core/infrastructure/service/user
 import { ProgrammingStatusService } from '../../../../core/infrastructure/api/programming-status.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { GameReportResponse } from '../../../../core/domain/interface/game-report-response';
-import ApexCharts from 'apexcharts';
-import { GameReportService } from '../../../../core/infrastructure/api/game-report.service';
 import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
 @Component({
   selector: 'app-my-programmings',
@@ -45,6 +42,7 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
   userId: number = 0;
   isScrolled = false;
   generatingUrlForActivity: number | null = null; // Para mostrar estado de carga
+  isLoadingMore: boolean = false; // Para mostrar estado de carga del botón "Ver más"
   private subscription = new Subscription();
   constructor(
     private myProgrammingGamesService: MyProgrammingGamesService,
@@ -52,7 +50,6 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     private router: Router,
     private userSession: UserSessionService,
     private programmingStatusService: ProgrammingStatusService,
-    private gameReportService: GameReportService,
     private gameUrlService: GameUrlService
   ) {}
 
@@ -123,12 +120,27 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   loadProgrammings(loadMore: boolean = false): void {
-    const gameType =
-      this.selectedTab === 'Todos'
-        ? 'all'
-        : this.mapTabToType(this.selectedTab);
-    const limit = this.activitiesPerPage;
-    const offset = loadMore ? (this.currentPage - 1) * limit : 0;
+    // Usar el mapeo correcto para todos los tipos de juego
+    const gameType = this.mapTabToType(this.selectedTab);
+    
+    // Debug temporal
+    console.log('🔍 [DEBUG] loadProgrammings:', {
+      selectedTab: this.selectedTab,
+      gameType: gameType,
+      loadMore: loadMore,
+      currentPage: this.currentPage,
+      userId: this.userId
+    });
+    
+    // Lógica como el dashboard: limit crece, offset siempre 0
+    const limit = loadMore ? this.currentPage * this.activitiesPerPage : this.activitiesPerPage;
+    const offset = 0;
+    
+    // Mostrar loading solo cuando se cargan más elementos
+    if (loadMore) {
+      this.isLoadingMore = true;
+    }
+    
     let startDate = '',
       endDate = '',
       exactStartDate = '',
@@ -154,6 +166,7 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
       exactStartDate = '';
       exactEndDate = '';
     }
+    
     this.myProgrammingGamesService
       .getMyProgrammingGames(
         this.userId,
@@ -167,36 +180,33 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
       )
       .subscribe({
         next: (res) => {
+          console.log('🔍 [DEBUG] Response:', {
+            success: res?.success,
+            dataExists: !!res?.data,
+            totalFromAPI: res?.data?.total,
+            arrayLength: res?.data?.data?.length,
+            gameType: gameType,
+            selectedTab: this.selectedTab,
+            limit: limit,
+            offset: offset
+          });
+          
           if (res && res.data && Array.isArray(res.data.data)) {
-            if (loadMore && offset > 0) {
-              // Filtrar duplicados antes de agregar
-              const newActivities = res.data.data.filter(newActivity => 
-                !this.activities.some(existingActivity => 
-                  existingActivity.game_instance_id === newActivity.game_instance_id
-                )
-              );
-              this.activities = [...this.activities, ...newActivities];
-            } else {
-              this.activities = res.data.data;
-            }
+            // Con la nueva lógica, siempre reemplazamos todas las actividades
+            this.activities = res.data.data;
             this.totalActivities = res.data.total;
-            
-            // Debug: mostrar tipos de juegos únicos
-            const uniqueTypes = [...new Set(this.activities.map(a => a.type_game))];
-            
-            // Debug: verificar duplicados
-            const gameIds = this.activities.map(a => a.game_instance_id);
-            const duplicates = gameIds.filter((id, index) => gameIds.indexOf(id) !== index);
-            if (duplicates.length > 0) {
-              console.warn('⚠️ IDs duplicados encontrados:', duplicates);
-            }
           } else {
             this.activities = [];
+            console.warn('⚠️ [MyProgrammings] Respuesta inválida del backend:', res);
           }
+          
+          // Ocultar loading
+          this.isLoadingMore = false;
         },
         error: (err) => {
           this.activities = [];
-          console.error('Error al cargar programaciones:', err);
+          console.error('❌ [MyProgrammings] Error al cargar programaciones:', err);
+          this.isLoadingMore = false;
         },
       });
   }
@@ -210,35 +220,17 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   loadMore(): void {
-    // Marcar la posición actual antes de cargar más
-    const currentScrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-    const currentActivitiesCount = this.activities.length;
-    
+    // Incrementar la página para cargar más elementos
     this.currentPage++;
-    this.loadProgrammings(true);
     
-    // Después de cargar más actividades, hacer scroll suave hacia los nuevos elementos
-    setTimeout(() => {
-      if (this.activities.length > currentActivitiesCount) {
-        // Scroll suave hacia los nuevos elementos
-        const newElements = document.querySelectorAll('.programming-card');
-        if (newElements.length > currentActivitiesCount) {
-          const targetElement = newElements[currentActivitiesCount];
-          if (targetElement) {
-            targetElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start',
-              inline: 'nearest'
-            });
-          }
-        }
-      }
-    }, 300); // Dar tiempo para que se rendericen los nuevos elementos
+    // Cargar con más elementos (el limit se calculará como currentPage * activitiesPerPage)
+    this.loadProgrammings(true);
   }
 
   resetPagination(): void {
     this.currentPage = 1;
     this.activities = [];
+    this.isLoadingMore = false;
   }
 
   onTabChange(tab: string): void {
@@ -301,124 +293,11 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     this.menuAbierto = null;
   }
   verReporte(id: number): void {
-    this.reportGameInstanceId = id;
     this.menuAbierto = null;
-
-    // Mostrar el modal con SweetAlert2
-    Swal.fire({
-      title: 'Reporte de Juego',
-      html: '<div id="chart-container" style="min-height: 400px;"></div>',
-      width: 800,
-      showCloseButton: true,
-      showConfirmButton: false,
-      allowOutsideClick: false,
-      customClass: {
-        popup: 'report-modal-popup',
-      },
-      didOpen: () => {
-        this.loadReportData(id);
-      },
-    });
+    
+    // Navegar al nuevo componente de reporte
+    this.router.navigate(['/juegos/reporte', id]);
   }
-
-  private loadReportData(gameInstanceId: number): void {
-    // Mostrar loading
-    const container = document.getElementById('chart-container');
-    if (container) {
-      container.innerHTML = '<div class="text-center py-8"><div class="spinner-border text-purple-600" role="status"></div><p class="mt-2">Cargando reporte...</p></div>';
-    }
-
-    this.gameReportService.getReport(gameInstanceId.toString()).subscribe({ // Corregido: uso de this.gameReportService
-      next: (res: GameReportResponse) => {
-        this.renderReportChart(res.data);
-      },
-      error: (error) => {
-        if (container) {
-          container.innerHTML = '<div class="text-center text-red-500 py-8"><i class="fas fa-exclamation-triangle mb-2"></i><p>No se pudo cargar el reporte</p></div>';
-        }
-      }
-    });
-  }
-
-  private renderReportChart(data: any): void {
-    const container = document.getElementById('chart-container');
-    if (!container) return;
-
-    // Para el JSON que muestras, crear un gráfico simple
-    const options = {
-      chart: {
-        type: 'donut',
-        height: 350,
-        animations: {
-          enabled: true,
-          easing: 'easeinout',
-          speed: 800
-        }
-      },
-      series: [data.sessions_count || 0, data.average_rating || 0],
-      labels: ['Sesiones Totales', 'Rating Promedio'],
-      colors: ['#7C3AED', '#38BDF8'],
-      plotOptions: {
-        pie: {
-          donut: {
-            size: '65%',
-            labels: {
-              show: true,
-              total: {
-                show: true,
-                label: 'Total',
-                formatter: () => `ID: ${data.game_instance_id}`
-              }
-            }
-          }
-        }
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: (val: number) => `${val.toFixed(1)}%`
-      },
-      legend: {
-        position: 'bottom',
-        fontSize: '14px'
-      },
-      tooltip: {
-        y: {
-          formatter: (val: number, opts: any) => {
-            const label = opts.w.globals.labels[opts.seriesIndex];
-            return label === 'Sesiones Totales' ? `${val} sesiones` : `${val.toFixed(1)} rating`;
-          }
-        }
-      }
-    };
-
-    const chart = new ApexCharts(container, options);
-    chart.render();
-
-    // Agregar información adicional debajo del gráfico
-    setTimeout(() => {
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'mt-4 p-4 bg-gray-50 rounded-lg';
-      infoDiv.innerHTML = `
-        <div class="grid grid-cols-3 gap-4 text-center">
-          <div class="bg-white p-3 rounded-lg shadow-sm">
-            <div class="text-2xl font-bold text-purple-600">${data.game_instance_id}</div>
-            <div class="text-sm text-gray-600">ID Instancia</div>
-          </div>
-          <div class="bg-white p-3 rounded-lg shadow-sm">
-            <div class="text-2xl font-bold text-blue-600">${data.sessions_count}</div>
-            <div class="text-sm text-gray-600">Sesiones</div>
-          </div>
-          <div class="bg-white p-3 rounded-lg shadow-sm">
-            <div class="text-2xl font-bold text-green-600">${data.average_rating.toFixed(1)}</div>
-            <div class="text-sm text-gray-600">Rating Promedio</div>
-          </div>
-        </div>
-      `;
-      container.appendChild(infoDiv);
-    }, 100);
-  }
-
-
 
   closeReportModal() {
     this.showReportModal = false;

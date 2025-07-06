@@ -38,6 +38,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   activeDropdownId: number | null = null;
   ratingArray: number[] = [1, 2, 3, 4, 5];
   isHeaderMinimized: boolean = false;
+  isLoadingMore: boolean = false;
   getGameRoute(gameType: string, id: number): string {
     const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
     switch (normalizedType) {
@@ -57,25 +58,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private limitSubject = new BehaviorSubject<{ limit: number }>({ limit: 6 });
   
   ngOnInit(): void {
-    // Usar el UserSessionService optimizado para esperar el token
-    if (this.userSessionService.isAuthenticated()) {
-      // Si ya está autenticado, cargar inmediatamente sin loading adicional
-      this.loadGameInstances();
-    } else {
-      // Si no está autenticado, esperar brevemente el token
-      this.subscription.add(
-        this.userSessionService.waitForToken$(1000).subscribe({
-          next: (token) => {
-            this.loadGameInstances();
-          },
-          error: (err) => {
-            console.warn('[Dashboard] Timeout esperando token, cargando sin autenticación:', err);
-            // Fallback: intentar cargar igualmente
-            this.loadGameInstances();
-          }
-        })
-      );
-    }
+    // Cargar inmediatamente - el guard ya maneja la autenticación
+    // No esperar tokens adicionales para máxima velocidad
+    this.loadGameInstances();
   }
 toggleHeaderSize(): void {
   this.isHeaderMinimized = !this.isHeaderMinimized;
@@ -99,11 +84,10 @@ getTypeIcon(typeValue: string): string {
   }
 
   private loadGameInstances(): void {
-    // Solo mostrar loading si no hay juegos cargados y no es un filtro
+    // Carga rápida sin delays - solo mostrar loading en la primera carga
     const isFirstLoad = this.allGames.length === 0;
-    const isFiltering = this.selectedType !== null || this.selectedLevels.length > 0 || this.searchTerm !== '';
     
-    if (isFirstLoad && !isFiltering) {
+    if (isFirstLoad) {
       this.gameLoadingService.showFastGameLoading('Cargando juegos...');
     }
     
@@ -118,7 +102,7 @@ getTypeIcon(typeValue: string): string {
           this.currentOffset = games.length;
           this.hasMoreGames = games.length === this.PAGE_SIZE;
           
-          if (isFirstLoad && !isFiltering) {
+          if (isFirstLoad) {
             this.gameLoadingService.hideFast();
           }
         },
@@ -128,7 +112,7 @@ getTypeIcon(typeValue: string): string {
           this.filteredGames = [];
           this.displayedGames = [];
           
-          if (isFirstLoad && !isFiltering) {
+          if (isFirstLoad) {
             this.gameLoadingService.hideFast();
           }
         },
@@ -202,8 +186,9 @@ getTypeIcon(typeValue: string): string {
   }
 
   loadMoreGames(): void {
-    if (!this.hasMoreGames) return;
+    if (!this.hasMoreGames || this.isLoadingMore) return;
 
+    this.isLoadingMore = true;
     const newLimit = this.PAGE_SIZE + 6;
 
     this.gameInstanceService
@@ -219,9 +204,11 @@ getTypeIcon(typeValue: string): string {
             this.hasMoreGames = false;
           }
           this.applyFilters();
+          this.isLoadingMore = false;
         },
         error: (err) => {
           console.error('Error cargando más instancias de juegos:', err);
+          this.isLoadingMore = false;
         },
       });
   }
