@@ -84,6 +84,7 @@ export class GamePuzzleComponent
   mostrarPista = false;
   mobileMenuOpen = false;
   isMobileView = false;
+  isFooterCollapsed = false; // Nueva variable para el footer móvil
   private timeWarningSent = false;
 
   constructor() {
@@ -93,28 +94,47 @@ export class GamePuzzleComponent
   override ngOnInit() {
     super.ngOnInit();
     this.checkViewport();
-    window.addEventListener('resize', () => this.checkViewport());
+    window.addEventListener('resize', () => {
+      this.checkViewport();
+      // Recalcular tamaños de imagen al redimensionar
+      if (this.gameStarted) {
+        const boardSize = this.getBoardSize();
+        this.imageWidth = boardSize.width;
+        this.imageHeight = boardSize.height;
+      }
+    });
   }
 
   private checkViewport() {
     this.isMobileView = window.innerWidth < 1024; // Tablet o móvil
     if (this.isMobileView) {
-      this.isPanelOpen = false; // Por defecto cerrado en móviles
+      this.isPanelOpen = false; // Panel lateral oculto en móviles
+      this.isFooterCollapsed = false; // Footer expandido por defecto
+      // Actualizar dimensiones de imagen para dispositivos móviles
+      const boardSize = this.getBoardSize();
+      this.imageWidth = boardSize.width;
+      this.imageHeight = boardSize.height;
     } else {
       this.isPanelOpen = true; // Por defecto abierto en desktop
+      this.isFooterCollapsed = true; // Footer no aplica en desktop
+      // Mantener dimensiones originales para desktop
+      this.imageWidth = 700;
+      this.imageHeight = 700;
     }
   }
   getBoardSize(): { width: number; height: number } {
     if (this.isMobileView) {
-      const maxWidth = window.innerWidth * 0.95;
-      return { width: maxWidth, height: maxWidth }; // Cuadrado
+      // Móviles: máximo 90% del viewport width, pero mínimo 300px y máximo 450px
+      const viewportSize = Math.min(window.innerWidth, window.innerHeight);
+      const maxSize = Math.min(viewportSize * 0.9, 450);
+      const minSize = Math.max(maxSize, 300);
+      return { width: minSize, height: minSize };
     } else if (window.innerWidth < 1280) {
-      // Tablet
-      const maxWidth = Math.min(600, window.innerWidth * 0.8);
-      return { width: maxWidth, height: maxWidth };
+      // Tablets: tamaño fijo de 600x600
+      return { width: 600, height: 600 };
     } else {
-      // Desktop
-      return { width: 724, height: 724 }; // Tamaño original
+      // Desktop: tamaño original de 700x700
+      return { width: 700, height: 700 };
     }
   }
   override ngOnDestroy() {
@@ -231,8 +251,10 @@ export class GamePuzzleComponent
       this.totalPieces = this.rows * this.cols;
       this.maxTime = 300;
 
-      this.imageWidth = 700;
-      this.imageHeight = 700;
+      // Configurar tamaños según el dispositivo
+      const boardSize = this.getBoardSize();
+      this.imageWidth = boardSize.width;
+      this.imageHeight = boardSize.height;
 
       if (this.puzzleConfig.path_img) {
         this.puzzleImageUrl = this.getFrontendImagePath(
@@ -806,40 +828,48 @@ export class GamePuzzleComponent
   }
 
   togglePanel() {
+    // En móviles el panel es fijo, no se puede ocultar
+    if (this.isMobileView) {
+      return;
+    }
+    
     this.isPanelOpen = !this.isPanelOpen;
+    this.gameAudioService.playButtonClick();
+  }
+
+  toggleFooter() {
+    this.isFooterCollapsed = !this.isFooterCollapsed;
     this.gameAudioService.playButtonClick();
   }
   getPieceStyle(piece: PuzzlePiece): any {
     if (!piece) return {};
 
-    const pieceWidth = this.imageWidth / this.cols;
-    const pieceHeight = this.imageHeight / this.rows;
+    // Usar el tamaño actual del tablero para calcular las piezas
+    const boardSize = this.getBoardSize();
+    const pieceWidth = boardSize.width / this.cols;
+    const pieceHeight = boardSize.height / this.rows;
     const isInBoard = !this.isInSidebar(piece);
 
-    // Para el sidebar, las piezas mantienen las proporciones exactas pero más pequeñas
-    const sidebarScale = Math.min(100 / pieceWidth, 100 / pieceHeight); // Máximo 100px por lado
+    // Para el sidebar, ajustar el tamaño según el dispositivo
+    let sidebarScale: number;
+    if (this.isMobileView) {
+      // En móviles, piezas más pequeñas para el sidebar horizontal
+      sidebarScale = Math.min(80 / pieceWidth, 80 / pieceHeight);
+    } else {
+      // En desktop, piezas del sidebar mantienen un tamaño razonable
+      sidebarScale = Math.min(100 / pieceWidth, 100 / pieceHeight);
+    }
+    
     const displayWidth = isInBoard ? pieceWidth : pieceWidth * sidebarScale;
     const displayHeight = isInBoard ? pieceHeight : pieceHeight * sidebarScale;
 
     // Calcular la posición de fondo para mostrar solo la porción correcta de la imagen
-    const backgroundPosX = -piece.col * pieceWidth;
-    const backgroundPosY = -piece.row * pieceHeight;
+    const backgroundPosX = -piece.col * (isInBoard ? pieceWidth : pieceWidth * sidebarScale);
+    const backgroundPosY = -piece.row * (isInBoard ? pieceHeight : pieceHeight * sidebarScale);
 
-    // Para el sidebar, escalar también la posición de fondo proporcionalmente
-    const scaledBackgroundPosX = isInBoard
-      ? backgroundPosX
-      : backgroundPosX * sidebarScale;
-    const scaledBackgroundPosY = isInBoard
-      ? backgroundPosY
-      : backgroundPosY * sidebarScale;
-
-    // El background-size debe ser el tamaño COMPLETO de la imagen original escalado apropiadamente
-    const backgroundSizeWidth = isInBoard
-      ? this.imageWidth
-      : this.imageWidth * sidebarScale;
-    const backgroundSizeHeight = isInBoard
-      ? this.imageHeight
-      : this.imageHeight * sidebarScale;
+    // El background-size debe ser el tamaño COMPLETO de la imagen escalado apropiadamente
+    const backgroundSizeWidth = isInBoard ? boardSize.width : boardSize.width * sidebarScale;
+    const backgroundSizeHeight = isInBoard ? boardSize.height : boardSize.height * sidebarScale;
 
     // Asegurar que la URL de la imagen sea válida
     const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
@@ -869,7 +899,7 @@ export class GamePuzzleComponent
       'width.px': displayWidth,
       'height.px': displayHeight,
       'background-image': `url('${imageUrl}')`,
-      'background-position': `${scaledBackgroundPosX}px ${scaledBackgroundPosY}px`,
+      'background-position': `${backgroundPosX}px ${backgroundPosY}px`,
       'background-size': `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
       'background-repeat': 'no-repeat',
       'background-clip': 'padding-box',
@@ -881,13 +911,13 @@ export class GamePuzzleComponent
       position: isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
       transition: 'all 0.2s ease',
-      transform:
-        this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
+      transform: this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
       top: isInBoard ? '0' : 'auto',
       left: isInBoard ? '0' : 'auto',
-      margin: isInBoard ? '0' : '6px',
+      margin: isInBoard ? '0' : (this.isMobileView ? '4px' : '6px'),
       padding: '0',
       overflow: 'hidden',
+      'flex-shrink': isInBoard ? 'auto' : '0' // Para evitar que las piezas se compriman en el sidebar móvil
     };
   }
 

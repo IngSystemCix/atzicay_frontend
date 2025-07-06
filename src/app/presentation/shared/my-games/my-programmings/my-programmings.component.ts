@@ -123,20 +123,9 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
     // Usar el mapeo correcto para todos los tipos de juego
     const gameType = this.mapTabToType(this.selectedTab);
     
-    // Debug temporal
-    console.log('🔍 [DEBUG] loadProgrammings:', {
-      selectedTab: this.selectedTab,
-      gameType: gameType,
-      loadMore: loadMore,
-      currentPage: this.currentPage,
-      userId: this.userId
-    });
-    
-    // Lógica como el dashboard: limit crece, offset siempre 0
     const limit = loadMore ? this.currentPage * this.activitiesPerPage : this.activitiesPerPage;
     const offset = 0;
     
-    // Mostrar loading solo cuando se cargan más elementos
     if (loadMore) {
       this.isLoadingMore = true;
     }
@@ -180,17 +169,6 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
       )
       .subscribe({
         next: (res) => {
-          console.log('🔍 [DEBUG] Response:', {
-            success: res?.success,
-            dataExists: !!res?.data,
-            totalFromAPI: res?.data?.total,
-            arrayLength: res?.data?.data?.length,
-            gameType: gameType,
-            selectedTab: this.selectedTab,
-            limit: limit,
-            offset: offset
-          });
-          
           if (res && res.data && Array.isArray(res.data.data)) {
             // Con la nueva lógica, siempre reemplazamos todas las actividades
             this.activities = res.data.data;
