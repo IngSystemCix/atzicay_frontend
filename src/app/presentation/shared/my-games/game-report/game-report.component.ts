@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameReportService } from '../../../../core/infrastructure/api/game-report.service';
 import { GameReportResponse, GameReportData } from '../../../../core/domain/interface/game-report-response';
-import { GameLoadingService } from '../../../../core/infrastructure/services/game-loading.service';
+import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { Subscription } from 'rxjs';
 

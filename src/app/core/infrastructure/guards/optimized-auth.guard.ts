@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { UserSessionService } from '../service/user-session.service';
-import { GameLoadingService } from '../services/game-loading.service';
+import { GameLoadingService } from '../service/game-loading.service';
 import { map, switchMap, timeout, catchError, of, tap } from 'rxjs';
 
 export const optimizedAuthGuard: CanActivateFn = (route, state) => {

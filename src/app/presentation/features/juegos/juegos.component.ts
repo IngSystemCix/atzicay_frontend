@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AtzicayTabsComponent, Tab as AtzicayTab } from '../../components/atzicay-tabs/atzicay-tabs.component';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
-import { GameLoadingService } from '../../../core/infrastructure/services/game-loading.service';
+import { GameLoadingService } from '../../../core/infrastructure/service/game-loading.service';
 import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-juegos',

@@ -7,8 +7,8 @@ import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared
 import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructure/service/game-alert.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
-import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
-import { GameLoadingService } from '../../../../core/infrastructure/services/game-loading.service';
+import { GameUrlService } from '../../../../core/infrastructure/service/game-url.service';
+import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
 interface JuegoState {

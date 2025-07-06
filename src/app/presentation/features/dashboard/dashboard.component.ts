@@ -16,7 +16,7 @@ import { AtzicayButtonComponent } from '../../components/atzicay-button/atzicay-
 import { FilterDropdownComponent } from '../../components/filter-dropdown/filter-dropdown.component';
 import { GameInstanceService } from '../../../core/infrastructure/api/game-instance.service';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
-import { GameLoadingService } from '../../../core/infrastructure/services/game-loading.service';
+import { GameLoadingService } from '../../../core/infrastructure/service/game-loading.service';
 
 @Component({
   selector: 'app-dashboard',

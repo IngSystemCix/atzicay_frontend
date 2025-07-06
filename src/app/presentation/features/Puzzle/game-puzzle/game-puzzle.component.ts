@@ -13,8 +13,8 @@ import {
 } from '../../../../core/infrastructure/service/game-alert.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
-import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
-import { GameLoadingService } from '../../../../core/infrastructure/services/game-loading.service';
+import { GameUrlService } from '../../../../core/infrastructure/service/game-url.service';
+import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
 
@@ -84,7 +84,7 @@ export class GamePuzzleComponent
   mostrarPista = false;
   mobileMenuOpen = false;
   isMobileView = false;
-  isFooterCollapsed = false; // Nueva variable para el footer móvil
+  isFooterCollapsed = false; // Estado del footer móvil
   private timeWarningSent = false;
 
   constructor() {
@@ -108,15 +108,15 @@ export class GamePuzzleComponent
   private checkViewport() {
     this.isMobileView = window.innerWidth < 1024; // Tablet o móvil
     if (this.isMobileView) {
-      this.isPanelOpen = false; // Panel lateral oculto en móviles
-      this.isFooterCollapsed = false; // Footer expandido por defecto
+      this.isPanelOpen = false; // Por defecto cerrado en móviles
+      this.isFooterCollapsed = true; // Footer inicialmente colapsado en móviles
       // Actualizar dimensiones de imagen para dispositivos móviles
       const boardSize = this.getBoardSize();
       this.imageWidth = boardSize.width;
       this.imageHeight = boardSize.height;
     } else {
       this.isPanelOpen = true; // Por defecto abierto en desktop
-      this.isFooterCollapsed = true; // Footer no aplica en desktop
+      this.isFooterCollapsed = false; // No aplicable en desktop
       // Mantener dimensiones originales para desktop
       this.imageWidth = 700;
       this.imageHeight = 700;
@@ -828,11 +828,6 @@ export class GamePuzzleComponent
   }
 
   togglePanel() {
-    // En móviles el panel es fijo, no se puede ocultar
-    if (this.isMobileView) {
-      return;
-    }
-    
     this.isPanelOpen = !this.isPanelOpen;
     this.gameAudioService.playButtonClick();
   }
@@ -844,10 +839,13 @@ export class GamePuzzleComponent
   getPieceStyle(piece: PuzzlePiece): any {
     if (!piece) return {};
 
-    // Usar el tamaño actual del tablero para calcular las piezas
+    // Usar las dimensiones calculadas de la imagen
+    const imageDimensions = this.getImageDimensions();
     const boardSize = this.getBoardSize();
-    const pieceWidth = boardSize.width / this.cols;
-    const pieceHeight = boardSize.height / this.rows;
+    
+    // Calcular el tamaño de cada pieza basado en las dimensiones de la imagen
+    const pieceWidth = imageDimensions.width / this.cols;
+    const pieceHeight = imageDimensions.height / this.rows;
     const isInBoard = !this.isInSidebar(piece);
 
     // Para el sidebar, ajustar el tamaño según el dispositivo
@@ -868,8 +866,8 @@ export class GamePuzzleComponent
     const backgroundPosY = -piece.row * (isInBoard ? pieceHeight : pieceHeight * sidebarScale);
 
     // El background-size debe ser el tamaño COMPLETO de la imagen escalado apropiadamente
-    const backgroundSizeWidth = isInBoard ? boardSize.width : boardSize.width * sidebarScale;
-    const backgroundSizeHeight = isInBoard ? boardSize.height : boardSize.height * sidebarScale;
+    const backgroundSizeWidth = isInBoard ? imageDimensions.width : imageDimensions.width * sidebarScale;
+    const backgroundSizeHeight = isInBoard ? imageDimensions.height : imageDimensions.height * sidebarScale;
 
     // Asegurar que la URL de la imagen sea válida
     const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
@@ -925,8 +923,11 @@ export class GamePuzzleComponent
   getPieceStyleCompleted(piece: PuzzlePiece): any {
     if (!piece) return {};
 
-    const pieceWidth = this.imageWidth / this.cols;
-    const pieceHeight = this.imageHeight / this.rows;
+    // Usar las dimensiones calculadas de la imagen
+    const imageDimensions = this.getImageDimensions();
+    
+    const pieceWidth = imageDimensions.width / this.cols;
+    const pieceHeight = imageDimensions.height / this.rows;
     const isInBoard = !this.isInSidebar(piece);
 
     // Para el sidebar, mantener el mismo scale que en el juego normal
@@ -943,11 +944,11 @@ export class GamePuzzleComponent
       ? backgroundPosY
       : backgroundPosY * sidebarScale;
     const backgroundSizeWidth = isInBoard
-      ? this.imageWidth
-      : this.imageWidth * sidebarScale;
+      ? imageDimensions.width
+      : imageDimensions.width * sidebarScale;
     const backgroundSizeHeight = isInBoard
-      ? this.imageHeight
-      : this.imageHeight * sidebarScale;
+      ? imageDimensions.height
+      : imageDimensions.height * sidebarScale;
 
     const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
 
@@ -1222,5 +1223,58 @@ export class GamePuzzleComponent
         this.puzzleImageUrl
       );
     }
+  }
+
+  /**
+   * Calcula las dimensiones de la imagen del puzzle para que se ajuste dentro del tablero fijo
+   * manteniendo la proporción de aspecto de la imagen original
+   */
+  private getImageDimensions(): { width: number; height: number; offsetX: number; offsetY: number } {
+    if (!this.puzzleImageUrl) {
+      const boardSize = this.getBoardSize();
+      return { 
+        width: boardSize.width, 
+        height: boardSize.height, 
+        offsetX: 0, 
+        offsetY: 0 
+      };
+    }
+
+    // Obtener el tamaño del tablero (fijo)
+    const boardSize = this.getBoardSize();
+    
+    // Si no tenemos las dimensiones reales de la imagen, usar el tamaño del tablero
+    // En una implementación más completa, cargaríamos la imagen para obtener sus dimensiones reales
+    const imageAspectRatio = 1; // Asumimos imagen cuadrada por defecto
+    
+    let imageWidth = boardSize.width;
+    let imageHeight = boardSize.height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    // Ajustar para mantener proporción dentro del tablero
+    if (imageAspectRatio > 1) {
+      // Imagen más ancha que alta
+      imageHeight = boardSize.width / imageAspectRatio;
+      if (imageHeight > boardSize.height) {
+        imageHeight = boardSize.height;
+        imageWidth = boardSize.height * imageAspectRatio;
+        offsetX = (boardSize.width - imageWidth) / 2;
+      } else {
+        offsetY = (boardSize.height - imageHeight) / 2;
+      }
+    } else if (imageAspectRatio < 1) {
+      // Imagen más alta que ancha
+      imageWidth = boardSize.height * imageAspectRatio;
+      if (imageWidth > boardSize.width) {
+        imageWidth = boardSize.width;
+        imageHeight = boardSize.width / imageAspectRatio;
+        offsetY = (boardSize.height - imageHeight) / 2;
+      } else {
+        offsetX = (boardSize.width - imageWidth) / 2;
+      }
+    }
+
+    return { width: imageWidth, height: imageHeight, offsetX, offsetY };
   }
 }

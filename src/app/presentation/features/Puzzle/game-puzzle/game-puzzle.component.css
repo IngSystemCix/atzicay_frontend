@@ -34,36 +34,29 @@
   right: 0;
 }
 
-/* Panel móvil - fijo en la parte inferior sin tapar el tablero */
+/* Panel móvil - abajo como menú desplegable */
 @media (max-width: 1023px) {
   .floating-panel {
     position: fixed;
     left: 0;
     right: 0;
     top: auto;
-    bottom: 0;
+    bottom: -300px;
     transform: none;
     width: 100%;
-    height: 120px; /* Altura fija más pequeña */
-    max-height: 120px;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease;
+    height: 280px;
+    max-height: 50vh;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-left: none;
-    border-top: 2px solid #9333EA;
-    background: rgba(255, 255, 255, 0.98);
+    border-top: 3px solid #9333EA;
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(15px);
-    z-index: 50; /* Menor z-index para que no tape otros elementos */
-    padding: 0;
   }
-
   
   .floating-panel.open {
-    transform: translateY(0);
-  }
-
-  .panel-toggle {
-    display: none;
+    bottom: 0;
   }
 }
 
@@ -299,10 +292,16 @@
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Panel toggle para móviles - oculto ya que el panel es fijo */
+/* Panel toggle para móviles - en la parte superior del panel */
 @media (max-width: 1023px) {
   .panel-toggle {
-    display: none; /* Ocultar en móviles ya que el panel es siempre visible */
+    left: 50%;
+    top: -24px;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 24px;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -349,28 +348,28 @@
 /* Estilos para el contenedor de piezas */
 .pieces-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
+  grid-template-columns: 1fr 1fr; /* DOS COLUMNAS IGUALES para desktop */
+  gap: 8px;
   padding: 15px;
   max-height: calc(80vh - 120px);
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto; /* Permitir scroll horizontal también */
   flex: 1;
   scrollbar-width: thin;
   scrollbar-color: #9333EA #f3f4f6;
   justify-items: center;
   align-items: start;
+  background: linear-gradient(180deg, rgba(147, 51, 234, 0.02), rgba(147, 51, 234, 0.01));
 }
 
-/* Para móviles - scroll horizontal compacto */
+/* Para móviles y tablets - scroll horizontal con filas únicas */
 @media (max-width: 1023px) {
   .pieces-container {
     display: flex;
     flex-direction: row;
-    gap: 8px;
-    padding: 10px 15px;
-    max-height: 100px;
-    height: 100px;
+    gap: 10px;
+    padding: 15px 20px;
+    max-height: 180px;
     overflow-x: auto;
     overflow-y: hidden;
     align-items: center;
@@ -378,31 +377,23 @@
     scrollbar-width: thin;
     scrollbar-color: #9333EA #f3f4f6;
   }
-
-  /* Estilos de scroll para móviles */
+  
   .pieces-container::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
+    width: auto;
   }
-
+  
   .pieces-container::-webkit-scrollbar-track {
     background: #f3f4f6;
-    border-radius: 3px;
+    border-radius: 4px;
   }
-
+  
   .pieces-container::-webkit-scrollbar-thumb {
     background: #9333EA;
-    border-radius: 3px;
-  }
-
-  /* Ajustar tamaño de piezas para móviles */
-  .sidebar-piece {
-    width: 80px !important;
-    height: 80px !important;
-    min-width: 80px;
-    min-height: 80px;
-    margin: 0 4px;
+    border-radius: 4px;
   }
 }
+
 .pieces-container::-webkit-scrollbar {
   width: 8px;
 }
@@ -423,11 +414,15 @@
 
 /* Contenedor del tablero principal */
 .puzzle-board-container {
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  aspect-ratio: 1/1;
-  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 724px;
+  height: 724px;
+  padding: 12px;
+  box-sizing: border-box;
+  max-width: 90vw;
+  max-height: 90vh;
 }
 
 /* Responsivo para tablets */
@@ -442,8 +437,13 @@
 /* Responsivo para móviles */
 @media (max-width: 767px) {
   .puzzle-board-container {
-    max-width: 95vw;
-    max-height: 95vw;
+    width: 90vw;
+    height: 90vw;
+    min-width: 300px;
+    min-height: 300px;
+    max-width: 450px;
+    max-height: 450px;
+    padding: 8px;
   }
 }
 
@@ -478,7 +478,7 @@
 .puzzle-piece.selected {
   /* Solo un scale ligero para feedback visual */
   transform: scale(1.02) !important;
-  box-shadow: 0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2) !important;
+  box-shadow: 0 0 0 2px #9c6fc7, 0 4px 12px rgba(147, 51, 234, 0.2) !important;
 }
 
 /* Piezas del sidebar - mostrar solo la porción correspondiente */
@@ -570,29 +570,19 @@
 
 /* Panel del header */
 .panel-header {
-  padding: 15px;
+  padding: 20px 15px 15px 15px;
   border-bottom: 1px solid rgba(147, 51, 234, 0.1);
   background: linear-gradient(180deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.02));
+  border-radius: 16px 16px 0 0;
   flex-shrink: 0;
 }
 
 @media (max-width: 1023px) {
   .panel-header {
-    padding: 8px 15px;
-    text-align: center;
-  }
-
-  .panel-header h3 {
-    font-size: 14px !important;
-    margin: 0 !important;
-  }
-
-  .panel-header .text-center {
-    font-size: 12px !important;
-    margin-top: 2px !important;
+    padding: 15px 15px 10px 15px;
+    border-radius: 20px 20px 0 0;
   }
 }
-
 
 /* Estilos responsivos */
 @media (max-width: 1023px) {
@@ -630,141 +620,173 @@
   margin: 0 auto;
 }
 
-/* Botón flotante para móviles - OCULTO ya que el panel es fijo */
+/* Botón flotante para móviles - Mostrar piezas */
 .mobile-pieces-button {
-  display: none; /* Oculto completamente ya que el panel es siempre visible */
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #9333EA, #7928CA);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+  z-index: 1001;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  user-select: none;
+  display: none; /* Oculto por defecto */
 }
 
-/* Ajustar el área principal del juego para móviles */
+/* Mostrar solo en móviles y tablets */
 @media (max-width: 1023px) {
-  /* Agregar padding-bottom al contenedor principal para que no tape el panel */
-  .flex-1 {
-    padding-bottom: 150px !important; /* Espacio para el panel fijo */
-  }
-  
-  /* Asegurar que el tablero se centre bien */
-  .puzzle-board-container {
-    margin-bottom: 20px !important; /* Margen adicional */
+  .mobile-pieces-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
-/* Área principal del juego - dejar espacio para el panel fijo en móviles */
-.game-main-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  position: relative;
-  padding-bottom: 20px; /* Espacio inicial */
+.mobile-pieces-button:hover {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
+  background: linear-gradient(135deg, #7928CA, #6B21A8);
 }
 
-@media (max-width: 1023px) {
-  .game-main-area {
-    padding-bottom: 140px; /* Espacio para el panel fijo */
-  }
+.mobile-pieces-button:active {
+  transform: translateX(-50%) translateY(0px);
+  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.3);
 }
 
-/* Panel móvil - Footer de piezas */
+.mobile-pieces-button.active {
+  background: linear-gradient(135deg, #7928CA, #6B21A8);
+  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.3);
+}
+
+/* Footer móvil con piezas del puzzle */
 .mobile-pieces-footer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-top: 2px solid #9333EA;
-  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-  transition: transform 0.3s ease, height 0.3s ease;
-  height: 120px; /* Altura cuando está expandido */
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  max-height: 40vh;
+  display: none;
+}
+
+/* Mostrar solo en móviles y tablets */
+@media (max-width: 1023px) {
+  .mobile-pieces-footer {
+    display: block;
+  }
+  
+  /* Espacio para que el footer no tape el contenido */
+  .game-main-area {
+    padding-bottom: 200px;
+  }
 }
 
 .mobile-pieces-footer.collapsed {
-  height: 40px; /* Solo muestra el header cuando está colapsado */
-  transform: translateY(calc(100% - 40px));
+  transform: translateY(calc(100% - 60px));
 }
 
 .footer-header {
-  padding: 8px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(147, 51, 234, 0.1);
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #A293FA, #A293FA);
+  color: white;
   cursor: pointer;
-  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-weight: 600;
-  color: #6B21A8;
-  min-height: 40px;
-  box-sizing: border-box;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.2);
 }
 
-.footer-header svg {
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
+.footer-header:hover {
+  background: linear-gradient(135deg, #A293FA, #A293FA);
 }
 
 .pieces-scroll-container {
-  display: flex;
+  padding: 15px;
   overflow-x: auto;
-  padding: 10px;
-  height: calc(100% - 40px);
-  scrollbar-width: thin;
-  scrollbar-color: #9333EA #f3f4f6;
-  gap: 8px;
+  overflow-y: hidden;
+  display: flex;
+  gap: 12px;
+  height: 120px;
   align-items: center;
+  width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: #A293FA #f1f5f9;
+  -webkit-overflow-scrolling: touch;
 }
 
 .pieces-scroll-container::-webkit-scrollbar {
-  height: 4px;
+  height: 8px;
 }
 
 .pieces-scroll-container::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 2px;
+  background: #f1f5f9;
+  border-radius: 4px;
 }
 
 .pieces-scroll-container::-webkit-scrollbar-thumb {
   background: #9333EA;
-  border-radius: 2px;
+  border-radius: 4px;
+}
+
+.pieces-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #7928CA;
 }
 
 .mobile-piece {
-  flex: 0 0 auto;
-  width: 70px;
-  height: 70px;
-  background-size: cover;
-  background-position: center;
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  min-height: 80px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid #e2e8f0;
+  background-size: 400% 300% !important;
   background-repeat: no-repeat;
-  border-radius: 6px;
-  border: 2px solid rgba(147, 51, 234, 0.2);
-  cursor: grab;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+  flex-grow: 0;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .mobile-piece:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.15);
+  border-color: #9333EA;
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
 }
 
 .mobile-piece.selected {
   border-color: #9333EA;
-  box-shadow: 0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2);
-  transform: scale(1.05);
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3);
+  transform: scale(1.1);
 }
 
 .mobile-piece:active {
-  cursor: grabbing;
+  transform: scale(0.95);
 }
 
-/* Asegurar que el contenido principal no se tape */
+/* Ocultar panel lateral y botón flotante en móviles/tablets */
 @media (max-width: 1023px) {
-  .game-main-area {
-    padding-bottom: 130px; /* Espacio para el footer expandido */
+  .floating-panel {
+    display: none !important;
   }
   
-  .floating-panel {
-    display: none; /* Oculta el panel lateral en móviles */
+  .mobile-pieces-button {
+    display: none !important;
   }
 }
+

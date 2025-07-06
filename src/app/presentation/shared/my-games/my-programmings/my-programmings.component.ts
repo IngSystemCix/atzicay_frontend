@@ -8,7 +8,7 @@ import { UserSessionService } from '../../../../core/infrastructure/service/user
 import { ProgrammingStatusService } from '../../../../core/infrastructure/api/programming-status.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
-import { GameUrlService } from '../../../../core/infrastructure/services/game-url.service';
+import { GameUrlService } from '../../../../core/infrastructure/service/game-url.service';
 @Component({
   selector: 'app-my-programmings',
   standalone: true,

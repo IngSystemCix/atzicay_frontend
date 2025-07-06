@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { finalize, delay } from 'rxjs/operators';
-import { LoadingService } from '../services/loading.service';
+import { LoadingService } from '../service/loading.service';
 
 let activeRequests = 0;
 let loadingTimeout: any;

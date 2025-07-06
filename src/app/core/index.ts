@@ -1,6 +1,6 @@
 // Servicios
-export { LoadingService } from './infrastructure/services/loading.service';
-export type { LoadingState } from './infrastructure/services/loading.service';
+export { LoadingService } from './infrastructure/service/loading.service';
+export type { LoadingState } from './infrastructure/service/loading.service';
 
 // Interceptores
 export { loadingInterceptor } from './infrastructure/interceptors/loading.interceptor';
