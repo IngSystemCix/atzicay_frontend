@@ -131,14 +131,12 @@
           </div>
         </div>
 
-        <!-- Contenedor de piezas con scroll mejorado -->
         <div class="pieces-container">
           @for (piece of pieces; track piece.id) {
           @if (isInSidebar(piece)) {
-          <div class="puzzle-piece sidebar-piece" [style.background-image]="'url(' + puzzleImageUrl + ')'"
-            [style]="getPieceStyle(piece)" [class.selected]="selectedPiece?.id === piece.id"
-            (click)="onPieceClick(piece)" draggable="true" (dragstart)="onDragStart(piece, $event)"
-            (dragend)="onDragEnd($event)"></div>
+          <div class="puzzle-piece sidebar-piece" [style]="getPieceStyle(piece)"
+            [class.selected]="selectedPiece?.id === piece.id" (click)="onPieceClick(piece)" draggable="true"
+            (dragstart)="onDragStart(piece, $event)" (dragend)="onDragEnd($event)"></div>
           }
           }
         </div>
@@ -179,7 +177,8 @@
 
         <!-- Juego activo -->
         @if (gameStarted) {
-        <div class="p-2 md:p-3 flex items-center justify-center w-full h-full">
+        <div class="puzzle-board-container" [style.width.px]="getBoardSize().width"
+          [style.height.px]="getBoardSize().height">
           <div class="grid relative rounded-xl overflow-hidden bg-white/5 backdrop-blur-sm border border-purple-200/30"
             [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
             [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'" [style.width]="getBoardSize().width + 'px'"
@@ -189,7 +188,7 @@
             @for (col of colArray; let colIndex = $index; track $index) {
             <div class="drop-zone" [class.occupied]="isPieceAt(rowIndex, colIndex)"
               [class.correct]="isPieceCorrect(rowIndex, colIndex)" (dragover)="onDragOver($event)"
-              (drop)="onDrop(rowIndex, colIndex, $event)" style="box-sizing: border-box">
+              (drop)="onDrop(rowIndex, colIndex, $event)">
               @if (isPieceAt(rowIndex, colIndex)) {
               @for (piece of pieces; track piece.id) {
               @if (piece.inBoard && piece.currentRow === rowIndex && piece.currentCol === colIndex) {
@@ -250,24 +249,19 @@
   <div class="mobile-pieces-footer" [class.collapsed]="isFooterCollapsed">
     <div class="footer-header" (click)="toggleFooter()">
       <span>Piezas del puzzle ({{ remainingPiecesCount }} restantes)</span>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform" 
-           [class.rotate-180]="!isFooterCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform"
+        [class.rotate-180]="!isFooterCollapsed" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </div>
     <div class="pieces-scroll-container">
       @for (piece of pieces; track piece.id) {
-        @if (isInSidebar(piece)) {
-        <div class="mobile-piece" 
-             [style.background-image]="'url(' + puzzleImageUrl + ')'" 
-             [style]="getPieceStyle(piece)"
-             [class.selected]="selectedPiece?.id === piece.id"
-             (click)="onPieceClick(piece)" 
-             draggable="true" 
-             (dragstart)="onDragStart(piece, $event)"
-             (dragend)="onDragEnd($event)">
-        </div>
-        }
+      @if (isInSidebar(piece)) {
+      <div class="mobile-piece" [style.background-image]="'url(' + puzzleImageUrl + ')'" [style]="getPieceStyle(piece)"
+        [class.selected]="selectedPiece?.id === piece.id" (click)="onPieceClick(piece)" draggable="true"
+        (dragstart)="onDragStart(piece, $event)" (dragend)="onDragEnd($event)">
+      </div>
+      }
       }
     </div>
   </div>

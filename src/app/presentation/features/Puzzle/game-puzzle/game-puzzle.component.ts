@@ -124,16 +124,16 @@ export class GamePuzzleComponent
   }
   getBoardSize(): { width: number; height: number } {
     if (this.isMobileView) {
-      // Móviles: máximo 90% del viewport width, pero mínimo 300px y máximo 450px
+      // Móviles: 90% del viewport más pequeño, con límites
       const viewportSize = Math.min(window.innerWidth, window.innerHeight);
       const maxSize = Math.min(viewportSize * 0.9, 450);
-      const minSize = Math.max(maxSize, 300);
+      const minSize = Math.max(300, maxSize); // Entre 300px y 450px
       return { width: minSize, height: minSize };
     } else if (window.innerWidth < 1280) {
-      // Tablets: tamaño fijo de 600x600
+      // Tablets: tamaño fijo
       return { width: 600, height: 600 };
     } else {
-      // Desktop: tamaño original de 700x700
+      // Desktop: tamaño fijo
       return { width: 700, height: 700 };
     }
   }
@@ -147,7 +147,7 @@ export class GamePuzzleComponent
   onAuthenticationReady(userId: number): void {
     // Mostrar loading rápido para el puzzle
     this.gameLoadingService.showFastGameLoading('Cargando Rompecabezas...');
-    
+
     // Capturar parámetros de ruta - puede ser 'id' o 'token'
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
@@ -836,86 +836,83 @@ export class GamePuzzleComponent
     this.isFooterCollapsed = !this.isFooterCollapsed;
     this.gameAudioService.playButtonClick();
   }
+
   getPieceStyle(piece: PuzzlePiece): any {
     if (!piece) return {};
 
-    // Usar las dimensiones calculadas de la imagen
-    const imageDimensions = this.getImageDimensions();
+    // Obtener dimensiones del tablero y de la imagen escalada
     const boardSize = this.getBoardSize();
-    
-    // Calcular el tamaño de cada pieza basado en las dimensiones de la imagen
+    const imageDimensions = this.getImageDimensions();
+
+    // Calcular el tamaño de cada pieza basado en el tablero
     const pieceWidth = imageDimensions.width / this.cols;
     const pieceHeight = imageDimensions.height / this.rows;
     const isInBoard = !this.isInSidebar(piece);
 
-    // Para el sidebar, ajustar el tamaño según el dispositivo
-    let sidebarScale: number;
-    if (this.isMobileView) {
-      // En móviles, piezas más pequeñas para el sidebar horizontal
-      sidebarScale = Math.min(80 / pieceWidth, 80 / pieceHeight);
-    } else {
-      // En desktop, piezas del sidebar mantienen un tamaño razonable
-      sidebarScale = Math.min(100 / pieceWidth, 100 / pieceHeight);
-    }
-    
+    // Calcular el offset para centrar la imagen en el tablero
+    const offsetX = (boardSize.width - imageDimensions.width) / 2;
+    const offsetY = (boardSize.height - imageDimensions.height) / 2;
+
+    // Factor de escala para el sidebar
+    const sidebarScale = this.isMobileView ? 0.4 : 0.5; // 40% en móvil, 50% en desktop
+
+    // Calcular dimensiones de visualización
     const displayWidth = isInBoard ? pieceWidth : pieceWidth * sidebarScale;
     const displayHeight = isInBoard ? pieceHeight : pieceHeight * sidebarScale;
 
-    // Calcular la posición de fondo para mostrar solo la porción correcta de la imagen
-    const backgroundPosX = -piece.col * (isInBoard ? pieceWidth : pieceWidth * sidebarScale);
-    const backgroundPosY = -piece.row * (isInBoard ? pieceHeight : pieceHeight * sidebarScale);
+    // Calcular posición de fondo (ajustando por el offset de centrado)
+    const bgPosX = -piece.col * pieceWidth - (isInBoard ? offsetX : 0);
+    const bgPosY = -piece.row * pieceHeight - (isInBoard ? offsetY : 0);
 
-    // El background-size debe ser el tamaño COMPLETO de la imagen escalado apropiadamente
-    const backgroundSizeWidth = isInBoard ? imageDimensions.width : imageDimensions.width * sidebarScale;
-    const backgroundSizeHeight = isInBoard ? imageDimensions.height : imageDimensions.height * sidebarScale;
+    // Escalar la posición para piezas del sidebar
+    const scaledBgPosX = isInBoard ? bgPosX : bgPosX * sidebarScale;
+    const scaledBgPosY = isInBoard ? bgPosY : bgPosY * sidebarScale;
 
-    // Asegurar que la URL de la imagen sea válida
-    const imageUrl = this.puzzleImageUrl || 'assets/rompecabezas.png';
+    // Tamaño del background (imagen completa escalada)
+    const bgSizeWidth = isInBoard
+      ? imageDimensions.width
+      : imageDimensions.width * sidebarScale;
+    const bgSizeHeight = isInBoard
+      ? imageDimensions.height
+      : imageDimensions.height * sidebarScale;
 
-    // Determinar el color del borde según el estado de la pieza
-    let borderColor;
-    let boxShadow = 'none';
+    // Estilos visuales
+    let border = isInBoard ? 'none' : '2px solid rgba(147, 51, 234, 0.3)';
+    let boxShadow = isInBoard ? 'none' : '0 2px 6px rgba(0, 0, 0, 0.1)';
+    let borderRadius = isInBoard ? '0' : '6px';
+
+    if (this.selectedPiece?.id === piece.id) {
+      border = '2px solid rgba(147, 51, 234, 0.8)';
+      boxShadow = '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2)';
+    }
 
     if (piece.correctPos && isInBoard) {
-      // Pieza en posición correcta: borde verde
-      borderColor = '2px solid #22c55e';
-    } else if (this.selectedPiece?.id === piece.id) {
-      // Pieza seleccionada: borde morado
-      borderColor = isInBoard ? 'none' : '2px solid rgba(147, 51, 234, 0.8)';
-      if (!isInBoard) {
-        boxShadow = '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.2)';
-      }
-    } else {
-      // Pieza normal - sin bordes en el tablero para que las piezas se vean pegadas
-      borderColor = isInBoard ? 'none' : '2px solid rgba(147, 51, 234, 0.2)';
-      if (!isInBoard) {
-        boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
-      }
+      border = '2px solid #22c55e';
     }
 
     return {
       'width.px': displayWidth,
       'height.px': displayHeight,
-      'background-image': `url('${imageUrl}')`,
-      'background-position': `${backgroundPosX}px ${backgroundPosY}px`,
-      'background-size': `${backgroundSizeWidth}px ${backgroundSizeHeight}px`,
+      'background-image': `url('${this.puzzleImageUrl}')`,
+      'background-position': `${scaledBgPosX}px ${scaledBgPosY}px`,
+      'background-size': `${bgSizeWidth}px ${bgSizeHeight}px`,
       'background-repeat': 'no-repeat',
-      'background-clip': 'padding-box',
-      cursor: this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
-      border: borderColor,
-      'border-radius': isInBoard ? '0' : '8px',
+      border: border,
+      'border-radius': borderRadius,
       'box-shadow': boxShadow,
+      cursor: this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
       display: 'block',
       position: isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
       transition: 'all 0.2s ease',
-      transform: this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
+      transform:
+        this.selectedPiece?.id === piece.id ? 'scale(1.05)' : 'scale(1)',
       top: isInBoard ? '0' : 'auto',
       left: isInBoard ? '0' : 'auto',
-      margin: isInBoard ? '0' : (this.isMobileView ? '4px' : '6px'),
+      margin: isInBoard ? '0' : '4px',
       padding: '0',
       overflow: 'hidden',
-      'flex-shrink': isInBoard ? 'auto' : '0' // Para evitar que las piezas se compriman en el sidebar móvil
+      'flex-shrink': '0',
     };
   }
 
@@ -925,7 +922,7 @@ export class GamePuzzleComponent
 
     // Usar las dimensiones calculadas de la imagen
     const imageDimensions = this.getImageDimensions();
-    
+
     const pieceWidth = imageDimensions.width / this.cols;
     const pieceHeight = imageDimensions.height / this.rows;
     const isInBoard = !this.isInSidebar(piece);
@@ -1229,52 +1226,43 @@ export class GamePuzzleComponent
    * Calcula las dimensiones de la imagen del puzzle para que se ajuste dentro del tablero fijo
    * manteniendo la proporción de aspecto de la imagen original
    */
-  private getImageDimensions(): { width: number; height: number; offsetX: number; offsetY: number } {
-    if (!this.puzzleImageUrl) {
-      const boardSize = this.getBoardSize();
-      return { 
-        width: boardSize.width, 
-        height: boardSize.height, 
-        offsetX: 0, 
-        offsetY: 0 
-      };
-    }
-
-    // Obtener el tamaño del tablero (fijo)
+  private getImageDimensions(): { width: number; height: number } {
+    // Tamaño base del tablero (sin bordes/padding)
     const boardSize = this.getBoardSize();
-    
-    // Si no tenemos las dimensiones reales de la imagen, usar el tamaño del tablero
-    // En una implementación más completa, cargaríamos la imagen para obtener sus dimensiones reales
-    const imageAspectRatio = 1; // Asumimos imagen cuadrada por defecto
-    
-    let imageWidth = boardSize.width;
-    let imageHeight = boardSize.height;
-    let offsetX = 0;
-    let offsetY = 0;
+    const boardWidth = boardSize.width;
+    const boardHeight = boardSize.height;
 
-    // Ajustar para mantener proporción dentro del tablero
-    if (imageAspectRatio > 1) {
-      // Imagen más ancha que alta
-      imageHeight = boardSize.width / imageAspectRatio;
-      if (imageHeight > boardSize.height) {
-        imageHeight = boardSize.height;
-        imageWidth = boardSize.height * imageAspectRatio;
-        offsetX = (boardSize.width - imageWidth) / 2;
-      } else {
-        offsetY = (boardSize.height - imageHeight) / 2;
-      }
-    } else if (imageAspectRatio < 1) {
-      // Imagen más alta que ancha
-      imageWidth = boardSize.height * imageAspectRatio;
-      if (imageWidth > boardSize.width) {
-        imageWidth = boardSize.width;
-        imageHeight = boardSize.width / imageAspectRatio;
-        offsetY = (boardSize.height - imageHeight) / 2;
-      } else {
-        offsetX = (boardSize.width - imageWidth) / 2;
-      }
+    // Si no tenemos imagen, usar el tamaño del tablero
+    if (!this.puzzleImageUrl) {
+      return { width: boardWidth, height: boardHeight };
     }
 
-    return { width: imageWidth, height: imageHeight, offsetX, offsetY };
+    // Proporción del tablero (siempre cuadrado según tu código)
+    const boardAspectRatio = boardWidth / boardHeight;
+
+    // Asumimos que la imagen ya está cargada con sus dimensiones reales
+    // Si no están disponibles, usamos las dimensiones del tablero
+    const imgWidth = this.actualImageWidth || boardWidth;
+    const imgHeight = this.actualImageHeight || boardHeight;
+    const imgAspectRatio = imgWidth / imgHeight;
+
+    let scaledWidth, scaledHeight;
+
+    // Ajustar la imagen para que quepa completamente en el tablero
+    if (imgAspectRatio > boardAspectRatio) {
+      // Imagen más ancha que el tablero (en proporción)
+      scaledWidth = boardWidth;
+      scaledHeight = boardWidth / imgAspectRatio;
+    } else {
+      // Imagen más alta que el tablero (en proporción)
+      scaledHeight = boardHeight;
+      scaledWidth = boardHeight * imgAspectRatio;
+    }
+
+    // Asegurarnos de que no sea más grande que el tablero
+    scaledWidth = Math.min(scaledWidth, boardWidth);
+    scaledHeight = Math.min(scaledHeight, boardHeight);
+
+    return { width: scaledWidth, height: scaledHeight };
   }
 }

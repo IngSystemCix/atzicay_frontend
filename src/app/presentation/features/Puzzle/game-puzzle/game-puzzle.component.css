@@ -153,12 +153,17 @@
 
 /* Para el sidebar */
 .sidebar-piece {
-  transition: all 0.3s ease;
-  overflow: hidden;
-  transform-origin: center;
-  will-change: transform;
-  cursor: grab;
+    display: block !important;
+    background-repeat: no-repeat !important;
+    background-origin: padding-box !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
 }
+
 
 .sidebar-piece:hover {
   transform: scale(1.08);
@@ -606,6 +611,32 @@
   .game-content-area {
     padding-bottom: 20px;
   }
+}
+
+/* Mobile sidebar pieces */
+@media (max-width: 1023px) {
+    .sidebar-piece {
+        min-width: 80px !important;
+        min-height: 80px !important;
+        margin: 0 8px 0 0 !important;
+    }
+    
+    .pieces-scroll-container {
+        padding: 12px 15px;
+    }
+}
+/* Desktop sidebar pieces */
+@media (min-width: 1024px) {
+    .sidebar-piece {
+        width: 100px !important;
+        height: 100px !important;
+        margin: 8px !important;
+    }
+    
+    .pieces-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 12px;
+    }
 }
 
 @media (max-width: 640px) {
