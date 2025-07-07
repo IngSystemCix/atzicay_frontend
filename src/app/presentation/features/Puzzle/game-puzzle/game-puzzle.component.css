@@ -34,29 +34,49 @@
   right: 0;
 }
 
-/* Panel móvil - abajo como menú desplegable */
+/* Panel móvil - footer horizontal fijo en la parte inferior */
 @media (max-width: 1023px) {
   .floating-panel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: auto;
-    bottom: -300px;
-    transform: none;
-    width: 100%;
-    height: 280px;
-    max-height: 50vh;
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
-    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-left: none;
-    border-top: 3px solid #9333EA;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(15px);
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100vw !important;
+    height: 100px !important; /* Altura muy pequeña, solo para las piezas */
+    max-height: 100px !important;
+    border-radius: 0 !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+    transition: none !important;
+    border-left: none !important;
+    border-top: 2px solid #9333EA !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(15px) !important;
+    padding: 0 !important;
+    z-index: 9999 !important; /* Z-index muy alto para estar siempre encima */
+    display: flex !important;
+    flex-direction: column !important;
   }
   
   .floating-panel.open {
-    bottom: 0;
+    bottom: 0 !important;
+  }
+  
+  /* Ocultar completamente el header del panel en móviles */
+  .panel-header {
+    display: none !important;
+  }
+  
+  /* Ocultar el botón toggle en móviles */
+  .panel-toggle {
+    display: none !important;
+  }
+  
+  /* Agregar espacio al contenido principal para que no sea tapado por el footer */
+  .game-main-area {
+    padding-bottom: 110px !important; /* Espacio para el footer */
+    height: calc(100vh - 110px) !important;
   }
 }
 
@@ -77,15 +97,17 @@
 .drop-zone {
   position: relative;
   box-sizing: border-box;
-  border: 1px solid rgba(147, 51, 234, 0.3);
+  border: 1px solid rgba(147, 51, 234, 0.2);
   transition: all 0.2s ease;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
   margin: 0;
   padding: 0;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 20px;
+  min-width: 20px;
 }
 
 .drop-zone:hover {
@@ -94,8 +116,13 @@
 }
 
 .drop-zone.occupied {
-  border-color: rgba(147, 51, 234, 0.6);
-  background-color: rgba(147, 51, 234, 0.05);
+  border-color: rgba(147, 51, 234, 0.3);
+  background-color: transparent;
+}
+
+.drop-zone.correct {
+  border-color: #22c55e;
+  background-color: rgba(34, 197, 94, 0.05);
 }
 
 /* Piezas en el tablero - sin márgenes para que se vean pegadas */
@@ -367,35 +394,121 @@
   background: linear-gradient(180deg, rgba(147, 51, 234, 0.02), rgba(147, 51, 234, 0.01));
 }
 
-/* Para móviles y tablets - scroll horizontal con filas únicas */
+/* Para móviles y tablets - footer horizontal con scroll */
 @media (max-width: 1023px) {
   .pieces-container {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding: 15px 20px;
-    max-height: 180px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    align-items: center;
-    justify-content: flex-start;
-    scrollbar-width: thin;
-    scrollbar-color: #9333EA #f3f4f6;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    padding: 10px 15px !important;
+    height: 100px !important; /* Altura exacta para el footer */
+    max-height: 100px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #9333EA #f3f4f6 !important;
+    background: transparent !important;
+    width: 100% !important;
   }
   
   .pieces-container::-webkit-scrollbar {
-    height: 8px;
-    width: auto;
+    height: 4px !important;
+    width: auto !important;
   }
   
   .pieces-container::-webkit-scrollbar-track {
-    background: #f3f4f6;
-    border-radius: 4px;
+    background: rgba(243, 244, 246, 0.3) !important;
+    border-radius: 2px !important;
   }
   
   .pieces-container::-webkit-scrollbar-thumb {
-    background: #9333EA;
-    border-radius: 4px;
+    background: #9333EA !important;
+    border-radius: 2px !important;
+  }
+  
+  /* Piezas en el footer móvil - tamaño fijo y pequeño */
+  .sidebar-piece {
+    min-width: 60px !important;
+    width: 60px !important;
+    height: 60px !important;
+    min-height: 60px !important;
+    max-width: 60px !important;
+    max-height: 60px !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    margin: 0 !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(147, 51, 234, 0.4) !important;
+    box-shadow: 0 1px 4px rgba(147, 51, 234, 0.1) !important;
+    cursor: grab !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+  }
+  
+  .sidebar-piece:hover {
+    transform: scale(1.03) !important;
+    border-color: rgba(147, 51, 234, 0.7) !important;
+    box-shadow: 0 2px 8px rgba(147, 51, 234, 0.2) !important;
+    z-index: 10 !important;
+  }
+  
+  .sidebar-piece.selected {
+    transform: scale(1.05) !important;
+    border-color: #9333EA !important;
+    box-shadow: 0 0 0 2px #9333EA, 0 2px 8px rgba(147, 51, 234, 0.3) !important;
+    z-index: 20 !important;
+  }
+  
+  /* Quitar animación flotante en móviles */
+  .sidebar-piece {
+    animation: none !important;
+  }
+}
+
+/* Estilos específicos para móviles - Tablero centrado */
+@media (max-width: 1023px) {
+  /* Contenedor principal del juego en móviles */
+  .puzzle-board-main-container {
+    padding: 10px !important;
+    margin: 10px auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: auto !important;
+  }
+  
+  /* Grid del tablero en móviles */
+  .puzzle-board-grid {
+    border-radius: 6px !important;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1) !important;
+    border: 2px solid rgba(147, 51, 234, 0.3) !important;
+  }
+  
+  .game-main-area {
+    padding-bottom: 110px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    min-height: calc(100vh - 110px) !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Centrar el contenido del juego */
+  .puzzle-game-container {
+    flex: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 10px 0 !important;
+    width: 100% !important;
+  }
+  
+  /* Ocultar completamente el footer que está duplicado */
+  .mobile-pieces-footer {
+    display: none !important;
   }
 }
 
@@ -417,159 +530,56 @@
   background: #7928CA;
 }
 
-/* Contenedor del tablero principal */
-.puzzle-board-container {
+/* Contenedor principal del tablero - Adaptativo */
+.puzzle-board-main-container {
+  transition: all 0.3s ease;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Contenedor del juego - Adaptativo */
+.puzzle-game-container {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 724px;
-  height: 724px;
-  padding: 12px;
-  box-sizing: border-box;
-  max-width: 90vw;
-  max-height: 90vh;
+  padding: 0;
+}
+
+/* Grid del tablero - Adaptativo */
+.puzzle-board-grid {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  border: 2px solid rgba(147, 51, 234, 0.2);
 }
 
 /* Responsivo para tablets */
 @media (max-width: 1279px) and (min-width: 768px) {
-  .puzzle-board-container {
-    width: 600px;
-    height: 600px;
-    padding: 10px;
+  .puzzle-board-main-container {
+    padding: 15px;
+  }
+  
+  .puzzle-board-grid {
+    border-radius: 6px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
   }
 }
 
 /* Responsivo para móviles */
 @media (max-width: 767px) {
-  .puzzle-board-container {
-    width: 90vw;
-    height: 90vw;
-    min-width: 300px;
-    min-height: 300px;
-    max-width: 450px;
-    max-height: 450px;
-    padding: 8px;
+  .puzzle-board-main-container {
+    padding: 10px;
+    margin: 5px auto;
   }
-}
-
-.puzzle-board-grid {
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
-}
-
-/* Piezas del puzzle - Estilos mejorados para mostrar SOLO una porción de la imagen */
-.puzzle-piece {
-  display: block !important;
-  background-repeat: no-repeat !important;
-  background-origin: padding-box !important;
-  image-rendering: -webkit-optimize-contrast !important;
-  image-rendering: crisp-edges !important;
-  border-radius: 4px !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  cursor: grab !important;
-  transition: all 0.2s ease !important;
-  /* NO usar contain - esto hace que se vea la imagen completa */
-}
-
-.puzzle-piece:hover {
-  /* Removido el scale para evitar distorsiones */
-  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.15) !important;
-}
-
-.puzzle-piece.selected {
-  /* Solo un scale ligero para feedback visual */
-  transform: scale(1.02) !important;
-  box-shadow: 0 0 0 2px #9c6fc7, 0 4px 12px rgba(147, 51, 234, 0.2) !important;
-}
-
-/* Piezas del sidebar - mostrar solo la porción correspondiente */
-.sidebar-piece {
-  display: block !important;
-  background-repeat: no-repeat !important;
-  background-origin: padding-box !important;
-  image-rendering: -webkit-optimize-contrast !important;
-  image-rendering: crisp-edges !important;
-  border-radius: 4px !important;
-  box-sizing: border-box !important;
-  overflow: hidden !important;
-  cursor: grab !important;
-  transition: all 0.3s ease !important;
-  position: relative !important;
-  /* NO usar contain - esto hace que se vea la imagen completa */
-}
-
-.sidebar-piece:hover {
-  /* Removido el scale excesivo */
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15) !important;
-}
-
-/* Piezas en el tablero - mostrar solo la porción correspondiente */
-.piece-in-board {
-  display: block !important;
-  background-repeat: no-repeat !important;
-  background-origin: padding-box !important;
-  image-rendering: -webkit-optimize-contrast !important;
-  image-rendering: crisp-edges !important;
-  box-sizing: border-box !important;
-  position: absolute !important;
-  overflow: hidden !important;
-  width: 100% !important;
-  height: 100% !important;
-  top: 0 !important;
-  left: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  /* NO usar contain - esto hace que se vea la imagen completa */
-}
-
-.piece-in-board:hover {
-  /* Removido el scale para evitar distorsiones cuando está en el tablero */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
-}
-
-/* Mejoras para diferentes tamaños de puzzle */
-.pieces-container {
-  /* Asegurar que cuando haya muchas piezas se pueda hacer scroll */
-  max-height: calc(80vh - 140px);
-  min-height: 200px;
-}
-
-/* Responsive para piezas más grandes */
-@media (min-width: 768px) {
-  .pieces-container {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    max-height: calc(80vh - 120px);
-  }
-}
-
-@media (max-width: 600px) {
-  .puzzle-scroll-content {
-    flex-direction: column !important;
-    align-items: center !important;
-    height: auto;
-  }
-  .piece-canvas-sidebar {
-    flex-direction: row !important;
-    min-width: 100vw;
-    max-width: 100vw;
-    width: 100vw;
-    margin-bottom: 1rem;
-    margin-right: 0;
-    height: 100px;
-    max-height: 120px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    display: flex;
-    flex-wrap: nowrap;
-  }
-  .sidebar-piece {
-    width: 60px !important;
-    height: 60px !important;
-    margin: 0 6px 0 0;
+  
+  .puzzle-board-grid {
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -582,242 +592,21 @@
   flex-shrink: 0;
 }
 
+/* Panel del header - Móviles */
 @media (max-width: 1023px) {
   .panel-header {
-    padding: 15px 15px 10px 15px;
+    padding: 10px 15px 8px 15px;
     border-radius: 20px 20px 0 0;
-  }
-}
-
-/* Estilos responsivos */
-@media (max-width: 1023px) {
-  /* Ajustar el tablero del puzzle */
-  .puzzle-board-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1/1;
-    padding: 8px;
-  }
-
-  /* Ajustar piezas para móviles */
-  .pieces-container {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 6px;
-    padding: 10px;
-  }
-
-  /* Ajustar el área del juego */
-  .game-content-area {
-    padding-bottom: 20px;
-  }
-}
-
-/* Mobile sidebar pieces */
-@media (max-width: 1023px) {
-    .sidebar-piece {
-        min-width: 80px !important;
-        min-height: 80px !important;
-        margin: 0 8px 0 0 !important;
-    }
-    
-    .pieces-scroll-container {
-        padding: 12px 15px;
-    }
-}
-/* Desktop sidebar pieces */
-@media (min-width: 1024px) {
-    .sidebar-piece {
-        width: 100px !important;
-        height: 100px !important;
-        margin: 8px !important;
-    }
-    
-    .pieces-container {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 12px;
-    }
-}
-
-@media (max-width: 640px) {
-  .pieces-container {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-  }
-}
-
-/* Asegurar que el tablero se ajuste */
-.puzzle-board-container {
-  transition: all 0.3s ease;
-  margin: 0 auto;
-}
-
-/* Botón flotante para móviles - Mostrar piezas */
-.mobile-pieces-button {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #9333EA, #7928CA);
-  color: white;
-  padding: 12px 20px;
-  border-radius: 25px;
-  border: none;
-  box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
-  z-index: 1001;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  user-select: none;
-  display: none; /* Oculto por defecto */
-}
-
-/* Mostrar solo en móviles y tablets */
-@media (max-width: 1023px) {
-  .mobile-pieces-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
-.mobile-pieces-button:hover {
-  transform: translateX(-50%) translateY(-2px);
-  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
-  background: linear-gradient(135deg, #7928CA, #6B21A8);
-}
-
-.mobile-pieces-button:active {
-  transform: translateX(-50%) translateY(0px);
-  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.3);
-}
-
-.mobile-pieces-button.active {
-  background: linear-gradient(135deg, #7928CA, #6B21A8);
-  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.3);
-}
-
-/* Footer móvil con piezas del puzzle */
-.mobile-pieces-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  transition: transform 0.3s ease;
-  max-height: 40vh;
-  display: none;
-}
-
-/* Mostrar solo en móviles y tablets */
-@media (max-width: 1023px) {
-  .mobile-pieces-footer {
-    display: block;
+    background: linear-gradient(180deg, rgba(147, 51, 234, 0.08), rgba(147, 51, 234, 0.03));
   }
   
-  /* Espacio para que el footer no tape el contenido */
-  .game-main-area {
-    padding-bottom: 200px;
-  }
-}
-
-.mobile-pieces-footer.collapsed {
-  transform: translateY(calc(100% - 60px));
-}
-
-.footer-header {
-  padding: 15px 20px;
-  background: linear-gradient(135deg, #A293FA, #A293FA);
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-weight: 600;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 2px 10px rgba(147, 51, 234, 0.2);
-}
-
-.footer-header:hover {
-  background: linear-gradient(135deg, #A293FA, #A293FA);
-}
-
-.pieces-scroll-container {
-  padding: 15px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  display: flex;
-  gap: 12px;
-  height: 120px;
-  align-items: center;
-  width: 100%;
-  scrollbar-width: thin;
-  scrollbar-color: #A293FA #f1f5f9;
-  -webkit-overflow-scrolling: touch;
-}
-
-.pieces-scroll-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.pieces-scroll-container::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.pieces-scroll-container::-webkit-scrollbar-thumb {
-  background: #9333EA;
-  border-radius: 4px;
-}
-
-.pieces-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #7928CA;
-}
-
-.mobile-piece {
-  width: 80px;
-  height: 80px;
-  min-width: 80px;
-  min-height: 80px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 2px solid #e2e8f0;
-  background-size: 400% 300% !important;
-  background-repeat: no-repeat;
-  flex-shrink: 0;
-  flex-grow: 0;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.mobile-piece:hover {
-  transform: scale(1.05);
-  border-color: #9333EA;
-  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
-}
-
-.mobile-piece.selected {
-  border-color: #9333EA;
-  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.3);
-  transform: scale(1.1);
-}
-
-.mobile-piece:active {
-  transform: scale(0.95);
-}
-
-/* Ocultar panel lateral y botón flotante en móviles/tablets */
-@media (max-width: 1023px) {
-  .floating-panel {
-    display: none !important;
+  .panel-header h3 {
+    font-size: 14px;
+    margin-bottom: 4px;
   }
   
-  .mobile-pieces-button {
-    display: none !important;
+  .panel-header .text-sm {
+    font-size: 12px;
   }
 }
 
