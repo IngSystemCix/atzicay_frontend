@@ -16,6 +16,19 @@
   }
 }
 
+/* Header con auto-hide en scroll */
+.dashboard-header-text {
+  transition: transform 1s ease-out, opacity 1s ease-out;
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.dashboard-header-text.hidden {
+  transform: translateY(-30px);
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Animaciones para las cards */
 @keyframes fadeInUp {
   from {

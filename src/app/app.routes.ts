@@ -188,5 +188,5 @@ export const routes: Routes = [
         title: "Perfil"
       }
     ]
-  }
+  },
 ];

@@ -38,7 +38,10 @@ interface Word {
   templateUrl: './game-solve-the-word.component.html',
   styleUrl: './game-solve-the-word.component.css',
 })
-export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
+export class GameSolveTheWordComponent
+  extends BaseAuthenticatedComponent
+  implements OnInit, OnDestroy
+{
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
@@ -81,7 +84,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
   // Header control
   headerExpanded = false;
-  
+
   // Pista control
   mostrarPista = false;
 
@@ -99,12 +102,11 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   onAuthenticationReady(userId: number): void {
     // Mostrar loading rápido para la carga del juego
     this.gameLoadingService.showFastGameLoading('Cargando Pupiletras...');
-    
+
     // Capturar parámetros de ruta - puede ser 'id' o 'token'
     const id = this.route.snapshot.params['id'];
     const token = this.route.snapshot.params['token'];
-    
-    
+
     if (token) {
       // Si tenemos un token, validarlo primero
       this.gameUrlService.validateGameToken(token).subscribe({
@@ -123,7 +125,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
           this.error = 'Error al validar el acceso al juego';
           this.loading = false;
           this.gameLoadingService.hideFast();
-        }
+        },
       });
     } else if (id) {
       // Si tenemos un ID tradicional, usarlo directamente
@@ -151,40 +153,50 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     // Get userId from authenticated user
     const userId = this.currentUserId;
 
-    this.gameConfigService.getGameConfiguration(id, userId || undefined, false).subscribe({
-      next: (response: { success: boolean; data: GameConfiguration; message?: string }) => {
-        if (response.success && response.data) {
-          this.aplicarConfiguracion(response.data);
-          this.iniciarJuego();
+    this.gameConfigService
+      .getGameConfiguration(id, userId || undefined, false)
+      .subscribe({
+        next: (response: {
+          success: boolean;
+          data: GameConfiguration;
+          message?: string;
+        }) => {
+          if (response.success && response.data) {
+            this.aplicarConfiguracion(response.data);
+            this.iniciarJuego();
+            this.gameLoadingService.hideFast();
+          } else {
+            this.error =
+              response.message ||
+              'No se pudo cargar la configuración del juego';
+            this.gameLoadingService.hideFast();
+          }
+          this.loading = false;
+        },
+        error: (err: unknown) => {
+          console.error('Error cargando configuración:', err);
+          this.error = 'Error al cargar la configuración del juego';
+          this.loading = false;
           this.gameLoadingService.hideFast();
-        } else {
-          this.error = response.message || 'No se pudo cargar la configuración del juego';
-          this.gameLoadingService.hideFast();
-        }
-        this.loading = false;
-      },
-      error: (err: unknown) => {
-        console.error('Error cargando configuración:', err);
-        this.error = 'Error al cargar la configuración del juego';
-        this.loading = false;
-        this.gameLoadingService.hideFast();
-      },
-    });
+        },
+      });
   }
 
   private aplicarConfiguracion(data: GameConfiguration): void {
     // Guardar la configuración completa
     this.gameConfig = data;
-    
+
     this.title = data.game_name;
     this.description = data.game_description;
-    
+
     // Guardar el estado de evaluación del usuario
     this.userAssessed = data.assessed || false;
 
     // Aplicar configuraciones desde settings (con validación)
     if (data.settings && Array.isArray(data.settings)) {
-      const getSetting = (key: string) => data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)?.value;
+      const getSetting = (key: string) =>
+        data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)
+          ?.value;
       this.timeLeft = parseInt(getSetting('time_limit') || '347', 10);
       this.fontFamily = getSetting('font_family') || 'Arial';
       this.backgroundColor = getSetting('background_color') || '#fff';
@@ -203,7 +215,10 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.wordsFound = 0;
 
     // Tamaño de grilla dinámico
-    const maxWordLen = this.words.reduce((max, w) => Math.max(max, w.text.length), 0);
+    const maxWordLen = this.words.reduce(
+      (max, w) => Math.max(max, w.text.length),
+      0
+    );
     this.gridRows = Math.max(12, maxWordLen + 2, this.words.length + 2);
     this.gridCols = Math.max(12, maxWordLen + 2, this.words.length + 2);
   }
@@ -236,24 +251,24 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
   private async showWinAlert() {
     this.gameAudioService.playWordSearchAllWordsFound();
-    
+
     // Mostrar modal de valoración solo si el usuario no ha evaluado el juego
     if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
         userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed
+        gameAssessed: this.gameConfig?.assessed,
       });
     }
-    
+
     const timeUsed = this.formatTime(347 - this.timeLeft);
     const config: GameAlertConfig = {
       gameType: 'solve-the-word',
       gameName: 'Pupiletras',
       timeUsed,
       wordsCompleted: this.wordsFound,
-      totalWords: this.totalWords
+      totalWords: this.totalWords,
     };
 
     const result = await this.gameAlertService.showSuccessAlert(config);
@@ -264,20 +279,20 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       this.volverAlDashboard();
     }
   }
-  
+
   private async showRatingAlert(): Promise<void> {
     if (!this.gameConfig || !this.currentUserId) return;
 
     try {
       const gameInstanceId = this.gameConfig.game_instance_id;
       const gameName = this.gameConfig.game_name || 'Pupiletras';
-      
+
       const result = await this.ratingModalService.showRatingModal(
-        gameInstanceId, 
-        this.currentUserId, 
+        gameInstanceId,
+        this.currentUserId,
         gameName
       );
-      
+
       if (result) {
         this.userAssessed = true;
       }
@@ -288,22 +303,22 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
   private async showTimeUpAlert() {
     this.gameAudioService.playTimeUp();
-    
+
     // Mostrar modal de valoración si el usuario no ha evaluado el juego
     if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
       await this.showRatingAlert();
     } else {
       console.log('❌ Modal de valoración NO se muestra porque:', {
         userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed
+        gameAssessed: this.gameConfig?.assessed,
       });
     }
-    
+
     const config: GameAlertConfig = {
       gameType: 'solve-the-word',
       gameName: 'Pupiletras',
       wordsCompleted: this.wordsFound,
-      totalWords: this.totalWords
+      totalWords: this.totalWords,
     };
 
     const result = await this.gameAlertService.showTimeUpAlert(config);
@@ -321,7 +336,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       this.resetGame();
     }
   }
-  
+
   private showRatingModal() {
     // Método legacy - usar showRatingAlert en su lugar
     this.showRatingAlert();
@@ -332,13 +347,14 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       let placed = false;
       let attempts = 0;
 
+      // ✅ MAPEO CORREGIDO DE ORIENTACIONES
       const orientationMap: { [key: string]: { row: number; col: number } } = {
-        HL: { row: 0, col: 1 }, // Horizontal Left to Right (normal)
-        HR: { row: 0, col: 1 }, // Horizontal Right (igual que HL)
-        VU: { row: 1, col: 0 }, // Vertical Up to Down (normal)
-        VD: { row: 1, col: 0 }, // Vertical Down (igual que VU)
-        DU: { row: 1, col: 1 }, // Diagonal Down-Right
-        DD: { row: 1, col: 1 }, // Diagonal Down (igual que DU)
+        HL: { row: 0, col: 1 }, // Horizontal Left to Right (→)
+        HR: { row: 0, col: -1 }, // Horizontal Right to Left (←)
+        VU: { row: -1, col: 0 }, // Vertical Up (↑)
+        VD: { row: 1, col: 0 }, // Vertical Down (↓)
+        DU: { row: -1, col: 1 }, // Diagonal Up-Right (↗)
+        DD: { row: 1, col: 1 }, // Diagonal Down-Right (↘)
       };
 
       const direction = orientationMap[word.orientation || 'HL'] || {
@@ -349,17 +365,42 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       while (!placed && attempts < 100) {
         attempts++;
 
-        const maxStartRow =
-          direction.row === 0
-            ? this.gridRows - 1
-            : this.gridRows - word.text.length;
-        const maxStartCol =
-          direction.col === 0
-            ? this.gridCols - 1
-            : this.gridCols - word.text.length;
+        // ✅ CÁLCULO CORREGIDO DE POSICIONES INICIALES
+        let maxStartRow: number;
+        let maxStartCol: number;
 
-        const startRow = Math.floor(Math.random() * (maxStartRow + 1));
-        const startCol = Math.floor(Math.random() * (maxStartCol + 1));
+        if (direction.row === 0) {
+          // Horizontal: la fila puede ser cualquiera
+          maxStartRow = this.gridRows - 1;
+        } else if (direction.row > 0) {
+          // Hacia abajo: debe tener espacio suficiente hacia abajo
+          maxStartRow = this.gridRows - word.text.length;
+        } else {
+          // Hacia arriba: debe empezar desde una posición que permita ir hacia arriba
+          maxStartRow = word.text.length - 1;
+        }
+
+        if (direction.col === 0) {
+          // Vertical: la columna puede ser cualquiera
+          maxStartCol = this.gridCols - 1;
+        } else if (direction.col > 0) {
+          // Hacia derecha: debe tener espacio suficiente hacia derecha
+          maxStartCol = this.gridCols - word.text.length;
+        } else {
+          // Hacia izquierda: debe empezar desde una posición que permita ir hacia izquierda
+          maxStartCol = word.text.length - 1;
+        }
+
+        // ✅ GENERAR POSICIONES VÁLIDAS
+        const minStartRow = direction.row < 0 ? word.text.length - 1 : 0;
+        const minStartCol = direction.col < 0 ? word.text.length - 1 : 0;
+
+        const startRow =
+          Math.floor(Math.random() * (maxStartRow - minStartRow + 1)) +
+          minStartRow;
+        const startCol =
+          Math.floor(Math.random() * (maxStartCol - minStartCol + 1)) +
+          minStartCol;
 
         if (this.canPlaceWord(word.text, startRow, startCol, direction)) {
           const positions = [];
@@ -407,7 +448,42 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   placeFallbackWord(word: Word) {
+    console.log(`⚠️ Colocando palabra fallback: ${word.text}`);
 
+    // ✅ INTENTAR COLOCAR CON LA ORIENTACIÓN ORIGINAL PRIMERO
+    const orientationMap: { [key: string]: { row: number; col: number } } = {
+      HL: { row: 0, col: 1 }, // Horizontal Left to Right (→)
+      HR: { row: 0, col: -1 }, // Horizontal Right to Left (←)
+      VU: { row: -1, col: 0 }, // Vertical Up (↑)
+      VD: { row: 1, col: 0 }, // Vertical Down (↓)
+      DU: { row: -1, col: 1 }, // Diagonal Up-Right (↗)
+      DD: { row: 1, col: 1 }, // Diagonal Down-Right (↘)
+    };
+
+    const preferredDirection = orientationMap[word.orientation || 'HL'] || {
+      row: 0,
+      col: 1,
+    };
+
+    // ✅ INTENTAR CON LA ORIENTACIÓN PREFERIDA
+    if (this.tryPlaceWordWithDirection(word, preferredDirection)) {
+      return;
+    }
+
+    // ✅ SI NO FUNCIONA, INTENTAR CON TODAS LAS ORIENTACIONES
+    const allDirections = Object.values(orientationMap);
+
+    for (const direction of allDirections) {
+      if (this.tryPlaceWordWithDirection(word, direction)) {
+        return;
+      }
+    }
+
+    // ✅ ÚLTIMO RECURSO: COLOCAR HORIZONTALMENTE EN LA PRIMERA POSICIÓN DISPONIBLE
+    this.forceHorizontalPlacement(word);
+  }
+
+  private forceHorizontalPlacement(word: Word): void {
     // ✅ BUSCAR PRIMERA POSICIÓN HORIZONTAL DISPONIBLE
     for (let row = 0; row < this.gridRows; row++) {
       for (let col = 0; col <= this.gridCols - word.text.length; col++) {
@@ -460,6 +536,83 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     }
   }
 
+  private getValidStartCols(
+    wordLength: number,
+    direction: { row: number; col: number }
+  ): number[] {
+    const cols = [];
+
+    if (direction.col === 0) {
+      // Vertical: cualquier columna
+      for (let i = 0; i < this.gridCols; i++) {
+        cols.push(i);
+      }
+    } else if (direction.col > 0) {
+      // Hacia derecha: desde 0 hasta (gridCols - wordLength)
+      for (let i = 0; i <= this.gridCols - wordLength; i++) {
+        cols.push(i);
+      }
+    } else {
+      // Hacia izquierda: desde (wordLength - 1) hasta (gridCols - 1)
+      for (let i = wordLength - 1; i < this.gridCols; i++) {
+        cols.push(i);
+      }
+    }
+
+    return cols;
+  }
+
+  private getValidStartRows(
+    wordLength: number,
+    direction: { row: number; col: number }
+  ): number[] {
+    const rows = [];
+
+    if (direction.row === 0) {
+      // Horizontal: cualquier fila
+      for (let i = 0; i < this.gridRows; i++) {
+        rows.push(i);
+      }
+    } else if (direction.row > 0) {
+      // Hacia abajo: desde 0 hasta (gridRows - wordLength)
+      for (let i = 0; i <= this.gridRows - wordLength; i++) {
+        rows.push(i);
+      }
+    } else {
+      // Hacia arriba: desde (wordLength - 1) hasta (gridRows - 1)
+      for (let i = wordLength - 1; i < this.gridRows; i++) {
+        rows.push(i);
+      }
+    }
+
+    return rows;
+  }
+
+  private tryPlaceWordWithDirection(
+    word: Word,
+    direction: { row: number; col: number }
+  ): boolean {
+    const startRows = this.getValidStartRows(word.text.length, direction);
+    const startCols = this.getValidStartCols(word.text.length, direction);
+
+    for (const startRow of startRows) {
+      for (const startCol of startCols) {
+        if (this.canPlaceWord(word.text, startRow, startCol, direction)) {
+          const positions = [];
+          for (let i = 0; i < word.text.length; i++) {
+            const row = startRow + i * direction.row;
+            const col = startCol + i * direction.col;
+            this.grid[row][col].letter = word.text[i];
+            positions.push({ row, col });
+          }
+          word.positions = positions;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   fillRemainingCells() {
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     for (let i = 0; i < this.gridRows; i++) {
@@ -480,12 +633,12 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
-        
+
         // Reproducir sonido de advertencia cuando quedan 30 segundos
         if (this.timeLeft === 30) {
           this.gameAudioService.playTimeWarning();
         }
-        
+
         // Reproducir countdown en los últimos 5 segundos
         if (this.timeLeft <= 5 && this.timeLeft > 0) {
           this.gameAudioService.playCountdown();
@@ -638,7 +791,7 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
 
     if (this.wordsFound === this.totalWords) {
       clearInterval(this.timer);
-      this.showWinAlert(); 
+      this.showWinAlert();
     }
   }
 
@@ -647,7 +800,6 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
       this.selection = [];
     }
   }
-
 
   isAligned(
     firstCell: WordCell,
@@ -713,11 +865,16 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   get descripcionJuego(): string {
-    return this.description || 'Encuentra todas las palabras ocultas en la sopa de letras';
+    return (
+      this.description ||
+      'Encuentra todas las palabras ocultas en la sopa de letras'
+    );
   }
 
   get porcentajeProgreso(): number {
-    return this.totalWords > 0 ? Math.round((this.wordsFound / this.totalWords) * 100) : 0;
+    return this.totalWords > 0
+      ? Math.round((this.wordsFound / this.totalWords) * 100)
+      : 0;
   }
 
   volverAlDashboard(): void {
@@ -733,6 +890,9 @@ export class GameSolveTheWordComponent extends BaseAuthenticatedComponent implem
   }
 
   get pistaTexto(): string {
-    return this.description || 'Busca las palabras en todas las direcciones: horizontal, vertical y diagonal. Las palabras pueden estar escritas hacia adelante o hacia atrás.';
+    return (
+      this.description ||
+      'Busca las palabras en todas las direcciones: horizontal, vertical y diagonal. Las palabras pueden estar escritas hacia adelante o hacia atrás.'
+    );
   }
 }
