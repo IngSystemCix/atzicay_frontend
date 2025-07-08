@@ -5,6 +5,7 @@ import {
   inject,
   HostListener,
   OnDestroy,
+  AfterViewInit,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -41,7 +42,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isDropdownOpen = false;
   activeDropdownId: number | null = null;
   ratingArray: number[] = [1, 2, 3, 4, 5];
-  isHeaderMinimized: boolean = false;
   isLoadingMore: boolean = false;
   getGameRoute(gameType: string, id: number): string {
     const normalizedType = gameType.replace(/\s|_/g, '').toLowerCase();
@@ -65,14 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Cargar inmediatamente - el guard ya maneja la autenticación
     // No esperar tokens adicionales para máxima velocidad
     this.loadGameInstances();
-    
-    // Configurar el scroll listener
-    setTimeout(() => this.setupScrollListener(), 100);
   }
-toggleHeaderSize(): void {
-  this.isHeaderMinimized = !this.isHeaderMinimized;
-}
-
 getTypeIcon(typeValue: string): string {
   const icons: { [key: string]: string } = {
     'all': '🎮',
@@ -87,34 +80,6 @@ getTypeIcon(typeValue: string): string {
     this.subscription.unsubscribe();
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
-    }
-    // Limpiar scroll listener
-    if (this.scrollContainer) {
-      this.scrollContainer.removeEventListener('scroll', this.onScroll.bind(this));
-    }
-  }
-
-  private setupScrollListener(): void {
-    this.scrollContainer = document.querySelector('.dashboard-scroll-content');
-    if (this.scrollContainer) {
-      this.scrollContainer.addEventListener('scroll', this.onScroll.bind(this));
-    }
-  }
-
-  private onScroll(): void {
-    if (!this.scrollContainer) return;
-
-    const scrollTop = this.scrollContainer.scrollTop;
-    const headerElement = document.querySelector('.dashboard-header-text');
-    
-    if (!headerElement) return;
-
-    // Si scrollea hacia abajo más de 120px, ocultar header
-    if (scrollTop > 120) {
-      headerElement.classList.add('hidden');
-    } else {
-      // Si está cerca del top, mostrar header
-      headerElement.classList.remove('hidden');
     }
   }
 

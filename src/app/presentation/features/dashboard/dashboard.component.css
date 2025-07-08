@@ -117,9 +117,33 @@
   display: none !important;
 }
 
-/* Asegurar que el contenedor de las cards no interfiera */
-.grid > div {
-  isolation: auto;
-  position: relative;
-  overflow: visible !important;
+/* Fix para el espacio vacío cuando el header se minimiza */
+.dashboard-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ajustar altura dinámicamente cuando el header cambia */
+.dashboard-scroll-content {
+  flex: 1;
+  overflow-y: auto;
+  /* Altura por defecto cuando el header está visible */
+  height: calc(100vh - 280px);
+  transition: height 1s ease-out;
+}
+
+/* Cuando el header está minimizado, aumentar el espacio disponible */
+.header-minimized .dashboard-scroll-content {
+  height: calc(100vh - 150px) !important;
+}
+
+.header-expanded .dashboard-scroll-content {
+  height: calc(100vh - 280px) !important;
 }
