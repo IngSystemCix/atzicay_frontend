@@ -11,6 +11,8 @@ import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../core/infrastructure/service/alert.service';
 import { Subscription } from 'rxjs';
+import { GameTypeCountsService } from '../../../core/infrastructure/api/game-type-counts.service';
+import { GameTypeCounts } from '../../../core/domain/model/game-type-counts.model';
 
 @Component({
   selector: 'app-profile',
@@ -29,13 +31,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
   public countriesLoaded = false; // Variable para controlar si los países están cargados
 
+  public totalGamesCreated: number = 0;
+  private gameTypeCounts: GameTypeCounts | null = null;
+
   constructor(
     private authService: AuthService,
     private profileService: ProfileService,
     private countryService: CountryService,
     private auth0: Auth0Service,
     private userSession: UserSessionService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private gameTypeCountsService: GameTypeCountsService
   ) { }
 
   ngOnInit(): void {
@@ -71,6 +77,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (userId) {
       this.currentUserId = userId;
       this.loadUserProfile(userId);
+      this.loadUserGameCounts(userId);
     } else {
       // Esperar el token y obtener el userId
       this.subscription.add(
@@ -98,6 +105,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
                 this.userSession.setUserId(res.data.user_id);
                 this.currentUserId = res.data.user_id;
                 this.loadUserProfile(res.data.user_id);
+                this.loadUserGameCounts(res.data.user_id);
               } else {
                 this.showNoUserMessage = true;
               }
@@ -123,6 +131,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             this.userSession.setUserId(res.user.Id);
             this.currentUserId = res.user.Id;
             this.loadUserProfile(res.user.Id);
+            this.loadUserGameCounts(res.user.Id); // Asegurar que también se cargue el conteo de juegos
           } else {
             this.showNoUserMessage = true;
           }
@@ -172,6 +181,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
             }, 200);
           }
           
+          this.loadUserGameCounts(userId); // Cargar conteo de juegos del usuario
           this.showNoUserMessage = false;
           console.log('Usuario cargado:', this.user);
         } else {
@@ -187,6 +197,29 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.user = null;
         this.showNoUserMessage = true;
       },
+    });
+  }
+
+  private loadUserGameCounts(userId: number): void {
+    this.gameTypeCountsService.getGameTypeCountsByUser(userId).subscribe({
+      next: (res) => {
+        if (res && res.data) {
+          this.gameTypeCounts = res.data;
+          this.totalGamesCreated =
+            (res.data.hangman_count || 0) +
+            (res.data.memorygame_count || 0) +
+            (res.data.puzzle_count || 0) +
+            (res.data.solvetheword_count || 0);
+        } else {
+          this.gameTypeCounts = null;
+          this.totalGamesCreated = 0;
+        }
+      },
+      error: (err) => {
+        console.error('Error al obtener conteo de juegos:', err);
+        this.gameTypeCounts = null;
+        this.totalGamesCreated = 0;
+      }
     });
   }
 
