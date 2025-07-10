@@ -17,6 +17,7 @@ import { GameAudioService } from '../../../../core/infrastructure/service/game-a
 import { GameUrlService } from '../../../../core/infrastructure/service/game-url.service';
 import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
+import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
 
 interface WordCell {
   letter: string;
@@ -34,7 +35,7 @@ interface Word {
 @Component({
   selector: 'app-game-solve-the-word',
   standalone: true,
-  imports: [CommonModule, FloatingLogoComponent],
+  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
   templateUrl: './game-solve-the-word.component.html',
   styleUrl: './game-solve-the-word.component.css',
 })
@@ -81,7 +82,7 @@ export class GameSolveTheWordComponent
   fontColor = '#000';
   userAssessed = false; // Nueva propiedad para controlar valoración
   gameConfig: GameConfiguration | null = null; // Configuración completa del juego
-
+  mobileMenuOpen = false;
   // Header control
   headerExpanded = false;
 
@@ -270,14 +271,11 @@ export class GameSolveTheWordComponent
       wordsCompleted: this.wordsFound,
       totalWords: this.totalWords,
     };
-
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
-      this.resetGame();
-    } else if (result.isDismissed) {
-      // Si presiona "Ir al Dashboard" o cierra el modal
       this.volverAlDashboard();
     }
+    // Si se descarta, NO redirigir automáticamente
   }
 
   private async showRatingAlert(): Promise<void> {

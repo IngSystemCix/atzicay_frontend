@@ -6,6 +6,7 @@ import { MyGamesService } from '../../../../core/infrastructure/api/my-games.ser
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { MyGame } from '../../../../core/domain/model/my-game.model';
 import { UpdateVisibilityService } from '../../../../core/infrastructure/api/update-visibility.service';
+import { GamePrivacyService } from '../../../../core/infrastructure/api/game-privacy.service';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -39,7 +40,8 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
     private myGamesService: MyGamesService,
     private userSession: UserSessionService,
     private router: Router,
-    private updateVisibilityService: UpdateVisibilityService
+    private updateVisibilityService: UpdateVisibilityService,
+    private gamePrivacyService: GamePrivacyService
   ) {}
 
   ngOnInit(): void {
@@ -220,19 +222,11 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
 
   changeVisibility(juego: MyGame) {
     const isPublic = juego.visibility === 'P';
-    // Para el endpoint: true = público, false = restringido
-    const newStatus = !isPublic; // Si era público (P), será false (restringido), si era restringido (R), será true (público)
+    const newStatus = isPublic ? false : true; // true = público, false = restringido (boolean)
     const confirmText = isPublic ? '¿Deseas hacer este juego restringido?' : '¿Deseas hacer este juego público?';
     const successText = isPublic ? 'El juego ahora es restringido.' : 'El juego ahora es público.';
     const confirmButton = isPublic ? 'Sí, restringir' : 'Sí, hacer público';
-    
-    console.log('Estado actual del juego:', {
-      gameId: juego.game_instance_id,
-      currentVisibility: juego.visibility,
-      isCurrentlyPublic: isPublic,
-      willBePublic: newStatus
-    });
-    
+
     Swal.fire({
       title: 'Cambiar visibilidad',
       text: confirmText,
@@ -244,55 +238,14 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        console.log('Enviando request:', { 
-          gameInstanceId: juego.game_instance_id, 
-          status: newStatus,
-          explanation: `Cambiando de ${isPublic ? 'público' : 'restringido'} a ${newStatus ? 'público' : 'restringido'}`
-        });
-        
-        // Función de depuración
-        this.updateVisibilityService.testUpdateVisibility(juego.game_instance_id, newStatus);
-        
         this.updateVisibilityService.updateVisibility(juego.game_instance_id, newStatus).subscribe({
           next: (response) => {
-            console.log('✅ Respuesta exitosa del servidor:', response);
-            console.log('📦 Data recibida:', response.data);
-            
-            if (response.data) {
-              console.log('🎯 Nuevo status recibido:', response.data.status);
-              console.log('👁️ Nueva visibilidad recibida:', response.data.visibility);
-            }
-            
             this.menuAbierto = null;
-            
-            // Actualizar localmente el estado del juego usando la respuesta del servidor
-            if (response.data && response.data.visibility) {
-              juego.visibility = response.data.visibility;
-            } else {
-              // Fallback en caso de que el backend aún no esté actualizado
-              juego.visibility = newStatus ? 'P' : 'R';
-            }
-            
-            // Mostrar mensaje de éxito
             Swal.fire('Actualizado', successText, 'success');
-            
-            // Opcional: recargar la lista para asegurar consistencia
-            // this.cargarJuegos();
+            this.cargarJuegos(); // Recarga la lista desde el backend para reflejar el estado real
           },
           error: (err) => {
             this.menuAbierto = null;
-            console.error('❌ Error completo al cambiar visibilidad:', {
-              error: err,
-              gameId: juego.game_instance_id,
-              attemptedStatus: newStatus,
-              currentVisibility: juego.visibility,
-              errorMessage: err.error?.message || err.message,
-              statusCode: err.status,
-              url: err.url,
-              headers: err.headers,
-              fullError: err
-            });
-            
             let errorMessage = 'No se pudo cambiar la visibilidad.';
             if (err.status === 401) {
               errorMessage = 'No tienes autorización para realizar esta acción. Verifica tu sesión.';
@@ -305,7 +258,50 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
             } else if (err.error?.message) {
               errorMessage = err.error.message;
             }
-            
+            Swal.fire('Error', errorMessage, 'error');
+          }
+        });
+      }
+    });
+  }
+
+  changePrivacy(juego: MyGame, privacy: 'P' | 'R') {
+    const isPublic = privacy === 'P';
+    const confirmText = isPublic ? '¿Deseas hacer este juego público?' : '¿Deseas hacer este juego privado?';
+    const successText = isPublic ? 'El juego ahora es público.' : 'El juego ahora es privado.';
+    const confirmButton = isPublic ? 'Sí, hacer público' : 'Sí, hacer privado';
+
+    Swal.fire({
+      title: 'Cambiar privacidad',
+      text: confirmText,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#8571FB',
+      cancelButtonColor: '#d33',
+      confirmButtonText: confirmButton,
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.gamePrivacyService.updatePrivacy(juego.game_instance_id, privacy).subscribe({
+          next: (response) => {
+            this.menuAbierto = null;
+            Swal.fire('Actualizado', successText, 'success');
+            this.cargarJuegos();
+          },
+          error: (err) => {
+            this.menuAbierto = null;
+            let errorMessage = 'No se pudo cambiar la privacidad.';
+            if (err.status === 401) {
+              errorMessage = 'No tienes autorización para realizar esta acción. Verifica tu sesión.';
+            } else if (err.status === 404) {
+              errorMessage = 'El juego no fue encontrado.';
+            } else if (err.status === 422) {
+              errorMessage = 'Datos de solicitud inválidos.';
+            } else if (err.status === 0) {
+              errorMessage = 'Error de conexión. Verifica que el servidor esté funcionando.';
+            } else if (err.error?.message) {
+              errorMessage = err.error.message;
+            }
             Swal.fire('Error', errorMessage, 'error');
           }
         });
@@ -343,11 +339,12 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
   getVisibilityClass(v: string): string {
-    switch (v) {
-      case 'P': return 'bg-blue-500 text-white';
-      case 'R': return 'bg-orange-500 text-white';
-      default: return 'bg-gray-400 text-white';
+    if (v === 'P') {
+      return 'bg-blue-500 text-white';
+    } else if (v === 'R') {
+      return 'bg-orange-400 text-white';
     }
+    return 'bg-gray-400 text-white';
   }
 
     formatRating(rating: string): string {
@@ -379,6 +376,10 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
         color: 'blue'
       };
     }
+  }
+
+  getActivated(Activated: number): string {
+    return Activated === 1 ? 'Activo' : 'Inactivo';
   }
 
   private cerrarMenus() {

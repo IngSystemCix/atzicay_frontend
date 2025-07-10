@@ -671,33 +671,21 @@ reiniciarJuego(): void {
   }
 
   private async showSuccessAlert(): Promise<void> {
-    
-    // Mostrar modal de valoración si el usuario no ha evaluado el juego
-    if (!this.state.userAssessed && this.state.gameConfig && !this.state.gameConfig.assessed) {
-      await this.showRatingAlert();
-    } else {
-      console.log('❌ Modal de valoración NO se muestra porque:', {
-        userAssessed: this.state.userAssessed,
-        gameAssessed: this.state.gameConfig?.assessed
-      });
-    }
-    
-    const timeUsed = this.formatTime(this.state.tiempoInicial - this.state.tiempoRestante);
+    const timeUsed = this.formatearTiempo();
     const config: GameAlertConfig = {
       gameType: 'hangman',
       gameName: 'Ahorcado',
       timeUsed,
       wordsCompleted: this.state.palabrasCompletadas,
-      totalWords: this.state.totalPalabras
+      totalWords: this.state.totalPalabras,
     };
 
+    // Esperar la interacción del usuario antes de redirigir
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
-      this.reiniciarJuego();
-    } else if (result.isDismissed) {
-      // Si presiona "Ir al Dashboard" o cierra el modal
       this.volverAlDashboard();
     }
+    // Si se descarta, NO redirigir automáticamente
   }
 
   private async showWordSuccessAlert(): Promise<void> {

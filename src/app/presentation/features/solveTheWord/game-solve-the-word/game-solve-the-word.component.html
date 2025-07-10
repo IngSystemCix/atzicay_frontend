@@ -1,36 +1,29 @@
 <div class="w-full max-w-full flex flex-col xl:flex-row gap-6 overflow-y-auto">
   <!-- Logo flotante -->
-  <app-floating-logo></app-floating-logo>
-  
+  <div class="hidden xl:block">
+    <app-floating-logo></app-floating-logo>
+  </div>
   <!-- Estados de autenticación y carga -->
   @if (isLoading && !loading) {
   <div class="fixed inset-0 flex flex-col items-center justify-center min-h-screen bg-white/80 backdrop-blur-sm z-50">
-    <div
-      class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mb-4"
-    ></div>
+    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mb-4"></div>
     <p class="text-purple-600 text-lg font-semibold">Verificando autenticación...</p>
   </div>
   } @if (authError && !isLoading) {
   <div class="fixed inset-0 flex flex-col items-center justify-center min-h-screen bg-white/80 backdrop-blur-sm z-50">
-    <div
-      class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-lg"
-    >
+    <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-lg">
       <p class="font-bold">Error de autenticación</p>
       <p>{{ authError }}</p>
     </div>
   </div>
   } @if (loading && !isLoading) {
   <div class="fixed inset-0 flex flex-col items-center justify-center min-h-screen bg-white/80 backdrop-blur-sm z-50">
-    <div
-      class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mb-4"
-    ></div>
+    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mb-4"></div>
     <p class="text-purple-600 text-lg font-semibold">Cargando juego...</p>
   </div>
   } @if (error && !loading && !isLoading) {
   <div class="fixed inset-0 flex flex-col items-center justify-center min-h-screen bg-white/80 backdrop-blur-sm z-50">
-    <div
-      class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-lg"
-    >
+    <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-lg">
       <p class="font-bold">Error</p>
       <p>{{ error }}</p>
     </div>
@@ -38,341 +31,18 @@
   } @if (!loading && !error && !isLoading && !authError) {
   <div class="w-full h-full flex flex-col">
     <!-- Header Mejorado -->
-    <div
-      class="w-full flex justify-center mb-6 transition-all duration-700 ease-in-out max-w-7xl mx-auto"
-    >
-      <div
-        *ngIf="headerExpanded"
-        class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 rounded-3xl backdrop-blur-xl shadow-2xl border border-atzicay-border/30 p-6 relative overflow-hidden"
-        style="backdrop-filter: blur(25px)"
-      >
-        <!-- Decorative background elements -->
-        <div
-          class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"
-        ></div>
-        <div
-          class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-3xl"
-        ></div>
-        <div
-          class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-400/10 to-transparent rounded-full blur-2xl"
-        ></div>
-
-        <!-- Content container -->
-        <div class="relative z-10">
-          <!-- Header superior con diseño premium -->
-          <div class="flex items-center justify-between mb-6">
-            <button
-              (click)="volverAlDashboard()"
-              class="group relative px-6 py-3 bg-white text-purple-700 rounded-2xl hover:from-white to-white/95 font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl border border-white/20"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              ></div>
-              <div class="relative flex items-center">
-                <svg
-                  class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                Volver
-              </div>
-            </button>
-
-            <div class="text-center flex-1 mx-8">
-              <div class="relative">
-                <h1
-                  class="text-3xl font-black mb-2 tracking-tight text-atzicay-heading"
-                >
-                  {{ tituloJuego }}
-                </h1>
-              </div>
-              <p class="text-lg font-medium text-atzicay-subheading mt-3">
-                {{ descripcionJuego }}
-              </p>
-            </div>
-
-            <button
-              (click)="toggleHeader()"
-              class="group bg-white hover:from-white to-white/95 rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg hover:shadow-xl border border-atzicay-border"
-              title="Minimizar header"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-6 w-6 text-purple-600 group-hover:text-purple-700 transition-colors duration-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M5 15l7-7 7 7"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Progreso Card -->
-            <div
-              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              ></div>
-              <div class="relative">
-                <div class="flex items-center justify-between mb-4">
-                  <h3
-                    class="text-sm font-bold text-gray-700 uppercase tracking-wide"
-                  >
-                    Progreso
-                  </h3>
-                  <span class="text-2xl font-black text-purple-700">
-                    {{ wordsFound }}/{{ totalWords }}
-                  </span>
-                </div>
-                <div class="relative">
-                  <div
-                    class="w-full bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner"
-                  >
-                    <div
-                      class="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 h-4 rounded-full transition-all duration-1000 ease-out shadow-lg relative"
-                      [style.width.%]="porcentajeProgreso"
-                    >
-                      <div
-                        class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-full"
-                      ></div>
-                    </div>
-                  </div>
-                  <div class="mt-2 text-center">
-                    <span class="text-sm font-semibold text-purple-600"
-                      >{{ porcentajeProgreso }}% completado</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tiempo Card -->
-            <div
-              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              ></div>
-              <div class="relative flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <div
-                    class="bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl p-3 shadow-sm"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-7 w-7 text-blue-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="text-3xl font-black text-gray-800 font-mono mb-1">
-                      {{ formatearTiempo() }}
-                    </p>
-                    <p
-                      class="text-sm text-gray-600 font-semibold uppercase tracking-wide"
-                    >
-                      Tiempo restante
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pista Card -->
-            <div
-              class="group relative bg-gradient-to-br from-white/95 to-white/85 rounded-2xl p-6 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/20"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              ></div>
-              <div class="relative">
-                <button
-                  (click)="togglePista()"
-                  class="w-full text-left focus:outline-none"
-                >
-                  <div class="flex items-center justify-between mb-4">
-                    <h3
-                      class="text-sm font-bold text-gray-700 uppercase tracking-wide"
-                    >
-                      Pista
-                    </h3>
-                    <div class="flex items-center gap-2">
-                      <div
-                        class="bg-gradient-to-br from-yellow-100 to-yellow-50 rounded-xl p-2 shadow-sm"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          class="h-5 w-5 text-yellow-600 transition-transform duration-300"
-                          [ngClass]="{ 'rotate-180': mostrarPista }"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9.663 17h4.673M12 3v1m6.364-.636l-.707.707M21 12h-1M17.66 18.364l-.707-.707M12 21v-1m-6.364-.636l.707-.707M3 12h1m2.343-5.657l-.707-.707"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="text-center">
-                    <p class="text-lg font-semibold text-yellow-600">
-                      {{ mostrarPista ? "Ocultar pista" : "Ver pista" }}
-                    </p>
-                  </div>
-                </button>
-                @if (mostrarPista) {
-                <div
-                  class="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-200"
-                  style="animation: fadeInUp 0.4s ease forwards"
-                >
-                  <p class="text-sm font-medium text-yellow-800">
-                    {{ pistaTexto }}
-                  </p>
-                </div>
-                }
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Header minimizado premium -->
-      <div
-        *ngIf="!headerExpanded"
-        class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-8 py-4 relative overflow-hidden"
-      >
-        <!-- Decorative elements -->
-        <div
-          class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"
-        ></div>
-        <div
-          class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl"
-        ></div>
-
-        <div class="relative z-10 flex items-center justify-between">
-          <!-- Info compacta premium -->
-          <div class="flex items-center gap-4 text-atzicay-heading">
-            <div class="flex items-center gap-3">
-              <span
-                class="text-xl font-black bg-atzicay-heading bg-clip-text text-transparent"
-              >
-                {{ tituloJuego }}
-              </span>
-            </div>
-
-            <!-- Stats compactos premium -->
-            <div class="flex items-center gap-3">
-              <!-- Progreso compacto -->
-              <div
-                class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border"
-              >
-                <span class="font-black text-atzicay-heading">
-                  {{ wordsFound }}/{{ totalWords }}
-                </span>
-                <div class="w-20 bg-purple-200 rounded-full h-2 shadow-inner">
-                  <div
-                    class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500 shadow-sm"
-                    [style.width.%]="porcentajeProgreso"
-                  ></div>
-                </div>
-              </div>
-
-              <!-- Tiempo compacto -->
-              <div
-                class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-                <span class="font-black">{{ formatearTiempo() }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Botones de acción premium -->
-          <div class="flex items-center gap-3">
-            <button
-              (click)="volverAlDashboard()"
-              class="group relative px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border"
-            >
-              <div
-                class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              ></div>
-              <div class="relative flex items-center">
-                <span class="mr-2">←</span>
-                Volver
-              </div>
-            </button>
-
-            <button
-              (click)="toggleHeader()"
-              class="group bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg border border-atzicay-border"
-              title="Expandir header"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-5 w-5 text-purple-600 group-hover:text-purple-700 transition-colors duration-300"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
+    <div class="w-full flex justify-center mb-6 transition-all duration-700 ease-in-out max-w-7xl mx-auto">
+      <app-game-header [tituloJuego]="title" [descripcionJuego]="description" [vidasRestantes]="0"
+        [palabrasCompletadas]="wordsFound" [totalPalabras]="totalWords" [tiempoRestante]="timeLeft"
+        [porcentajeProgreso]="porcentajeProgreso" [headerExpanded]="headerExpanded" [mobileMenuOpen]="mobileMenuOpen"
+        [mostrarVidas]="false" [mostrarTiempo]="true" [mostrarProgreso]="true" tipoJuego="solve-word"
+        (toggleHeader)="headerExpanded = !headerExpanded"
+        (toggleMobileMenu)="mobileMenuOpen = !mobileMenuOpen"
+        (volverAlDashboard)="volverAlDashboard()"></app-game-header>
     </div>
 
     <!-- Área principal del juego con diseño mejorado -->
-    <div
-      class="min-h-screen bg-atzicay-bg p-4"
-    >
+    <div class="min-h-screen bg-atzicay-bg p-4">
       <!-- Container principal -->
       <div class="max-w-7xl mx-auto">
         <!-- Flex container responsive -->
@@ -380,88 +50,33 @@
           <!-- Panel principal del tablero -->
           <div class="flex-1 flex justify-center items-start">
             <div class="w-full max-w-2xl">
-              <div
-                class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-purple-200/50 p-4 md:p-6"
-              >
-                <!-- Header del tablero -->
-                <div class="text-center mb-4">
-                  <h2
-                    class="text-xl md:text-2xl font-bold text-purple-700 mb-2"
-                  >
-                    {{ tituloJuego }}
-                  </h2>
-                  <div
-                    class="flex justify-center items-center gap-4 text-sm text-purple-600"
-                  >
-                    <span class="flex items-center gap-1">
-                      <svg
-                        class="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
-                        />
-                      </svg>
-                      {{ wordsFound }}/{{ totalWords }}
-                    </span>
-                    <span class="flex items-center gap-1">
-                      <svg
-                        class="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M15,1H9V3H15M11,14H13V8H11M19,3H17V1A1,1 0 0,0 16,0H8A1,1 0 0,0 7,1V3H5A1,1 0 0,0 4,4V6H20V4A1,1 0 0,0 19,3Z"
-                        />
-                      </svg>
-                      {{ formatTime(timeLeft) }}
-                    </span>
-                  </div>
-                </div>
-
+              <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-purple-200/50 p-4 md:p-6">
                 <!-- Grilla del juego -->
                 <div class="flex justify-center">
                   <div
                     class="grid gap-0.5 md:gap-1 p-3 md:p-4 bg-gradient-to-br from-purple-25 to-purple-50 rounded-2xl select-none border-2 border-purple-200 shadow-inner"
                     [style.grid-template-columns]="
                       'repeat(' + gridCols + ', minmax(0, 1fr))'
-                    "
-                    [style.width]="'min(90vw, min(70vh, 500px))'"
-                    [style.height]="'min(90vw, min(70vh, 500px))'"
-                  >
+                    " [style.width]="'min(90vw, min(70vh, 500px))'" [style.height]="'min(90vw, min(70vh, 500px))'">
                     @for (row of grid; track $index) { @for (cell of row; track
                     $index) {
                     <div
                       class="flex items-center justify-center border border-purple-200 rounded text-xs sm:text-sm md:text-base font-bold cursor-pointer transition-all duration-200 aspect-square hover:scale-105 hover:shadow-md"
-                      [class.bg-green-200]="cell.isFound"
-                      [class.bg-yellow-300]="
+                      [class.bg-green-200]="cell.isFound" [class.bg-yellow-300]="
                         selection.includes(cell) && !cell.isFound
-                      "
-                      [class.text-green-700]="cell.isFound"
-                      [class.text-purple-700]="
+                      " [class.text-green-700]="cell.isFound" [class.text-purple-700]="
                         !cell.isFound && !selection.includes(cell)
-                      "
-                      [class.text-purple-800]="
+                      " [class.text-purple-800]="
                         selection.includes(cell) && !cell.isFound
-                      "
-                      [class.font-black]="cell.isFound"
-                      [class.border-green-400]="cell.isFound"
+                      " [class.font-black]="cell.isFound" [class.border-green-400]="cell.isFound"
                       [class.border-yellow-400]="
                         selection.includes(cell) && !cell.isFound
-                      "
-                      [class.border-2]="
+                      " [class.border-2]="
                         cell.isFound || selection.includes(cell)
-                      "
-                      [class.shadow-md]="cell.isFound"
-                      [class.bg-white]="
+                      " [class.shadow-md]="cell.isFound" [class.bg-white]="
                         !cell.isFound && !selection.includes(cell)
-                      "
-                      (mousedown)="onCellMouseDown(cell)"
-                      (mouseover)="onCellMouseOver(cell)"
-                      (mouseup)="onCellMouseUp()"
-                      (mouseleave)="onCellMouseLeave()"
-                    >
+                      " (mousedown)="onCellMouseDown(cell)" (mouseover)="onCellMouseOver(cell)"
+                      (mouseup)="onCellMouseUp()" (mouseleave)="onCellMouseLeave()">
                       {{ cell.letter }}
                     </div>
                     } }
@@ -474,76 +89,52 @@
           <!-- Sidebar de palabras optimizado -->
           <div class="w-full xl:w-80 2xl:w-96">
             <div
-              class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-purple-200/50 p-4 md:p-6 sticky top-4"
-            >
+              class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-purple-200/50 p-4 md:p-6 sticky top-4">
               <!-- Header del sidebar -->
               <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg md:text-xl font-bold text-purple-700">
                   Palabras
                 </h3>
                 <div
-                  class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg"
-                >
+                  class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
                   {{ wordsFound }}/{{ totalWords }}
                 </div>
               </div>
 
               <!-- Barra de progreso -->
               <div class="mb-6">
-                <div
-                  class="flex justify-between text-sm font-semibold text-purple-600 mb-2"
-                >
+                <div class="flex justify-between text-sm font-semibold text-purple-600 mb-2">
                   <span>Progreso:</span>
                   <span>{{ porcentajeProgreso }}%</span>
                 </div>
-                <div
-                  class="w-full h-2.5 bg-purple-200 rounded-full overflow-hidden shadow-inner"
-                >
+                <div class="w-full h-2.5 bg-purple-200 rounded-full overflow-hidden shadow-inner">
                   <div
                     class="h-full bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 rounded-full transition-all duration-500 shadow-sm"
-                    [style.width.%]="porcentajeProgreso"
-                  ></div>
+                    [style.width.%]="porcentajeProgreso"></div>
                 </div>
               </div>
 
               <!-- Lista de palabras con scroll optimizado -->
-              <div
-                class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar"
-              >
+              <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
                 @for (word of words; track word.text) {
-                <div
-                  class="group relative p-3 rounded-xl transition-all duration-300 border"
-                  [class.bg-purple-50]="!word.found"
-                  [class.border-purple-200]="!word.found"
-                  [class.bg-gradient-to-r]="word.found"
-                  [class.from-green-50]="word.found"
-                  [class.to-green-100]="word.found"
-                  [class.border-green-300]="word.found"
-                  [class.shadow-md]="word.found"
-                >
+                <div class="group relative p-3 rounded-xl transition-all duration-300 border"
+                  [class.bg-purple-50]="!word.found" [class.border-purple-200]="!word.found"
+                  [class.bg-gradient-to-r]="word.found" [class.from-green-50]="word.found"
+                  [class.to-green-100]="word.found" [class.border-green-300]="word.found"
+                  [class.shadow-md]="word.found">
                   <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
-                      <div
-                        class="font-bold text-base transition-all duration-300 truncate"
-                        [class.line-through]="word.found"
-                        [class.text-green-700]="word.found"
-                        [class.text-purple-700]="!word.found"
-                      >
+                      <div class="font-bold text-base transition-all duration-300 truncate"
+                        [class.line-through]="word.found" [class.text-green-700]="word.found"
+                        [class.text-purple-700]="!word.found">
                         {{ word.text }}
                       </div>
                       <div class="flex items-center gap-2 mt-1">
                         @if (word.found) {
                         <span
-                          class="bg-green-100 text-green-600 px-2 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1"
-                        >
-                          <svg
-                            class="w-3 h-3"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
-                            />
+                          class="bg-green-100 text-green-600 px-2 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1">
+                          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
                           Encontrada
                         </span>
@@ -553,14 +144,8 @@
                     @if (word.found) {
                     <div class="ml-3 flex-shrink-0">
                       <div class="bg-green-500 rounded-full p-1.5 shadow-lg">
-                        <svg
-                          class="w-4 h-4 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
-                          />
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                         </svg>
                       </div>
                     </div>
@@ -573,9 +158,7 @@
               <!-- Estadísticas del sidebar -->
               <div class="mt-6 pt-4 border-t border-purple-100">
                 <div class="grid grid-cols-2 gap-3 mb-4">
-                  <div
-                    class="text-center p-2.5 bg-purple-50 rounded-xl border border-purple-200"
-                  >
+                  <div class="text-center p-2.5 bg-purple-50 rounded-xl border border-purple-200">
                     <div class="text-xl font-bold text-purple-600">
                       {{ totalWords - wordsFound }}
                     </div>
@@ -583,9 +166,7 @@
                       Restantes
                     </div>
                   </div>
-                  <div
-                    class="text-center p-2.5 bg-blue-50 rounded-xl border border-blue-200"
-                  >
+                  <div class="text-center p-2.5 bg-blue-50 rounded-xl border border-blue-200">
                     <div class="text-xl font-bold text-blue-600">
                       {{ formatTime(347 - timeLeft) }}
                     </div>
@@ -596,8 +177,7 @@
                 <!-- Botón de reinicio -->
                 <button
                   class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-2.5 px-4 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 text-sm"
-                  (click)="resetGame()"
-                >
+                  (click)="resetGame()">
                   🔄 Reiniciar Juego
                 </button>
               </div>

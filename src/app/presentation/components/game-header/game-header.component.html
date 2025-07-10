@@ -1,7 +1,7 @@
 <!-- Header Responsivo -->
 <div class="w-full flex justify-center mb-6 transition-all duration-700 ease-in-out max-w-7xl mx-auto">
   <!-- Header Desktop (xl y superior) -->
-  <div class="hidden xl:block w-full">
+  <div class="hidden xl:flex w-auto justify-center items-center mx-auto">
     <div *ngIf="headerExpanded"
       class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 rounded-3xl backdrop-blur-xl shadow-2xl border border-atzicay-border/30 p-6 relative overflow-hidden"
       style="backdrop-filter: blur(25px)">
@@ -143,76 +143,60 @@
 
     <!-- Header minimizado premium -->
     <div *ngIf="!headerExpanded"
-      class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-8 py-4 relative overflow-hidden">
+      class="w-full bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 rounded-full backdrop-blur-xl shadow-2xl border border-atzicay-border/40 px-4 py-4 relative overflow-hidden mx-auto flex min-w-0 max-w-full"
+      style="align-items: center; justify-content: center;">
       <!-- Decorative elements -->
       <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
-      <div
-        class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl">
-      </div>
+      <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-300/10 to-transparent rounded-full blur-2xl"></div>
 
-      <div class="relative z-10 flex items-center justify-between">
+      <div class="relative z-10 flex flex-wrap items-center justify-between w-full gap-2">
         <!-- Info compacta premium -->
-        <div class="flex items-center gap-4 text-atzicay-heading">
-          <div class="flex items-center gap-3">
-            <span class="text-xl font-black bg-atzicay-heading bg-clip-text text-transparent">
-              {{ tituloJuego }}
-            </span>
+        <div class="flex flex-wrap items-center gap-2 text-atzicay-heading min-w-0">
+          <span class="text-base sm:text-lg md:text-xl font-black bg-atzicay-heading bg-clip-text text-transparent truncate max-w-[40vw] sm:max-w-xs md:max-w-sm">
+            {{ tituloJuego }}
+          </span>
+          <!-- Vidas compactas (solo si mostrarVidas es true) -->
+          <div *ngIf="mostrarVidas"
+            class="flex items-center gap-1 bg-white text-red-600 font-bold rounded-2xl px-3 py-1 shadow-lg border border-atzicay-border text-xs sm:text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span class="font-black">{{ vidasRestantes }}</span>
           </div>
-
-          <!-- Stats compactos premium -->
-          <div class="flex items-center gap-3">
-            <!-- Vidas compactas (solo si mostrarVidas es true) -->
-            <div *ngIf="mostrarVidas"
-              class="flex items-center gap-2 bg-white text-red-600 font-bold rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-              <span class="font-black">{{ vidasRestantes }}</span>
+          <!-- Progreso compacto (solo si mostrarProgreso es true) -->
+          <div *ngIf="mostrarProgreso"
+            class="flex items-center gap-1 bg-white rounded-2xl px-3 py-1 shadow-lg border border-atzicay-border text-xs sm:text-sm">
+            <span class="font-black text-atzicay-heading">
+              {{ palabrasCompletadas }}/{{ totalPalabras }}
+            </span>
+            <div class="w-16 sm:w-20 bg-purple-200 rounded-full h-2 shadow-inner">
+              <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500 shadow-sm"
+                [style.width.%]="porcentajeProgreso"></div>
             </div>
-
-            <!-- Progreso compacto (solo si mostrarProgreso es true) -->
-            <div *ngIf="mostrarProgreso"
-              class="flex items-center gap-2 bg-white rounded-2xl px-4 py-2 shadow-lg border border-atzicay-border">
-              <span class="font-black text-atzicay-heading">
-                {{ palabrasCompletadas }}/{{ totalPalabras }}
-              </span>
-              <div class="w-20 bg-purple-200 rounded-full h-2 shadow-inner">
-                <div
-                  class="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-500 shadow-sm"
-                  [style.width.%]="porcentajeProgreso"></div>
-              </div>
-            </div>
-
-            <!-- Tiempo compacto (solo si mostrarTiempo es true) -->
-            <div *ngIf="mostrarTiempo"
-              class="flex items-center gap-2 bg-white text-blue-600 rounded-2xl px-4 py-2 font-mono shadow-lg border border-atzicay-border">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="font-black">{{ formatearTiempo() }}</span>
-            </div>
+          </div>
+          <!-- Tiempo compacto (solo si mostrarTiempo es true) -->
+          <div *ngIf="mostrarTiempo"
+            class="flex items-center gap-1 bg-white text-blue-600 rounded-2xl px-3 py-1 font-mono shadow-lg border border-atzicay-border text-xs sm:text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="font-black">{{ formatearTiempo() }}</span>
           </div>
         </div>
-
         <!-- Botones de acción premium -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 flex-shrink-0">
           <button (click)="volverAlDashboard.emit()"
-            class="group relative px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-semibold text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border">
-            <div
-              class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            </div>
+            class="group relative px-4 py-2 bg-white text-purple-700 rounded-2xl font-semibold text-xs sm:text-sm cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg border border-atzicay-border">
+            <div class="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="relative flex items-center">
-              <span class="mr-2">←</span>
+              <span class="mr-1">←</span>
               Volver
             </div>
           </button>
-
           <button (click)="toggleHeader.emit()"
-            class="group bg-white rounded-2xl p-3 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg border border-atzicay-border"
+            class="group bg-white rounded-2xl p-2 transition-all duration-300 cursor-pointer active:scale-95 shadow-lg border border-atzicay-border"
             title="Expandir header">
             <svg xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" fill="none"
@@ -228,25 +212,11 @@
   <!-- Header Mobile y Tablet (hasta xl) -->
   <div class="xl:hidden w-full">
     <!-- Barra superior fija con logo Atzicay y menú hamburguesa -->
-    <div class="bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 backdrop-blur-xl shadow-lg border border-atzicay-border/40 rounded-2xl p-4 relative overflow-hidden">
+    <div class="w-full bg-gradient-to-r from-atzicay-bg/95 to-atzicay-bg/90 backdrop-blur-xl shadow-lg border border-atzicay-border/40 rounded-2xl p-4 relative overflow-hidden">
       <!-- Decorative elements -->
       <div class="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent"></div>
       
-      <div class="relative z-10 flex items-center justify-between">
-        <!-- Logo Atzicay -->
-        <div class="flex items-center gap-3">
-          <div class="bg-white rounded-xl p-2 shadow-md">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="h-5 w-5 text-purple-600 flex-shrink-0"
-                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <span class="text-lg font-black text-atzicay-heading tracking-wide">
-            ATZICAY
-          </span>
-        </div>
+      <div class="relative z-10 flex items-center justify-between">      
 
         <!-- Título del juego centrado -->
         <div class="flex-1 text-center">
@@ -270,7 +240,7 @@
     </div>
 
     <!-- Menú desplegable -->
-    <div class="overflow-hidden transition-all duration-500 ease-in-out"
+    <div class="w-full transition-all duration-500 ease-in-out overflow-scroll juegos-scrollbar"
          [class.max-h-96]="mobileMenuOpen"
          [class.max-h-0]="!mobileMenuOpen">
       <div class="bg-gradient-to-br from-atzicay-bg/95 to-atzicay-bg/85 backdrop-blur-xl shadow-xl border border-atzicay-border/30 rounded-2xl mt-3 p-4 relative overflow-hidden"

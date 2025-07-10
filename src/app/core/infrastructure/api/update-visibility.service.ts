@@ -12,8 +12,8 @@ export interface UpdateVisibilityResponse {
   code: number;
   message: string;
   data: {
-    status: boolean; // El nuevo estado del juego
-    visibility: 'P' | 'R'; // La visibilidad en formato de la base de datos
+    status: boolean; // true = público, false = restringido
+    visibility: string; // 'P' o 'R'
   } | null;
 }
 
@@ -21,12 +21,12 @@ export interface UpdateVisibilityResponse {
  * Servicio para actualizar la visibilidad de los juegos
  * 
  * API Response visibility values:
- * - 'P' = Público
- * - 'R' = Restringido
+ * - 1 = Público
+ * - 0 = Restringido
  * 
  * API Request status values:
- * - true = Hacer público (cambia a 'P')
- * - false = Hacer restringido (cambia a 'R')
+ * - 1 = Hacer público (cambia a 1)
+ * - 0 = Hacer restringido (cambia a 0)
  */
 @Injectable({ providedIn: 'root' })
 export class UpdateVisibilityService {
@@ -37,7 +37,7 @@ export class UpdateVisibilityService {
   /**
    * Actualiza la visibilidad de un juego
    * @param gameInstanceId ID de la instancia del juego
-   * @param status true para hacer público, false para hacer restringido
+   * @param status 1 para activar, 0 para desactivar
    * @returns Observable con la respuesta del servidor
    */
   updateVisibility(gameInstanceId: number, status: boolean): Observable<UpdateVisibilityResponse> {
@@ -45,10 +45,10 @@ export class UpdateVisibilityService {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     });
-    
-    const body: UpdateVisibilityRequest = { status };
+    // Forzar booleano y log para depuración
+    const body: UpdateVisibilityRequest = { status: !!status };
+    console.log('[UpdateVisibilityService] Enviando body:', body, 'a', `${this.baseUrl}my-game/update-status/${gameInstanceId}`);
     const url = `${this.baseUrl}my-game/update-status/${gameInstanceId}`;
-    
     return this.http.put<UpdateVisibilityResponse>(url, body, { headers });
   }
 

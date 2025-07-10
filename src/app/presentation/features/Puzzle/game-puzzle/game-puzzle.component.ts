@@ -785,30 +785,17 @@ export class GamePuzzleComponent
   }
 
   private async showSuccessAlert(): Promise<void> {
-    // Mostrar modal de valoración si el usuario no ha evaluado el juego
-    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      await this.showRatingAlert();
-    } else {
-      console.log('❌ Modal de valoración NO se muestra porque:', {
-        userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed,
-      });
-    }
-
     const timeUsed = this.formatTime(this.timeElapsed);
     const config: GameAlertConfig = {
       gameType: 'puzzle',
       gameName: 'Rompecabezas',
       timeUsed,
     };
-
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
-      this.restartGame();
-    } else if (result.isDismissed) {
-      // Si presiona "Ir al Dashboard" o cierra el modal
       this.volverAlDashboard();
     }
+    // Si se descarta, NO redirigir automáticamente
   }
 
   private async showTimeUpAlert(): Promise<void> {

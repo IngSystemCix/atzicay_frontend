@@ -366,6 +366,8 @@ export class LayoutsMemoryComponent implements OnDestroy {
           this.logAction('Game saved', res);
           this.alertService.showGameCreatedSuccess('Juego de memoria');
           this.resetForm();
+          // Redirigir a la vista de juegos después de crear exitosamente
+          this.router.navigate(['/juegos']);
         },
         error: (err: any) => {
           this.isSaving = false;
@@ -380,10 +382,8 @@ export class LayoutsMemoryComponent implements OnDestroy {
   }
 
   private async buildPairsPayload(): Promise<any[]> {
-    // Convierte imágenes a base64 y arma el array de pares según el modo
     const promises = this.pairs.map(async (pair) => {
       if (this.cardType === 'imagenes') {
-        // Modo II: Imagen - Imagen
         const PathImg1 = pair.card1?.image
           ? await this.fileToBase64(pair.card1.image)
           : pair.card1?.imageUrl || '';
@@ -396,7 +396,6 @@ export class LayoutsMemoryComponent implements OnDestroy {
           PathImg2,
         };
       } else {
-        // Modo ID: Imagen - Descripción
         const PathImg1 = pair.card1?.image
           ? await this.fileToBase64(pair.card1.image)
           : pair.card1?.imageUrl || '';

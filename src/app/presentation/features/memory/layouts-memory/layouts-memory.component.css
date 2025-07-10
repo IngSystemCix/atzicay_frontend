@@ -42,6 +42,54 @@
   background: #9333ea;
 }
 
+/* Fixed card dimensions */
+.card-container {
+  width: 100%;
+  height: 200px; /* Tamaño fijo para desktop */
+  position: relative;
+  overflow: hidden;
+}
+
+.card-container-mobile {
+  width: 100%;
+  height: 150px; /* Tamaño fijo para móvil */
+  position: relative;
+  overflow: hidden;
+}
+
+.card-container-small {
+  width: 100%;
+  height: 200px; /* Tamaño más pequeño para modo imagen-texto */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Fix for image display issues */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  background-color: transparent !important;
+}
+
+/* Ensure images load properly and fit container */
+.image-container img {
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: none !important;
+  filter: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Text area with fixed dimensions */
+.text-card-container {
+  min-height: 200px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   /* Make form elements more compact on mobile */
@@ -61,8 +109,17 @@
     margin-bottom: 0.75rem;
   }
   
-  /* Adjust card heights */
-  .h-32, .h-40, .h-48 {
-    height: 8rem;
+  /* Use mobile card sizes */
+  .card-container {
+    height: 150px;
+  }
+  
+  .card-container-small {
+    height: 100px;
+  }
+  
+  .text-card-container {
+    min-height: 100px;
+    max-height: 150px;
   }
 }

@@ -6,6 +6,7 @@ import {
   HostListener,
   OnDestroy,
   AfterViewInit,
+  ElementRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -26,7 +27,7 @@ import { GameLoadingService } from '../../../core/infrastructure/service/game-lo
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
-export class DashboardComponent implements OnInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private gameInstanceService = inject(GameInstanceService);
   private userSessionService = inject(UserSessionService);
   private gameLoadingService = inject(GameLoadingService);
@@ -36,8 +37,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
 
   // Variables para el scroll header
+  headerVisible = true;
   private lastScrollTop = 0;
-  private scrollContainer: HTMLElement | null = null;
+  private mainScrollElement: HTMLElement | null = null;
+  private scrollHandler = this.onMainScroll.bind(this);
 
   isDropdownOpen = false;
   activeDropdownId: number | null = null;
@@ -72,7 +75,7 @@ getTypeIcon(typeValue: string): string {
     'hangman': '🎯',
     'memory': '🧠',
     'puzzle': '🧩',
-    'solve_the_word': '📝'
+    'solve_theword': '📝'
   };
   return icons[typeValue] || '🎮';
 }
@@ -81,6 +84,30 @@ getTypeIcon(typeValue: string): string {
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
+    if (this.mainScrollElement) {
+      this.mainScrollElement.removeEventListener('scroll', this.scrollHandler);
+    }
+  }
+
+  ngAfterViewInit(): void {
+    // Find the main content area in the main layout
+    setTimeout(() => {
+      this.mainScrollElement = document.querySelector('main.flex-1.w-full.overflow-auto');
+      if (this.mainScrollElement) {
+        this.mainScrollElement.addEventListener('scroll', this.scrollHandler, { passive: true });
+      }
+    }, 0);
+  }
+
+  private onMainScroll(): void {
+    if (!this.mainScrollElement) return;
+    const scrollTop = this.mainScrollElement.scrollTop;
+    if (scrollTop === 0) {
+      this.headerVisible = true;
+    } else {
+      this.headerVisible = false;
+    }
+    this.lastScrollTop = scrollTop;
   }
 
   private loadGameInstances(): void {

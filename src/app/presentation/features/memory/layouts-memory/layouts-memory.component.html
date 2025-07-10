@@ -14,7 +14,7 @@
       </div>
       
       <!-- Action Buttons - Responsive -->
-      <div class="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+      <div class="flex flex-row xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
         <button (click)="onCancel()"
           class="px-4 py-2 sm:px-6 sm:py-3 border-2 border-gray-300 text-atzicay-purple-500 rounded-xl font-medium hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 transform hover:scale-[1.02] whitespace-nowrap text-sm sm:text-base">
           <span class="flex items-center justify-center">
@@ -143,9 +143,6 @@
                         class="bg-atzicay-bg-button text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold">
                         Par {{ $index + 1 }}
                       </span>
-                      <div class="ml-2 sm:ml-3 text-xxs sm:text-xs text-gray-500">
-                        <p>ID: {{ pair.id }}</p>
-                      </div>
                     </div>
                     <button title="Eliminar Par" type="button" (click)="removePair($index)"
                       class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 sm:p-2 rounded-full transition-all duration-300 transform hover:scale-110"
@@ -170,22 +167,15 @@
                                (change)="onFileSelected($event, $index, 1)"
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                id="file-input-{{ $index }}-1">
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group image-container card-container"
                              [class.border-purple-500]="pair.card1?.imageUrl"
                              [class.bg-purple-50]="pair.card1?.imageUrl">
                           @if (pair.card1?.imageUrl) {
-                            <div class="relative">
-                              <img [src]="pair.card1?.imageUrl" 
-                                   [alt]="'Imagen tarjeta 1 del par ' + ($index + 1)"
-                                   class="w-full h-32 sm:h-40 md:h-48 object-cover">
-                              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                                </svg>
-                              </div>
-                            </div>
+                            <img [src]="pair.card1?.imageUrl" 
+                                 [alt]="'Imagen tarjeta 1 del par ' + ($index + 1)"
+                                 class="w-full h-full object-cover">
                           } @else {
-                            <div class="p-4 sm:p-6 text-center h-32 sm:h-40 md:h-48 flex flex-col items-center justify-center">
+                            <div class="w-full h-full flex flex-col items-center justify-center">
                               <div class="text-gray-400 mb-2 sm:mb-3 group-hover:text-purple-500 transition-colors duration-300">
                                 <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                                   <path fill-rule="evenodd"
@@ -211,22 +201,15 @@
                                (change)="onFileSelected($event, $index, 2)"
                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                id="file-input-{{ $index }}-2">
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group image-container card-container"
                              [class.border-indigo-500]="pair.card2?.imageUrl"
                              [class.bg-indigo-50]="pair.card2?.imageUrl">
                           @if (pair.card2?.imageUrl) {
-                            <div class="relative">
-                              <img [src]="pair.card2?.imageUrl" 
-                                   [alt]="'Imagen tarjeta 2 del par ' + ($index + 1)"
-                                   class="w-full h-32 sm:h-40 md:h-48 object-cover">
-                              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
-                                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                                </svg>
-                              </div>
-                            </div>
+                            <img [src]="pair.card2?.imageUrl" 
+                                 [alt]="'Imagen tarjeta 2 del par ' + ($index + 1)"
+                                 class="w-full h-full object-cover">
                           } @else {
-                            <div class="p-4 sm:p-6 text-center h-32 sm:h-40 md:h-48 flex flex-col items-center justify-center">
+                            <div class="w-full h-full flex flex-col items-center justify-center">
                               <div class="text-gray-400 mb-2 sm:mb-3 group-hover:text-indigo-500 transition-colors duration-300">
                                 <svg class="w-12 h-12 sm:w-16 sm:h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                                   <path fill-rule="evenodd"
@@ -256,31 +239,24 @@
                                  (change)="onFileSelected($event, $index, 1)"
                                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                  id="file-input-{{ $index }}-1">
-                          <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group"
+                          <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl overflow-hidden hover:border-purple-400 transition-all duration-300 cursor-pointer group image-container card-container-small"
                                [class.border-purple-500]="pair.card1?.imageUrl"
                                [class.bg-purple-50]="pair.card1?.imageUrl">
                             @if (pair.card1?.imageUrl) {
-                              <div class="relative">
-                                <img [src]="pair.card1?.imageUrl" 
-                                     [alt]="'Imagen del par ' + ($index + 1)"
-                                     class="w-full h-28 sm:h-32 md:h-40 object-cover">
-                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                                  <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
-                                  </svg>
-                                </div>
-                              </div>
+                              <img [src]="pair.card1?.imageUrl" 
+                                   [alt]="'Imagen del par ' + ($index + 1)"
+                                   class="w-full h-full object-cover">
                             } @else {
-                              <div class="p-4 sm:p-6 text-center h-28 sm:h-32 md:h-40 flex flex-col items-center justify-center">
-                                <div class="text-gray-400 mb-2 sm:mb-3 group-hover:text-purple-500 transition-colors duration-300">
-                                  <svg class="w-10 h-10 sm:w-12 sm:h-12 mx-auto" fill="currentColor" viewBox="0 0 20 20">
+                              <div class="w-full h-full flex flex-col items-center justify-center">
+                                <div class="text-gray-400 mb-1 sm:mb-2 group-hover:text-purple-500 transition-colors duration-300">
+                                  <svg class="w-8 h-8 sm:w-10 sm:h-10 mx-auto" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                       d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
                                       clip-rule="evenodd" />
                                   </svg>
                                 </div>
-                                <p class="text-xs sm:text-sm text-gray-600 font-medium">Subir imagen</p>
-                                <p class="text-xxs sm:text-xs text-gray-400 mt-1">Máximo 1 MB</p>
+                                <p class="text-xs text-gray-600 font-medium">Subir imagen</p>
+                                <p class="text-xxs text-gray-400">Máximo 1 MB</p>
                               </div>
                             }
                             <span class="absolute top-2 right-2 bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-xxs sm:text-xs font-medium">
@@ -292,7 +268,7 @@
                       
                       <!-- Tarjeta 2: Texto -->
                       <div class="space-y-3 sm:space-y-4">
-                        <div class="border-2 border-gray-300 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-indigo-400 transition-all duration-300 relative"
+                        <div class="border-2 border-gray-300 rounded-lg sm:rounded-xl p-3 sm:p-4 hover:border-indigo-400 transition-all duration-300 relative text-card-container"
                              [class.border-indigo-500]="pair.card1?.text?.trim()"
                              [class.bg-indigo-50]="pair.card1?.text?.trim()">
                           <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">
@@ -304,14 +280,16 @@
                               Texto descriptivo
                             </span>
                           </label>
-                          <textarea [(ngModel)]="pair.card1!.text"
-                                    rows="4"
-                                    class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-none text-xs sm:text-sm"
-                                    placeholder="Escribe el texto que acompañará a la imagen..."
-                                    maxlength="100"></textarea>
-                          <div class="flex justify-between items-center mt-1 sm:mt-2">
-                            <span class="text-xxs sm:text-xs text-gray-400">Máximo 100 caracteres</span>
-                            <span class="text-xxs sm:text-xs text-gray-500">{{ (pair.card1?.text || '').length }}/100</span>
+                          <div class="flex-1">
+                            <textarea [(ngModel)]="pair.card1!.text"
+                                      rows="3"
+                                      class="w-full px-2 sm:px-3 py-1 sm:py-2 border border-gray-300 rounded-md sm:rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 resize-none text-xs sm:text-sm h-16"
+                                      placeholder="Escribe el texto que acompañará a la imagen..."
+                                      maxlength="100"></textarea>
+                            <div class="flex justify-between items-center mt-1 sm:mt-2">
+                              <span class="text-xxs sm:text-xs text-gray-400">Máximo 100 caracteres</span>
+                              <span class="text-xxs sm:text-xs text-gray-500">{{ (pair.card1?.text || '').length }}/100</span>
+                            </div>
                           </div>
                           <span class="absolute top-2 right-2 bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-xxs sm:text-xs font-medium">
                             Texto

@@ -20,7 +20,7 @@ const EXCLUDED_URLS = [
   '/api/session',
   '/connect/',
   '/callback',
-  '/api/game-instances', // Excluir game-instances para que sea más rápido
+  '/api/game-instances', 
   '/api/hangman/', // Excluir hangman para carga rápida
   '/api/puzzle/', // Excluir puzzle para carga rápida
   '/api/memory/', // Excluir memory para carga rápida

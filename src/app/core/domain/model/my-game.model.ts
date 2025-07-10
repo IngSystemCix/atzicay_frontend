@@ -1,7 +1,8 @@
 export interface MyGame {
   name: string;
   difficulty: string;
-  visibility: string;
+  visibility: string; // 'P' = público, 'R' = restringido
+  activated: number; // 0 = desactivado, 1 = activado
   author: string;
   type_game: string;
   rating: string;

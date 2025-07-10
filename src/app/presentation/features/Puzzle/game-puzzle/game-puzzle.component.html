@@ -48,8 +48,10 @@
       [palabrasCompletadas]="palabrasCompletadas" [totalPalabras]="totalPalabras" [tiempoRestante]="tiempoRestante"
       [porcentajeProgreso]="porcentajeProgreso" [headerExpanded]="headerExpanded" [mobileMenuOpen]="mobileMenuOpen"
       [mostrarVidas]="false" [mostrarTiempo]="true" [mostrarProgreso]="true" [tipoJuego]="'puzzle'"
-      (toggleHeader)="toggleHeader()" (toggleMobileMenu)="toggleMobileMenu()"
-      (volverAlDashboard)="volverAlDashboard()"></app-game-header>
+      (toggleHeader)="headerExpanded = !headerExpanded"
+      (toggleMobileMenu)="mobileMenuOpen = !mobileMenuOpen"
+      (volverAlDashboard)="volverAlDashboard()">
+    </app-game-header>
 
     <!-- Pista del Puzzle (específica para el puzzle) -->
     @if (puzzleConfig?.clue) {
@@ -150,10 +152,8 @@
       gameStarted,
     'bg-gradient-to-br from-purple-100 to-purple-200 border-2 border-purple-300':
       !gameStarted
-  }" 
-        [style.width.px]="gameStarted ? getBoardSize().width + 40 : 500"
-        [style.height.px]="gameStarted ? getBoardSize().height + 40 : 400"
-        [style.min-width.px]="320"
+  }" [style.width.px]="gameStarted ? getBoardSize().width + 40 : 500"
+        [style.height.px]="gameStarted ? getBoardSize().height + 40 : 400" [style.min-width.px]="320"
         [style.min-height.px]="320">
         <!-- Pantalla de inicio -->
         @if (!gameStarted) {
@@ -183,8 +183,7 @@
         @if (gameStarted) {
         <div class="puzzle-game-container flex items-center justify-center">
           <div class="puzzle-board-grid relative rounded-xl overflow-hidden shadow-2xl border-2 border-purple-200/50"
-            [style.width.px]="getBoardSize().width"
-            [style.height.px]="getBoardSize().height"
+            [style.width.px]="getBoardSize().width" [style.height.px]="getBoardSize().height"
             [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
             [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'"
             style="display: grid; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(4px);">

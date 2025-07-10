@@ -10,6 +10,7 @@ import { GameAudioService } from '../../../../core/infrastructure/service/game-a
 import { GameUrlService } from '../../../../core/infrastructure/service/game-url.service';
 import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
+import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
 
 interface Card {
   id: number;
@@ -23,7 +24,7 @@ interface Card {
 
 @Component({
   selector: 'app-game-memory',
-  imports: [CommonModule, FloatingLogoComponent],
+  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
   templateUrl: './game-memory.component.html',
   styleUrl: './game-memory.component.css'
 })
@@ -50,7 +51,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   gameConfig: GameConfiguration | null = null;
   userAssessed = false; // Nueva propiedad para controlar valoración
   attempts = 0; // Contador de intentos (pares volteados)
-
+  mobileMenuOpen = false;
   // Header control
   headerExpanded = false;
   
@@ -174,16 +175,13 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       gameType: 'memory',
       gameName: 'Memoria',
       timeUsed,
-      attempts: this.attempts // Usar el contador real de intentos
+      attempts: this.attempts
     };
-
     const result = await this.gameAlertService.showSuccessAlert(config);
     if (result.isConfirmed) {
-      this.resetGame();
-    } else if (result.isDismissed) {
-      // Si presiona "Ir al Dashboard" o cierra el modal
       this.volverAlDashboard();
     }
+    // Si se descarta, NO redirigir automáticamente
   }
 
   private async showRatingAlert(): Promise<void> {

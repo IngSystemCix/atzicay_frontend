@@ -11,16 +11,6 @@ import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my
 import { CreateGame } from '../../../../core/domain/model/create-game.model';
 import { HostListener } from '@angular/core';
 
-// Enum para orientación compatible con backend
-export enum SolveTheWordOrientation {
-  HL = 'HL', // Horizontal Left
-  HR = 'HR', // Horizontal Right
-  VU = 'VU', // Vertical Up
-  VD = 'VD', // Vertical Down
-  DU = 'DU', // Diagonal Up
-  DD = 'DD', // Diagonal Down
-}
-
 @Component({
   selector: 'app-layouts-solve-the-word',
   standalone: true,
