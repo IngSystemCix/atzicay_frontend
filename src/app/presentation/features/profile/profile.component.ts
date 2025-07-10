@@ -13,6 +13,7 @@ import { AlertService } from '../../../core/infrastructure/service/alert.service
 import { Subscription } from 'rxjs';
 import { GameTypeCountsService } from '../../../core/infrastructure/api/game-type-counts.service';
 import { GameTypeCounts } from '../../../core/domain/model/game-type-counts.model';
+import { AssessmentService } from '../../../core/infrastructure/api/assessment.service';
 
 @Component({
   selector: 'app-profile',
@@ -46,14 +47,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private auth0: Auth0Service,
     private userSession: UserSessionService,
     private alertService: AlertService,
-    private gameTypeCountsService: GameTypeCountsService
+    private gameTypeCountsService: GameTypeCountsService,
+    private assessmentService: AssessmentService // <-- nuevo servicio
   ) {}
 
   ngOnInit(): void {
     // Primero cargar países, luego el perfil
     this.loadCountries();
     this.loadAuth0UserPicture();
-    this.simulateRatingData();
+    // this.simulateRatingData(); // Eliminar simulación
 
     // Esperar un poco para que los países se carguen antes de inicializar el perfil
     setTimeout(() => {
@@ -63,12 +65,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
-  }
-
-  private simulateRatingData(): void {
-    // Simula un promedio de calificación para mostrar la barra y el porcentaje
-    const simulatedRating = 2.8; // Cambia este valor para probar diferentes rangos
-    this.updateRankInfo(simulatedRating);
   }
 
   private loadAuth0UserPicture(): void {
@@ -306,6 +302,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           }
 
           this.loadUserGameCounts(userId); // Cargar conteo de juegos del usuario
+          this.loadAverageAssessment(userId); // <-- cargar promedio de calificación
           this.showNoUserMessage = false;
           console.log('Usuario cargado:', this.user);
         } else {
@@ -321,6 +318,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.user = null;
         this.showNoUserMessage = true;
       },
+    });
+  }
+
+  private loadAverageAssessment(userId: number): void {
+    this.assessmentService.getAverageAssessment().subscribe({
+      next: (average) => {
+        this.updateRankInfo(average);
+      },
+      error: (err) => {
+        console.error('Error al obtener promedio de calificación:', err);
+        this.updateRankInfo(0);
+      }
     });
   }
 
