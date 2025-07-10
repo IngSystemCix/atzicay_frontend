@@ -239,6 +239,7 @@
                                     name="inicio" 
                                     id="inicio" 
                                     [(ngModel)]="programmingGame.StartTime"
+                                    (ngModelChange)="onStartTimeChange()"
                                     #inicioInput="ngModel"
                                     class="w-full border-2 border-gray-200 rounded-xl p-3.5 text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-300 bg-white group-hover:border-gray-300"
                                     required

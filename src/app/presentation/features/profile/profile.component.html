@@ -3,18 +3,12 @@
   <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-atzicay-border">
     <div class="flex flex-col lg:flex-row">
       <!-- Panel izquierdo - Información del perfil -->
-      <div
-        class="w-full lg:w-1/3 bg-white text-white p-8 text-center"
-      >
+      <div class="w-full lg:w-1/3 bg-white text-white p-8 text-center">
         <div class="relative inline-block mb-6">
-          <img
-            [src]="picture || 'assets/default-profile.png'"
-            alt="Foto de perfil"
-            class="w-32 h-32 rounded-full mx-auto border-4 border-atzicay-border shadow-lg object-cover"
-          />
+          <img [src]="picture || 'assets/default-profile.png'" alt="Foto de perfil"
+            class="w-32 h-32 rounded-full mx-auto border-4 border-atzicay-border shadow-lg object-cover" />
           <div
-            class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-400 rounded-full border-3 border-white flex items-center justify-center"
-          >
+            class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-400 rounded-full border-3 border-white flex items-center justify-center">
             <span class="text-xs">✓</span>
           </div>
         </div>
@@ -26,7 +20,9 @@
         <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-left space-y-3 mb-6">
           <div class="flex items-center text-sm">
             <svg class="w-4 h-4 mr-3 text-atzicay-heading" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                clip-rule="evenodd"></path>
             </svg>
             <div>
               <span class="text-atzicay-heading font-bold">Nacimiento</span><br />
@@ -35,7 +31,9 @@
           </div>
           <div class="flex items-center text-sm">
             <svg class="w-4 h-4 mr-3 text-atzicay-heading" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                clip-rule="evenodd"></path>
             </svg>
             <div>
               <span class="text-atzicay-heading font-bold">País</span><br />
@@ -44,7 +42,9 @@
           </div>
           <div class="flex items-center text-sm">
             <svg class="w-4 h-4 mr-3 text-atzicay-heading font-bold" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                clip-rule="evenodd"></path>
             </svg>
             <div>
               <span class="text-atzicay-heading font-bold">Ciudad</span><br />
@@ -53,7 +53,9 @@
           </div>
           <div class="flex items-center text-sm">
             <svg class="w-4 h-4 mr-3 text-atzicay-heading" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                clip-rule="evenodd"></path>
             </svg>
             <div>
               <span class="text-atzicay-heading font-bold">Miembro desde</span><br />
@@ -62,22 +64,12 @@
           </div>
         </div>
 
-        <button
-          (click)="abrirModal()"
-          class="w-full bg-atzicay-bg-button text-white font-semibold py-3 px-6 rounded-xl hover:bg-atzicay-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
-        >
-          <svg
-            class="w-5 h-5 inline mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-            ></path>
+        <button (click)="abrirModal()"
+          class="w-full bg-atzicay-bg-button text-white font-semibold py-3 px-6 rounded-xl hover:bg-atzicay-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg">
+          <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+            </path>
           </svg>
           Editar Perfil
         </button>
@@ -85,21 +77,11 @@
 
       <div class="w-full lg:w-2/3 p-8">
         <div class="flex items-center mb-6">
-          <div
-            class="w-12 h-12 bg-atzicay-purple-500 rounded-xl flex items-center justify-center mr-4"
-          >
-            <svg
-              class="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-              ></path>
+          <div class="w-12 h-12 bg-atzicay-purple-500 rounded-xl flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+              </path>
             </svg>
           </div>
           <div>
@@ -111,24 +93,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Juegos Creados -->
           <div
-            class="bg-atzicay-bg p-6 rounded-2xl border-2 border-atzicay-border hover:shadow-lg transition-all duration-300 group"
-          >
+            class="bg-atzicay-bg p-6 rounded-2xl border-2 border-atzicay-border hover:shadow-lg transition-all duration-300 group">
             <div class="flex items-center justify-between mb-4">
               <div
-                class="w-12 h-12 bg-atzicay-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
-              >
-                <svg
-                  class="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"
-                  ></path>
+                class="w-12 h-12 bg-atzicay-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4">
+                  </path>
                 </svg>
               </div>
             </div>
@@ -140,30 +112,69 @@
             </p>
           </div>
 
-          <!-- Estadística adicional 2 -->
+          <!-- Estadística de Calificación con Rangos -->
           <div
-            class="bg-atzicay-bg p-6 rounded-2xl border-2 border-atzicay-border hover:shadow-lg transition-all duration-300 group"
-          >
+            class="bg-atzicay-bg p-6 rounded-2xl border-2 border-atzicay-border hover:shadow-lg transition-all duration-300 group">
             <div class="flex items-center justify-between mb-4">
               <div
-                class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
-              >
-                <svg
-                  class="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                  ></path>
+                class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
+                  </path>
                 </svg>
               </div>
-            </div>            <p class="text-atzicay-heading font-extrabold">Calificación</p>
+              <!-- Indicador de rango -->
+              <div class="flex items-center space-x-2">
+                <span class="text-2xl">{{ rankIcon }}</span>
+                <span class="text-sm font-bold px-3 py-1 rounded-full border-2 border-atzicay-border bg-white"
+                  [ngClass]="rankColor">
+                  {{ currentRank }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Calificación promedio -->
+            <div class="flex items-center mb-2">
+              <p class="text-4xl font-bold text-atzicay-heading mr-2">{{ averageRating | number:'1.1-1' }}</p>
+              <div class="flex items-center">
+                <!-- Estrellas dinámicas con relleno parcial -->
+                <div class="flex space-x-1">
+                  <div *ngFor="let star of [1,2,3,4,5]; let i = index" class="relative">
+                    <!-- Estrella de fondo (gris) -->
+                    <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+
+                    <!-- Estrella de relleno (amarilla) con máscara para relleno parcial -->
+                    <div class="absolute top-0 left-0 overflow-hidden" [style.width.%]="getStarFillPercentage(i + 1)">
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path
+                          d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p class="text-atzicay-heading font-extrabold">Calificación</p>
             <p class="text-atzicay-heading text-sm mt-1">Promedio de valoraciones</p>
+
+            <!-- Barra de progreso hacia el siguiente rango -->
+            <div class="mt-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-xs text-atzicay-heading font-medium">Progreso al siguiente rango</span>
+                <span class="text-xs text-atzicay-heading font-medium">{{ getProgressPercentage() }}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                <div class="h-full bg-atzicay-purple-500 rounded-full transition-all duration-500 ease-out"
+                  [style.width.%]="getProgressPercentage()">
+                </div>
+              </div>
+              <p class="text-xs text-atzicay-heading mt-1">{{ getNextRankMessage() }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -171,11 +182,7 @@
   </div>
 
   @if (showModal && user && countriesLoaded) {
-  <app-modal-edit-users
-    [userData]="user"
-    (close)="cerrarModal()"
-    [countries]="countries"
-    (userUpdated)="onUserUpdated($event)"
-  ></app-modal-edit-users>
+  <app-modal-edit-users [userData]="user" (close)="cerrarModal()" [countries]="countries"
+    (userUpdated)="onUserUpdated($event)"></app-modal-edit-users>
   }
 </div>

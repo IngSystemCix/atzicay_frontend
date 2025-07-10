@@ -88,33 +88,43 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
       return;
     }
     // Validaciones frontend
-    if (
-      !this.programmingGame.Name ||
-      this.programmingGame.Name.trim().length === 0
-    ) {
+    const now = new Date();
+    const startTime = new Date(this.programmingGame.StartTime);
+    const endTime = new Date(this.programmingGame.EndTime);
+
+    // Validar nombre
+    if (!this.programmingGame.Name || this.programmingGame.Name.trim().length === 0) {
       this.error = 'El nombre es obligatorio.';
       return;
     }
+    // Validar fecha de inicio
     if (!this.programmingGame.StartTime) {
       this.error = 'La fecha y hora de inicio es obligatoria.';
       return;
     }
+    if (isNaN(startTime.getTime()) || startTime < now) {
+      this.error = 'La fecha y hora de inicio no puede ser anterior a la fecha actual.';
+      return;
+    }
+    // Validar fecha de fin
     if (!this.programmingGame.EndTime) {
       this.error = 'La fecha y hora de fin es obligatoria.';
       return;
     }
-    if (
-      isNaN(this.programmingGame.Attempts) ||
-      this.programmingGame.Attempts < 1
-    ) {
-      this.error = 'El número de intentos debe ser mayor o igual a 1.';
+    if (isNaN(endTime.getTime()) || endTime <= startTime) {
+      this.error = 'La fecha de fin debe ser posterior a la de inicio.';
       return;
     }
-    if (
-      isNaN(this.programmingGame.MaximumTime) ||
-      this.programmingGame.MaximumTime < 1
-    ) {
-      this.error = 'El tiempo máximo debe ser mayor o igual a 1 minuto.';
+    // Validar intentos
+    const attempts = Number(this.programmingGame.Attempts);
+    if (!Number.isInteger(attempts) || attempts < 1) {
+      this.error = 'El número de intentos debe ser un número entero mayor o igual a 1.';
+      return;
+    }
+    // Validar tiempo máximo
+    const maxTime = Number(this.programmingGame.MaximumTime);
+    if (!Number.isInteger(maxTime) || maxTime < 1) {
+      this.error = 'El tiempo máximo debe ser un número entero mayor o igual a 1 minuto.';
       return;
     }
     // Validar que la fecha de fin sea posterior a la de inicio
@@ -230,6 +240,22 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
       all: '🎮',
     };
     return iconoMap[type] || '🎮';
+  }
+
+  // Actualiza EndTime automáticamente cuando cambia StartTime
+  onStartTimeChange(): void {
+    if (this.programmingGame.StartTime) {
+      const startDate = new Date(this.programmingGame.StartTime);
+      // Sumar 24 horas
+      startDate.setHours(startDate.getHours() + 24);
+      // Formatear a string compatible con input datetime-local
+      const year = startDate.getFullYear();
+      const month = String(startDate.getMonth() + 1).padStart(2, '0');
+      const day = String(startDate.getDate()).padStart(2, '0');
+      const hours = String(startDate.getHours()).padStart(2, '0');
+      const minutes = String(startDate.getMinutes()).padStart(2, '0');
+      this.programmingGame.EndTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
   }
 
   cancelar() {
