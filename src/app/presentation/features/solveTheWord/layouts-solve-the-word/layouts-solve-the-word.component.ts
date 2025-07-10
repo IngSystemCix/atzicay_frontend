@@ -87,9 +87,29 @@ export class LayoutsSolveTheWordComponent
     this.activeTab = tab;
   }
 
+  // Validaciones para filas y columnas
+  setRows(value: number) {
+    this.rows = Math.max(10, Math.min(30, value));
+  }
+  setCols(value: number) {
+    this.cols = Math.max(10, Math.min(30, value));
+  }
+
+  // Calcular longitud máxima de palabra según orientación
+  getMaxWordLength(orientation: string): number {
+    if (orientation === 'HR' || orientation === 'HL') return this.cols;
+    if (orientation === 'VD' || orientation === 'VU') return this.rows;
+    // Diagonal: mínimo entre filas y columnas
+    return Math.min(this.rows, this.cols);
+  }
+
   addWord() {
     const newId = this.words.length + 1;
     this.words.push({ id: newId, word: '', orientation: 'HR' });
+    setTimeout(() => {
+      const input = document.querySelector(`#word-input-${newId}`) as HTMLInputElement;
+      if (input) input.focus();
+    }, 50);
   }
 
   removeWord(id: number) {
@@ -190,12 +210,16 @@ export class LayoutsSolveTheWordComponent
       this.alertService.showError('Debe agregar al menos una palabra');
       return false;
     }
-    const invalidWords = validWords.filter((w) => w.word.trim().length < 2);
-    if (invalidWords.length > 0) {
-      this.alertService.showError(
-        'Todas las palabras deben tener al menos 2 caracteres'
-      );
-      return false;
+    for (const w of validWords) {
+      const maxLen = this.getMaxWordLength(w.orientation);
+      if (w.word.trim().length < 2) {
+        this.alertService.showError('Todas las palabras deben tener al menos 2 caracteres');
+        return false;
+      }
+      if (w.word.trim().length > maxLen) {
+        this.alertService.showError(`La palabra "${w.word}" excede el máximo permitido (${maxLen}) para la orientación seleccionada.`);
+        return false;
+      }
     }
     return true;
   }

@@ -13,10 +13,6 @@ export class AuthService {
   private http = inject(HttpClient);
   private userSessionService = inject(UserSessionService);
 
-  /**
-   * Realiza el login con el id token de Auth0 y devuelve un observable con la información del usuario autenticado.
-   * Guarda el token JWT interno en sessionStorage con clave 'token_jwt'.
-   */
   login(idToken: string): Observable<Auth> {
     const body = { id_token: idToken };
     return this.http

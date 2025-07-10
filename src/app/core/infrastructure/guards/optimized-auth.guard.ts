@@ -4,12 +4,20 @@ import { AuthService } from '@auth0/auth0-angular';
 import { UserSessionService } from '../service/user-session.service';
 import { GameLoadingService } from '../service/game-loading.service';
 import { map, switchMap, timeout, catchError, of, tap } from 'rxjs';
+import { RedirectService } from '../service/RedirectService.service';
 
 export const optimizedAuthGuard: CanActivateFn = (route, state) => {
   const auth0 = inject(AuthService);
   const userSessionService = inject(UserSessionService);
   const router = inject(Router);
   const gameLoadingService = inject(GameLoadingService);
+  const redirectService = inject(RedirectService);
+
+  console.log('[OptimizedAuthGuard] URL actual:', state.url);
+  console.log('[OptimizedAuthGuard] Está autenticado:', userSessionService.isAuthenticated());
+
+  // Guardar URL de retorno si es necesario
+  redirectService.setReturnUrl(state.url);
 
   // Si ya está autenticado, permitir acceso inmediato
   if (userSessionService.isAuthenticated()) {

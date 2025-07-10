@@ -136,14 +136,11 @@
               <!-- Pairs Container - Responsive -->
               <div class="space-y-4 sm:space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                 @for (pair of pairs; let i = $index; track $index) {
-                <div class="border-2 border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-gradient-to-r from-gray-50 to-white hover:shadow-md transition-all duration-300 animate-slide-up">
+                <div class="border-2 border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 bg-gradient-to-r from-gray-50 to-white hover:shadow-md transition-all duration-300 animate-slide-up pair-item">
                   <div class="flex justify-between items-center mb-3 sm:mb-4">
-                    <div class="flex items-center">
-                      <span
-                        class="bg-atzicay-bg-button text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold">
-                        Par {{ $index + 1 }}
-                      </span>
-                    </div>
+                    <span class="bg-atzicay-bg-button text-white px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold">
+                      Par {{ pairs.length - i }}
+                    </span>
                     <button title="Eliminar Par" type="button" (click)="removePair($index)"
                       class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 sm:p-2 rounded-full transition-all duration-300 transform hover:scale-110"
                       [disabled]="pairs.length <= 1">

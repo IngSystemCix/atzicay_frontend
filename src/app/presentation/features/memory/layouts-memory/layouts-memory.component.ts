@@ -49,7 +49,13 @@ export class LayoutsMemoryComponent implements OnDestroy {
   // Game configuration
   gameTitle: string = '';
   gameDescription: string = '';
-  cardType: CardType = 'imagen-texto';
+  private _cardType: CardType = 'imagen-texto';
+  set cardType(value: CardType) {
+    this._cardType = value;
+  }
+  get cardType(): CardType {
+    return this._cardType;
+  }
 
   // Game settings
   gameSettings = {
@@ -120,14 +126,27 @@ export class LayoutsMemoryComponent implements OnDestroy {
 
   // Card pair management methods
   addPair(): void {
+    // Validar que el primer par (el más reciente) esté completo antes de agregar uno nuevo
+    if (this.pairs.length > 0 && !this.isPairComplete(this.pairs[0])) {
+      this.alertService.showWarning('Completa el par actual antes de agregar uno nuevo.');
+      return;
+    }
     const newPair: CardPair = {
       id: this.generateNewId(),
       card1: { image: null, text: '', imageUrl: '' },
       card2: { image: null, text: '', imageUrl: '' },
     };
-
-    this.pairs.push(newPair);
+    this.pairs.unshift(newPair); // Agregar al inicio
     this.logAction('Pair added', newPair);
+    setTimeout(() => {
+      const pairElements = this.el.nativeElement.querySelectorAll('.pair-item');
+      if (pairElements && pairElements.length > 0) {
+        const firstPair = pairElements[0];
+        if (firstPair) {
+          firstPair.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }, 100);
   }
 
   removePair(index: number): void {
@@ -168,20 +187,17 @@ export class LayoutsMemoryComponent implements OnDestroy {
   // Método específico para validar pares según el modo
   private isPairComplete(pair: CardPair): boolean {
     if (!pair.card1) return false;
-
-    switch (this.cardType) {
-      case 'imagen-texto':
-        // En modo imagen-texto, solo necesitamos validar card1 (imagen + texto)
-        return this.isCardComplete(pair.card1);
-      case 'imagenes':
-        // En modo imagen-imagen, necesitamos ambas cards con imágenes
-        return (
-          !!(pair.card1?.image || pair.card1?.imageUrl) &&
-          !!(pair.card2?.image || pair.card2?.imageUrl)
-        );
-      default:
-        return false;
+    if (this.cardType === 'imagen-texto') {
+      // En modo imagen-texto, solo necesitamos validar card1 (imagen + texto)
+      return this.isCardComplete(pair.card1);
+    } else if (this.cardType === 'imagenes') {
+      // En modo imagen-imagen, necesitamos ambas cards con imágenes
+      return (
+        !!(pair.card1?.image || pair.card1?.imageUrl) &&
+        !!(pair.card2?.image || pair.card2?.imageUrl)
+      );
     }
+    return false;
   }
 
   // File handling methods
@@ -342,6 +358,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
         return;
       }
 
+      // CORRECTO: Usar buildPairsPayload para enviar imágenes y textos
       const pairsPayload = await this.buildPairsPayload();
       const settingsPayload = this.buildSettingsPayload();
 
@@ -623,7 +640,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
 
     try {
       const pairsPayload = await this.buildPairsPayload();
-      const settingsPayload = this.buildSettingsPayload();
+      const settingsPayload = await this.buildSettingsPayload();
 
       const gameData = {
         Name: this.gameTitle,
@@ -708,5 +725,13 @@ export class LayoutsMemoryComponent implements OnDestroy {
     const isAuthenticated = this.userSessionService.isAuthenticated();
 
     return { isAuthenticated, userId };
+  }
+
+  // Devuelve la URL de la imagen con cache busting
+  getCacheBustedImageUrl(imageUrl: string): string {
+    if (!imageUrl) return '';
+    // Si ya tiene un parámetro v, lo reemplazamos
+    const baseUrl = imageUrl.split('?v=')[0];
+    return `${baseUrl}?v=${Date.now()}`;
   }
 }

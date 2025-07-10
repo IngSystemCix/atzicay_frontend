@@ -76,9 +76,10 @@
               <input
                 title="Número de filas"
                 type="number"
-                min="5"
+                min="10"
                 max="30"
                 [(ngModel)]="rows"
+                (ngModelChange)="setRows($event)"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
               />
             </div>
@@ -89,9 +90,10 @@
               <input
                 title="Número de columnas"
                 type="number"
-                min="5"
+                min="10"
                 max="30"
                 [(ngModel)]="cols"
+                (ngModelChange)="setCols($event)"
                 class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none transition-all"
               />
             </div>
@@ -151,9 +153,11 @@
                   >Palabra</label
                 >
                 <input
+                  id="word-input-{{word.id}}"
                   title="Palabra a encontrar"
                   [(ngModel)]="word.word"
                   type="text"
+                  maxlength="{{ getMaxWordLength(word.orientation) }}"
                   class="w-full px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                 />
               </div>
