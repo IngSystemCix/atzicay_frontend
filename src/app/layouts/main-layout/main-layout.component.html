@@ -7,12 +7,13 @@
            transform -translate-x-full md:translate-x-0"
     [class.-translate-x-full]="sidebarCollapsed && (isMobile || isTablet)"
     [class.translate-x-0]="!sidebarCollapsed || (!isMobile && !isTablet)"
-    [class.w-16]="sidebarCollapsed && !isMobile && !isTablet"
-    [class.w-64]="!sidebarCollapsed || isMobile || isTablet"
+    [class.w-16]="sidebarCollapsed && (isMobile || isTablet)"
+    [class.w-64]="!sidebarCollapsed || (!isMobile && !isTablet)"
+    [class.flex-shrink-0]="!sidebarCollapsed || (!isMobile && !isTablet)"
   ></app-sidebar>
 
   <!-- Overlay para móvil y tablet con efecto blur -->
- <div 
+ <div
     class="fixed inset-0 backdrop-blur-sm bg-black/20 z-30 transition-all duration-300 ease-in-out
            block md:hidden"
     [class.opacity-0]="sidebarCollapsed"
@@ -27,7 +28,7 @@
   <!-- Contenido principal -->
     <div class="flex-1 flex flex-col overflow-hidden min-w-0 transition-all duration-300 ease-in-out">
 
-    
+
     <!-- Header -->
         <app-header class="w-full z-10 flex-shrink-0"></app-header>
 
@@ -35,6 +36,6 @@
      <main class="flex-1 w-full overflow-auto">
       <router-outlet></router-outlet>
     </main>
-    
+
   </div>
 </div>
