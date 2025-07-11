@@ -374,6 +374,7 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
             const secureUrl = this.gameUrlService.generateCleanGameUrl(gameRoute, response.data.token);
             
             // Cerrar loading y mostrar URL
+            Swal.close();
             Swal.fire({
               title: '🔒 URL Segura Generada',
               html: `
@@ -384,7 +385,7 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
                   <div class="bg-gray-100 p-3 rounded-lg border">
                     <p class="text-sm font-medium mb-2">URL del juego:</p>
                     <input id="gameUrlInput" type="text" value="${secureUrl}" 
-                           class="w-full p-2 text-xs border rounded bg-white" readonly>
+                           class="w-full p-2 text-xs border rounded bg-white mb-2" readonly>
                   </div>
                   <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
                     <p class="text-xs text-green-700">
@@ -394,47 +395,50 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
                   <p class="text-xs text-gray-500 mt-2">
                     Esta URL incluye el contexto de la programación y permitirá al estudiante jugar con todos los intentos y configuraciones establecidas.
                   </p>
+                  <div id="swal-footer" class="flex flex-row justify-center gap-6 mt-8">
+                    <input id="playNowBtn" type="button" value="🎮 Jugar Ahora" class="px-5 py-2 text-base font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors cursor-pointer shadow" />
+                    <input id="copyUrlBtn" type="button" value="📋 Copiar URL" class="px-5 py-2 text-base font-semibold bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors cursor-pointer shadow" />
+                  </div>
                 </div>
               `,
-              showCancelButton: true,
-              confirmButtonText: '📋 Copiar URL',
-              cancelButtonText: '🎮 Jugar Ahora',
-              confirmButtonColor: '#8b5cf6',
-              cancelButtonColor: '#10b981',
+              showConfirmButton: false,
+              showCancelButton: false,
               width: 700,
               customClass: {
                 popup: 'text-left'
               },
-              preConfirm: () => {
-                // Copiar al portapapeles
+              didOpen: () => {
+                const copyBtn = document.getElementById('copyUrlBtn') as HTMLInputElement;
+                const playBtn = document.getElementById('playNowBtn') as HTMLInputElement;
                 const input = document.getElementById('gameUrlInput') as HTMLInputElement;
-                if (input) {
-                  input.select();
-                  navigator.clipboard.writeText(secureUrl).then(() => {
-                    Swal.fire({
-                      title: '¡Copiado!',
-                      text: 'La URL segura ha sido copiada al portapapeles',
-                      icon: 'success',
-                      timer: 2000,
-                      showConfirmButton: false
-                    });
-                  }).catch(() => {
-                    // Fallback para navegadores más antiguos
-                    document.execCommand('copy');
-                    Swal.fire({
-                      title: '¡Copiado!',
-                      text: 'La URL segura ha sido copiada al portapapeles',
-                      icon: 'success',
-                      timer: 2000,
-                      showConfirmButton: false
+                if (copyBtn && input) {
+                  copyBtn.addEventListener('click', () => {
+                    input.select();
+                    navigator.clipboard.writeText(input.value).then(() => {
+                      Swal.fire({
+                        title: '¡Copiado!',
+                        text: 'La URL segura ha sido copiada al portapapeles',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                      });
+                    }).catch(() => {
+                      document.execCommand('copy');
+                      Swal.fire({
+                        title: '¡Copiado!',
+                        text: 'La URL segura ha sido copiada al portapapeles',
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false
+                      });
                     });
                   });
                 }
-              }
-            }).then((result) => {
-              if (result.dismiss === Swal.DismissReason.cancel) {
-                // Abrir el juego en una nueva pestaña
-                window.open(secureUrl, '_blank');
+                if (playBtn && input) {
+                  playBtn.addEventListener('click', () => {
+                    window.open(input.value, '_blank');
+                  });
+                }
               }
             });
           } else {
