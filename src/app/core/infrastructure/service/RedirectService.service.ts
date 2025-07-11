@@ -11,8 +11,9 @@ export class RedirectService {
 
   // Guardar URL de retorno
   setReturnUrl(url: string): void {
-    // Solo guardar si es un juego programado (ruta con /play/ o token)
-    const isProgrammingGame = url.includes('/play/') || /\/play\/solve-the-word\//.test(url) || /\/play\/hangman\//.test(url);
+    // Solo guardar si es un juego programado de cualquiera de los 4 juegos
+    const isProgrammingGame =
+      /\/play\/(hangman|puzzle|memory|solve-the-word)\//.test(url);
     if (isProgrammingGame) {
       console.log('[RedirectService] Guardando URL de retorno (programado):', url);
       sessionStorage.setItem(this.RETURN_URL_KEY, url);
