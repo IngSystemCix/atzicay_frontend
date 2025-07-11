@@ -25,7 +25,7 @@ export class RatingModalService {
     let selectedRating = 0;
     
     const { value: result } = await Swal.fire({
-      title: `¡Has completado el ${gameName}!`,
+      title: `¡Has completado el juego ${gameName}!`,
       html: `
         <div style="text-align: center; font-family: Arial, sans-serif;">
           <p style="margin-bottom: 16px; color: #6b7280; font-size: 16px;">¿Qué te pareció esta experiencia?</p>

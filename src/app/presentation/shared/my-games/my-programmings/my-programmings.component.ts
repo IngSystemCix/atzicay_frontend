@@ -387,11 +387,6 @@ export class MyProgrammingsComponent implements OnInit, OnChanges, OnDestroy {
                     <input id="gameUrlInput" type="text" value="${secureUrl}" 
                            class="w-full p-2 text-xs border rounded bg-white mb-2" readonly>
                   </div>
-                  <div class="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
-                    <p class="text-xs text-green-700">
-                      🔒 <strong>URL Segura:</strong> Esta URL utiliza un token de acceso temporal que expira el ${new Date(response.data.expires_at).toLocaleString()}.
-                    </p>
-                  </div>
                   <p class="text-xs text-gray-500 mt-2">
                     Esta URL incluye el contexto de la programación y permitirá al estudiante jugar con todos los intentos y configuraciones establecidas.
                   </p>
