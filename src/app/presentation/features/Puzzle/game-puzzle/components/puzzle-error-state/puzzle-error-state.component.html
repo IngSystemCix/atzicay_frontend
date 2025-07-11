@@ -1,1 +1,16 @@
-<p>puzzle-error-state works!</p>
+<div class="text-center max-w-md">
+  <div class="bg-red-50 border-2 border-red-200 text-red-800 px-6 py-4 rounded-2xl mb-6 shadow-lg">
+    <div class="flex items-center justify-center mb-3">
+      <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+      </svg>
+    </div>
+    <p class="font-bold text-lg mb-2">¡Ups! Algo salió mal</p>
+    <p class="text-sm">{{ errorMessage }}</p>
+  </div>
+  <button (click)="backToDashboard.emit()"
+    class="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
+    ← Volver al Dashboard
+  </button>
+</div>

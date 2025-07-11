@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
@@ -37,7 +37,9 @@ interface PuzzlePiece {
 @Component({
   selector: 'app-game-puzzle',
   standalone: true,
-  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
+  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent ,
+    PuzzleLoadingStateComponent, PuzzleErrorStateComponent, PuzzleClueComponent,
+    PuzzleSidebarComponent, PuzzleBoardComponent, PuzzleStartScreenComponent,PuzzleCompleteScreenComponent ],
   templateUrl: './game-puzzle.component.html',
   styleUrl: './game-puzzle.component.css',
 })
@@ -45,6 +47,8 @@ export class GamePuzzleComponent
   extends BaseAuthenticatedComponent
   implements OnInit, OnDestroy
 {
+  @Input() withProgrammings: boolean = false;
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);

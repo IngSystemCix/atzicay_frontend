@@ -21,6 +21,10 @@ import { HangmanGameComponent } from './presentation/features/hangman/game-hangm
 import { HangmanProgrammingComponent } from './presentation/features/hangman/game-hangman/layouts/hangman-programming/hangman-programming.component';
 import { SolveTheWordGameComponent } from './presentation/features/solveTheWord/game-solve-the-word/layouts/solve-the-word-game/solve-the-word-game.component';
 import { SolveTheWordProgrammingComponent } from './presentation/features/solveTheWord/game-solve-the-word/layouts/solve-the-word-programming/solve-the-word-programming.component';
+import { PuzzleGameComponent } from './presentation/features/Puzzle/game-puzzle/layouts/puzzle-game/puzzle-game.component';
+import { PuzzleProgrammingComponent } from './presentation/features/Puzzle/game-puzzle/layouts/puzzle-programming/puzzle-programming.component';
+import { MemoryGameComponent } from './presentation/features/memory/game-memory/layouts/memory-game/memory-game.component';
+import { MemoryProgrammingComponent } from './presentation/features/memory/game-memory/layouts/memory-programming/memory-programming.component';
 
 export const routes: Routes = [
   {
@@ -111,38 +115,38 @@ export const routes: Routes = [
   // Puzzle
   {
     path: 'juegos/jugar-puzzle/:id',
-    component: GamePuzzleComponent,
+    component: PuzzleGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas"
   },
   {
     path: 'game/puzzle/:id',
-    component: GamePuzzleComponent,
+    component: PuzzleGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas"
   },
   {
     path: 'play/puzzle/:token',
-    component: GamePuzzleComponent, // Cambia a PuzzleProgrammingComponent si tienes uno
+    component: PuzzleProgrammingComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas programado"
   },
   // Memory
   {
     path: 'juegos/jugar-memory/:id',
-    component: GameMemoryComponent,
+    component: MemoryGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Memoria"
   },
   {
     path: 'game/memory/:id',
-    component: GameMemoryComponent,
+    component: MemoryGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Memoria"
   },
   {
     path: 'play/memory/:token',
-    component: GameMemoryComponent, // Cambia a MemoryProgrammingComponent si tienes uno
+    component: MemoryProgrammingComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Memoria programado"
   },

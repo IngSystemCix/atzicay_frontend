@@ -1,0 +1,159 @@
+/* Copia los estilos relevantes del CSS original para este componente */
+.floating-panel {
+  position: fixed;
+  right: -420px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 400px;
+  height: 80vh;
+  max-height: calc(100vh - 200px);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px 0 0 16px;
+  box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-left: 3px solid #9333EA;
+}
+
+.floating-panel.open {
+  right: 0;
+}
+
+.panel-toggle {
+  position: absolute;
+  left: -48px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #9333EA;
+  color: white;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.panel-toggle:hover {
+  background: #7928CA;
+}
+
+.panel-header {
+  padding: 20px 15px 15px 15px;
+  border-bottom: 1px solid rgba(147, 51, 234, 0.1);
+  background: linear-gradient(180deg, rgba(147, 51, 234, 0.05), rgba(147, 51, 234, 0.02));
+  border-radius: 16px 16px 0 0;
+  flex-shrink: 0;
+}
+
+.pieces-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 15px;
+  max-height: calc(80vh - 120px);
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #9333EA #f3f4f6;
+  justify-items: center;
+  align-items: start;
+  background: linear-gradient(180deg, rgba(147, 51, 234, 0.02), rgba(147, 51, 234, 0.01));
+}
+
+.pieces-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.pieces-container::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.pieces-container::-webkit-scrollbar-thumb {
+  background: #9333EA;
+  border-radius: 4px;
+}
+
+.pieces-container::-webkit-scrollbar-thumb:hover {
+  background: #7928CA;
+}
+
+/* Estilos para móviles */
+@media (max-width: 1023px) {
+  .floating-panel {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100vw !important;
+    height: 100px !important;
+    max-height: 100px !important;
+    border-radius: 0 !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+    transition: none !important;
+    border-left: none !important;
+    border-top: 2px solid #9333EA !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(15px) !important;
+    padding: 0 !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .floating-panel.open {
+    bottom: 0 !important;
+  }
+  
+  .panel-header {
+    display: none !important;
+  }
+  
+  .panel-toggle {
+    display: none !important;
+  }
+  
+  .pieces-container {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    padding: 10px 15px !important;
+    height: 100px !important;
+    max-height: 100px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #9333EA #f3f4f6 !important;
+    background: transparent !important;
+    width: 100% !important;
+  }
+  
+  .pieces-container::-webkit-scrollbar {
+    height: 4px !important;
+    width: auto !important;
+  }
+  
+  .pieces-container::-webkit-scrollbar-track {
+    background: rgba(243, 244, 246, 0.3) !important;
+    border-radius: 2px !important;
+  }
+  
+  .pieces-container::-webkit-scrollbar-thumb {
+    background: #9333EA !important;
+    border-radius: 2px !important;
+  }
+}

@@ -1,0 +1,8 @@
+<div class="grid gap-4 max-w-4xl mx-auto" [ngClass]="gridClass">
+  @for (card of cards; track card) {
+    <app-memory-card 
+      [card]="card" 
+      (cardClicked)="onCardClick($event)">
+    </app-memory-card>
+  }
+</div>

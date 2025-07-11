@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
@@ -11,6 +11,8 @@ import { GameUrlService } from '../../../../core/infrastructure/service/game-url
 import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
+import { MemoryBoardComponent } from './components/memory-board/memory-board.component';
+import { MemoryStatusComponent } from './components/memory-status/memory-status.component';
 
 interface Card {
   id: number;
@@ -24,7 +26,10 @@ interface Card {
 
 @Component({
   selector: 'app-game-memory',
-  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
+  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent, FloatingLogoComponent, 
+    GameHeaderComponent,
+    MemoryBoardComponent,
+    MemoryStatusComponent],
   templateUrl: './game-memory.component.html',
   styleUrl: './game-memory.component.css'
 })
@@ -38,6 +43,8 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   private gameUrlService = inject(GameUrlService);
   private gameLoadingService = inject(GameLoadingService);
   
+  @Input() withProgrammings: boolean = false;
+
   cards: Card[] = [];
   flippedCards: Card[] = [];
   matches = 0;
