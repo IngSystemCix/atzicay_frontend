@@ -177,7 +177,26 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   toggleMenu(id: number) {
-    this.menuAbierto = this.menuAbierto === id ? null : id;
+    if (this.menuAbierto === id) {
+      this.menuAbierto = null;
+      document.removeEventListener('click', this.cerrarMenusBound);
+    } else {
+      this.menuAbierto = id;
+      this.cerrarMenusBound = this.cerrarMenusOutside.bind(this);
+      setTimeout(() => {
+        document.addEventListener('click', this.cerrarMenusBound);
+      }, 0);
+    }
+  }
+
+  private cerrarMenusBound: any;
+
+  private cerrarMenusOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-menu')) {
+      this.menuAbierto = null;
+      document.removeEventListener('click', this.cerrarMenusBound);
+    }
   }
 
   verProgramaciones(id: number) {

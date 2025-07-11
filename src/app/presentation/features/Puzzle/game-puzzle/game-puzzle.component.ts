@@ -2,21 +2,22 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
-import {
-  GameConfiguration,
-  PuzzleConfig,
-} from '../../../../core/domain/model/game-configuration.model';
+import { GameConfiguration, PuzzleConfig } from '../../../../core/domain/model/game-configuration.model';
 import { BaseAuthenticatedComponent } from '../../../../core/presentation/shared/base-authenticated.component';
-import {
-  GameAlertService,
-  GameAlertConfig,
-} from '../../../../core/infrastructure/service/game-alert.service';
+import { GameAlertService, GameAlertConfig } from '../../../../core/infrastructure/service/game-alert.service';
 import { GameAudioService } from '../../../../core/infrastructure/service/game-audio.service';
 import { RatingModalService } from '../../../../core/infrastructure/service/rating-modal.service';
 import { GameUrlService } from '../../../../core/infrastructure/service/game-url.service';
 import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
+import { PuzzleLoadingStateComponent } from './components/puzzle-loading-state/puzzle-loading-state.component';
+import { PuzzleErrorStateComponent } from './components/puzzle-error-state/puzzle-error-state.component';
+import { PuzzleClueComponent } from './components/puzzle-clue/puzzle-clue.component';
+import { PuzzleSidebarComponent } from './components/puzzle-sidebar/puzzle-sidebar.component';
+import { PuzzleBoardComponent } from './components/puzzle-board/puzzle-board.component';
+import { PuzzleStartScreenComponent } from './components/puzzle-start-screen/puzzle-start-screen.component';
+import { PuzzleCompleteScreenComponent } from './components/puzzle-complete-screen/puzzle-complete-screen.component';
 
 interface PuzzlePiece {
   id: number;
