@@ -11,7 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, filter, take } from 'rxjs';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { GameInstance } from '../../../core/domain/model/game-instance.model';
 import { AtzicayButtonComponent } from '../../components/atzicay-button/atzicay-button.component';
@@ -19,6 +19,7 @@ import { FilterDropdownComponent } from '../../components/filter-dropdown/filter
 import { GameInstanceService } from '../../../core/infrastructure/api/game-instance.service';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 import { GameLoadingService } from '../../../core/infrastructure/service/game-loading.service';
+import { RedirectService } from '../../../core/infrastructure/service/RedirectService.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,6 +35,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   protected PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
+  private redirectService = inject(RedirectService);
   private subscription = new Subscription();
 
   // Variables para el scroll header
@@ -65,9 +67,18 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private limitSubject = new BehaviorSubject<{ limit: number }>({ limit: 6 });
   
   ngOnInit(): void {
-    // Cargar inmediatamente - el guard ya maneja la autenticación
-    // No esperar tokens adicionales para máxima velocidad
-    this.loadGameInstances();
+    // Esperar a que el userId esté disponible antes de redirigir
+    this.userSessionService.userId$.pipe(
+      filter(userId => !!userId),
+      take(1)
+    ).subscribe(() => {
+      const returnUrl = this.redirectService.getReturnUrl();
+      if (returnUrl) {
+        this.redirectService.redirectAfterLogin();
+        return;
+      }
+      this.loadGameInstances();
+    });
   }
 getTypeIcon(typeValue: string): string {
   const icons: { [key: string]: string } = {

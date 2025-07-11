@@ -7,6 +7,7 @@ import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 import { filter, switchMap, take, tap } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { RedirectService } from '../../../core/infrastructure/service/RedirectService.service';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,8 @@ export class LoginComponent implements OnInit {
     public auth: Auth0Service,
     private router: Router,
     private backendAuthService: AuthService,
-    private userSessionService: UserSessionService
+    private userSessionService: UserSessionService,
+    private redirectService: RedirectService // <--- inyectar servicio
   ) { }
 
   /**
@@ -47,10 +49,11 @@ export class LoginComponent implements OnInit {
         // Usar UserSessionService para manejar el token centralmente
         this.userSessionService.setToken(authResponse.access_token);
         sessionStorage.setItem('user', JSON.stringify(authResponse.user));
+        sessionStorage.setItem('token_jwt', authResponse.access_token); // <--- guardar token con clave correcta
 
-        // Navegación en el siguiente ciclo del event loop para asegurar persistencia
+        // Usar RedirectService para redirigir correctamente
         setTimeout(() => {
-          this.router.navigate(['/dashboard']);
+          this.redirectService.redirectAfterLogin();
         }, 0);
       })
     ).subscribe({

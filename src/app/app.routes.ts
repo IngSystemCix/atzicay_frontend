@@ -17,6 +17,8 @@ import { GameSolveTheWordComponent } from './presentation/features/solveTheWord/
 import { GameReportComponent } from './presentation/shared/my-games/game-report/game-report.component';
 import { optimizedAuthGuard } from './core/infrastructure/guards/optimized-auth.guard';
 import { loginGuard } from './core/infrastructure/guards/login.guard';
+import { HangmanGameComponent } from './presentation/features/hangman/game-hangman/layouts/hangman-game/hangman-game.component';
+import { HangmanProgrammingComponent } from './presentation/features/hangman/game-hangman/layouts/hangman-programming/hangman-programming.component';
 
 export const routes: Routes = [
   {
@@ -88,7 +90,7 @@ export const routes: Routes = [
   
   {
     path: 'juegos/jugar-hangman/:id',
-    component: GameHangmanComponent,
+    component: HangmanGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de ahorcado"
   },
@@ -101,9 +103,9 @@ export const routes: Routes = [
   // Rutas con tokens seguros
   {
     path: 'play/hangman/:token',
-    component: GameHangmanComponent,
+    component: HangmanProgrammingComponent,
     canActivate: [optimizedAuthGuard],
-    title: "Juego de ahorcado"
+    title: "Juego de ahorcado programado"
   },
   {
     path: 'juegos/jugar-puzzle/:id',

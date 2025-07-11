@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
@@ -11,6 +11,12 @@ import { GameUrlService } from '../../../../core/infrastructure/service/game-url
 import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
+import { HangmanDrawingComponent } from './components/hangman-drawing/hangman-drawing.component';
+import { HangmanWordDisplayComponent } from './components/hangman-word-display/hangman-word-display.component';
+import { HangmanKeyboardComponent } from './components/hangman-keyboard/hangman-keyboard.component';
+import { HangmanHintComponent } from './components/hangman-hint/hangman-hint.component';
+import { RedirectService } from '../../../../core/infrastructure/service/RedirectService.service';
+
 interface JuegoState {
   palabraActual: string;
   pistaPalabra: string;
@@ -45,11 +51,20 @@ interface JuegoState {
 @Component({
   selector: 'app-game-hangman',
   standalone: true,
-  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
+  imports: [
+    CommonModule,
+    FloatingLogoComponent,
+    GameHeaderComponent,
+    HangmanDrawingComponent,
+    HangmanWordDisplayComponent,
+    HangmanKeyboardComponent,
+    HangmanHintComponent,
+  ],
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
 })
 export class GameHangmanComponent extends BaseAuthenticatedComponent implements OnInit, OnDestroy {
+  @Input() withProgrammings: boolean = false;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
@@ -58,6 +73,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
   private gameAudioService = inject(GameAudioService);
   private gameUrlService = inject(GameUrlService);
   private gameLoadingService = inject(GameLoadingService);
+  private redirectService: RedirectService = inject(RedirectService);
 
   readonly INTENTOS_INICIALES = 6;
   private intervaloContador: any;
@@ -245,7 +261,7 @@ export class GameHangmanComponent extends BaseAuthenticatedComponent implements 
     // Get userId from authenticated user
     const userId = this.currentUserId;
 
-    this.gameConfigService.getGameConfiguration(id, userId || undefined, false).subscribe({
+    this.gameConfigService.getGameConfiguration(id, userId || undefined, this.withProgrammings).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.state.gameConfig = response.data;
@@ -560,7 +576,9 @@ reiniciarJuego(): void {
     this.mostrarModalTiempoAgotado = false;
     this.mostrarModalJuegoFinalizado = false;
     this.mostrarModalFallo = false;
-    this.router.navigate(['/dashboard']);
+    this.mostrarModalExito = false;
+    this.redirectService.clearReturnUrl();
+    this.router.navigate(['/dashboard'], { replaceUrl: true });
   }
 
   formatearTiempo(): string {

@@ -48,16 +48,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private userSession: UserSessionService,
     private alertService: AlertService,
     private gameTypeCountsService: GameTypeCountsService,
-    private assessmentService: AssessmentService // <-- nuevo servicio
+    private assessmentService: AssessmentService 
   ) {}
 
   ngOnInit(): void {
-    // Primero cargar países, luego el perfil
     this.loadCountries();
     this.loadAuth0UserPicture();
-    // this.simulateRatingData(); // Eliminar simulación
 
-    // Esperar un poco para que los países se carguen antes de inicializar el perfil
     setTimeout(() => {
       this.initializeUserProfile();
     }, 100);

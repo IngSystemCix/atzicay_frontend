@@ -19,6 +19,9 @@ export const loginGuard: CanActivateFn = (route, state) => {
   // Si viene de una URL protegida, guardar la URL para después del login
   if (state && state.url && !state.url.startsWith('/login')) {
     redirectService.setReturnUrl(state.url);
+    // Redirigir al login pero con returnUrl como query param
+    router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+    return false;
   }
 
   return true;

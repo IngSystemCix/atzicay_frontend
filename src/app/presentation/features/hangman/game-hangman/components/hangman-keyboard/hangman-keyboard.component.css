@@ -1,0 +1,17 @@
+  .keyboard {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+    .keyboard-key {
+      /* Estilos base */
+      transition: all 0.3s;
+    }
+    .keyboard-key.correct {
+      background-color: green;
+      color: white;
+    }
+    .keyboard-key.incorrect {
+      background-color: red;
+      color: white;
+    }

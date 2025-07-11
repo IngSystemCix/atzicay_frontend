@@ -1,0 +1,37 @@
+<div class="flex justify-center">
+  <div class="bg-white/95 rounded-3xl p-4 md:p-6 lg:p-8 shadow-2xl border border-white/50 backdrop-blur-sm">
+    <div class="flex justify-center flex-wrap gap-2 md:gap-3 max-w-4xl">
+      @for (letra of word.split(''); let i = $index; track $index) {
+        @if (isSpace(i)) {
+          <!-- Espacios entre palabras -->
+          <div class="w-2 h-12 md:w-4 md:h-16 lg:w-6 lg:h-20 flex items-end justify-center">
+            <div class="w-full h-1 bg-gray-300 rounded-full opacity-50"></div>
+          </div>
+        } @else {
+          <!-- Letras normales - Tamaño responsivo -->
+          <div class="relative">
+            <div
+              class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black h-12 w-12 md:h-16 md:w-16 lg:h-20 lg:w-20 flex items-center justify-center rounded-2xl shadow-lg transition-all duration-500 transform hover:scale-105"
+              [ngClass]="{
+                'bg-gradient-to-br from-purple-100 to-purple-200 border-2 border-purple-300 text-purple-700 scale-110 shadow-xl animate-bounce':
+                  getRevealedCharacter(i) !== '',
+                'bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-gray-300 text-gray-400':
+                  getRevealedCharacter(i) === ''
+              }" style="animation-duration: 0.6s; animation-fill-mode: both">
+              @if (getRevealedCharacter(i) !== '') {
+                <span class="animate-pulse">{{ getRevealedCharacter(i) }}</span>
+              } @else {
+                <span class="text-lg md:text-xl lg:text-2xl">?</span>
+              }
+            </div>
+
+            <!-- Efecto de brillo cuando se revela -->
+            @if (getRevealedCharacter(i) !== '') {
+              <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse"></div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>

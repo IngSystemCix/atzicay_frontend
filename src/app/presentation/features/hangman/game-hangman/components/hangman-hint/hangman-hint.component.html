@@ -1,0 +1,45 @@
+<div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl shadow-2xl border border-yellow-200 overflow-hidden">
+  <div class="p-6">
+    <button (click)="toggleHint()"
+      class="w-full flex items-center justify-center gap-3 focus:outline-none group"
+      aria-label="Mostrar/ocultar pista">
+      <div class="bg-yellow-400 group-hover:bg-yellow-500 rounded-full p-3 transition-colors shadow-lg group-hover:shadow-xl">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white transition-transform duration-300"
+         fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9.663 17h4.673M12 3v1m6.364-.636l-.707.707M21 12h-1M17.66 18.364l-.707-.707M12 21v-1m-6.364-.636l.707-.707M3 12h1m2.343-5.657l-.707-.707" />
+        </svg>
+      </div>
+      <div class="text-center">
+        <h3 class="text-xl font-bold text-yellow-700 mb-1">
+          💡 Pista Disponible
+        </h3>
+        <p class="text-sm text-yellow-600 font-medium">
+          {{ showHint ? "Toca para ocultar" : "Toca para revelar" }}
+        </p>
+      </div>
+    </button>
+
+    @if (showHint) {
+      <div class="mt-6 p-4 bg-white/80 rounded-2xl border border-yellow-200 backdrop-blur-sm"
+        style="animation: fadeInUp 0.4s ease forwards">
+        <div class="flex items-start gap-3">
+          <div class="bg-yellow-100 rounded-full p-2 mt-1">
+            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-yellow-700 mb-1">
+              Pista:
+            </p>
+            <p class="text-lg font-medium text-gray-800 leading-relaxed">
+              {{ hint }}
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
