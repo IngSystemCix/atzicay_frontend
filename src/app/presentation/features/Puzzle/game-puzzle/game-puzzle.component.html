@@ -47,6 +47,7 @@
         <!-- Panel lateral flotante con piezas disponibles -->
         <app-puzzle-sidebar *ngIf="gameStarted && !gameCompleted" [pieces]="pieces" [selectedPiece]="selectedPiece"
           [isPanelOpen]="isPanelOpen" [isMobileView]="isMobileView" [remainingPiecesCount]="remainingPiecesCount"
+          [puzzleImageUrl]="puzzleImageUrl" [rows]="rows" [cols]="cols" [boardSize]="getBoardSize()"
           (pieceClick)="onPieceClick($event)" (dragStart)="onDragStart($event.piece, $event.event)"
           (dragEnd)="onDragEnd($event)" (togglePanel)="togglePanel()"></app-puzzle-sidebar>
 

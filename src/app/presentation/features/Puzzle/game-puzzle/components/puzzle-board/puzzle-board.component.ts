@@ -60,12 +60,35 @@ export class PuzzleBoardComponent {
     return !!piece?.correctPos;
   }
 
-  getCurrentPieceStyle(piece: PuzzlePiece): any {
-    // Implementa la lógica de estilo como en el componente principal
-    // Esto debería moverse a un servicio compartido si se usa en varios lugares
-    return {
-      'background-image': `url('${this.puzzleImageUrl}')`,
-      // ... otros estilos
-    };
-  }
+  // Agregar este método mejorado para getCurrentPieceStyle
+getCurrentPieceStyle(piece: PuzzlePiece): any {
+  const cellWidth = this.boardSize.width / this.cols;
+  const cellHeight = this.boardSize.height / this.rows;
+  
+  // Calcular el tamaño total de la imagen original
+  const totalImageWidth = cellWidth * this.cols;
+  const totalImageHeight = cellHeight * this.rows;
+  
+  // Calcular la posición de recorte para esta pieza
+  const backgroundPositionX = -(piece.col * cellWidth);
+  const backgroundPositionY = -(piece.row * cellHeight);
+  
+  return {
+    'background-image': `url('${this.puzzleImageUrl}')`,
+    'background-size': `${totalImageWidth}px ${totalImageHeight}px`,
+    'background-position': `${backgroundPositionX}px ${backgroundPositionY}px`,
+    'background-repeat': 'no-repeat',
+    'width': '100%',
+    'height': '100%',
+    'display': 'block',
+    'image-rendering': 'crisp-edges'
+  };
+}
+
+// Agregar método para obtener la pieza en una posición específica
+getPieceAt(row: number, col: number): PuzzlePiece | null {
+  return this.pieces.find(
+    (p) => p.inBoard && p.currentRow === row && p.currentCol === col
+  ) || null;
+}
 }

@@ -1,35 +1,46 @@
-<div class="puzzle-board-grid relative rounded-xl overflow-hidden shadow-2xl border-2 border-purple-200/50"
-  [style.width.px]="boardSize.width" 
-  [style.height.px]="boardSize.height"
-  [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
-  [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'"
-  style="display: grid; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(4px);">
-  
-  <!-- Zonas para soltar piezas -->
-  @for (row of rowArray; let rowIndex = $index; track $index) {
-    @for (col of colArray; let colIndex = $index; track $index) {
-      <div class="drop-zone" 
-        [class.occupied]="isPieceAt(rowIndex, colIndex)"
-        [class.correct]="isPieceCorrect(rowIndex, colIndex)" 
-        (dragover)="$event.preventDefault()"
-        (drop)="drop.emit({row: rowIndex, col: colIndex, dragEvent: $event})">
-        
-        @if (isPieceAt(rowIndex, colIndex)) {
-          @for (piece of pieces; track piece.id) {
-            @if (piece.inBoard && piece.currentRow === rowIndex && piece.currentCol === colIndex) {
-              <div class="piece-in-board" 
-                [class.correct]="piece.correctPos"
-                [class.selected]="selectedPiece?.id === piece.id"
-                [style.background-image]="'url(' + puzzleImageUrl + ')'" 
-                [style]="getCurrentPieceStyle(piece)"
-                (click)="pieceClick.emit(piece)" 
-                draggable="true" 
-                (dragstart)="dragStart.emit({piece, event: $event})"
-                (dragend)="dragEnd.emit($event)"></div>
+<div class="puzzle-board-container flex justify-center p-4">
+  <div class="puzzle-board-grid relative rounded-2xl overflow-hidden shadow-2xl border-4 border-purple-300/30 bg-gradient-to-br from-purple-50/20 to-blue-50/20 backdrop-blur-sm"
+    [style.width.px]="boardSize.width" 
+    [style.height.px]="boardSize.height"
+    [style.grid-template-rows]="'repeat(' + rows + ', 1fr)'"
+    [style.grid-template-columns]="'repeat(' + cols + ', 1fr)'"
+    style="display: grid; gap: 0; padding: 0;">
+    
+    <!-- Zonas para soltar piezas -->
+    @for (row of rowArray; let rowIndex = $index; track $index) {
+      @for (col of colArray; let colIndex = $index; track $index) {
+        <div class="drop-zone group relative" 
+          [class.occupied]="isPieceAt(rowIndex, colIndex)"
+          [class.correct]="isPieceCorrect(rowIndex, colIndex)" 
+          (dragover)="$event.preventDefault()"
+          (drop)="drop.emit({row: rowIndex, col: colIndex, dragEvent: $event})">
+          
+          <!-- Indicador de posición vacía -->
+          @if (!isPieceAt(rowIndex, colIndex)) {
+            <div class="empty-slot absolute inset-0 flex items-center justify-center text-purple-300/40 font-bold text-sm transition-all duration-200 group-hover:text-purple-400/60 group-hover:scale-110">
+              {{ rowIndex * cols + colIndex + 1 }}
+            </div>
+          }
+          
+          <!-- Pieza en el board -->
+          @if (isPieceAt(rowIndex, colIndex)) {
+            @for (piece of pieces; track piece.id) {
+              @if (piece.inBoard && piece.currentRow === rowIndex && piece.currentCol === colIndex) {
+                <div class="piece-in-board cursor-grab active:cursor-grabbing transition-all duration-200 hover:z-10" 
+                  [class.correct]="piece.correctPos"
+                  [class.selected]="selectedPiece?.id === piece.id"
+                  [class.wrong-position]="!piece.correctPos"
+                  [ngStyle]="getCurrentPieceStyle(piece)"
+                  (click)="pieceClick.emit(piece)" 
+                  draggable="true" 
+                  (dragstart)="dragStart.emit({piece, event: $event})"
+                  (dragend)="dragEnd.emit($event)">
+                </div>
+              }
             }
           }
-        }
-      </div>
+        </div>
+      }
     }
-  }
+  </div>
 </div>

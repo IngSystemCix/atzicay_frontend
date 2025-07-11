@@ -1,42 +1,73 @@
-<div class="w-full max-w-7xl mx-auto mb-6">
-  <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-3xl shadow-2xl border border-yellow-200 overflow-hidden">
-    <div class="p-6">
-      <button (click)="togglePista.emit()" class="w-full flex items-center justify-center gap-3 focus:outline-none group"
+<div class="w-full max-w-4xl mx-auto mb-8">
+  <div class="relative bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-3xl shadow-2xl border-2 border-amber-200/50 overflow-hidden backdrop-blur-sm">
+    <!-- Decorative background elements -->
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-4 left-4 w-8 h-8 bg-yellow-400 rounded-full animate-pulse"></div>
+      <div class="absolute top-8 right-8 w-6 h-6 bg-amber-400 rounded-full animate-pulse delay-1000"></div>
+      <div class="absolute bottom-6 left-8 w-4 h-4 bg-orange-400 rounded-full animate-pulse delay-2000"></div>
+    </div>
+    
+    <div class="relative p-8">
+      <button (click)="togglePista.emit()" 
+        class="w-full flex items-center justify-center gap-4 focus:outline-none focus:ring-4 focus:ring-amber-200 rounded-2xl p-4 transition-all duration-300 hover:bg-gradient-to-r hover:from-amber-100/50 hover:to-yellow-100/50 group"
         aria-label="Mostrar/ocultar pista">
-        <div class="bg-yellow-400 group-hover:bg-yellow-500 rounded-full p-3 transition-colors shadow-lg group-hover:shadow-xl">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white transition-transform duration-300"
-            [ngClass]="{ 'rotate-180': mostrarPista }" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        
+        <!-- Icon container with enhanced styling -->
+        <div class="relative bg-gradient-to-br from-amber-400 to-yellow-500 group-hover:from-amber-500 group-hover:to-yellow-600 rounded-full p-4 transition-all duration-300 shadow-lg group-hover:shadow-xl group-hover:scale-110 transform">
+          <div class="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-0 group-hover:opacity-100"></div>
+          <svg xmlns="http://www.w3.org/2000/svg" 
+            class="h-7 w-7 text-white transition-all duration-500 transform relative z-10"
+            [ngClass]="{ 'rotate-180 scale-110': mostrarPista }" 
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" 
               d="M9.663 17h4.673M12 3v1m6.364-.636l-.707.707M21 12h-1M17.66 18.364l-.707-.707M12 21v-1m-6.364-.636l.707-.707M3 12h1m2.343-5.657l-.707-.707" />
           </svg>
         </div>
-        <div class="text-center">
-          <h3 class="text-xl font-bold text-yellow-700 mb-1">
+        
+        <!-- Text content with improved typography -->
+        <div class="text-center space-y-2">
+          <h3 class="text-2xl font-bold bg-gradient-to-r from-amber-600 to-yellow-600 bg-clip-text text-transparent">
             💡 Pista del Rompecabezas
           </h3>
-          <p class="text-sm text-yellow-600 font-medium">
+          <p class="text-sm text-amber-600 font-semibold tracking-wide uppercase">
             {{ mostrarPista ? "Toca para ocultar" : "Toca para revelar" }}
           </p>
+          <div class="flex justify-center">
+            <div class="h-0.5 w-16 bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full opacity-50 group-hover:opacity-100 transition-opacity"></div>
+          </div>
         </div>
       </button>
 
+      <!-- Enhanced hint content -->
       @if (mostrarPista) {
-        <div class="mt-6 p-4 bg-white/80 rounded-2xl border border-yellow-200 backdrop-blur-sm"
-          style="animation: fadeInUp 0.4s ease forwards">
-          <div class="flex items-start gap-3">
-            <div class="bg-yellow-100 rounded-full p-2 mt-1">
-              <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-yellow-700 mb-1">
-                Pista del Rompecabezas:
-              </p>
-              <p class="text-lg font-medium text-gray-800 leading-relaxed">
-                {{ clue }}
-              </p>
+        <div class="mt-8 transform" style="animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards">
+          <div class="relative bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-amber-200/50 p-6 shadow-inner">
+            <!-- Decorative corner elements -->
+            <div class="absolute top-2 left-2 w-3 h-3 bg-amber-300 rounded-full opacity-50"></div>
+            <div class="absolute top-2 right-2 w-3 h-3 bg-yellow-300 rounded-full opacity-50"></div>
+            <div class="absolute bottom-2 left-2 w-3 h-3 bg-orange-300 rounded-full opacity-50"></div>
+            <div class="absolute bottom-2 right-2 w-3 h-3 bg-amber-300 rounded-full opacity-50"></div>
+            
+            <div class="flex items-start gap-4">
+              <!-- Enhanced icon -->
+              <div class="bg-gradient-to-br from-amber-100 to-yellow-100 rounded-full p-3 shadow-sm border border-amber-200/50">
+                <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              
+              <!-- Content -->
+              <div class="flex-1 space-y-2">
+                <p class="text-sm font-bold text-amber-700 uppercase tracking-wide">
+                  🔍 Pista del Rompecabezas
+                </p>
+                <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4 border border-amber-200/30">
+                  <p class="text-lg font-semibold text-gray-800 leading-relaxed">
+                    {{ clue }}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,4 +1,60 @@
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
+  50% { 
+    transform: scale(1.05); 
+    opacity: 0.8; 
+  }
+}
+
+/* Animación para el botón */
+.group:hover .animate-ping {
+  animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Efectos de hover mejorados */
+.group:hover {
+  transform: translateY(-2px);
+}
+
+/* Animación para las esquinas decorativas */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(180deg); }
+}
+
+.absolute.opacity-50 {
+  animation: float 3s ease-in-out infinite;
+}
+
+.absolute.opacity-50:nth-child(2) { animation-delay: 0.5s; }
+.absolute.opacity-50:nth-child(3) { animation-delay: 1s; }
+.absolute.opacity-50:nth-child(4) { animation-delay: 1.5s; }
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .p-8 { padding: 1.5rem; }
+  .gap-4 { gap: 0.75rem; }
+  .text-2xl { font-size: 1.5rem; }
+  .p-4 { padding: 0.75rem; }
 }

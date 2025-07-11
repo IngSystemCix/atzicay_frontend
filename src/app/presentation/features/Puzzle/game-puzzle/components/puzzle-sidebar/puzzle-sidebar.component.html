@@ -9,14 +9,14 @@
 
   <!-- Header del panel mejorado -->
   <div class="panel-header">
-    <h3 class="text-purple-700 font-bold text-center flex items-center justify-center gap-2">
+    <h3 class="text-atzicay-heading font-bold text-center flex items-center justify-center gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z" />
       </svg>
       Piezas disponibles
     </h3>
-    <div class="text-center text-sm text-purple-600 mt-2">
+    <div class="text-center text-sm text-atzicay-subheading mt-2">
       {{ remainingPiecesCount }} piezas restantes
     </div>
   </div>
@@ -24,7 +24,7 @@
   <div class="pieces-container">
     @for (piece of pieces; track piece.id) {
       @if (isInSidebar(piece)) {
-        <div class="puzzle-piece sidebar-piece" [style]="getPieceStyle(piece)"
+        <div class="puzzle-piece sidebar-piece flex items-center justify-center relative" [ngStyle]="getPieceStyle(piece)"
           [class.selected]="selectedPiece?.id === piece.id" 
           (click)="pieceClick.emit(piece)" 
           draggable="true"

@@ -137,7 +137,7 @@
     align-items: center !important;
     justify-content: flex-start !important;
     scrollbar-width: thin !important;
-    scrollbar-color: #9333EA #f3f4f6 !important;
+    scrollbar-color: #A294F9 #f3f4f6 !important;
     background: transparent !important;
     width: 100% !important;
   }
@@ -153,7 +153,7 @@
   }
   
   .pieces-container::-webkit-scrollbar-thumb {
-    background: #9333EA !important;
+    background: #A294F9 !important;
     border-radius: 2px !important;
   }
 }

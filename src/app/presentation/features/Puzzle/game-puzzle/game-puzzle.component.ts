@@ -192,6 +192,7 @@ export class GamePuzzleComponent
       return { width: 700, height: 700 };
     }
   }
+  // ...existing code...
   override ngOnDestroy() {
     if (this.timer) {
       clearInterval(this.timer);
@@ -312,9 +313,8 @@ export class GamePuzzleComponent
       this.imageHeight = boardSize.height;
 
       if (this.puzzleConfig.path_img) {
-        this.puzzleImageUrl = this.getFrontendImagePath(
-          this.puzzleConfig.path_img
-        );
+        // Convierte la ruta de la imagen a formato frontend
+        this.puzzleImageUrl = this.getFrontendImagePath(this.puzzleConfig.path_img);
         // Validar que la imagen sea accesible
         this.validatePuzzleImage(this.puzzleImageUrl).then((isValid) => {
           if (!isValid) {
