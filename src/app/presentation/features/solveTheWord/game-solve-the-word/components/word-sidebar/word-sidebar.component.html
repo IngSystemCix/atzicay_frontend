@@ -1,0 +1,94 @@
+<div class="w-full xl:w-80 2xl:w-96">
+  <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-purple-200/50 p-4 md:p-6 sticky top-4">
+    <!-- Header del sidebar -->
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="text-lg md:text-xl font-bold text-purple-700">
+        Palabras
+      </h3>
+      <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-1.5 rounded-full text-sm font-bold shadow-lg">
+        {{ wordsFound }}/{{ totalWords }}
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="mb-6">
+      <div class="flex justify-between text-sm font-semibold text-purple-600 mb-2">
+        <span>Progreso:</span>
+        <span>{{ porcentajeProgreso }}%</span>
+      </div>
+      <div class="w-full h-2.5 bg-purple-200 rounded-full overflow-hidden shadow-inner">
+        <div
+          class="h-full bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 rounded-full transition-all duration-500 shadow-sm"
+          [style.width.%]="porcentajeProgreso"></div>
+      </div>
+    </div>
+
+    <!-- Lista de palabras con scroll optimizado -->
+    <div class="space-y-2 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+      @for (word of words; track word.text) {
+      <div class="group relative p-3 rounded-xl transition-all duration-300 border"
+        [class.bg-purple-50]="!word.found" [class.border-purple-200]="!word.found"
+        [class.bg-gradient-to-r]="word.found" [class.from-green-50]="word.found"
+        [class.to-green-100]="word.found" [class.border-green-300]="word.found"
+        [class.shadow-md]="word.found">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-base transition-all duration-300 truncate"
+              [class.line-through]="word.found" [class.text-green-700]="word.found"
+              [class.text-purple-700]="!word.found">
+              {{ word.text }}
+            </div>
+            <div class="flex items-center gap-2 mt-1">
+              @if (word.found) {
+              <span
+                class="bg-green-100 text-green-600 px-2 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                </svg>
+                Encontrada
+              </span>
+              }
+            </div>
+          </div>
+          @if (word.found) {
+          <div class="ml-3 flex-shrink-0">
+            <div class="bg-green-500 rounded-full p-1.5 shadow-lg">
+              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+              </svg>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Estadísticas del sidebar -->
+    <div class="mt-6 pt-4 border-t border-purple-100">
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="text-center p-2.5 bg-purple-50 rounded-xl border border-purple-200">
+          <div class="text-xl font-bold text-purple-600">
+            {{ totalWords - wordsFound }}
+          </div>
+          <div class="text-xs text-purple-500 font-medium">
+            Restantes
+          </div>
+        </div>
+        <div class="text-center p-2.5 bg-blue-50 rounded-xl border border-blue-200">
+          <div class="text-xl font-bold text-blue-600">
+            {{ formatTime(347 - timeLeft) }}
+          </div>
+          <div class="text-xs text-blue-500 font-medium">Tiempo</div>
+        </div>
+      </div>
+
+      <!-- Botón de reinicio -->
+      <button
+        class="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-2.5 px-4 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 text-sm"
+        (click)="resetGame.emit()">
+        🔄 Reiniciar Juego
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="w-full max-w-2xl">
+  <div class="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-purple-200/50 p-4 md:p-6">
+    <!-- Grilla del juego -->
+    <div class="flex justify-center">
+      <div
+        class="grid gap-0.5 md:gap-1 p-3 md:p-4 bg-gradient-to-br from-purple-25 to-purple-50 rounded-2xl select-none border-2 border-purple-200 shadow-inner"
+        [style.grid-template-columns]="'repeat(' + gridCols + ', minmax(0, 1fr))'"
+        [style.width]="'min(90vw, min(70vh, 500px))'"
+        [style.height]="'min(90vw, min(70vh, 500px))'">
+        @for (row of grid; track $index) { 
+          @for (cell of row; track $index) {
+          <div
+            class="flex items-center justify-center border border-purple-200 rounded text-xs sm:text-sm md:text-base font-bold cursor-pointer transition-all duration-200 aspect-square hover:scale-105 hover:shadow-md"
+            [class.bg-green-200]="cell.isFound" 
+            [class.bg-yellow-300]="selection.includes(cell) && !cell.isFound"
+            [class.text-green-700]="cell.isFound" 
+            [class.text-purple-700]="!cell.isFound && !selection.includes(cell)"
+            [class.text-purple-800]="selection.includes(cell) && !cell.isFound"
+            [class.font-black]="cell.isFound" 
+            [class.border-green-400]="cell.isFound"
+            [class.border-yellow-400]="selection.includes(cell) && !cell.isFound"
+            [class.border-2]="cell.isFound || selection.includes(cell)"
+            [class.shadow-md]="cell.isFound" 
+            [class.bg-white]="!cell.isFound && !selection.includes(cell)"
+            (mousedown)="cellMouseDown.emit(cell)" 
+            (mouseover)="cellMouseOver.emit(cell)"
+            (mouseup)="cellMouseUp.emit()" 
+            (mouseleave)="cellMouseLeave.emit()">
+            {{ cell.letter }}
+          </div>
+          } 
+        }
+      </div>
+    </div>
+  </div>
+</div>

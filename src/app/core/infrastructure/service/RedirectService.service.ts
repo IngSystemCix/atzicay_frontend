@@ -11,12 +11,10 @@ export class RedirectService {
 
   // Guardar URL de retorno
   setReturnUrl(url: string): void {
-    const isGameUrl = url.includes('/play/') || 
-                     url.includes('/juegos/jugar-') || 
-                     url.includes('/game/');
-    
-    if (isGameUrl) {
-      console.log('[RedirectService] Guardando URL de retorno:', url);
+    // Solo guardar si es un juego programado (ruta con /play/ o token)
+    const isProgrammingGame = url.includes('/play/') || /\/play\/solve-the-word\//.test(url) || /\/play\/hangman\//.test(url);
+    if (isProgrammingGame) {
+      console.log('[RedirectService] Guardando URL de retorno (programado):', url);
       sessionStorage.setItem(this.RETURN_URL_KEY, url);
     }
   }

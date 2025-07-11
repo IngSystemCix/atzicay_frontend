@@ -19,6 +19,8 @@ import { optimizedAuthGuard } from './core/infrastructure/guards/optimized-auth.
 import { loginGuard } from './core/infrastructure/guards/login.guard';
 import { HangmanGameComponent } from './presentation/features/hangman/game-hangman/layouts/hangman-game/hangman-game.component';
 import { HangmanProgrammingComponent } from './presentation/features/hangman/game-hangman/layouts/hangman-programming/hangman-programming.component';
+import { SolveTheWordGameComponent } from './presentation/features/solveTheWord/game-solve-the-word/layouts/solve-the-word-game/solve-the-word-game.component';
+import { SolveTheWordProgrammingComponent } from './presentation/features/solveTheWord/game-solve-the-word/layouts/solve-the-word-programming/solve-the-word-programming.component';
 
 export const routes: Routes = [
   {
@@ -87,7 +89,7 @@ export const routes: Routes = [
     ]
   },
 
-  
+  // Hangman
   {
     path: 'juegos/jugar-hangman/:id',
     component: HangmanGameComponent,
@@ -96,28 +98,22 @@ export const routes: Routes = [
   },
   {
     path: 'game/hangman/:id',
-    component: GameHangmanComponent,
+    component: HangmanGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de ahorcado"
   },
-  // Rutas con tokens seguros
   {
     path: 'play/hangman/:token',
     component: HangmanProgrammingComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de ahorcado programado"
   },
+  // Puzzle
   {
     path: 'juegos/jugar-puzzle/:id',
     component: GamePuzzleComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Rompezabezas"
-  },
-  {
-    path: 'juegos/jugar-memory/:id',
-    component: GameMemoryComponent,
-    canActivate: [optimizedAuthGuard],
-    title: "Juego de Memoria"
   },
   {
     path: 'game/puzzle/:id',
@@ -127,18 +123,13 @@ export const routes: Routes = [
   },
   {
     path: 'play/puzzle/:token',
-    component: GamePuzzleComponent,
+    component: GamePuzzleComponent, // Cambia a PuzzleProgrammingComponent si tienes uno
     canActivate: [optimizedAuthGuard],
-    title: "Juego de Rompezabezas"
+    title: "Juego de Rompezabezas programado"
   },
+  // Memory
   {
-    path: 'juegos/puzzle/jugar',
-    component: GamePuzzleComponent,
-    canActivate: [optimizedAuthGuard],
-    title: "Juego de Rompezabezas"
-  },
-  {
-    path: 'juegos/memory/jugar',
+    path: 'juegos/jugar-memory/:id',
     component: GameMemoryComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Memoria"
@@ -151,27 +142,28 @@ export const routes: Routes = [
   },
   {
     path: 'play/memory/:token',
-    component: GameMemoryComponent,
+    component: GameMemoryComponent, // Cambia a MemoryProgrammingComponent si tienes uno
     canActivate: [optimizedAuthGuard],
-    title: "Juego de Memoria"
+    title: "Juego de Memoria programado"
   },
+  // Solve the Word
   {
     path: 'juegos/jugar-solve-the-word/:id',
-    component: GameSolveTheWordComponent,
+    component: SolveTheWordGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Pupiletras"
   },
   {
     path: 'game/solve-the-word/:id',
-    component: GameSolveTheWordComponent,
+    component: SolveTheWordGameComponent,
     canActivate: [optimizedAuthGuard],
     title: "Juego de Pupiletras"
   },
   {
     path: 'play/solve-the-word/:token',
-    component: GameSolveTheWordComponent,
+    component: SolveTheWordProgrammingComponent,
     canActivate: [optimizedAuthGuard],
-    title: "Juego de Pupiletras"
+    title: "Juego de Pupiletras programado"
   },
   {
     path: 'juegos/solve-The-Word/jugar',

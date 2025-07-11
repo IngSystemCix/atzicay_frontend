@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameConfigurationService } from '../../../../core/infrastructure/api/game-configuration.service';
@@ -18,6 +18,9 @@ import { GameUrlService } from '../../../../core/infrastructure/service/game-url
 import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { FloatingLogoComponent } from '../../../components/floating-logo/floating-logo.component';
 import { GameHeaderComponent } from '../../../components/game-header/game-header.component';
+import { GameBoardComponent } from './components/game-board/game-board.component';
+import { WordSidebarComponent } from './components/word-sidebar/word-sidebar.component';
+import { GameLoadingStatesComponent } from './components/game-loading-states/game-loading-states.component';
 
 interface WordCell {
   letter: string;
@@ -35,7 +38,14 @@ interface Word {
 @Component({
   selector: 'app-game-solve-the-word',
   standalone: true,
-  imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent],
+  imports: [
+    CommonModule,
+    FloatingLogoComponent,
+    GameHeaderComponent,
+    GameBoardComponent,
+    WordSidebarComponent,
+    GameLoadingStatesComponent,
+  ],
   templateUrl: './game-solve-the-word.component.html',
   styleUrl: './game-solve-the-word.component.css',
 })
@@ -43,6 +53,8 @@ export class GameSolveTheWordComponent
   extends BaseAuthenticatedComponent
   implements OnInit, OnDestroy
 {
+  @Input() withProgrammings: boolean = false;
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private gameConfigService = inject(GameConfigurationService);
@@ -876,7 +888,19 @@ export class GameSolveTheWordComponent
   }
 
   volverAlDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    // Oculta cualquier modal visual si los tienes definidos
+    if ((this as any).mostrarModalTiempoAgotado !== undefined) (this as any).mostrarModalTiempoAgotado = false;
+    if ((this as any).mostrarModalJuegoFinalizado !== undefined) (this as any).mostrarModalJuegoFinalizado = false;
+    if ((this as any).mostrarModalFallo !== undefined) (this as any).mostrarModalFallo = false;
+    if ((this as any).mostrarModalExito !== undefined) (this as any).mostrarModalExito = false;
+    // Limpia el returnUrl si tienes RedirectService
+    try {
+      const redirectService = (this as any).redirectService;
+      if (redirectService && typeof redirectService.clearReturnUrl === 'function') {
+        redirectService.clearReturnUrl();
+      }
+    } catch {}
+    this.router.navigate(['/dashboard'], { replaceUrl: true });
   }
 
   formatearTiempo(): string {
