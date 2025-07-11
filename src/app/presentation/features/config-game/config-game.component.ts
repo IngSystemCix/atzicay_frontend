@@ -7,11 +7,12 @@ import Swal from 'sweetalert2';
 import { ProgrammingGameService } from '../../../core/infrastructure/api/programming-game.service';
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 import { ProgrammingGame } from '../../../core/domain/model/programming-game.model';
+import { AtzicayButtonComponent } from '../../components/atzicay-button/atzicay-button.component';
 
 @Component({
   selector: 'app-config-game',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, AtzicayButtonComponent],
   templateUrl: './config-game.component.html',
   styleUrl: './config-game.component.css',
 })
@@ -149,6 +150,8 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
       MaximumTime: Number(this.programmingGame.MaximumTime),
     };
 
+    
+    
 
     this.programmingGameService
       .createProgrammingGame(this.gameId, this.currentUserId, data)
@@ -205,6 +208,7 @@ export class ConfigGameComponent implements OnInit, OnDestroy {
   private formatDateTime(date: string, time: string): string {
     return `${date}T${time}`;
   }
+
 
   getMinDateTime(): string {
     const now = new Date();
