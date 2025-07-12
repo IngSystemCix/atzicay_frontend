@@ -135,8 +135,9 @@ export class GameAlertService {
    */
   showGameOverAlert(config: GameAlertConfig): Promise<any> {
     const content = this.getGameOverContent(config);
+    const showRatingButton = !config.userAssessed;
     
-    return Swal.fire({
+    const alertConfig: any = {
       title: '¡Juego Terminado!',
       html: content,
       icon: 'error',
@@ -150,7 +151,15 @@ export class GameAlertService {
       },
       allowOutsideClick: false,
       allowEscapeKey: false
-    });
+    };
+
+    if (showRatingButton) {
+      alertConfig.showDenyButton = true;
+      alertConfig.denyButtonText = '⭐ Valorar juego';
+      alertConfig.denyButtonColor = '#8b5cf6';
+    }
+    
+    return Swal.fire(alertConfig);
   }
 
   /**
