@@ -10,7 +10,9 @@ export interface GameAlertConfig {
   score?: number;
   lives?: number;
   attempts?: number;
+  matches?: number; // Para el juego de memoria
   currentWord?: string; // Para mostrar la palabra actual adivinada
+  userAssessed?: boolean; // Para saber si el usuario ya valoró el juego
 }
 
 @Injectable({
@@ -23,20 +25,29 @@ export class GameAlertService {
    */
   showSuccessAlert(config: GameAlertConfig): Promise<any> {
     const content = this.getSuccessContent(config);
+    const showRatingButton = !config.userAssessed;
     
-    return Swal.fire({
+    const alertConfig: any = {
       title: '¡Felicidades!',
       html: content,
       icon: 'success',
       showCancelButton: true,
       confirmButtonText: '🎮 Jugar de nuevo',
-      cancelButtonText: '🏠 Ir al Dashboard',
+      cancelButtonText: '🏠 Volver al Inicio',
       confirmButtonColor: '#10b981',
       cancelButtonColor: '#6b7280',
       customClass: {
         popup: 'animated bounceIn',
       }
-    });
+    };
+
+    if (showRatingButton) {
+      alertConfig.showDenyButton = true;
+      alertConfig.denyButtonText = '⭐ Valorar juego';
+      alertConfig.denyButtonColor = '#8b5cf6';
+    }
+    
+    return Swal.fire(alertConfig);
   }
 
   /**
@@ -44,14 +55,15 @@ export class GameAlertService {
    */
   showTimeUpAlert(config: GameAlertConfig): Promise<any> {
     const content = this.getTimeUpContent(config);
+    const showRatingButton = !config.userAssessed;
     
-    return Swal.fire({
+    const alertConfig: any = {
       title: '¡Tiempo agotado!',
       html: content,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '🔄 Intentar de nuevo',
-      cancelButtonText: '🏠 Ir al Dashboard',
+      cancelButtonText: '🏠 Volver al Inicio',
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
       customClass: {
@@ -59,7 +71,15 @@ export class GameAlertService {
       },
       allowOutsideClick: false,
       allowEscapeKey: false
-    });
+    };
+
+    if (showRatingButton) {
+      alertConfig.showDenyButton = true;
+      alertConfig.denyButtonText = '⭐ Valorar juego';
+      alertConfig.denyButtonColor = '#8b5cf6';
+    }
+    
+    return Swal.fire(alertConfig);
   }
 
   /**
@@ -74,7 +94,7 @@ export class GameAlertService {
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: '💪 Continuar',
-      cancelButtonText: '🏠 Ir al Dashboard',
+      cancelButtonText: '🏠 Volver al Inicio',
       confirmButtonColor: '#f59e0b',
       cancelButtonColor: '#6b7280',
       customClass: {
@@ -122,7 +142,7 @@ export class GameAlertService {
       icon: 'error',
       showCancelButton: true,
       confirmButtonText: '🔄 Jugar de nuevo',
-      cancelButtonText: '🏠 Ir al Dashboard',
+      cancelButtonText: '🏠 Volver al Inicio',
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
       customClass: {
@@ -242,49 +262,44 @@ export class GameAlertService {
         return `
           <div style="text-align: center;">
             <div style="font-size: 4rem; margin-bottom: 1rem;">${gameIcon}</div>
-            <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+            <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #10b981; font-weight: bold;">
               ¡Has completado el rompecabezas!
             </p>
-            ${config.timeUsed ? 
-              `<p style="font-size: 1rem; color: #6b7280;">
-                Tiempo de resolución: <strong>${config.timeUsed}</strong>
-              </p>` : ''}
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 1.5rem; border-radius: 1rem; margin: 1rem 0; border: 2px solid #bbf7d0;">
+              ${config.timeUsed ? 
+                `<p style="font-size: 1rem; color: #166534; margin-bottom: 0.5rem;">
+                  ⏱️ Tiempo de resolución: <strong>${config.timeUsed}</strong>
+                </p>` : ''}
+              <p style="font-size: 0.9rem; color: #15803d; margin-top: 0.5rem;">
+                ¡Excelente trabajo resolviendo el puzzle! 🧩✨
+              </p>
+            </div>
           </div>
         `;
       
       case 'memory':
-        return `
-          <div style="text-align: center;">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">${gameIcon}</div>
-            <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-              ¡Has encontrado todas las parejas!
-            </p>
-            ${config.timeUsed ? 
-              `<p style="font-size: 1rem; color: #6b7280;">
-                Tiempo total: <strong>${config.timeUsed}</strong>
-              </p>` : ''}
-            ${config.attempts ? 
-              `<p style="font-size: 1rem; color: #6b7280;">
-                Intentos realizados: <strong>${config.attempts}</strong>
-              </p>` : ''}
-          </div>
-        `;
+        return this.getMemorySuccessContent(config);
       
       case 'solve-the-word':
         return `
           <div style="text-align: center;">
             <div style="font-size: 4rem; margin-bottom: 1rem;">${gameIcon}</div>
-            <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+            <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #10b981; font-weight: bold;">
               ¡Has encontrado todas las palabras!
             </p>
-            ${config.timeUsed ? 
-              `<p style="font-size: 1rem; color: #6b7280;">
-                Tiempo usado: <strong>${config.timeUsed}</strong>
-              </p>` : ''}
-            ${config.wordsCompleted && config.totalWords ? 
-              `<p style="font-size: 1rem; color: #6b7280;">
-                Palabras encontradas: <strong>${config.wordsCompleted}/${config.totalWords}</strong>
-              </p>` : ''}
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); padding: 1.5rem; border-radius: 1rem; margin: 1rem 0; border: 2px solid #bbf7d0;">
+              ${config.timeUsed ? 
+                `<p style="font-size: 1rem; color: #166534; margin-bottom: 0.5rem;">
+                  ⏱️ Tiempo usado: <strong>${config.timeUsed}</strong>
+                </p>` : ''}
+              ${config.wordsCompleted && config.totalWords ? 
+                `<p style="font-size: 1rem; color: #166534; margin-bottom: 0.5rem;">
+                  🎯 Palabras encontradas: <strong>${config.wordsCompleted}/${config.totalWords}</strong>
+                </p>` : ''}
+              <p style="font-size: 0.9rem; color: #15803d; margin-top: 0.5rem;">
+                ¡Excelente trabajo! 🎉
+              </p>
+            </div>
           </div>
         `;
       
@@ -323,12 +338,43 @@ export class GameAlertService {
           <div style="text-align: center;">
             <div style="font-size: 4rem; margin-bottom: 1rem;">⏰</div>
             <p style="font-size: 1.2rem; margin-bottom: 1rem;">
-              Se acabó el tiempo para encontrar las palabras.
+              El tiempo se agotó antes de encontrar todas las palabras.
             </p>
             ${config.wordsCompleted && config.totalWords ? 
-              `<p style="font-size: 1rem; color: #6b7280;">
-                Palabras encontradas: <strong>${config.wordsCompleted}/${config.totalWords}</strong>
-              </p>` : ''}
+              `<div style="background: #f3f4f6; padding: 1rem; border-radius: 1rem; margin: 1rem 0;">
+                <p style="font-size: 1rem; color: #374151; margin-bottom: 0.5rem;">Progreso alcanzado:</p>
+                <p style="font-size: 1.4rem; font-weight: bold; color: ${config.wordsCompleted === config.totalWords ? '#10b981' : '#f59e0b'};">
+                  ${config.wordsCompleted} de ${config.totalWords} palabras encontradas
+                </p>
+                <div style="width: 100%; background: #e5e7eb; border-radius: 1rem; height: 8px; margin-top: 0.5rem;">
+                  <div style="width: ${Math.round((config.wordsCompleted / config.totalWords) * 100)}%; background: ${config.wordsCompleted === config.totalWords ? '#10b981' : '#f59e0b'}; height: 100%; border-radius: 1rem;"></div>
+                </div>
+              </div>` : ''}
+            <p style="font-size: 0.9rem; color: #6b7280; margin-top: 1rem;">
+              ¡No te desanimes! Puedes intentarlo de nuevo o valorar tu experiencia.
+            </p>
+          </div>
+        `;
+      
+      case 'puzzle':
+        return `
+          <div style="text-align: center;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">⏰</div>
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">
+              El tiempo se agotó antes de completar el rompecabezas.
+            </p>
+            <div style="background: #f3f4f6; padding: 1rem; border-radius: 1rem; margin: 1rem 0;">
+              <p style="font-size: 1rem; color: #374151; margin-bottom: 0.5rem;">Estado del rompecabezas:</p>
+              <p style="font-size: 1.1rem; font-weight: bold; color: #f59e0b;">
+                🧩 Puzzle incompleto
+              </p>
+              <p style="font-size: 0.9rem; color: #6b7280; margin-top: 0.5rem;">
+                ¡Estabas tan cerca! Inténtalo de nuevo.
+              </p>
+            </div>
+            <p style="font-size: 0.9rem; color: #6b7280; margin-top: 1rem;">
+              ¡No te desanimes! Puedes intentarlo de nuevo o valorar tu experiencia.
+            </p>
           </div>
         `;
       
@@ -541,5 +587,36 @@ export class GameAlertService {
         }
       }, 1000);
     }
+  }
+
+  /**
+   * Contenido para completar juego de memoria
+   */
+  private getMemorySuccessContent(config: GameAlertConfig): string {
+    return `
+      <div class="text-center space-y-4">
+        <div class="text-4xl mb-4">🧠✨</div>
+        <div class="text-lg font-semibold text-gray-800">
+          ¡Increíble memoria! Has encontrado todas las parejas
+        </div>
+        <div class="bg-blue-50 rounded-lg p-4 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">⏱️ Tiempo:</span>
+            <span class="font-bold text-blue-600">${config.timeUsed}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">🔄 Intentos realizados:</span>
+            <span class="font-bold text-green-600">${config.attempts || 0}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">🎯 Parejas encontradas:</span>
+            <span class="font-bold text-purple-600">${config.matches || 0}</span>
+          </div>
+        </div>
+        <div class="text-sm text-gray-600">
+          ¡Tu memoria y concentración son excepcionales! 🌟
+        </div>
+      </div>
+    `;
   }
 }

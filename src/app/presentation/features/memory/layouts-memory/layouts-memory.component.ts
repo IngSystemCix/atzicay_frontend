@@ -10,7 +10,7 @@ import {
   Tab,
 } from '../../../components/atzicay-tabs/atzicay-tabs.component';
 import { Platform } from '@angular/cdk/platform';
-import { GenericConfigGameComponent } from '../../../shared/components/generic-config-game/generic-config-game.component';
+import { GenericConfigGameComponent } from '../../../components/generic-config-game/generic-config-game.component';
 
 interface CardPair {
   id: number;

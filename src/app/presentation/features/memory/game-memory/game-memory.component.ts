@@ -182,13 +182,24 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       gameType: 'memory',
       gameName: 'Memoria',
       timeUsed,
-      attempts: this.attempts
+      attempts: this.attempts,
+      matches: this.matches,
+      userAssessed: this.userAssessed
     };
+    
     const result = await this.gameAlertService.showSuccessAlert(config);
+    
     if (result.isConfirmed) {
+      // Jugar de nuevo - reiniciar el juego
+      this.resetGame();
+    } else if (result.isDismissed && result.dismiss === 'cancel') {
+      // Ir al Dashboard
       this.volverAlDashboard();
+    } else if (result.isDenied) {
+      // Usuario quiere valorar el juego
+      await this.showRatingAlert();
     }
-    // Si se descarta, NO redirigir automáticamente
+    // Si se descarta de otra forma, NO redirigir automáticamente
   }
 
   private async showRatingAlert(): Promise<void> {
@@ -201,7 +212,8 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
       const result = await this.ratingModalService.showRatingModal(
         gameInstanceId, 
         this.currentUserId, 
-        gameName
+        gameName,
+        'completed' // Contexto específico para completado
       );
       
       if (result) {
@@ -382,17 +394,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
         this.gameCompleted = true;
         clearInterval(this.timerInterval);
         
-        // Mostrar modal de valoración si el usuario no ha evaluado el juego
-        if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-          await this.showRatingAlert();
-        } else {
-          console.log('❌ Modal de valoración NO se muestra porque:', {
-            userAssessed: this.userAssessed,
-            gameAssessed: this.gameConfig?.assessed
-          });
-        }
-        
-        // Mostrar modal de éxito
+        // Mostrar modal de éxito con botón de valoración opcional
         this.showSuccessAlert();
       }
     } else {

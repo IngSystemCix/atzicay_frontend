@@ -12,7 +12,7 @@ import { CreateGameService } from '../../../../core/infrastructure/api/create-ga
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { Platform } from '@angular/cdk/platform';
-import {GenericConfigGameComponent} from '../../../shared/components/generic-config-game/generic-config-game.component';
+import {GenericConfigGameComponent} from '../../../components/generic-config-game/generic-config-game.component';
 @Component({
   selector: 'app-layouts-puzzle',
   imports: [CommonModule, FormsModule, ReactiveFormsModule, GenericConfigGameComponent],

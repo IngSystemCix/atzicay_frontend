@@ -16,19 +16,39 @@ export class RatingModalService {
    * @param gameInstanceId ID de la instancia del juego
    * @param userId ID del usuario
    * @param gameName Nombre del juego para mostrar en el modal
+   * @param context Contexto del juego: 'completed' | 'timeup' | 'general'
    * @returns Promise<boolean> - true si se envió la valoración, false si se canceló
    */
-  async showRatingModal(gameInstanceId: number, userId: number, gameName: string = 'juego'): Promise<boolean> {
+  async showRatingModal(gameInstanceId: number, userId: number, gameName: string = 'juego', context: 'completed' | 'timeup' | 'general' = 'general'): Promise<boolean> {
     
     this.audioService.playButtonClick();
     
     let selectedRating = 0;
     
+    // Definir el mensaje según el contexto
+    let titleMessage = '';
+    let descriptionMessage = '';
+    
+    switch (context) {
+      case 'completed':
+        titleMessage = `¡Has completado el juego ${gameName}!`;
+        descriptionMessage = '¿Qué te pareció esta experiencia?';
+        break;
+      case 'timeup':
+        titleMessage = `¡Valora tu experiencia con ${gameName}!`;
+        descriptionMessage = 'Aunque se acabó el tiempo, ¿qué te pareció el juego?';
+        break;
+      default:
+        titleMessage = `¡Valora tu experiencia con ${gameName}!`;
+        descriptionMessage = '¿Qué te pareció esta experiencia?';
+        break;
+    }
+    
     const { value: result } = await Swal.fire({
-      title: `¡Has completado el juego ${gameName}!`,
+      title: titleMessage,
       html: `
         <div style="text-align: center; font-family: Arial, sans-serif;">
-          <p style="margin-bottom: 16px; color: #6b7280; font-size: 16px;">¿Qué te pareció esta experiencia?</p>
+          <p style="margin-bottom: 16px; color: #6b7280; font-size: 16px;">${descriptionMessage}</p>
           
           <div style="padding: 16px 0; margin-bottom: 24px;" id="stars-container">
             <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 8px;">

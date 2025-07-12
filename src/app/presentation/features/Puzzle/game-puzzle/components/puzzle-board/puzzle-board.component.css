@@ -8,7 +8,7 @@
   overflow: hidden;
   box-shadow: none;
   background: #fff;
-  border: 2px solid #CDC1FE;
+  border: 1px solid #CDC1FE;
   position: relative;
 }
 
@@ -45,19 +45,15 @@
 
 .drop-zone:hover {
   background: #fff;
-  border-color: #9333EA;
-  border-style: solid;
   transform: none;
   box-shadow: none;
 }
 
 .drop-zone.occupied {
-  border: 1px solid #9333EA;
   background: transparent;
 }
 
 .drop-zone.correct {
-  border: 1px solid #22c55e;
   background: #fff;
   box-shadow: none;
 }
@@ -86,7 +82,6 @@
   transform: none !important;
   z-index: 10 !important;
   box-shadow: none !important;
-  border-color: #9333EA !important;
 }
 
 .piece-in-board.correct {
@@ -95,7 +90,7 @@
 }
 
 .piece-in-board.wrong-position {
-  border: 2px solid #ef4444 !important;
+  border: 2px solid #e31515 !important;
   box-shadow: none !important;
 }
 
@@ -103,7 +98,7 @@
   box-shadow: none !important;
   z-index: 20 !important;
   transform: none !important;
-  border-color: #9333EA !important;
+  border-color: #e31515 !important;
 }
 
 .correct-overlay {

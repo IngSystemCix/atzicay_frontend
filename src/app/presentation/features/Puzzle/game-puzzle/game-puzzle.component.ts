@@ -17,7 +17,6 @@ import { PuzzleClueComponent } from './components/puzzle-clue/puzzle-clue.compon
 import { PuzzleSidebarComponent } from './components/puzzle-sidebar/puzzle-sidebar.component';
 import { PuzzleBoardComponent } from './components/puzzle-board/puzzle-board.component';
 import { PuzzleStartScreenComponent } from './components/puzzle-start-screen/puzzle-start-screen.component';
-import { PuzzleCompleteScreenComponent } from './components/puzzle-complete-screen/puzzle-complete-screen.component';
 
 interface PuzzlePiece {
   id: number;
@@ -39,7 +38,7 @@ interface PuzzlePiece {
   standalone: true,
   imports: [CommonModule, FloatingLogoComponent, GameHeaderComponent ,
     PuzzleLoadingStateComponent, PuzzleErrorStateComponent, PuzzleClueComponent,
-    PuzzleSidebarComponent, PuzzleBoardComponent, PuzzleStartScreenComponent,PuzzleCompleteScreenComponent ],
+    PuzzleSidebarComponent, PuzzleBoardComponent, PuzzleStartScreenComponent ],
   templateUrl: './game-puzzle.component.html',
   styleUrl: './game-puzzle.component.css',
 })
@@ -795,40 +794,63 @@ export class GamePuzzleComponent
       gameType: 'puzzle',
       gameName: 'Rompecabezas',
       timeUsed,
+      userAssessed: this.userAssessed || (this.gameConfig?.assessed ?? false),
     };
-    const result = await this.gameAlertService.showSuccessAlert(config);
-    if (result.isConfirmed) {
-      this.volverAlDashboard();
+    
+    let shouldShowAlert = true;
+    
+    while (shouldShowAlert) {
+      const result = await this.gameAlertService.showSuccessAlert(config);
+      
+      if (result.isConfirmed) {
+        // Jugar de nuevo
+        this.restartGame();
+        shouldShowAlert = false;
+      } else if (result.isDenied) {
+        // Valorar juego
+        await this.showRatingAlert('completed');
+        // Actualizar la configuración para que no se muestre nuevamente el botón
+        config.userAssessed = true;
+        // Continuar el bucle para mostrar el modal nuevamente
+      } else {
+        // Ir al Dashboard (isDismissed o cualquier otro caso)
+        this.volverAlDashboard();
+        shouldShowAlert = false;
+      }
     }
-    // Si se descarta, NO redirigir automáticamente
   }
 
   private async showTimeUpAlert(): Promise<void> {
-    // Mostrar modal de valoración si el usuario no ha evaluado el juego
-    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      await this.showRatingAlert();
-    } else {
-      console.log('❌ Modal de valoración NO se muestra porque:', {
-        userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed,
-      });
-    }
-
     const config: GameAlertConfig = {
       gameType: 'puzzle',
       gameName: 'Rompecabezas',
+      userAssessed: this.userAssessed || (this.gameConfig?.assessed ?? false),
     };
 
-    const result = await this.gameAlertService.showTimeUpAlert(config);
-    if (result.isConfirmed) {
-      this.restartGame();
-    } else if (result.isDismissed) {
-      // Si presiona "Ir al Dashboard" o cierra el modal
-      this.volverAlDashboard();
+    let shouldShowAlert = true;
+    
+    while (shouldShowAlert) {
+      const result = await this.gameAlertService.showTimeUpAlert(config);
+      
+      if (result.isConfirmed) {
+        // Intentar de nuevo
+        this.restartGame();
+        shouldShowAlert = false;
+      } else if (result.isDenied) {
+        // Valorar juego
+        await this.showRatingAlert('timeup');
+        // Actualizar la configuración para que no se muestre nuevamente el botón
+        config.userAssessed = true;
+        // Continuar el bucle para mostrar el modal nuevamente
+      } else {
+        // Ir al Dashboard (isDismissed o cualquier otro caso)
+        this.volverAlDashboard();
+        shouldShowAlert = false;
+      }
     }
   }
 
-  private async showRatingAlert(): Promise<void> {
+  private async showRatingAlert(context: 'completed' | 'timeup' | 'general' = 'general'): Promise<void> {
     if (!this.gameConfig || !this.currentUserId) return;
 
     try {
@@ -838,20 +860,20 @@ export class GamePuzzleComponent
       const result = await this.ratingModalService.showRatingModal(
         gameInstanceId,
         this.currentUserId,
-        gameName
+        gameName,
+        context
       );
 
       if (result) {
         this.userAssessed = true;
+        // Actualizar también la configuración del juego para evitar mostrar nuevamente
+        if (this.gameConfig) {
+          this.gameConfig.assessed = true;
+        }
       }
     } catch (error) {
       console.error('Error al mostrar modal de valoración:', error);
     }
-  }
-
-  private showRatingModal() {
-    // Método legacy - usar showRatingAlert en su lugar
-    this.showRatingAlert();
   }
 
   isPieceAt(row: number, col: number): boolean {
@@ -1107,12 +1129,7 @@ export class GamePuzzleComponent
       clearInterval(this.timer);
     }
 
-    // Mostrar modal de valoración si el usuario no ha evaluado el juego
-    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      this.showRatingAlert();
-    }
-
-    // Mostrar alerta de tiempo agotado
+    // Mostrar alerta de tiempo agotado (que incluye la opción de valorar)
     this.showTimeUpAlert();
   }
 

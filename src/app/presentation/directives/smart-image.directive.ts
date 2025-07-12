@@ -8,8 +8,7 @@ import { CacheBustingService } from '../../core/infrastructure/service/cache-bus
 export class SmartImageDirective implements OnInit {
   @Input() appSmartImage: string = '';
   @Input() fallbackImage: string = 'assets/default-game.png';
-  @Input() isDynamic: boolean = false; // Para imágenes de storage que pueden cambiar
-
+  @Input() isDynamic: boolean = false; 
   private el = inject(ElementRef);
   private renderer = inject(Renderer2);
   private cacheBustingService = inject(CacheBustingService);
@@ -24,12 +23,10 @@ export class SmartImageDirective implements OnInit {
       return;
     }
 
-    // Aplicar cache busting inteligente
     const imageUrl = this.isDynamic 
       ? this.cacheBustingService.applyGameImageCacheBusting(this.appSmartImage)
       : this.cacheBustingService.applyCacheBusting(this.appSmartImage);
 
-    // Verificar que la imagen existe antes de aplicarla
     this.cacheBustingService.preloadAndVerifyImage(imageUrl)
       .then((verifiedUrl) => {
         this.renderer.setAttribute(this.el.nativeElement, 'src', verifiedUrl);

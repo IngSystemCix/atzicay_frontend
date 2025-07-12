@@ -57,10 +57,6 @@
           [gameStarted]="gameStarted" [boardSize]="getBoardSize()" (pieceClick)="onPieceClick($event)"
           (dragStart)="onDragStart($event.piece, $event.event)" (dragEnd)="onDragEnd($event)"
           (drop)="onDrop($event.row, $event.col, $event.dragEvent)"></app-puzzle-board>
-
-        <!-- Pantalla de victoria -->
-        <app-puzzle-complete-screen *ngIf="gameCompleted" [timeElapsed]="timeElapsed" [totalPieces]="totalPieces"
-          (backToDashboard)="volverAlDashboard()"></app-puzzle-complete-screen>
       </div>
     </div>
   </ng-container>

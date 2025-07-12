@@ -181,7 +181,7 @@ getTypeIcon(typeValue: string): string {
     { value: 'hangman', label: 'Ahorcado' },
     { value: 'memory', label: 'Memoria' },
     { value: 'puzzle', label: 'Rompecabezas' },
-    { value: 'solve_the_word', label: 'Sopa de letras' },
+    { value: 'solve_the_word', label: 'Pupiletras' },
   ];
 
   difficultyLevels = [

@@ -7,13 +7,14 @@ import { UserSessionService } from '../../../../core/infrastructure/service/user
 import { MyGame } from '../../../../core/domain/model/my-game.model';
 import { UpdateVisibilityService } from '../../../../core/infrastructure/api/update-visibility.service';
 import { GamePrivacyService } from '../../../../core/infrastructure/api/game-privacy.service';
+import { EditGameModalComponent } from '../edit-game-modal/edit-game-modal.component';
 import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-juegos-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, EditGameModalComponent],
   templateUrl: './juegos-lista.component.html',
   styleUrl: './juegos-lista.component.css',
 })
@@ -35,6 +36,10 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
   // Variables para el modal de configuración
   showConfigModal = false;
   selectedGameId: number | null = null;
+
+  // Variables para el modal de edición
+  showEditModal = false;
+  selectedGame: MyGame | null = null;
 
   constructor(
     private myGamesService: MyGamesService,
@@ -225,12 +230,29 @@ export class JuegosListaComponent implements OnInit, OnChanges, OnDestroy {
 
   editarJuego(id: number) {
     this.menuAbierto = null;
+    const juego = this.juegos.find(j => j.game_instance_id === id);
+    if (juego) {
+      this.selectedGame = juego;
+      this.showEditModal = true;
+    }
   }
 
   cerrarModalConfiguracion() {
     this.showConfigModal = false;
     this.selectedGameId = null;
     document.removeEventListener('click', this.cerrarMenus.bind(this));
+  }
+
+  // Nuevos métodos para el modal de edición
+  cerrarModalEdicion() {
+    this.showEditModal = false;
+    this.selectedGame = null;
+  }
+
+  onGameEditSaved() {
+    this.mostrarMensaje('Juego actualizado correctamente', 'success');
+    this.cargarJuegos();
+    this.cerrarModalEdicion();
   }
 
   onConfigurationSaved() {

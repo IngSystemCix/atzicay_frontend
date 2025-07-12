@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AtzicayTabsComponent } from '../../../components/atzicay-tabs/atzicay-tabs.component';
 import { AtzicayButtonComponent } from '../../../components/atzicay-button/atzicay-button.component';
-import { GenericConfigGameComponent } from '../../../shared/components/generic-config-game/generic-config-game.component';
+import { GenericConfigGameComponent } from '../../../components/generic-config-game/generic-config-game.component';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';

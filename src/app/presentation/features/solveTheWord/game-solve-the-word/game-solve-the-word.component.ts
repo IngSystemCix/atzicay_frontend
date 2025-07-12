@@ -71,6 +71,7 @@ export class GameSolveTheWordComponent
   wordsFound = 0;
   totalWords = 0;
   timeLeft = 347; // default
+  originalTimeLimit = 347; // Para calcular el tiempo usado
   timer: any;
   selection: WordCell[] = [];
   directions = [
@@ -211,9 +212,12 @@ export class GameSolveTheWordComponent
         data.settings.find((s: GameSetting) => s.key.toLowerCase() === key)
           ?.value;
       this.timeLeft = parseInt(getSetting('time_limit') || '347', 10);
+      this.originalTimeLimit = this.timeLeft; // Guardar el tiempo original
       this.fontFamily = getSetting('font_family') || 'Arial';
       this.backgroundColor = getSetting('background_color') || '#fff';
       this.fontColor = getSetting('font_color') || '#000';
+    } else {
+      // Si no hay settings, usar valores por defecto
       this.originalTimeLimit = this.timeLeft;
     }
 
@@ -245,8 +249,6 @@ export class GameSolveTheWordComponent
     this.startTimer();
   }
 
-  originalTimeLimit = 347;
-
   initializeGrid() {
     this.grid = [];
     for (let i = 0; i < this.gridRows; i++) {
@@ -265,32 +267,40 @@ export class GameSolveTheWordComponent
   private async showWinAlert() {
     this.gameAudioService.playWordSearchAllWordsFound();
 
-    // Mostrar modal de valoración solo si el usuario no ha evaluado el juego
-    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      await this.showRatingAlert();
-    } else {
-      console.log('❌ Modal de valoración NO se muestra porque:', {
-        userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed,
-      });
-    }
-
-    const timeUsed = this.formatTime(347 - this.timeLeft);
+    const timeUsed = this.formatTime(this.originalTimeLimit - this.timeLeft);
     const config: GameAlertConfig = {
       gameType: 'solve-the-word',
       gameName: 'Pupiletras',
       timeUsed,
       wordsCompleted: this.wordsFound,
       totalWords: this.totalWords,
+      userAssessed: this.userAssessed || (this.gameConfig?.assessed ?? false),
     };
-    const result = await this.gameAlertService.showSuccessAlert(config);
-    if (result.isConfirmed) {
-      this.volverAlDashboard();
+    
+    let shouldShowAlert = true;
+    
+    while (shouldShowAlert) {
+      const result = await this.gameAlertService.showSuccessAlert(config);
+      
+      if (result.isConfirmed) {
+        // Jugar de nuevo
+        this.resetGame();
+        shouldShowAlert = false;
+      } else if (result.isDenied) {
+        // Valorar juego
+        await this.showRatingAlert('completed');
+        // Actualizar la configuración para que no se muestre nuevamente el botón
+        config.userAssessed = true;
+        // Continuar el bucle para mostrar el modal nuevamente
+      } else {
+        // Ir al Dashboard (isDismissed o cualquier otro caso)
+        this.volverAlDashboard();
+        shouldShowAlert = false;
+      }
     }
-    // Si se descarta, NO redirigir automáticamente
   }
 
-  private async showRatingAlert(): Promise<void> {
+  private async showRatingAlert(context: 'completed' | 'timeup' | 'general' = 'general'): Promise<void> {
     if (!this.gameConfig || !this.currentUserId) return;
 
     try {
@@ -300,11 +310,16 @@ export class GameSolveTheWordComponent
       const result = await this.ratingModalService.showRatingModal(
         gameInstanceId,
         this.currentUserId,
-        gameName
+        gameName,
+        context
       );
 
       if (result) {
         this.userAssessed = true;
+        // Actualizar también la configuración del juego para evitar mostrar nuevamente
+        if (this.gameConfig) {
+          this.gameConfig.assessed = true;
+        }
       }
     } catch (error) {
       console.error('Error al mostrar modal de valoración:', error);
@@ -314,42 +329,35 @@ export class GameSolveTheWordComponent
   private async showTimeUpAlert() {
     this.gameAudioService.playTimeUp();
 
-    // Mostrar modal de valoración si el usuario no ha evaluado el juego
-    if (!this.userAssessed && this.gameConfig && !this.gameConfig.assessed) {
-      await this.showRatingAlert();
-    } else {
-      console.log('❌ Modal de valoración NO se muestra porque:', {
-        userAssessed: this.userAssessed,
-        gameAssessed: this.gameConfig?.assessed,
-      });
-    }
-
     const config: GameAlertConfig = {
       gameType: 'solve-the-word',
       gameName: 'Pupiletras',
       wordsCompleted: this.wordsFound,
       totalWords: this.totalWords,
+      userAssessed: this.userAssessed || (this.gameConfig?.assessed ?? false),
     };
 
-    const result = await this.gameAlertService.showTimeUpAlert(config);
-    if (result.isConfirmed) {
-      this.resetGame();
-    } else if (result.isDismissed) {
-      // Si presiona "Ir al Dashboard" o cierra el modal
-      this.volverAlDashboard();
+    let shouldShowAlert = true;
+    
+    while (shouldShowAlert) {
+      const result = await this.gameAlertService.showTimeUpAlert(config);
+      
+      if (result.isConfirmed) {
+        // Intentar de nuevo
+        this.resetGame();
+        shouldShowAlert = false;
+      } else if (result.isDenied) {
+        // Valorar juego
+        await this.showRatingAlert('timeup');
+        // Actualizar la configuración para que no se muestre nuevamente el botón
+        config.userAssessed = true;
+        // Continuar el bucle para mostrar el modal nuevamente
+      } else {
+        // Ir al Dashboard (isDismissed o cualquier otro caso)
+        this.volverAlDashboard();
+        shouldShowAlert = false;
+      }
     }
-  }
-
-  private async showErrorAlert(message: string) {
-    const result = await this.gameAlertService.showErrorAlert(message);
-    if (result.isConfirmed) {
-      this.resetGame();
-    }
-  }
-
-  private showRatingModal() {
-    // Método legacy - usar showRatingAlert en su lugar
-    this.showRatingAlert();
   }
 
   placeWordsOnGrid() {
