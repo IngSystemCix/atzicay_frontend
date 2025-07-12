@@ -186,7 +186,10 @@
                     class="absolute top-0.5 sm:top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
                   ></div>
                 </div>
-                <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700">Mostrar pista</span>
+                <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700"
+                [appTooltip]="'Activa o desactiva la pista para el rompecabezas'" position="top"
+                >
+                  Mostrar pista</span>
               </label>
             </div>
 
@@ -266,7 +269,7 @@
                   class="absolute top-0.5 sm:top-1 left-0 w-4 h-4 bg-white rounded-full transition-transform duration-200"
                 ></div>
               </div>
-              <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700">Ayuda Automática</span>
+              <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700" [appTooltip]="'Activa o desactiva la ayuda automática'" position="top">Ayuda Automática</span>
             </label>
           </div>
         </div>
@@ -275,7 +278,7 @@
 
       <ng-container *ngIf="activeTab === 'configuracion'">
         <div class="w-full">
-          <app-generic-config-game 
+          <app-generic-config-game
             [settings]="configForm.value"
             (settingsChange)="onSettingsChange($event)">
           </app-generic-config-game>

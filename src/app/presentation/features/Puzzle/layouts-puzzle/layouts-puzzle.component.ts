@@ -1,21 +1,22 @@
-import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { Platform } from '@angular/cdk/platform';
 import { CommonModule } from '@angular/common';
+import { Component, ElementRef, OnInit, Renderer2 } from '@angular/core';
 import {
-  FormsModule,
   FormBuilder,
   FormGroup,
-  Validators,
+  FormsModule,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
-import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
-import { Platform } from '@angular/cdk/platform';
-import {GenericConfigGameComponent} from '../../../components/generic-config-game/generic-config-game.component';
+import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
+import { GenericConfigGameComponent } from '../../../components/generic-config-game/generic-config-game.component';
+import { TooltipDirective } from '../../../shared/tooltip/tooltip.directive';
 @Component({
   selector: 'app-layouts-puzzle',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, GenericConfigGameComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, GenericConfigGameComponent, TooltipDirective],
   templateUrl: './layouts-puzzle.component.html',
   styleUrl: './layouts-puzzle.component.css',
 })
