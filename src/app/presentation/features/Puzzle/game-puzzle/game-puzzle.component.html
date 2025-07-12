@@ -55,6 +55,7 @@
         <app-puzzle-board *ngIf="gameStarted" [pieces]="pieces" [rows]="rows" [cols]="cols" [rowArray]="rowArray"
           [colArray]="colArray" [puzzleImageUrl]="puzzleImageUrl" [selectedPiece]="selectedPiece"
           [gameStarted]="gameStarted" [boardSize]="getBoardSize()" (pieceClick)="onPieceClick($event)"
+          (pieceDoubleClick)="onPieceDoubleClick($event)"
           (dragStart)="onDragStart($event.piece, $event.event)" (dragEnd)="onDragEnd($event)"
           (drop)="onDrop($event.row, $event.col, $event.dragEvent)"></app-puzzle-board>
       </div>

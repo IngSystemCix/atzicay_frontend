@@ -32,6 +32,7 @@
                   [class.wrong-position]="!piece.correctPos"
                   [ngStyle]="getCurrentPieceStyle(piece)"
                   (click)="pieceClick.emit(piece)" 
+                  (dblclick)="pieceDoubleClick.emit(piece)"
                   draggable="true" 
                   (dragstart)="dragStart.emit({piece, event: $event})"
                   (dragend)="dragEnd.emit($event)">

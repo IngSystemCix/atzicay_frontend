@@ -36,6 +36,7 @@ export class PuzzleBoardComponent {
   };
 
   @Output() pieceClick = new EventEmitter<PuzzlePiece>();
+  @Output() pieceDoubleClick = new EventEmitter<PuzzlePiece>();
   @Output() dragStart = new EventEmitter<{
     piece: PuzzlePiece;
     event: DragEvent;

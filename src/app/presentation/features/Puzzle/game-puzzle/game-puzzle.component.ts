@@ -620,6 +620,13 @@ export class GamePuzzleComponent
     this.selectedPiece = piece;
   }
 
+  onPieceDoubleClick(piece: PuzzlePiece) {
+    if (!this.gameStarted || this.gameCompleted || !piece) return;
+    if (piece.inBoard) {
+      this.returnToSidebar(piece);
+    }
+  }
+
   onDragStart(piece: PuzzlePiece, event: DragEvent) {
     if (!this.gameStarted || this.gameCompleted || !piece) return;
 
