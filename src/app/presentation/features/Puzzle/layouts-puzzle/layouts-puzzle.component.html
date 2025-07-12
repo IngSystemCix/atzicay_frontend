@@ -75,10 +75,11 @@
     </div>
 
     <!-- Content Tabs - Responsive -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-      <!-- Tab Contenido -->
+    <div>
+      <!-- Tab Contenido with Grid Layout -->
       <ng-container *ngIf="activeTab === 'contenido'">
-        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+          <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6">
           <h2 class="text-2xl sm:text-3xl font-bold text-atzicay-purple-500 mb-2">
             Información del juego
           </h2>
@@ -152,19 +153,6 @@
                 </span>
                 }
               </div>
-            </div>
-
-            <div>
-              <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">Dificultad</label>
-              <select
-                title="Dificultad del juego"
-                formControlName="dificultad"
-                class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm sm:text-base"
-              >
-                <option value="E">Fácil</option>
-                <option value="M">Medio</option>
-                <option value="H">Difícil</option>
-              </select>
             </div>
 
             <div>
@@ -282,94 +270,18 @@
             </label>
           </div>
         </div>
-      </ng-container>
-
-      <!-- CONFIGURACIÓN TAB - Responsive -->
-      <ng-container *ngIf="activeTab === 'configuracion'">
-        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:col-span-2">
-          <h2 class="text-2xl sm:text-3xl font-bold text-atzicay-purple-500 mb-2">Configuración del juego</h2>
-          <p class="text-gray-600 mb-4 sm:mb-6 font-semibold">Personaliza las reglas y opciones del juego</p>
-
-          <form [formGroup]="configForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <!-- Fuente -->
-            <div>
-              <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Tipo de Letra</label>
-              <select
-                title="Fuente del Juego"
-                formControlName="fuente"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-              >
-                <option *ngFor="let font of fonts; let i = index" [value]="font">{{ font }}</option>
-              </select>
-            </div>
-
-            <!-- Color de Fuente y Fondo - Responsive -->
-            <div class="flex flex-col sm:flex-row items-center justify-around gap-4 sm:gap-6">
-              <div class="text-center">
-                <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Color de Letra</label>
-                <input
-                  title="Color de Fuente"
-                  type="color"
-                  formControlName="colorFuente"
-                  class="aspect-square size-10 sm:size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
-                />
-              </div>
-
-              <div class="text-center">
-                <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Color de Fondo</label>
-                <input
-                  title="Color de Fondo"
-                  type="color"
-                  formControlName="fondo"
-                  class="aspect-square size-10 sm:size-12 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 mx-auto"
-                />
-              </div>
-            </div>
-
-            <!-- Mensaje de Éxito -->
-            <div>
-              <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Mensaje de Éxito</label>
-              <input
-                title="Mensaje de Éxito"
-                type="text"
-                formControlName="mensajeExito"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-              />
-            </div>
-
-            <!-- Mensaje de Fracaso -->
-            <div>
-              <label class="block text-gray-900 mb-1 sm:mb-2 font-semibold text-sm sm:text-base">Mensaje de Fracaso</label>
-              <input
-                title="Mensaje de Fracaso"
-                type="text"
-                formControlName="mensajeFracaso"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-              />
-            </div>
-
-            <!-- Juego Público - Responsive -->
-            <div class="col-span-1 md:col-span-2">
-              <label class="flex items-center cursor-pointer">
-                <input type="checkbox" formControlName="juegoPublico" class="sr-only" />
-                <div class="relative">
-                  <div
-                    [ngClass]="configForm.get('juegoPublico')?.value ? 'bg-purple-500' : 'bg-gray-300'"
-                    class="w-10 h-5 sm:w-11 sm:h-6 rounded-full transition-colors duration-200"
-                  ></div>
-                  <div
-                    [ngClass]="configForm.get('juegoPublico')?.value ? 'translate-x-5 sm:translate-x-6' : 'translate-x-1'"
-                    class="absolute top-0.5 sm:top-1 left-0 w-4 h-4 bg-white rounded-full shadow-md transition-transform duration-200"
-                  ></div>
-                </div>
-                <span class="ml-3 text-xs sm:text-sm font-semibold text-gray-700">Juego Público</span>
-              </label>
-            </div>
-          </form>
         </div>
       </ng-container>
 
-      <!-- Tab Vista Previa -->
+      <ng-container *ngIf="activeTab === 'configuracion'">
+        <div class="w-full">
+          <app-generic-config-game 
+            [settings]="configForm.value"
+            (settingsChange)="onSettingsChange($event)">
+          </app-generic-config-game>
+        </div>
+      </ng-container>
+
       <ng-container *ngIf="activeTab === 'vista-previa'">
         <!-- Aquí puedes agregar una vista previa del puzzle si lo deseas -->
       </ng-container>

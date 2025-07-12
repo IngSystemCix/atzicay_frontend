@@ -1,6 +1,6 @@
 export interface GameSetting {
-  Key: string;
-  Value: string;
+  ConfigKey: string;
+  ConfigValue: string;
 }
 
 export interface HangmanWord {

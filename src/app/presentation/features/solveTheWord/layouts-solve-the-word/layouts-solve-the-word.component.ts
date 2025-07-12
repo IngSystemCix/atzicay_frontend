@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AtzicayTabsComponent } from '../../../components/atzicay-tabs/atzicay-tabs.component';
 import { AtzicayButtonComponent } from '../../../components/atzicay-button/atzicay-button.component';
+import { GenericConfigGameComponent } from '../../../shared/components/generic-config-game/generic-config-game.component';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my-games/base-create-game.component';
 import { CreateGame } from '../../../../core/domain/model/create-game.model';
 import { HostListener } from '@angular/core';
+
 
 @Component({
   selector: 'app-layouts-solve-the-word',
@@ -19,6 +21,7 @@ import { HostListener } from '@angular/core';
     FormsModule,
     AtzicayTabsComponent,
     AtzicayButtonComponent,
+    GenericConfigGameComponent,
   ],
   templateUrl: './layouts-solve-the-word.component.html',
   styleUrl: './layouts-solve-the-word.component.css',
@@ -60,6 +63,17 @@ export class LayoutsSolveTheWordComponent
   rows: number = 10;
   cols: number = 10;
   isMobile = false;
+
+  // Configuración para el componente genérico
+  gameSettings = {
+    font: 'Arial',
+    fontColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    successMessage: '¡Felicidades, ganaste!',
+    failureMessage: 'Intenta de nuevo',
+    difficulty: 'M',
+    visibility: 'P'
+  };
 
   constructor(
     private createGameService: CreateGameService,
@@ -175,22 +189,22 @@ export class LayoutsSolveTheWordComponent
       Name: this.gameTitle.trim(),
       Description: this.gameDescription.trim(),
       Activated: true,
-      Difficulty: this.difficulty,
-      Visibility: this.isPublicGame ? 'P' : 'R',
+      Difficulty: this.gameSettings.difficulty,
+      Visibility: this.gameSettings.visibility,
       Rows: this.rows,
       Cols: this.cols,
       Words: solveWords,
       Settings: [
-        { Key: 'Fuente', Value: this.fontFamily || 'Arial' },
-        { Key: 'ColorFondo', Value: this.backgroundColor },
-        { Key: 'ColorTexto', Value: this.fontColor },
+        { ConfigKey: 'font', ConfigValue: this.gameSettings.font || 'Arial' },
+        { ConfigKey: 'backgroundColor', ConfigValue: this.gameSettings.backgroundColor },
+        { ConfigKey: 'fontColor', ConfigValue: this.gameSettings.fontColor },
         {
-          Key: 'MensajeExito',
-          Value: this.successMessage || '¡Excelente trabajo!',
+          ConfigKey: 'successMessage',
+          ConfigValue: this.gameSettings.successMessage || '¡Excelente trabajo!',
         },
         {
-          Key: 'MensajeFallo',
-          Value: this.failureMessage || '¡Inténtalo de nuevo!',
+          ConfigKey: 'failureMessage',
+          ConfigValue: this.gameSettings.failureMessage || '¡Inténtalo de nuevo!',
         },
       ],
     };
@@ -222,5 +236,37 @@ export class LayoutsSolveTheWordComponent
       }
     }
     return true;
+  }
+
+  /**
+   * Obtiene la configuración para el componente genérico
+   */
+  getConfigSettings() {
+    return {
+      font: this.gameSettings.font,
+      fontColor: this.gameSettings.fontColor,
+      backgroundColor: this.gameSettings.backgroundColor,
+      successMessage: this.gameSettings.successMessage,
+      failureMessage: this.gameSettings.failureMessage,
+      difficulty: this.gameSettings.difficulty,
+      visibility: this.gameSettings.visibility
+    };
+  }
+
+  /**
+   * Maneja los cambios del componente genérico de configuración
+   */
+  onConfigChange(settings: any) {
+    // Actualizar gameSettings con los valores del componente genérico
+    this.gameSettings = { ...this.gameSettings, ...settings };
+    
+    // Actualizar las propiedades individuales para mantener compatibilidad
+    this.fontFamily = settings.font || this.fontFamily;
+    this.fontColor = settings.fontColor || this.fontColor;
+    this.backgroundColor = settings.backgroundColor || this.backgroundColor;
+    this.successMessage = settings.successMessage || this.successMessage;
+    this.failureMessage = settings.failureMessage || this.failureMessage;
+    this.difficulty = settings.difficulty || this.difficulty;
+    this.isPublicGame = settings.visibility === 'P';
   }
 }

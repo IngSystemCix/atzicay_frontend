@@ -127,4 +127,7 @@ input[type="date"] {
   animation: slide-in-from-top 0.2s ease-out;
 }
 
+.swal2-hide-loader {
+  display: none !important;
+}
 

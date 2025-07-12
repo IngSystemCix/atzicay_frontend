@@ -145,9 +145,12 @@
         <div
           class="h-48 sm:h-56 lg:h-72 flex justify-center items-center relative shrink-0 rounded-t-3xl overflow-hidden"
           [style.background-color]="getGameBackgroundColor(game.type_game)">
-          <!-- Imagen principal adaptativa -->
-          <img [src]="getGameImage(game.type_game)" alt="Game Image"
-            class="w-full h-full object-cover sm:object-contain transition-all duration-500" />
+          <!-- Imagen principal adaptativa con smart loading -->
+          <img [appSmartImage]="getGameImagePath(game.type_game)" 
+               fallbackImage="assets/default-game.png"
+               [isDynamic]="false"
+               alt="Game Image"
+               class="w-full h-full object-cover sm:object-contain transition-all duration-500" />
           <!-- Overlay gradient mejorado -->
           <div
             class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 z-20">
@@ -235,11 +238,14 @@
             </div>
           </div>
 
-          <!-- Play Button responsivo -->
+          <!-- Play Button responsivo con cache optimizado -->
           <div class="w-full">
-            <app-atzicay-button type="link" label="🎮 Jugar Ahora"
-              [routerLink]="getGameRoute(game.type_game, game.game_instance_id)"
-              [fullWidth]="true"></app-atzicay-button>
+            <app-atzicay-button 
+              type="primary" 
+              label="🎮 Jugar Ahora"
+              (click)="playGame(game.type_game, game.game_instance_id)"
+              [fullWidth]="true">
+            </app-atzicay-button>
           </div>
         </div>
       </div>

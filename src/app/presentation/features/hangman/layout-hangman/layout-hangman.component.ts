@@ -11,12 +11,14 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AtzicayTabsComponent } from '../../../components/atzicay-tabs/atzicay-tabs.component';
 import { AtzicayButtonComponent } from '../../../components/atzicay-button/atzicay-button.component';
+import { GenericConfigGameComponent } from '../../../shared/components/generic-config-game/generic-config-game.component';
 import { CreateGameService } from '../../../../core/infrastructure/api/create-game.service';
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { CreateGame, HangmanWord } from '../../../../core/domain/model/create-game.model';
 import { BaseCreateGameComponent } from '../../../../core/presentation/shared/my-games/base-create-game.component';
 import { Platform } from '@angular/cdk/platform';
+import { Visibility } from '../../../../core/domain/enum/visibility';
 
 @Component({
   selector: 'app-layout-hangman',
@@ -27,6 +29,7 @@ import { Platform } from '@angular/cdk/platform';
     FormsModule,
     AtzicayTabsComponent,
     AtzicayButtonComponent,
+    GenericConfigGameComponent,
   ],
   templateUrl: './layout-hangman.component.html',
   styleUrls: ['./layout-hangman.component.css'],
@@ -85,7 +88,7 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       difficulty: ['E', Validators.required],
-      visibility: ['P', Validators.required],
+      Visibility: ['P', Validators.required],
       presentation: ['A', Validators.required],
     });
     this.wordsForm = this.fb.group({
@@ -98,6 +101,8 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
       fontColor: ['#000000', Validators.required],
       successMessage: ['¡Excelente trabajo!', [Validators.required, Validators.minLength(3)]],
       failureMessage: ['Inténtalo de nuevo', [Validators.required, Validators.minLength(3)]],
+      difficulty: ['E', Validators.required],
+      visibility: ['P', Validators.required],
     });
     this.fuenteSeleccionada = this.fonts[0];
   }
@@ -184,15 +189,15 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
       Name: hangmanData.name.trim(),
       Description: hangmanData.description.trim(),
       Activated: true,
-      Difficulty: hangmanData.difficulty,
-      Visibility: hangmanData.visibility,
+      Difficulty: configData.difficulty,
+      Visibility: configData.Visibility,
       Settings: [
-        { Key: 'TiempoLimite', Value: configData.timeLimit.toString() },
-        { Key: 'Fuente', Value: configData.font },
-        { Key: 'ColorFondo', Value: configData.backgroundColor },
-        { Key: 'ColorTexto', Value: configData.fontColor },
-        { Key: 'MensajeExito', Value: configData.successMessage },
-        { Key: 'MensajeFallo', Value: configData.failureMessage },
+        { ConfigKey: 'time_limit', ConfigValue: configData.timeLimit?.toString() },
+        { ConfigKey: 'font', ConfigValue: configData.font },
+        { ConfigKey: 'backgroundColor', ConfigValue: configData.backgroundColor },
+        { ConfigKey: 'fontColor', ConfigValue: configData.fontColor },
+        { ConfigKey: 'successMessage', ConfigValue: configData.successMessage },
+        { ConfigKey: 'failureMessage', ConfigValue: configData.failureMessage },
       ],
       Words: words
     };
@@ -322,5 +327,15 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
   getPreviewClue(index: number): string {
     if (!this.showClues || this.wordsArray.length === 0) return '';
     return this.wordsArray.at(index)?.get('clue')?.value || '';
+  }
+
+  /**
+   * Maneja los cambios de configuración desde el componente genérico
+   */
+  onSettingsChange(settings: any): void {
+    this.configForm.patchValue(settings);
+    if (settings.font) {
+      this.fuenteSeleccionada = settings.font;
+    }
   }
 }

@@ -9,7 +9,7 @@ import {
   ElementRef,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService as Auth0Service } from '@auth0/auth0-angular';
 import { BehaviorSubject, Subscription, filter, take } from 'rxjs';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
@@ -20,11 +20,13 @@ import { GameInstanceService } from '../../../core/infrastructure/api/game-insta
 import { UserSessionService } from '../../../core/infrastructure/service/user-session.service';
 import { GameLoadingService } from '../../../core/infrastructure/service/game-loading.service';
 import { RedirectService } from '../../../core/infrastructure/service/RedirectService.service';
+import { CacheBustingService } from '../../../core/infrastructure/service/cache-busting.service';
+import { SmartImageDirective } from '../../directives/smart-image.directive';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink, AtzicayButtonComponent, FilterDropdownComponent],
+  imports: [FormsModule, CommonModule, AtzicayButtonComponent, FilterDropdownComponent, SmartImageDirective],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -32,11 +34,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private gameInstanceService = inject(GameInstanceService);
   private userSessionService = inject(UserSessionService);
   private gameLoadingService = inject(GameLoadingService);
+  private cacheBustingService = inject(CacheBustingService);
   protected PAGE_SIZE = 6;
   private auth0 = inject(Auth0Service);
   private backendAuthService = inject(AuthService);
   private redirectService = inject(RedirectService);
+  private router = inject(Router);
   private subscription = new Subscription();
+
 
   // Variables para el scroll header
   headerVisible = true;
@@ -67,17 +72,26 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private limitSubject = new BehaviorSubject<{ limit: number }>({ limit: 6 });
   
   ngOnInit(): void {
-    // Esperar a que el userId esté disponible antes de redirigir
+    // Optimizado: Cargar juegos inmediatamente y manejar redirección en paralelo
+    this.loadGameInstances();
+    
+    // Manejar redirección en paralelo si es necesario
     this.userSessionService.userId$.pipe(
       filter(userId => !!userId),
       take(1)
     ).subscribe(() => {
-      const returnUrl = this.redirectService.getReturnUrl();
-      if (returnUrl) {
-        this.redirectService.redirectAfterLogin();
-        return;
+      try {
+        const returnUrl = this.redirectService.getReturnUrl();
+        if (returnUrl) {
+          // Redirigir pero permitir que el dashboard se cargue primero
+          setTimeout(() => {
+            this.redirectService.redirectAfterLogin();
+          }, 100);
+        }
+      } catch (error) {
+        console.warn('RedirectService not available or error:', error);
+        // Continuar normalmente si hay error con redirect service
       }
-      this.loadGameInstances();
     });
   }
 getTypeIcon(typeValue: string): string {
@@ -122,10 +136,11 @@ getTypeIcon(typeValue: string): string {
   }
 
   private loadGameInstances(): void {
-    // Carga rápida sin delays - solo mostrar loading en la primera carga
+    // Solo actualizar cache version en la primera carga
     const isFirstLoad = this.allGames.length === 0;
     
     if (isFirstLoad) {
+      this.cacheBustingService.updateCacheVersion();
       this.gameLoadingService.showFastGameLoading('Cargando juegos...');
     }
     
@@ -217,9 +232,12 @@ getTypeIcon(typeValue: string): string {
     this.applyFilters();
   }
 
+  /**
+   * Método optimizado para aplicar filtros sin bloquear la UI
+   */
   applyFilters(): void {
     this.currentPage = 1;
-    // No mostrar loading para filtros, es una operación rápida
+    // Solo cargar instancias sin forzar cache refresh
     this.loadGameInstances();
   }
 
@@ -235,13 +253,14 @@ getTypeIcon(typeValue: string): string {
         next: (response) => {
           if (response.data.data.length > this.allGames.length) {
             this.allGames = response.data.data;
+            this.filteredGames = response.data.data;
+            this.displayedGames = response.data.data.slice(0, newLimit);
             this.currentOffset = this.allGames.length;
             this.hasMoreGames = this.allGames.length === newLimit;
             this.PAGE_SIZE = newLimit;
           } else {
             this.hasMoreGames = false;
           }
-          this.applyFilters();
           this.isLoadingMore = false;
         },
         error: (err) => {
@@ -346,6 +365,27 @@ getTypeIcon(typeValue: string): string {
   }
 
   getGameImage(type: string): string {
+    const imagePath = this.getGameImagePath(type);
+    
+    // Para imágenes de assets estáticas, usar cache busting normal
+    const imageWithCache = this.cacheBustingService.applyCacheBusting(imagePath);
+    
+    // Si estamos en desarrollo, forzar refresh del dev server ocasionalmente
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      // Solo forzar refresh si han pasado más de 5 segundos desde la última vez
+      const now = Date.now();
+      const lastRefresh = parseInt(sessionStorage.getItem('last_dev_refresh') || '0');
+      
+      if (now - lastRefresh > 5000) {
+        this.cacheBustingService.forceDevServerRefresh();
+        sessionStorage.setItem('last_dev_refresh', now.toString());
+      }
+    }
+    
+    return imageWithCache;
+  }
+
+  getGameImagePath(type: string): string {
     switch (type) {
       case 'hangman':
         return 'assets/ahorcado.png';
@@ -402,6 +442,125 @@ getTypeIcon(typeValue: string): string {
     const scrollElement = document.querySelector('.dashboard-scroll-content');
     if (scrollElement) {
       scrollElement.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /**
+   * Fuerza la actualización del cache de imágenes
+   * Útil cuando se crean nuevos juegos o se actualizan imágenes
+   */
+  refreshImageCache(): void {
+    this.cacheBustingService.updateCacheVersion();
+    console.log('Cache de imágenes actualizado para mejor rendimiento');
+  }
+
+  /**
+   * Método optimizado para aplicar filtros sin bloquear la UI
+   */
+  optimizedApplyFilters(): void {
+    this.currentPage = 1;
+    this.isLoadingMore = false; // Asegurarse de que no esté en estado de carga más
+    this.loadGameInstances();
+  }
+
+  /**
+   * Método optimizado para navegar a un juego con cache fresco
+   */
+  playGame(gameType: string, id: number): void {
+    // En desarrollo, forzar la detección de nuevos assets
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      this.cacheBustingService.triggerDevServerAssetScan();
+      this.cacheBustingService.forceDevRecompilation();
+    }
+    
+    // Obtener la ruta del juego
+    const route = this.getGameRoute(gameType, id);
+    
+    // Navegar con un pequeño delay para dar tiempo al cache
+    setTimeout(() => {
+      this.router.navigateByUrl(route);
+    }, 150);
+  }
+
+  /**
+   * Fuerza la recarga de assets en el servidor de desarrollo
+   */
+  private forceAssetReload(imagePath: string): void {
+    // Solo ejecutar en desarrollo
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      // Crear una imagen temporal para forzar la carga
+      const img = new Image();
+      img.onload = () => {
+        // Imagen cargada correctamente
+        console.log('Asset reloaded successfully:', imagePath);
+      };
+      img.onerror = () => {
+        // Si falla, intentar recargar después de un pequeño delay
+        setTimeout(() => {
+          this.retryImageLoad(imagePath);
+        }, 1000);
+      };
+      img.src = imagePath;
+    }
+  }
+
+  /**
+   * Reintenta cargar una imagen con cache busting más agresivo
+   */
+  private retryImageLoad(originalPath: string): void {
+    // Generar nuevo timestamp para cache busting más agresivo
+    const timestamp = Date.now();
+    const separator = originalPath.includes('?') ? '&' : '?';
+    const retryPath = `${originalPath}${separator}_retry=${timestamp}`;
+    
+    const img = new Image();
+    img.onload = () => {
+      console.log('Image retry successful:', retryPath);
+      // Forzar actualización de la vista
+      this.forceChangeDetection();
+    };
+    img.onerror = () => {
+      console.warn('Image retry failed:', retryPath);
+    };
+    img.src = retryPath;
+  }
+
+  /**
+   * Fuerza la detección de cambios en Angular
+   */
+  private forceChangeDetection(): void {
+    // Triggear change detection para actualizar las imágenes en la vista
+    setTimeout(() => {
+      // Pequeño cambio para triggear change detection
+      this.lastImageUpdate = Date.now();
+    }, 100);
+  }
+
+  // Variable para triggear change detection
+  lastImageUpdate = 0;
+
+  /**
+   * Método para llamar después de crear un nuevo juego
+   * Fuerza la actualización completa del dashboard para detectar nuevas imágenes
+   */
+  refreshAfterGameCreation(): void {
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      // Forzar recompilación del dev server
+      this.cacheBustingService.forceDevRecompilation();
+      
+      // Triggear scan de assets
+      this.cacheBustingService.triggerDevServerAssetScan();
+      
+      // Esperar un poco y recargar los juegos
+      setTimeout(() => {
+        this.loadGameInstances();
+      }, 1000);
+      
+      console.log('Dashboard refreshed after game creation');
+    } else {
+      // En producción, solo recargar normalmente
+      this.cacheBustingService.updateCacheVersion();
+      this.loadGameInstances();
     }
   }
 }

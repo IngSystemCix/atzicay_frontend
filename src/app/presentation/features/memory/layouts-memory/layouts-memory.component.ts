@@ -10,6 +10,7 @@ import {
   Tab,
 } from '../../../components/atzicay-tabs/atzicay-tabs.component';
 import { Platform } from '@angular/cdk/platform';
+import { GenericConfigGameComponent } from '../../../shared/components/generic-config-game/generic-config-game.component';
 
 interface CardPair {
   id: number;
@@ -28,9 +29,10 @@ interface CardPair {
 type TabType = 'contenido' | 'configuracion' | 'vista-previa';
 type CardType = 'imagen-texto' | 'imagenes';
 
+
 @Component({
   selector: 'app-layouts-memory',
-  imports: [CommonModule, FormsModule, AtzicayTabsComponent],
+  imports: [CommonModule, FormsModule, AtzicayTabsComponent, GenericConfigGameComponent],
   templateUrl: './layouts-memory.component.html',
   styleUrl: './layouts-memory.component.css',
   providers: [CreateGameService],
@@ -59,7 +61,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
 
   // Game settings
   gameSettings = {
-    difficulty: 'medio',
+    difficulty: 'E', // 'E' = Fácil, 'M' = Medio, 'H' = Difícil
     font: 'Arial',
     fontColor: '#000000',
     backgroundColor: '#ffffff',
@@ -367,6 +369,8 @@ export class LayoutsMemoryComponent implements OnDestroy {
         Name: this.gameTitle,
         Description: this.gameDescription,
         Activated: true,
+        Difficulty: this.gameSettings.difficulty, // En nivel superior
+        Visibility: this.gameSettings.visibility, // En nivel superior
         Mode: this.cardType === 'imagenes' ? 'II' : 'ID',
         Pairs: pairsPayload,
         Settings: settingsPayload,
@@ -489,27 +493,7 @@ export class LayoutsMemoryComponent implements OnDestroy {
       });
     }
 
-    // Difficulty configuration (en Settings, no en nivel superior)
-    if (this.gameSettings.difficulty) {
-      const difficultyValue =
-        this.gameSettings.difficulty === 'facil'
-          ? 'E'
-          : this.gameSettings.difficulty === 'medio'
-          ? 'M'
-          : 'H';
-      settings.push({
-        ConfigKey: 'difficulty',
-        ConfigValue: difficultyValue,
-      });
-    }
-
-    // Visibility configuration (en Settings, no en nivel superior)
-    if (this.gameSettings.visibility) {
-      settings.push({
-        ConfigKey: 'visibility',
-        ConfigValue: this.gameSettings.visibility,
-      });
-    }
+    // NO incluir difficulty ni visibility aquí - van en el nivel superior del GameInstance
 
     return settings;
   }
@@ -584,6 +568,38 @@ export class LayoutsMemoryComponent implements OnDestroy {
         );
       }
     }
+  }
+
+  /**
+   * Obtiene la configuración para el componente genérico
+   */
+  getConfigSettings() {
+    return {
+      font: this.gameSettings.font,
+      fontColor: this.gameSettings.fontColor,
+      backgroundColor: this.gameSettings.backgroundColor,
+      successMessage: this.gameSettings.successMessage,
+      failureMessage: this.gameSettings.failureMessage,
+      difficulty: this.gameSettings.difficulty,
+      visibility: this.gameSettings.visibility
+    };
+  }
+
+  /**
+   * Maneja los cambios del componente genérico de configuración
+   */
+  onConfigChange(settings: any) {
+    // Actualizar gameSettings con los valores del componente genérico
+    this.gameSettings = {
+      ...this.gameSettings,
+      font: settings.font,
+      fontColor: settings.fontColor,
+      backgroundColor: settings.backgroundColor,
+      successMessage: settings.successMessage,
+      failureMessage: settings.failureMessage,
+      difficulty: settings.difficulty,
+      visibility: settings.visibility
+    };
   }
 
   // Settings management

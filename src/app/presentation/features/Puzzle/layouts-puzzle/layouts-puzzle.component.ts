@@ -12,10 +12,10 @@ import { CreateGameService } from '../../../../core/infrastructure/api/create-ga
 import { UserSessionService } from '../../../../core/infrastructure/service/user-session.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { Platform } from '@angular/cdk/platform';
-
+import {GenericConfigGameComponent} from '../../../shared/components/generic-config-game/generic-config-game.component';
 @Component({
   selector: 'app-layouts-puzzle',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, GenericConfigGameComponent],
   templateUrl: './layouts-puzzle.component.html',
   styleUrl: './layouts-puzzle.component.css',
 })
@@ -112,22 +112,22 @@ export class LayoutsPuzzleComponent implements OnInit {
         180,
         [Validators.required, Validators.min(30), Validators.max(3600)],
       ],
-      dificultad: ['M', Validators.required],
     });
 
     this.configForm = this.fb.group({
-      fuente: [this.fonts[0], Validators.required],
-      fondo: ['#cccccc', Validators.required],
-      colorFuente: ['#000000', Validators.required],
-      mensajeExito: [
+      font: ["Arial", Validators.required],
+      backgroundColor: ['#cccccc', Validators.required],
+      fontColor: ['#000000', Validators.required],
+      successMessage: [
         '¡Excelente trabajo!',
         [Validators.required, Validators.minLength(3)],
       ],
-      mensajeFracaso: [
+      failureMessage: [
         'Inténtalo de nuevo',
         [Validators.required, Validators.minLength(3)],
       ],
-      juegoPublico: [true],
+      difficulty: ['M', Validators.required],
+      visibility: ['P', Validators.required],
     });
 
     // Configurar validación condicional para la pista
@@ -151,8 +151,19 @@ export class LayoutsPuzzleComponent implements OnInit {
     const id = this.userSession.getUserId();
     if (id) this.userId = id;
 
-    // Forzar la actualización de formularios
+    // Forzar la actualización de formularios y valores por defecto en configForm
     this.forceFormValuesUpdate();
+
+    // Asegurar valores por defecto visibles en la pestaña de configuración
+    this.configForm.patchValue({
+      font: "Arial",
+      backgroundColor: '#cccccc',
+      fontColor: '#000000',
+      successMessage: '¡Excelente trabajo!',
+      failureMessage: 'Inténtalo de nuevo',
+      difficulty: 'M',
+      visibility: 'P',
+    });
   }
 
   setActiveTab(tab: string) {
@@ -164,11 +175,11 @@ export class LayoutsPuzzleComponent implements OnInit {
     }
   }
 
-  selectColor(tipo: 'fondo' | 'colorFuente', color: string) {
-    if (tipo === 'fondo') {
-      this.configForm.patchValue({ fondo: color });
+  selectColor(tipo: 'backgroundColor' | 'fontColor', color: string) {
+    if (tipo === 'backgroundColor') {
+      this.configForm.patchValue({ backgroundColor: color });
     } else {
-      this.configForm.patchValue({ colorFuente: color });
+      this.configForm.patchValue({ fontColor: color });
     }
   }
 
@@ -226,14 +237,15 @@ export class LayoutsPuzzleComponent implements OnInit {
 
       // Asegurar que todos los valores por defecto estén visibles
       this.configForm.patchValue({
-        fuente: this.configForm.get('fuente')?.value || this.fonts[0],
-        fondo: this.configForm.get('fondo')?.value || '#cccccc',
-        colorFuente: this.configForm.get('colorFuente')?.value || '#000000',
-        mensajeExito:
-          this.configForm.get('mensajeExito')?.value || '¡Excelente trabajo!',
-        mensajeFracaso:
-          this.configForm.get('mensajeFracaso')?.value || 'Inténtalo de nuevo',
-        juegoPublico: this.configForm.get('juegoPublico')?.value ?? true,
+        font: this.configForm.get('font')?.value || this.fonts[0],
+        backgroundColor: this.configForm.get('backgroundColor')?.value || '#cccccc',
+        fontColor: this.configForm.get('fontColor')?.value || '#000000',
+        successMessage:
+          this.configForm.get('successMessage')?.value || '¡Excelente trabajo!',
+        failureMessage:
+          this.configForm.get('failureMessage')?.value || 'Inténtalo de nuevo',
+        difficulty: this.configForm.get('difficulty')?.value || 'M',
+        visibility: this.configForm.get('visibility')?.value || 'P',
       });
     }, 0);
   }
@@ -384,20 +396,20 @@ export class LayoutsPuzzleComponent implements OnInit {
         Name: contentData.tituloJuego.trim(),
         Description: contentData.descripcion.trim(),
         Activated: true,
-        Difficulty: contentData.dificultad,
-        Visibility: configData.juegoPublico ? 1 : 0,
+        Difficulty: configData.difficulty,
+        Visibility: configData.visibility,
         PathImg: pathImg,
         Clue: contentData.mostrarPista ? contentData.pista : '',
         Rows: contentData.filas,
         Cols: contentData.columnas,
         AutomaticHelp: contentData.ayudaAutomatica ? true : false,
         Settings: [
-          { Key: 'time_limit', Value: contentData.tiempo.toString() },
-          { Key: 'Fuente', Value: configData.fuente },
-          { Key: 'ColorFondo', Value: configData.fondo },
-          { Key: 'ColorTexto', Value: configData.colorFuente },
-          { Key: 'MensajeExito', Value: configData.mensajeExito },
-          { Key: 'MensajeFallo', Value: configData.mensajeFracaso },
+          { ConfigKey: 'time_limit', ConfigValue: contentData.tiempo.toString() },
+          { ConfigKey: 'font', ConfigValue: configData.font },
+          { ConfigKey: 'backgroundColor', ConfigValue: configData.backgroundColor },
+          { ConfigKey: 'fontColor', ConfigValue: configData.fontColor },
+          { ConfigKey: 'successMessage', ConfigValue: configData.successMessage },
+          { ConfigKey: 'failureMessage', ConfigValue: configData.failureMessage },
         ],
       };
 
@@ -456,20 +468,28 @@ export class LayoutsPuzzleComponent implements OnInit {
       pista: '',
       ayudaAutomatica: false,
       tiempo: 180,
-      dificultad: 'M',
     });
 
-    this.configForm.reset({
-      fuente: 'Arial',
-      fondo: '#cccccc',
-      colorFuente: '#000000',
-      mensajeExito: '¡Excelente trabajo!',
-      mensajeFracaso: 'Inténtalo de nuevo',
-      juegoPublico: true,
+    // Usar setValue para asegurar que los valores por defecto se reflejen en el formulario y el componente genérico
+    this.configForm.setValue({
+      font: this.fonts[0],
+      backgroundColor: '#cccccc',
+      fontColor: '#000000',
+      successMessage: '¡Excelente trabajo!',
+      failureMessage: 'Inténtalo de nuevo',
+      difficulty: 'M',
+      visibility: 'P',
     });
 
     this.selectedImage = null;
     this.selectedFile = null;
     this.activeTab = 'contenido';
+  }
+
+  /**
+   * Maneja los cambios de configuración desde el componente genérico
+   */
+  onSettingsChange(settings: any): void {
+    this.configForm.patchValue(settings);
   }
 }
