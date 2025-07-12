@@ -93,8 +93,8 @@ export class GameHangmanComponent
     letrasSeleccionadas: new Set<string>(),
     intentosRestantes: 6,
     vidasRestantes: 3,
-    tiempoRestante: 180,
-    tiempoInicial: 180,
+    tiempoRestante: 10,
+    tiempoInicial: 10,
     juegoTerminado: false,
     juegoGanado: false,
     juegoFinalizado: false,
@@ -544,15 +544,23 @@ export class GameHangmanComponent
     }
 
     if (!ganado) {
+      // Primero determinar la causa del fallo ANTES de restar vida
+      const fueporTiempo = this.state.tiempoRestante === 0;
+      
       this.state.vidasRestantes--;
+      
       if (this.state.vidasRestantes <= 0) {
         this.state.juegoFinalizado = true;
 
-        // Mostrar modal de game over usando el servicio con valoración integrada
-        this.showGameOverAlert();
+        // Mostrar modal específico según la causa
+        if (fueporTiempo) {
+          this.showTimeUpAlert();
+        } else {
+          this.showGameOverAlert();
+        }
       } else {
         // Si fue por tiempo, mostrar modal de tiempo agotado
-        if (this.state.tiempoRestante === 0) {
+        if (fueporTiempo) {
           this.showTimeUpAlert();
         } else {
           // Mostrar modal de vida perdida
@@ -658,9 +666,24 @@ export class GameHangmanComponent
           this.gameAudioService.playCountdown();
         }
       } else {
-        // Solo mostrar el modal de tiempo agotado
+        // Cuando el tiempo se acaba, solo detener el timer y mostrar la alerta
+        clearInterval(this.state.timerInterval);
+        this.state.timerInterval = null;
         this.gameAudioService.playTimeUp();
-        this.finalizarJuego(false);
+        
+        // Marcar que el juego terminó por tiempo
+        this.state.juegoTerminado = true;
+        
+        // Determinar si se perdió una vida
+        this.state.vidasRestantes--;
+        
+        // Mostrar la alerta apropiada
+        if (this.state.vidasRestantes <= 0) {
+          this.state.juegoFinalizado = true;
+          this.showTimeUpAlert();
+        } else {
+          this.showTimeUpAlert();
+        }
       }
     }, 1000);
   }
@@ -771,11 +794,8 @@ export class GameHangmanComponent
       } else if (result.isDenied) {
         // Valorar juego
         await this.showRatingAlert('completed');
-        // Actualizar la configuración para que no se muestre nuevamente el botón
         config.userAssessed = true;
-        // Continuar el bucle para mostrar el modal nuevamente
       } else {
-        // Ir al dashboard o cerrar
         this.volverAlDashboard();
         shouldShowAlert = false;
       }
@@ -808,22 +828,35 @@ export class GameHangmanComponent
         this.state.userAssessed || (this.state.gameConfig?.assessed ?? false),
     };
 
-    let shouldShowAlert = true;
+    const result = await this.gameAlertService.showTimeUpAlert(config);
 
-    while (shouldShowAlert) {
-      const result = await this.gameAlertService.showTimeUpAlert(config);
-
-      if (result.isConfirmed) {
-        // Intentar de nuevo
+    if (result.isConfirmed) {
+      // Intentar de nuevo
+      this.reiniciarPalabraActual();
+    } else if (result.isDenied) {
+      // Usuario quiere valorar
+      await this.showRatingAlert('timeup');
+      this.state.userAssessed = true;
+      
+      // Mostrar el modal nuevamente pero sin el botón de valorar
+      const configWithoutRating: GameAlertConfig = {
+        ...config,
+        userAssessed: true
+      };
+      
+      const secondResult = await this.gameAlertService.showTimeUpAlert(configWithoutRating);
+      
+      if (secondResult.isConfirmed) {
         this.reiniciarPalabraActual();
-        shouldShowAlert = false;
-      } else if (result.isDenied) {
-        await this.showRatingAlert('timeup');
-        config.userAssessed = true;
       } else {
         this.volverAlDashboard();
-        shouldShowAlert = false;
       }
+    } else if (result.dismiss === 'cancel') {
+      // Usuario hizo click en "Volver al Inicio"
+      this.volverAlDashboard();
+    } else {
+      // Si el modal se cerró de manera inesperada, volver al dashboard
+      this.volverAlDashboard();
     }
   }
 
@@ -835,21 +868,30 @@ export class GameHangmanComponent
         this.state.userAssessed || (this.state.gameConfig?.assessed ?? false),
     };
 
-    let shouldShowAlert = true;
+    const result = await this.gameAlertService.showLifeLostAlert(config);
 
-    while (shouldShowAlert) {
-      const result = await this.gameAlertService.showLifeLostAlert(config);
-
-      if (result.isConfirmed) {
+    if (result.isConfirmed) {
+      this.reiniciarPalabraActual();
+    } else if (result.isDenied) {
+      // Usuario quiere valorar
+      await this.showRatingAlert('general');
+      this.state.userAssessed = true;
+      
+      // Mostrar el modal nuevamente pero sin el botón de valorar
+      const configWithoutRating: GameAlertConfig = {
+        ...config,
+        userAssessed: true
+      };
+      
+      const secondResult = await this.gameAlertService.showLifeLostAlert(configWithoutRating);
+      
+      if (secondResult.isConfirmed) {
         this.reiniciarPalabraActual();
-        shouldShowAlert = false;
-      } else if (result.isDenied) {
-        await this.showRatingAlert('general');
-        config.userAssessed = true;
       } else {
         this.volverAlDashboard();
-        shouldShowAlert = false;
       }
+    } else {
+      this.volverAlDashboard();
     }
   }
 
@@ -863,21 +905,35 @@ export class GameHangmanComponent
         this.state.userAssessed || (this.state.gameConfig?.assessed ?? false),
     };
 
-    let shouldShowAlert = true;
+    const result = await this.gameAlertService.showGameOverAlert(config);
 
-    while (shouldShowAlert) {
-      const result = await this.gameAlertService.showGameOverAlert(config);
-
-      if (result.isConfirmed) {
+    if (result.isConfirmed) {
+      // Reiniciar juego
+      this.reiniciarJuego();
+    } else if (result.isDenied) {
+      // Usuario quiere valorar
+      await this.showRatingAlert('general');
+      this.state.userAssessed = true;
+      
+      // Mostrar el modal nuevamente pero sin el botón de valorar
+      const configWithoutRating: GameAlertConfig = {
+        ...config,
+        userAssessed: true
+      };
+      
+      const secondResult = await this.gameAlertService.showGameOverAlert(configWithoutRating);
+      
+      if (secondResult.isConfirmed) {
         this.reiniciarJuego();
-        shouldShowAlert = false;
-      } else if (result.isDenied) {
-        await this.showRatingAlert('general');
-        config.userAssessed = true;
       } else {
         this.volverAlDashboard();
-        shouldShowAlert = false;
       }
+    } else if (result.dismiss === 'cancel') {
+      // Usuario hizo click en "Volver al Inicio"
+      this.volverAlDashboard();
+    } else {
+      // Si el modal se cerró de manera inesperada, volver al dashboard
+      this.volverAlDashboard();
     }
   }
 
