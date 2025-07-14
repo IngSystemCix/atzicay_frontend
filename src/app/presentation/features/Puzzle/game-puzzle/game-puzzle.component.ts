@@ -87,16 +87,21 @@ export class GamePuzzleComponent
   headerExpanded = false;
   mostrarPista = false;
   mobileMenuOpen = false;
+  backgroundColor: string = '#f3f4f6';
+  fontColor: string = '#222';
+  fontFamily: string = 'Arial';
+  timeLimit: number = 300;
   isMobileView = false;
   isFooterCollapsed = false; // Estado del footer móvil
   private timeWarningSent = false;
-
+  juegoIniciado = false;
   constructor() {
     super();
   }
 
   override ngOnInit() {
     super.ngOnInit();
+    this.juegoIniciado = false;
     this.checkViewport();
     window.addEventListener('resize', () => {
       this.checkViewport();
@@ -300,11 +305,35 @@ export class GamePuzzleComponent
     this.puzzleConfig = data.puzzle;
     this.userAssessed = data.assessed || false;
 
+    // Aplicar settings visuales y tiempo
+    if (data.settings && Array.isArray(data.settings)) {
+      for (const setting of data.settings) {
+        if (setting.key === 'backgroundColor' && setting.value) {
+          this.backgroundColor = setting.value;
+        }
+        if (setting.key === 'fontColor' && setting.value) {
+          this.fontColor = setting.value;
+        }
+        if (setting.key === 'font' && setting.value) {
+          this.fontFamily = setting.value;
+        }
+        if (setting.key === 'time_limit' && setting.value) {
+          const parsed = parseInt(setting.value);
+          if (!isNaN(parsed)) {
+            this.timeLimit = parsed;
+            this.maxTime = parsed;
+            this.timeLeft = parsed;
+          }
+        }
+      }
+    }
+
     if (this.puzzleConfig) {
       this.rows = this.puzzleConfig.rows || 4;
       this.cols = this.puzzleConfig.cols || 4;
       this.totalPieces = this.rows * this.cols;
-      this.maxTime = 300;
+      this.maxTime = this.timeLimit;
+      this.timeLeft = this.timeLimit;
 
       // Configurar tamaños según el dispositivo
       const boardSize = this.getBoardSize();
@@ -522,33 +551,27 @@ export class GamePuzzleComponent
   }
 
   async startGame() {
+    this.juegoIniciado = true;
     this.gameAudioService.playGameStart();
-
     if (this.timer) {
       clearInterval(this.timer);
     }
-
-    this.timeLeft = this.maxTime;
+    this.timeLeft = this.timeLimit;
     this.timeElapsed = 0;
     this.timeWarningSent = false;
-
     this.timer = setInterval(() => {
       if (this.timeLeft > 0) {
         this.timeLeft--;
-        this.timeElapsed = this.maxTime - this.timeLeft; // Actualizar tiempo transcurrido
-
-        // Reproducir sonido de advertencia cuando quedan 60 segundos
+        this.timeElapsed = this.timeLimit - this.timeLeft;
         if (this.timeLeft === 60 && !this.timeWarningSent) {
           this.gameAudioService.playTimeWarning();
           this.timeWarningSent = true;
         }
-
-        // Reproducir countdown en los últimos 5 segundos
         if (this.timeLeft <= 5 && this.timeLeft > 0) {
           this.gameAudioService.playCountdown();
         }
       } else {
-        this.timeElapsed = this.maxTime; // Tiempo total transcurrido cuando se agota
+        this.timeElapsed = this.timeLimit;
         this.gameAudioService.playTimeUp();
         clearInterval(this.timer);
         this.endGame();

@@ -1,0 +1,21 @@
+
+<div class="flex flex-col items-center justify-center w-full">
+  <button
+    (click)="startGame()"
+    class="group relative overflow-hidden bg-atzicay-bg-button
+           text-white font-bold py-4 px-8 rounded-2xl 
+           shadow-lg hover:shadow-xl transform hover:scale-105 
+           transition-all duration-300 ease-in-out
+           border-1 border-atzicay-border hover:border-atzicay-purple-500 cursor-pointer"
+    [ngStyle]="{ 'font-family': font, 'background-color': backgroundColor, color: fontColor }"
+  >
+    <span class="relative z-10 flex items-center gap-3">
+      <svg width="24" height="24" fill="currentColor" class="text-white" viewBox="0 0 20 20">
+        <path d="M6.5 5.5v9l7-4.5-7-4.5z" />
+      </svg>
+      <span class="text-lg tracking-wide">Iniciar juego</span>
+    </span>
+    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
+                transform -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></div>
+  </button>
+</div>

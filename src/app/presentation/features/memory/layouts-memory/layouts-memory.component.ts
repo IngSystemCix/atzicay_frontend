@@ -68,7 +68,17 @@ export class LayoutsMemoryComponent implements OnDestroy {
     successMessage: '¡Excelente trabajo!',
     failureMessage: '¡Inténtalo de nuevo!',
     visibility: 'P', // P = Público, R = Restringido
+    time_limit: 60 // Valor por defecto
   };
+
+  // Tiempo límite para el juego (vinculado al input)
+  get timeLimit(): number {
+    return this.gameSettings.time_limit;
+  }
+  set timeLimit(value: number) {
+    // Limitar entre 10 y 300 segundos
+    this.gameSettings.time_limit = Math.max(10, Math.min(300, value));
+  }
 
   // Card pairs
   pairs: CardPair[] = [
@@ -453,6 +463,13 @@ export class LayoutsMemoryComponent implements OnDestroy {
     // Convierte las configuraciones del juego al formato requerido por el backend
     const settings = [];
 
+    if (this.gameSettings.time_limit){
+      settings.push({
+        ConfigKey: 'time_limit',
+        ConfigValue: String(this.gameSettings.time_limit),
+      });
+    }
+
     // Font configuration
     if (this.gameSettings.font) {
       settings.push({
@@ -598,7 +615,8 @@ export class LayoutsMemoryComponent implements OnDestroy {
       successMessage: settings.successMessage,
       failureMessage: settings.failureMessage,
       difficulty: settings.difficulty,
-      visibility: settings.visibility
+      visibility: settings.visibility,
+      time_limit: settings.time_limit !== undefined ? settings.time_limit : this.gameSettings.time_limit
     };
   }
 

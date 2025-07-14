@@ -50,6 +50,7 @@ export class LayoutsSolveTheWordComponent
   failureMessage = 'Intenta de nuevo';
   isPublicGame = true;
   difficulty = 'M';
+  timeLimit: number = 180;
   colorOptions = [
     { name: '#FFFFFF', class: 'bg-gray-300' },
     { name: '#E0F7FA', class: 'bg-cyan-300' },
@@ -72,8 +73,13 @@ export class LayoutsSolveTheWordComponent
     successMessage: '¡Felicidades, ganaste!',
     failureMessage: 'Intenta de nuevo',
     difficulty: 'M',
-    visibility: 'P'
+    visibility: 'P',
+    timeLimit: 180
   };
+  setTimeLimit(value: number) {
+    this.timeLimit = Math.max(30, Math.min(600, value));
+    this.gameSettings.timeLimit = this.timeLimit;
+  }
 
   constructor(
     private createGameService: CreateGameService,
@@ -195,6 +201,7 @@ export class LayoutsSolveTheWordComponent
       Cols: this.cols,
       Words: solveWords,
       Settings: [
+        { ConfigKey: 'time_limit', ConfigValue: String(this.timeLimit) },
         { ConfigKey: 'font', ConfigValue: this.gameSettings.font || 'Arial' },
         { ConfigKey: 'backgroundColor', ConfigValue: this.gameSettings.backgroundColor },
         { ConfigKey: 'fontColor', ConfigValue: this.gameSettings.fontColor },
@@ -259,7 +266,6 @@ export class LayoutsSolveTheWordComponent
   onConfigChange(settings: any) {
     // Actualizar gameSettings con los valores del componente genérico
     this.gameSettings = { ...this.gameSettings, ...settings };
-    
     // Actualizar las propiedades individuales para mantener compatibilidad
     this.fontFamily = settings.font || this.fontFamily;
     this.fontColor = settings.fontColor || this.fontColor;
@@ -268,5 +274,8 @@ export class LayoutsSolveTheWordComponent
     this.failureMessage = settings.failureMessage || this.failureMessage;
     this.difficulty = settings.difficulty || this.difficulty;
     this.isPublicGame = settings.visibility === 'P';
+    if (settings.timeLimit !== undefined) {
+      this.timeLimit = settings.timeLimit;
+    }
   }
 }

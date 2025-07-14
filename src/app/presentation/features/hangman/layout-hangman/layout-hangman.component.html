@@ -114,6 +114,21 @@
             <option value="F">Ordenado</option>
           </select>
         </div>
+        <form [formGroup]="configForm">
+          <div class="mb-4">
+            <label for="">Tiempo limite (segundos)</label>
+            <input
+              type="number"
+              formControlName="timeLimit"
+              placeholder="Tiempo limite en segundos"
+              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              [class.border-red-500]="isTimeLimitInvalid"
+            />
+            <div *ngIf="configForm.get('timeLimit')?.value" class="text-sm text-gray-500 mt-1">
+              <span>Tiempo límite configurado: <b>{{ configForm.get('timeLimit')?.value }}</b> segundos</span>
+            </div>
+          </div>
+        </form>
       </form>
     </div>
 

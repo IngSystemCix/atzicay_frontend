@@ -1,5 +1,5 @@
 <div class="flex flex-col border-8 border-atzicay-border items-center min-h-screen h-screen p-4 overflow-x-hidden"
-  style="background-color: var(--color-atzicay-bg)">
+  [ngStyle]="{ 'background-color': state.colorFondo, 'font-family': state.fuente, color: state.colorTexto }">
   <!-- Logo flotante - Oculto en móviles y tablets -->
   <div class="hidden xl:block">
     <app-floating-logo></app-floating-logo>
@@ -42,6 +42,7 @@
   <!-- Game Content -->
   @if (!isLoading && !authError && !state.cargando && !state.error) {
   <div class="w-full h-full flex flex-col">
+    
     <!-- Header Responsivo -->
     <app-game-header 
     [tituloJuego]="tituloJuego"

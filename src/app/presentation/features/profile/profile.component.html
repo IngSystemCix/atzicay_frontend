@@ -75,7 +75,129 @@
         </button>
       </div>
 
-      <div class="w-full lg:w-2/3 p-8">
+     <div class="w-full lg:w-2/3 p-8 relative">
+        <!-- Botón de información de rangos en la esquina superior derecha -->
+        <div class="absolute top-4 right-4 z-10">
+          <div class="relative">
+            <button (click)="showRankInfo = !showRankInfo"
+              class="group relative w-10 h-10 bg-gradient-to-br from-atzicay-purple-500 to-atzicay-purple-600 rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 flex items-center justify-center border-2 border-white"
+              [class.ring-4]="showRankInfo"
+              [class.ring-atzicay-purple-300]="showRankInfo">
+              <!-- Icono cuando está cerrado -->
+              <svg *ngIf="!showRankInfo" class="w-5 h-5 text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <!-- Icono cuando está abierto -->
+              <svg *ngIf="showRankInfo" class="w-5 h-5 text-white transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+              
+              <!-- Efecto de pulso sutil -->
+              <div class="absolute inset-0 rounded-full bg-atzicay-purple-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            </button>
+            
+            <!-- Tooltip -->
+            <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+              <div class="bg-gray-800 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
+                {{ showRankInfo ? 'Ocultar rangos' : 'Ver sistema de rangos' }}
+                <div class="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel informativo de rangos - Posicionado absolutamente -->
+        <div *ngIf="showRankInfo"
+          class="absolute top-16 right-4 w-80 bg-white rounded-2xl p-6 border-2 border-atzicay-border shadow-2xl animate-fade-in z-20">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-atzicay-purple-500 to-atzicay-purple-600 rounded-lg flex items-center justify-center">
+                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                </svg>
+              </div>
+              <h4 class="text-atzicay-heading font-bold text-lg">Sistema de Rangos</h4>
+            </div>
+            <button (click)="showRankInfo = false"
+              class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-all duration-200 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <!-- Bronce -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 hover:shadow-md transition-shadow duration-200">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <span class="text-lg">🥉</span>
+                </div>
+                <div>
+                  <span class="text-sm font-bold text-orange-700">Bronce</span>
+                  <p class="text-xs text-orange-600">1.0 - 2.4 estrellas</p>
+                </div>
+              </div>
+              <div class="text-xs text-orange-700 font-semibold bg-orange-200 px-2 py-1 rounded-full">Inicial</div>
+            </div>
+
+            <!-- Plata -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <span class="text-lg">🥈</span>
+                </div>
+                <div>
+                  <span class="text-sm font-bold text-gray-700">Plata</span>
+                  <p class="text-xs text-gray-600">2.5 - 3.4 estrellas</p>
+                </div>
+              </div>
+              <div class="text-xs text-gray-700 font-semibold bg-gray-200 px-2 py-1 rounded-full">Intermedio</div>
+            </div>
+
+            <!-- Oro -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-yellow-50 to-yellow-100 border border-yellow-200 hover:shadow-md transition-shadow duration-200">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <span class="text-lg">🏆</span>
+                </div>
+                <div>
+                  <span class="text-sm font-bold text-yellow-700">Oro</span>
+                  <p class="text-xs text-yellow-600">3.5 - 4.4 estrellas</p>
+                </div>
+              </div>
+              <div class="text-xs text-yellow-700 font-semibold bg-yellow-200 px-2 py-1 rounded-full">Avanzado</div>
+            </div>
+
+            <!-- Diamante -->
+            <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 hover:shadow-md transition-shadow duration-200">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <span class="text-lg">💎</span>
+                </div>
+                <div>
+                  <span class="text-sm font-bold text-blue-700">Diamante</span>
+                  <p class="text-xs text-blue-600">4.5 - 5.0 estrellas</p>
+                </div>
+              </div>
+              <div class="text-xs text-blue-700 font-semibold bg-blue-200 px-2 py-1 rounded-full">Maestro</div>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+            <div class="flex items-center space-x-2">
+              <div class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                <span class="text-xs">💡</span>
+              </div>
+              <p class="text-xs text-purple-700 font-medium">
+                <span class="font-bold">Consejo:</span> Crea juegos de calidad para mejorar tu calificación promedio
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div class="flex items-center mb-6">
           <div class="w-12 h-12 bg-atzicay-purple-500 rounded-xl flex items-center justify-center mr-4">
             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

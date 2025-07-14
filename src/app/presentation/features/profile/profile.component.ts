@@ -39,7 +39,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public currentRank: string = 'Bronce';
   public rankIcon: string = '';
   public rankColor: string = '';
-
+  public showRankInfo: boolean = false;
   constructor(
     private authService: AuthService,
     private profileService: ProfileService,

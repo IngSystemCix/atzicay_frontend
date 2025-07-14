@@ -22,7 +22,7 @@ import { HangmanWordDisplayComponent } from './components/hangman-word-display/h
 import { HangmanKeyboardComponent } from './components/hangman-keyboard/hangman-keyboard.component';
 import { HangmanHintComponent } from './components/hangman-hint/hangman-hint.component';
 import { RedirectService } from '../../../../core/infrastructure/service/RedirectService.service';
-
+import {GenericStartGameButtonComponent} from '../../../components/generic-start-game-button/generic-start-game-button.component';
 interface JuegoState {
   palabraActual: string;
   pistaPalabra: string;
@@ -51,6 +51,7 @@ interface JuegoState {
   contadorCambio: number;
   intervaloContador: any;
   userAssessed: boolean;
+  juegoDeshabilitado: boolean;
 }
 
 @Component({
@@ -63,7 +64,7 @@ interface JuegoState {
     HangmanDrawingComponent,
     HangmanWordDisplayComponent,
     HangmanKeyboardComponent,
-    HangmanHintComponent,
+    HangmanHintComponent
   ],
   templateUrl: './game-hangman.component.html',
   styleUrls: ['./game-hangman.component.css'],
@@ -114,6 +115,7 @@ export class GameHangmanComponent
     contadorCambio: 0,
     intervaloContador: null,
     userAssessed: false,
+    juegoDeshabilitado: false,
   };
 
   alfabeto: string[] = [
@@ -331,44 +333,71 @@ export class GameHangmanComponent
   }
 
   aplicarConfiguracion(): void {
-    if (!this.state.gameConfig) return;
+    if (!this.state.gameConfig) {
+      // Valores de emergencia si no hay config
+      this.state.tiempoInicial = 180;
+      this.state.tiempoRestante = 180;
+      this.state.fuente = 'Arial';
+      this.state.colorFondo = '#ffffff';
+      this.state.colorTexto = '#000000';
+      this.state.palabrasJuego = [];
+      this.state.totalPalabras = 0;
+      this.state.indicePalabraActual = 0;
+      this.palabrasAdivinadas = [];
+      return;
+    }
     const config = this.state.gameConfig;
 
     // Guardar el estado de evaluación del usuario
     this.state.userAssessed = config.assessed || false;
 
+    // Valores de emergencia
+    let timeLimit = 180;
+    let font = 'Arial';
+    let bgColor = '#ffffff';
+    let fontColor = '#000000';
+
     // Aplicar configuraciones desde settings
     if (config.settings && Array.isArray(config.settings)) {
-      config.settings.forEach((setting) => {
+      for (const setting of config.settings) {
         switch (setting.key) {
-          case 'TiempoLimite':
-            this.state.tiempoInicial = parseInt(setting.value) || 180;
-            this.state.tiempoRestante = this.state.tiempoInicial;
+          case 'time_limit': {
+            const time = parseInt(setting.value);
+            if (!isNaN(time) && time > 0) {
+              timeLimit = time;
+            }
             break;
-          case 'MensajeExito':
-            this.state.mensajeExito = setting.value;
+          }
+          case 'font':
+            font = setting.value || font;
             break;
-          case 'MensajeFallo':
-            this.state.mensajeFallo = setting.value;
+          case 'backgroundColor':
+            bgColor = setting.value || bgColor;
             break;
-          case 'ColorFondo':
-            this.state.colorFondo = setting.value;
+          case 'fontColor':
+            fontColor = setting.value || fontColor;
             break;
-          case 'ColorTexto':
-            this.state.colorTexto = setting.value;
-            break;
-          case 'Fuente':
-            this.state.fuente = setting.value;
+          // NO usar successMessage ni failureMessage
+          default:
             break;
         }
-      });
+      }
     }
+    // Aplicar settings al estado
+    this.state.tiempoInicial = timeLimit;
+    this.state.tiempoRestante = timeLimit;
+    this.state.fuente = font;
+    this.state.colorFondo = bgColor;
+    this.state.colorTexto = fontColor;
 
     // Cargar palabras del hangman_words
-    if (Array.isArray(config.hangman_words)) {
+    if (
+      Array.isArray(config.hangman_words) &&
+      config.hangman_words.length > 0
+    ) {
       this.state.palabrasJuego = config.hangman_words.map((item) => ({
         ...item,
-        word: item.word.toUpperCase(),
+        word: item.word ? item.word.toUpperCase() : '',
       }));
       this.state.totalPalabras = this.state.palabrasJuego.length;
       this.state.indicePalabraActual = 0;
@@ -377,10 +406,17 @@ export class GameHangmanComponent
         (item) => item.word
       );
     } else {
-      this.state.palabrasJuego = [];
-      this.state.totalPalabras = 0;
+      // Palabras de emergencia
+      this.state.palabrasJuego = [
+        {
+          word: 'EMERGENCIA',
+          clue: 'Palabra de emergencia',
+          presentation: 'A',
+        },
+      ];
+      this.state.totalPalabras = 1;
       this.state.indicePalabraActual = 0;
-      this.palabrasAdivinadas = [];
+      this.palabrasAdivinadas = ['EMERGENCIA'];
     }
   }
   configurarPalabraActual(): void {
@@ -426,7 +462,8 @@ export class GameHangmanComponent
   seleccionarLetra(letra: string): void {
     if (
       this.state.juegoTerminado ||
-      this.state.letrasSeleccionadas.has(letra)
+      this.state.letrasSeleccionadas.has(letra) ||
+      this.state.juegoDeshabilitado
     ) {
       return;
     }
@@ -546,9 +583,9 @@ export class GameHangmanComponent
     if (!ganado) {
       // Primero determinar la causa del fallo ANTES de restar vida
       const fueporTiempo = this.state.tiempoRestante === 0;
-      
+
       this.state.vidasRestantes--;
-      
+
       if (this.state.vidasRestantes <= 0) {
         this.state.juegoFinalizado = true;
 
@@ -606,6 +643,7 @@ export class GameHangmanComponent
     this.state.palabrasCompletadas = 0;
     this.state.vidasRestantes = 3; // Solo aquí se resetean las vidas a 3
     this.state.juegoFinalizado = false;
+    this.state.tiempoRestante = this.state.tiempoInicial; // Reiniciar el tiempo correctamente
 
     // Restaurar todas las palabras en el canvas
     this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
@@ -638,6 +676,22 @@ export class GameHangmanComponent
     this.mostrarModalJuegoFinalizado = false;
     this.mostrarModalFallo = false;
     this.mostrarModalExito = false;
+
+    // Deshabilitar toda la lógica del juego
+    this.state.juegoDeshabilitado = true;
+
+    // Limpiar intervalos y listeners para evitar que el juego siga activo
+    if (this.state.timerInterval) {
+      clearInterval(this.state.timerInterval);
+      this.state.timerInterval = null;
+    }
+    if (this.intervaloContador) {
+      clearInterval(this.intervaloContador);
+      this.intervaloContador = null;
+    }
+    document.removeEventListener('keydown', this.onKeyPress.bind(this));
+    document.removeEventListener('keyup', this.onKeyUp.bind(this));
+
     this.redirectService.clearReturnUrl();
     this.router.navigate(['/dashboard'], { replaceUrl: true });
   }
@@ -670,13 +724,13 @@ export class GameHangmanComponent
         clearInterval(this.state.timerInterval);
         this.state.timerInterval = null;
         this.gameAudioService.playTimeUp();
-        
+
         // Marcar que el juego terminó por tiempo
         this.state.juegoTerminado = true;
-        
+
         // Determinar si se perdió una vida
         this.state.vidasRestantes--;
-        
+
         // Mostrar la alerta apropiada
         if (this.state.vidasRestantes <= 0) {
           this.state.juegoFinalizado = true;
@@ -837,15 +891,17 @@ export class GameHangmanComponent
       // Usuario quiere valorar
       await this.showRatingAlert('timeup');
       this.state.userAssessed = true;
-      
+
       // Mostrar el modal nuevamente pero sin el botón de valorar
       const configWithoutRating: GameAlertConfig = {
         ...config,
-        userAssessed: true
+        userAssessed: true,
       };
-      
-      const secondResult = await this.gameAlertService.showTimeUpAlert(configWithoutRating);
-      
+
+      const secondResult = await this.gameAlertService.showTimeUpAlert(
+        configWithoutRating
+      );
+
       if (secondResult.isConfirmed) {
         this.reiniciarPalabraActual();
       } else {
@@ -876,15 +932,17 @@ export class GameHangmanComponent
       // Usuario quiere valorar
       await this.showRatingAlert('general');
       this.state.userAssessed = true;
-      
+
       // Mostrar el modal nuevamente pero sin el botón de valorar
       const configWithoutRating: GameAlertConfig = {
         ...config,
-        userAssessed: true
+        userAssessed: true,
       };
-      
-      const secondResult = await this.gameAlertService.showLifeLostAlert(configWithoutRating);
-      
+
+      const secondResult = await this.gameAlertService.showLifeLostAlert(
+        configWithoutRating
+      );
+
       if (secondResult.isConfirmed) {
         this.reiniciarPalabraActual();
       } else {
@@ -914,15 +972,17 @@ export class GameHangmanComponent
       // Usuario quiere valorar
       await this.showRatingAlert('general');
       this.state.userAssessed = true;
-      
+
       // Mostrar el modal nuevamente pero sin el botón de valorar
       const configWithoutRating: GameAlertConfig = {
         ...config,
-        userAssessed: true
+        userAssessed: true,
       };
-      
-      const secondResult = await this.gameAlertService.showGameOverAlert(configWithoutRating);
-      
+
+      const secondResult = await this.gameAlertService.showGameOverAlert(
+        configWithoutRating
+      );
+
       if (secondResult.isConfirmed) {
         this.reiniciarJuego();
       } else {
@@ -950,7 +1010,7 @@ export class GameHangmanComponent
         gameInstanceId,
         this.currentUserId,
         gameName,
-        context 
+        context
       );
 
       if (result) {
@@ -994,7 +1054,12 @@ export class GameHangmanComponent
   }
 
   private onKeyPress(event: KeyboardEvent): void {
-    if (this.state.juegoTerminado || this.state.cargando || this.isLoading) {
+    if (
+      this.state.juegoTerminado ||
+      this.state.cargando ||
+      this.isLoading ||
+      this.state.juegoDeshabilitado
+    ) {
       return;
     }
 
@@ -1054,7 +1119,12 @@ export class GameHangmanComponent
     }
   }
   private onKeyUp(event: KeyboardEvent): void {
-    if (this.state.juegoTerminado || this.state.cargando || this.isLoading) {
+    if (
+      this.state.juegoTerminado ||
+      this.state.cargando ||
+      this.isLoading ||
+      this.state.juegoDeshabilitado
+    ) {
       return;
     }
 

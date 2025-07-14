@@ -95,7 +95,7 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
       words: this.fb.array([]),
     });
     this.configForm = this.fb.group({
-      timeLimit: [60, [Validators.required, Validators.min(10), Validators.max(300)]],
+      timeLimit: [180, [Validators.required, Validators.min(10), Validators.max(300)]],
       font: [this.fonts[0], Validators.required],
       backgroundColor: ['#ffffff', Validators.required],
       fontColor: ['#000000', Validators.required],
@@ -185,14 +185,16 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
       Clue: this.showClues ? control.get('clue')?.value?.trim() : undefined,
       Presentation: hangmanData.presentation
     }));
+    // Usar el tiempo límite del formulario (en segundos)
+    const timeLimit = configData.timeLimit ? configData.timeLimit.toString() : '60';
     return {
       Name: hangmanData.name.trim(),
       Description: hangmanData.description.trim(),
       Activated: true,
       Difficulty: configData.difficulty,
-      Visibility: configData.Visibility,
+      Visibility: configData.visibility, // corregido a minúscula
       Settings: [
-        { ConfigKey: 'time_limit', ConfigValue: configData.timeLimit?.toString() },
+        { ConfigKey: 'time_limit', ConfigValue: timeLimit },
         { ConfigKey: 'font', ConfigValue: configData.font },
         { ConfigKey: 'backgroundColor', ConfigValue: configData.backgroundColor },
         { ConfigKey: 'fontColor', ConfigValue: configData.fontColor },
@@ -248,6 +250,11 @@ export class LayoutHangmanComponent extends BaseCreateGameComponent implements O
       this.alertService.showCancellationSuccess('Ahorcado');
       this.router.navigate(['/juegos']);
     }
+  }
+
+  get isTimeLimitInvalid(): boolean {
+    const control = this.configForm.get('timeLimit');
+    return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
   // Métodos de validación para el template

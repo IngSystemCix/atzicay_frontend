@@ -1,39 +1,29 @@
 <div class="flex flex-col border-8 border-atzicay-border items-center min-h-screen h-screen p-4 overflow-x-hidden"
-  style="background-color: var(--color-atzicay-bg)">
+  [ngStyle]="{ 'background-color': backgroundColor, color: fontColor, 'font-family': fontFamily }">
   <!-- Logo flotante - Oculto en móviles y tablets -->
   <div class="hidden xl:block">
     <app-floating-logo></app-floating-logo>
   </div>
 
   <!-- Loading State -->
-  <app-puzzle-loading-state *ngIf="isLoading || loading" [message]="isLoading ? 'Autenticando...' : 'Cargando juego...'" />
+  <app-puzzle-loading-state *ngIf="isLoading || loading"
+    [message]="isLoading ? 'Autenticando...' : 'Cargando juego...'" />
 
   <!-- Error State -->
-  <app-puzzle-error-state *ngIf="(authError || error) && !isLoading && !loading" [errorMessage]="(authError || error) ?? ''"
-    (backToDashboard)="volverAlDashboard()" />
+  <app-puzzle-error-state *ngIf="(authError || error) && !isLoading && !loading"
+    [errorMessage]="(authError || error) ?? ''" (backToDashboard)="volverAlDashboard()" />
+  <!-- Botón genérico para iniciar el juego -->
 
   <!-- Game Content -->
   <ng-container *ngIf="!isLoading && !authError && !loading && !error">
     <div class="w-full h-full flex flex-col">
       <!-- Header Genérico -->
-      <app-game-header
-        [tituloJuego]="tituloJuego"
-        [descripcionJuego]="descripcionJuego"
-        [vidasRestantes]="vidasRestantes"
-        [palabrasCompletadas]="palabrasCompletadas"
-        [totalPalabras]="totalPalabras"
-        [tiempoRestante]="tiempoRestante"
-        [porcentajeProgreso]="porcentajeProgreso"
-        [headerExpanded]="headerExpanded"
-        [mobileMenuOpen]="mobileMenuOpen"
-        [mostrarVidas]="false"
-        [mostrarTiempo]="true"
-        [mostrarProgreso]="true"
-        tipoJuego="puzzle"
-        (toggleHeader)="toggleHeader()"
-        (toggleMobileMenu)="toggleMobileMenu()"
-        (volverAlDashboard)="volverAlDashboard()"
-      ></app-game-header>
+      <app-game-header [tituloJuego]="tituloJuego" [descripcionJuego]="descripcionJuego"
+        [vidasRestantes]="vidasRestantes" [palabrasCompletadas]="palabrasCompletadas" [totalPalabras]="totalPalabras"
+        [tiempoRestante]="tiempoRestante" [porcentajeProgreso]="porcentajeProgreso" [headerExpanded]="headerExpanded"
+        [mobileMenuOpen]="mobileMenuOpen" [mostrarVidas]="false" [mostrarTiempo]="true" [mostrarProgreso]="true"
+        tipoJuego="puzzle" (toggleHeader)="toggleHeader()" (toggleMobileMenu)="toggleMobileMenu()"
+        (volverAlDashboard)="volverAlDashboard()"></app-game-header>
 
       <!-- Pista del Puzzle -->
       <app-puzzle-clue *ngIf="puzzleConfig?.clue" [clue]="puzzleConfig?.clue ?? ''" [mostrarPista]="mostrarPista"
@@ -55,10 +45,11 @@
         <app-puzzle-board *ngIf="gameStarted" [pieces]="pieces" [rows]="rows" [cols]="cols" [rowArray]="rowArray"
           [colArray]="colArray" [puzzleImageUrl]="puzzleImageUrl" [selectedPiece]="selectedPiece"
           [gameStarted]="gameStarted" [boardSize]="getBoardSize()" (pieceClick)="onPieceClick($event)"
-          (pieceDoubleClick)="onPieceDoubleClick($event)"
-          (dragStart)="onDragStart($event.piece, $event.event)" (dragEnd)="onDragEnd($event)"
-          (drop)="onDrop($event.row, $event.col, $event.dragEvent)"></app-puzzle-board>
+          (pieceDoubleClick)="onPieceDoubleClick($event)" (dragStart)="onDragStart($event.piece, $event.event)"
+          (dragEnd)="onDragEnd($event)" (drop)="onDrop($event.row, $event.col, $event.dragEvent)"></app-puzzle-board>
       </div>
     </div>
   </ng-container>
+
+
 </div>
