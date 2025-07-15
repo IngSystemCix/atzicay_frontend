@@ -1,6 +1,6 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { Component, Inject, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService as Auth0 } from '@auth0/auth0-angular';
 import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { Subscription } from 'rxjs';
@@ -17,6 +17,7 @@ export class SidebarComponent {
   private auth = inject(Auth0);
   private backendAuth = inject(AuthService);
   private sidebarService = inject(SidebarService);
+  private router = inject(Router);
 
   isCollapsed = false;
   private subscription: Subscription = new Subscription();
@@ -32,6 +33,11 @@ export class SidebarComponent {
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
+
+  navigateToInicio(): void {
+    this.router.navigate(['/inicio']);
+  }
+
   cerrarSesion() {
     Swal.fire({
       title: '¿Estás seguro?',

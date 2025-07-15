@@ -40,6 +40,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public rankIcon: string = '';
   public rankColor: string = '';
   public showRankInfo: boolean = false;
+  public ratingLoading: boolean = false; // Estado de carga para la valoración
+  public ratingError: boolean = false; // Estado de error para la valoración
   constructor(
     private authService: AuthService,
     private profileService: ProfileService,
@@ -319,11 +321,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   private loadAverageAssessment(userId: number): void {
+    this.ratingLoading = true;
+    this.ratingError = false;
+    
     this.assessmentService.getAverageAssessment().subscribe({
       next: (average) => {
+        this.ratingLoading = false;
         this.updateRankInfo(average);
       },
       error: (err) => {
+        this.ratingLoading = false;
+        this.ratingError = true;
         console.error('Error al obtener promedio de calificación:', err);
         this.updateRankInfo(0);
       }
@@ -485,29 +493,34 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (!dateString) return 'Fecha no disponible';
 
     try {
-      // Si la fecha viene en formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss), parsearla sin zona horaria
+      // Si la fecha viene en formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss), parsearla correctamente
       if (dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
         const [year, month, day] = dateString
           .split('T')[0]
           .split('-')
           .map(Number);
-        const date = new Date(year, month - 1, day); // month - 1 porque los meses en JS van de 0-11
+        
+        // Crear fecha directamente sin problemas de zona horaria
+        // Usar UTC para evitar problemas de zona horaria
+        const date = new Date(Date.UTC(year, month - 1, day));
         if (!isNaN(date.getTime())) {
           return date.toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
+            timeZone: 'UTC' // Forzar UTC para evitar ajustes de zona horaria
           });
         }
       }
 
-      // Para otros formatos, usar el método tradicional
-      const date = new Date(dateString);
+      // Para otros formatos, intentar parsear directamente
+      const date = new Date(dateString + 'T00:00:00Z'); // Añadir tiempo UTC para evitar problemas de zona horaria
       if (!isNaN(date.getTime())) {
         return date.toLocaleDateString('es-ES', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
+          timeZone: 'UTC'
         });
       }
 

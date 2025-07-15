@@ -693,7 +693,7 @@ export class GameHangmanComponent
     document.removeEventListener('keyup', this.onKeyUp.bind(this));
 
     this.redirectService.clearReturnUrl();
-    this.router.navigate(['/dashboard'], { replaceUrl: true });
+    this.router.navigate(['/inicio'], { replaceUrl: true });
   }
 
   formatearTiempo(): string {

@@ -701,7 +701,10 @@ export class GamePuzzleComponent
     // Si no permitimos colocaciones incorrectas y la posición no es correcta
     if (!this.allowWrongPlacements && !isCorrectPosition) {
       // Devolver la pieza al sidebar
-      this.gameAudioService.playPuzzlePieceWrongPlace();
+      // Solo reproducir sonido si la ayuda está activada (allowWrongPlacements = false significa ayuda activada)
+      if (!this.allowWrongPlacements) {
+        this.gameAudioService.playPuzzlePieceWrongPlace();
+      }
       this.returnToSidebar(this.draggedPiece);
       return;
     }
@@ -719,10 +722,13 @@ export class GamePuzzleComponent
     this.draggedPiece.correctPos = isCorrectPosition;
 
     // Reproducir sonido si la pieza está en posición correcta
-    if (isCorrectPosition) {
-      this.gameAudioService.playPuzzlePieceSnap();
-    } else {
-      this.gameAudioService.playPuzzlePiecePlace();
+    // Solo reproducir sonidos si la ayuda está activada (allowWrongPlacements = false significa ayuda activada)
+    if (!this.allowWrongPlacements) {
+      if (isCorrectPosition) {
+        this.gameAudioService.playPuzzlePieceSnap();
+      } else {
+        this.gameAudioService.playPuzzlePiecePlace();
+      }
     }
 
     this.updateCorrectPiecesCount();
@@ -988,7 +994,8 @@ export class GamePuzzleComponent
       boxShadow = '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.3)';
     }
 
-    if (piece.correctPos && isInBoard) {
+    // Solo mostrar indicador visual verde si la ayuda está activada
+    if (piece.correctPos && isInBoard && !this.allowWrongPlacements) {
       border = '1px solid #22c55e';
       boxShadow = '0 0 0 1px #22c55e';
     }
@@ -1227,7 +1234,7 @@ export class GamePuzzleComponent
   }
 
   volverAlDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/inicio']);
   }
 
   togglePista(): void {

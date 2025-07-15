@@ -14,7 +14,7 @@ export const appConfig: ApplicationConfig = {
       domain: environment.domain,
       clientId: environment.clientId,
       authorizationParams: {
-        redirect_uri: window.location.origin + '/dashboard',
+        redirect_uri: window.location.origin + '/inicio',
         response_type: 'id_token',
         scope: 'openid profile email',
       },

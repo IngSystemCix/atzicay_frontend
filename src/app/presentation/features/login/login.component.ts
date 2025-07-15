@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit {
         connection: 'google-oauth2',
       },
       appState: {
-        target: '/dashboard',
+        target: '/inicio',
       },
     });
   };

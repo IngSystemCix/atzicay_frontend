@@ -445,7 +445,7 @@ export class GameMemoryComponent extends BaseAuthenticatedComponent implements O
   }
 
   volverAlDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/inicio']);
   }
 
   togglePista(): void {

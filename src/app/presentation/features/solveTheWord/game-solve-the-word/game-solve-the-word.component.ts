@@ -908,7 +908,7 @@ export class GameSolveTheWordComponent
         redirectService.clearReturnUrl();
       }
     } catch {}
-    this.router.navigate(['/dashboard'], { replaceUrl: true });
+    this.router.navigate(['/inicio'], { replaceUrl: true });
   }
 
   formatearTiempo(): string {

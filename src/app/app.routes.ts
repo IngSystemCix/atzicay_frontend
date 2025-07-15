@@ -29,7 +29,7 @@ import { MemoryProgrammingComponent } from './presentation/features/memory/game-
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'inicio',
     pathMatch: 'full'
   },
   {
@@ -40,13 +40,18 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
+    redirectTo: 'inicio',
+    pathMatch: 'full'
+  },
+  {
+    path: 'inicio',
     component: MainLayoutComponent,
     canActivate: [optimizedAuthGuard],
     children: [
       {
         path: '',
         component: DashboardComponent,
-        title:"Dashboard"
+        title:"Inicio"
       }
     ]
   },

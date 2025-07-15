@@ -5,7 +5,7 @@
   [class.w-16]="isCollapsed">
 
   <!-- Logo/Header -->
-  <div class="flex items-center justify-center p-5">
+  <div class="flex items-center justify-center p-5 cursor-pointer" (click)="navigateToInicio()">
     <svg xmlns="http://www.w3.org/2000/svg"
          class="h-8 w-8 text-atzicay-purple-500 flex-shrink-0"
          [class.mr-2]="!isCollapsed"
@@ -14,7 +14,7 @@
     </svg>
     @if (!isCollapsed) {
     <span
-      class="text-3xl font-bold text-atzicay-purple-500 tracking-wide transition-opacity duration-300">
+      class="text-3xl font-bold text-atzicay-purple-500 tracking-wide transition-opacity duration-300 hover:text-atzicay-purple-600">
       ATZICAY
     </span>
     }
@@ -22,11 +22,11 @@
 
   <nav class="px-4 mt-6">
     <a
-      routerLink="/dashboard"
+      routerLink="/inicio"
       routerLinkActive="bg-atzicay-bg-button text-white font-bold"
       class="flex items-center px-4 py-2 rounded-lg text-black hover:bg-atzicay-bg-button hover:text-white hover:shadow-md cursor-pointer mb-1 transition-all duration-200"
       [class.justify-center]="isCollapsed"
-      [title]="isCollapsed ? 'Dashboard' : ''">
+      [title]="isCollapsed ? 'Inicio' : ''">>
       <svg xmlns="http://www.w3.org/2000/svg"
            class="h-5 w-5 flex-shrink-0"
            [class.mr-3]="!isCollapsed"

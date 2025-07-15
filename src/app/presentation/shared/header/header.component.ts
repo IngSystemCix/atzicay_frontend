@@ -73,7 +73,7 @@ export class HeaderComponent implements OnInit {
   switchAccount(): void {
     this.auth.loginWithRedirect({
       appState: {
-        target: '/dashboard'
+        target: '/inicio'
       },
       authorizationParams: {
         connection: 'google-oauth2',
