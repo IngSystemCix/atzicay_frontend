@@ -1,11 +1,11 @@
 <!-- sidebar.component.html -->
 <aside
-  class="sidebar h-screen fixed bg-atzicay-bg transition-all duration-300 ease-in-out"
+  class="sidebar h-screen fixed bg-atzicay-bg transition-all duration-300 ease-in-out flex flex-col"
   [class.w-64]="!isCollapsed"
   [class.w-16]="isCollapsed">
 
   <!-- Logo/Header -->
-  <div class="flex items-center justify-center p-5 cursor-pointer" (click)="navigateToInicio()">
+  <div class="flex items-center justify-center p-5 cursor-pointer flex-shrink-0" (click)="navigateToInicio()">
     <svg xmlns="http://www.w3.org/2000/svg"
          class="h-8 w-8 text-atzicay-purple-500 flex-shrink-0"
          [class.mr-2]="!isCollapsed"
@@ -20,13 +20,14 @@
     }
   </div>
 
-  <nav class="px-4 mt-6">
+  <!-- Main Navigation -->
+  <nav class="flex-1 px-4 mt-6 pb-4 overflow-y-auto">
     <a
       routerLink="/inicio"
       routerLinkActive="bg-atzicay-bg-button text-white font-bold"
       class="flex items-center px-4 py-2 rounded-lg text-black hover:bg-atzicay-bg-button hover:text-white hover:shadow-md cursor-pointer mb-1 transition-all duration-200"
       [class.justify-center]="isCollapsed"
-      [title]="isCollapsed ? 'Inicio' : ''">>
+      [title]="isCollapsed ? 'Inicio' : ''">
       <svg xmlns="http://www.w3.org/2000/svg"
            class="h-5 w-5 flex-shrink-0"
            [class.mr-3]="!isCollapsed"
@@ -61,7 +62,7 @@
   </nav>
 
   <!-- Bottom section -->
-  <div class="absolute bottom-0 w-full border-t border-gray-200 p-4">
+  <div class="border-t border-gray-200 p-4 flex-shrink-0">
     <!-- Perfil -->
     <a
       routerLink="/perfil"
@@ -83,7 +84,7 @@
 
     <button (click)="cerrarSesion()"
             routerLinkActive="bg-atzicay-bg-button text-white font-bold"
-            class="flex w-full items-center px-4 py-2 rounded-lg text-black hover:bg-atzicay-bg-button hover:text-white hover:shadow-md cursor-pointer mb-1 transition-all duration-200"
+            class="flex w-full items-center px-4 py-2 rounded-lg text-black hover:bg-atzicay-bg-button hover:text-white hover:shadow-md cursor-pointer transition-all duration-200"
             [class.justify-center]="isCollapsed"
             [title]="isCollapsed ? 'Cerrar Sesión' : ''">
       <svg xmlns="http://www.w3.org/2000/svg"
