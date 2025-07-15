@@ -680,6 +680,10 @@ export class GamePuzzleComponent
     event.preventDefault();
     event.dataTransfer!.dropEffect = 'move';
   }
+  // Getter para saber si la ayuda automática está activa
+  get automaticHelpEnabled(): boolean {
+    return !!this.puzzleConfig?.automatic_help;
+  }
 
   onDrop(targetRow: number, targetCol: number, event: DragEvent) {
     event.preventDefault();
@@ -700,8 +704,10 @@ export class GamePuzzleComponent
 
     // Si no permitimos colocaciones incorrectas y la posición no es correcta
     if (!this.allowWrongPlacements && !isCorrectPosition) {
-      // Devolver la pieza al sidebar
-      this.gameAudioService.playPuzzlePieceWrongPlace();
+      // Solo feedback si automatic_help está activado
+      if (this.automaticHelpEnabled) {
+        this.gameAudioService.playPuzzlePieceWrongPlace();
+      }
       this.returnToSidebar(this.draggedPiece);
       return;
     }
@@ -718,11 +724,13 @@ export class GamePuzzleComponent
     this.draggedPiece.currentCol = targetCol;
     this.draggedPiece.correctPos = isCorrectPosition;
 
-    // Reproducir sonido si la pieza está en posición correcta
-    if (isCorrectPosition) {
-      this.gameAudioService.playPuzzlePieceSnap();
-    } else {
-      this.gameAudioService.playPuzzlePiecePlace();
+    // Reproducir sonido solo si automatic_help está activado
+    if (this.automaticHelpEnabled) {
+      if (isCorrectPosition) {
+        this.gameAudioService.playPuzzlePieceSnap();
+      } else {
+        this.gameAudioService.playPuzzlePiecePlace();
+      }
     }
 
     this.updateCorrectPiecesCount();
@@ -988,7 +996,8 @@ export class GamePuzzleComponent
       boxShadow = '0 0 0 2px #9333EA, 0 4px 12px rgba(147, 51, 234, 0.3)';
     }
 
-    if (piece.correctPos && isInBoard) {
+    // Solo mostrar borde verde si automatic_help está activado
+    if (piece.correctPos && isInBoard && this.automaticHelpEnabled) {
       border = '1px solid #22c55e';
       boxShadow = '0 0 0 1px #22c55e';
     }
@@ -1002,10 +1011,6 @@ export class GamePuzzleComponent
       'background-repeat': 'no-repeat',
       border: border,
       'border-radius': borderRadius,
-      'box-shadow': boxShadow,
-      cursor: this.gameStarted && !this.gameCompleted ? 'grab' : 'default',
-      display: 'block',
-      position: isInBoard ? 'absolute' : 'relative',
       'box-sizing': 'border-box',
       transition: 'all 0.2s ease',
       transform: this.selectedPiece?.id === piece.id ? 'scale(1.02)' : 'scale(1)',
@@ -1138,19 +1143,6 @@ export class GamePuzzleComponent
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  }
-
-  toggleHelp() {
-    this.allowWrongPlacements = !this.allowWrongPlacements;
-
-    // Si estamos activando la ayuda, verificar las piezas ya colocadas
-    if (!this.allowWrongPlacements) {
-      this.pieces.forEach((piece) => {
-        if (piece.inBoard && !piece.correctPos) {
-          this.returnToSidebar(piece);
-        }
-      });
-    }
   }
 
   endGame() {

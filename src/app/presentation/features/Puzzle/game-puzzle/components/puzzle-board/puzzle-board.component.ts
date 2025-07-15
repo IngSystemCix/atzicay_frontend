@@ -22,6 +22,7 @@ interface PuzzlePiece {
   styleUrl: './puzzle-board.component.css',
 })
 export class PuzzleBoardComponent {
+  @Input() automaticHelpEnabled: boolean = true;
   @Input() pieces: PuzzlePiece[] = [];
   @Input() rows: number = 4;
   @Input() cols: number = 4;

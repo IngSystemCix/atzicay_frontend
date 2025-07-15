@@ -89,10 +89,8 @@
   box-shadow: none !important;
 }
 
-.piece-in-board.wrong-position {
-  border: 2px solid #e31515 !important;
-  box-shadow: none !important;
-}
+
+/* El borde rojo solo se aplicará si la ayuda automática está activada, la clase se controlará desde el componente padre */
 
 .piece-in-board.selected {
   box-shadow: none !important;

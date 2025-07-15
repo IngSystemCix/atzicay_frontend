@@ -29,7 +29,7 @@
                 <div class="piece-in-board cursor-grab active:cursor-grabbing transition-all duration-200 hover:z-10" 
                   [class.correct]="piece.correctPos"
                   [class.selected]="selectedPiece?.id === piece.id"
-                  [class.wrong-position]="!piece.correctPos"
+                  [class.wrong-position]="!piece.correctPos && automaticHelpEnabled"
                   [ngStyle]="getCurrentPieceStyle(piece)"
                   (click)="pieceClick.emit(piece)" 
                   (dblclick)="pieceDoubleClick.emit(piece)"

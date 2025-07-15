@@ -258,11 +258,11 @@
 
           <div class="mt-4 sm:mt-6 flex items-center space-x-3">
             <label class="flex items-center cursor-pointer">
-              <input type="checkbox" formControlName="ayudaAutomatica" class="sr-only" />
-              <div class="relative">
+              <input type="checkbox" formControlName="ayudaAutomatica" class="absolute w-10 h-6 opacity-0 cursor-pointer z-10" style="left:0;top:0;" />
+              <div class="relative w-10 h-6 sm:w-11 sm:h-6" (click)="contentForm.get('ayudaAutomatica')?.setValue(!contentForm.get('ayudaAutomatica')?.value)">
                 <div
                   [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'bg-purple-500' : 'bg-gray-300'"
-                  class="w-10 h-5 sm:w-11 sm:h-6 rounded-full transition-colors duration-200"
+                  class="w-full h-full rounded-full transition-colors duration-200"
                 ></div>
                 <div
                   [ngClass]="contentForm.get('ayudaAutomatica')?.value ? 'translate-x-5 sm:translate-x-6' : 'translate-x-1'"

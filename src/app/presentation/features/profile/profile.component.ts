@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs';
 import { GameTypeCountsService } from '../../../core/infrastructure/api/game-type-counts.service';
 import { GameTypeCounts } from '../../../core/domain/model/game-type-counts.model';
 import { AssessmentService } from '../../../core/infrastructure/api/assessment.service';
-
+import { CacheBustingService } from '../../../core/infrastructure/service/cache-busting.service';
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -40,6 +40,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public rankIcon: string = '';
   public rankColor: string = '';
   public showRankInfo: boolean = false;
+  private rankingUpdateInterval: any;
+  private isRankingUpdateEnabled = true;
   constructor(
     private authService: AuthService,
     private profileService: ProfileService,
@@ -48,13 +50,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private userSession: UserSessionService,
     private alertService: AlertService,
     private gameTypeCountsService: GameTypeCountsService,
-    private assessmentService: AssessmentService 
+    private assessmentService: AssessmentService,
+    private cacheBustingService: CacheBustingService
   ) {}
 
   ngOnInit(): void {
     this.loadCountries();
     this.loadAuth0UserPicture();
-
+    this.initializeCacheSystem();
     setTimeout(() => {
       this.initializeUserProfile();
     }, 100);
@@ -62,6 +65,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+    this.stopRankingUpdates();
+  }
+
+  private initializeCacheSystem(): void {
+    this.subscription.add(
+      this.cacheBustingService.cacheVersion$.subscribe((version) => {
+        if (this.currentUserId && this.isRankingUpdateEnabled && this.user) {
+          setTimeout(() => {
+            this.refreshRankingData();
+          }, 500);
+        }
+      })
+    );
   }
 
   private loadAuth0UserPicture(): void {
@@ -139,6 +155,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.currentUserId = userId;
       this.loadUserProfile(userId);
       this.loadUserGameCounts(userId);
+      this.startRankingUpdates();
     } else {
       // Esperar el token y obtener el userId
       this.subscription.add(
@@ -298,10 +315,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
             }, 200);
           }
 
-          this.loadUserGameCounts(userId); // Cargar conteo de juegos del usuario
-          this.loadAverageAssessment(userId); // <-- cargar promedio de calificación
+          this.loadUserGameCounts(userId);
+          this.loadAverageAssessment(userId);
           this.showNoUserMessage = false;
-          console.log('Usuario cargado:', this.user);
         } else {
           this.user = null;
           this.showNoUserMessage = true;
@@ -322,14 +338,42 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.assessmentService.getAverageAssessment().subscribe({
       next: (average) => {
         this.updateRankInfo(average);
+        if (this.showRankInfo === undefined) {
+          this.showRankInfo = true;
+        }
       },
       error: (err) => {
         console.error('Error al obtener promedio de calificación:', err);
         this.updateRankInfo(0);
-      }
+        // Solo ocultar en caso de error, no forzar el estado
+        if (this.showRankInfo === undefined) {
+          this.showRankInfo = false;
+        }
+      },
     });
   }
 
+  public closeRankInfo(): void {
+    this.showRankInfo = false;
+  }
+
+  public openRankInfo(): void {
+    this.showRankInfo = true;
+  }
+
+  private refreshRankingData(): void {
+  if (this.currentUserId) {
+    
+    const currentShowState = this.showRankInfo;
+    
+    this.loadAverageAssessment(this.currentUserId);
+    this.loadUserGameCounts(this.currentUserId);
+    
+    setTimeout(() => {
+      this.showRankInfo = currentShowState;
+    }, 100);
+  }
+}
   private loadUserGameCounts(userId: number): void {
     this.gameTypeCountsService.getGameTypeCountsByUser(userId).subscribe({
       next: (res) => {
@@ -357,11 +401,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (this.currentUserId) {
       console.log('Datos recibidos del modal:', updatedUserData);
 
-      // Validar y formatear los datos antes de enviar
       const payload = {
         name: updatedUserData.name?.trim() || '',
         last_name: updatedUserData.last_name?.trim() || '',
-        gender: updatedUserData.gender || 'Male', // Mantener el formato original (Male, Female, Other)
+        gender: updatedUserData.gender || 'Male',
         birthdate: this.formatDateForAPI(updatedUserData.birthdate),
         city: updatedUserData.city?.trim() || '',
         country_id: Number(updatedUserData.country_id) || null,
@@ -369,7 +412,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       console.log('Payload a enviar:', payload);
 
-      // Validar que todos los campos requeridos estén presentes
       if (
         !payload.name ||
         !payload.last_name ||
@@ -391,6 +433,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
             console.log('Respuesta del servidor:', res);
             if (res && res.success && this.currentUserId !== null) {
               this.loadUserProfile(this.currentUserId);
+
+              // Forzar actualización del ranking después de actualizar perfil
+              this.cacheBustingService.updateCacheVersion();
+              this.refreshRankingData();
+
               this.cerrarModal();
               this.alertService.showSuccess(
                 'Perfil actualizado correctamente',
@@ -413,6 +460,31 @@ export class ProfileComponent implements OnInit, OnDestroy {
           },
         });
     }
+  }
+
+  public startRankingUpdates(): void {
+    this.isRankingUpdateEnabled = true;
+
+    // Actualizar cada 30 segundos
+    this.rankingUpdateInterval = setInterval(() => {
+      if (this.currentUserId) {
+        this.cacheBustingService.updateCacheVersion();
+      }
+    }, 30000);
+  }
+
+  public stopRankingUpdates(): void {
+    this.isRankingUpdateEnabled = false;
+
+    if (this.rankingUpdateInterval) {
+      clearInterval(this.rankingUpdateInterval);
+      this.rankingUpdateInterval = null;
+    }
+  }
+
+  public forceRankingRefresh(): void {
+    this.cacheBustingService.clearImageCache();
+    this.refreshRankingData();
   }
 
   private formatDateForAPI(dateString: string): string {
@@ -485,29 +557,29 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (!dateString) return 'Fecha no disponible';
 
     try {
-      // Si la fecha viene en formato ISO (YYYY-MM-DD o YYYY-MM-DDTHH:mm:ss), parsearla sin zona horaria
       if (dateString.match(/^\d{4}-\d{2}-\d{2}/)) {
-        const [year, month, day] = dateString
-          .split('T')[0]
-          .split('-')
-          .map(Number);
-        const date = new Date(year, month - 1, day); // month - 1 porque los meses en JS van de 0-11
+        const dateOnly = dateString.split('T')[0];
+        const [year, month, day] = dateOnly.split('-').map(Number);
+
+        const date = new Date(Date.UTC(year, month - 1, day));
+
         if (!isNaN(date.getTime())) {
           return date.toLocaleDateString('es-ES', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
+            timeZone: 'UTC',
           });
         }
       }
 
-      // Para otros formatos, usar el método tradicional
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
         return date.toLocaleDateString('es-ES', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
+          timeZone: 'UTC', // Usar UTC para evitar cambios de día
         });
       }
 

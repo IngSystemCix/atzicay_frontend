@@ -46,7 +46,7 @@ export const routes: Routes = [
       {
         path: '',
         component: DashboardComponent,
-        title:"Dashboard"
+        title:"Inicio"
       }
     ]
   },

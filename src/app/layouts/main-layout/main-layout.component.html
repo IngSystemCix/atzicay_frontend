@@ -7,9 +7,8 @@
            transform -translate-x-full md:translate-x-0"
     [class.-translate-x-full]="sidebarCollapsed && (isMobile || isTablet)"
     [class.translate-x-0]="!sidebarCollapsed || (!isMobile && !isTablet)"
-    [class.w-16]="sidebarCollapsed && (isMobile || isTablet)"
-    [class.w-64]="!sidebarCollapsed || (!isMobile && !isTablet)"
-    [class.flex-shrink-0]="!sidebarCollapsed || (!isMobile && !isTablet)"
+    [class.w-16]="sidebarCollapsed && !isMobile && !isTablet"
+    [class.w-64]="!sidebarCollapsed || isMobile || isTablet"
   ></app-sidebar>
 
   <!-- Overlay para móvil y tablet con efecto blur -->

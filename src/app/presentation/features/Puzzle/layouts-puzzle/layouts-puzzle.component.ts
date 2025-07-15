@@ -403,7 +403,7 @@ export class LayoutsPuzzleComponent implements OnInit {
         Clue: contentData.mostrarPista ? contentData.pista : '',
         Rows: contentData.filas,
         Cols: contentData.columnas,
-        AutomaticHelp: contentData.ayudaAutomatica ? true : false,
+        AutomaticHelp: !!contentData.ayudaAutomatica,
         Settings: [
           { ConfigKey: 'time_limit', ConfigValue: contentData.tiempo.toString() },
           { ConfigKey: 'font', ConfigValue: configData.font },
