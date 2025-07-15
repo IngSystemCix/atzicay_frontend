@@ -304,7 +304,7 @@
   </div>
 
   @if (showModal && user && countriesLoaded) {
-  <app-modal-edit-users [userData]="user" (close)="cerrarModal()" [countries]="countries"
+  <app-modal-edit-users [userData]="user" (close)="cerrarModal()" [countries]="countries" (outsideClick)="cerrarModal()"
     (userUpdated)="onUserUpdated($event)"></app-modal-edit-users>
   }
 </div>

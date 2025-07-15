@@ -179,8 +179,8 @@ getTypeIcon(typeValue: string): string {
 
   gameTypes = [
     { value: 'hangman', label: 'Ahorcado' },
-    { value: 'memory', label: 'Memoria' },
     { value: 'puzzle', label: 'Rompecabezas' },
+    { value: 'memory', label: 'Memoria' },
     { value: 'solve_the_word', label: 'Pupiletras' },
   ];
 
