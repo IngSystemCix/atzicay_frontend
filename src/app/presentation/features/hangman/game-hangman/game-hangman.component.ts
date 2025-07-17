@@ -600,6 +600,11 @@ export class GameHangmanComponent
         if (fueporTiempo) {
           this.showTimeUpAlert();
         } else {
+          // Detener el timer antes de mostrar el modal de vida perdida
+          if (this.state.timerInterval) {
+            clearInterval(this.state.timerInterval);
+            this.state.timerInterval = null;
+          }
           // Mostrar modal de vida perdida
           this.showLifeLostAlert();
         }
@@ -618,11 +623,11 @@ export class GameHangmanComponent
     this.mostrarModalFallo = false;
     this.mostrarModalTiempoAgotado = false;
 
-    // Solo reiniciar la palabra actual, NO las vidas
+    // Solo reiniciar la palabra actual, NO las vidas ni el tiempo
     this.inicializarPalabraRevelada();
     this.state.letrasSeleccionadas = new Set<string>();
     this.state.intentosRestantes = this.INTENTOS_INICIALES;
-    this.state.tiempoRestante = this.state.tiempoInicial;
+    // NO reiniciar el tiempo, solo continuar desde donde quedó
     this.state.juegoTerminado = false;
     this.state.juegoGanado = false;
 
@@ -638,26 +643,18 @@ export class GameHangmanComponent
     this.mostrarModalFallo = false;
     this.mostrarModalExito = false;
 
-    // Resetear completamente el estado del juego
     this.state.indicePalabraActual = 0;
     this.state.palabrasCompletadas = 0;
-    this.state.vidasRestantes = 3; // Solo aquí se resetean las vidas a 3
+    this.state.vidasRestantes = 3; 
     this.state.juegoFinalizado = false;
-    this.state.tiempoRestante = this.state.tiempoInicial; // Reiniciar el tiempo correctamente
+    this.state.tiempoRestante = this.state.tiempoInicial; 
 
-    // Restaurar todas las palabras en el canvas
     this.palabrasAdivinadas = this.state.palabrasJuego.map((item) =>
       item.word.toUpperCase()
     );
 
     this.iniciarJuego();
   }
-
-  /**
-   * Obtiene el progreso actual del juego como una cadena de la forma
-   * "Palabra X de Y", donde X es el índice actual de la palabra en el
-   * array de palabras y Y es el total de palabras en el juego.
-   */
   get progresoJuego(): string {
     return `Palabra ${this.state.indicePalabraActual + 1} de ${
       this.state.totalPalabras
@@ -676,11 +673,8 @@ export class GameHangmanComponent
     this.mostrarModalJuegoFinalizado = false;
     this.mostrarModalFallo = false;
     this.mostrarModalExito = false;
-
-    // Deshabilitar toda la lógica del juego
     this.state.juegoDeshabilitado = true;
 
-    // Limpiar intervalos y listeners para evitar que el juego siga activo
     if (this.state.timerInterval) {
       clearInterval(this.state.timerInterval);
       this.state.timerInterval = null;
@@ -710,28 +704,22 @@ export class GameHangmanComponent
       if (this.state.tiempoRestante > 0) {
         this.state.tiempoRestante--;
 
-        // Reproducir sonido de advertencia cuando quedan 30 segundos
         if (this.state.tiempoRestante === 30) {
           this.gameAudioService.playTimeWarning();
         }
 
-        // Reproducir countdown en los últimos 5 segundos
         if (this.state.tiempoRestante <= 5 && this.state.tiempoRestante > 0) {
           this.gameAudioService.playCountdown();
         }
       } else {
-        // Cuando el tiempo se acaba, solo detener el timer y mostrar la alerta
         clearInterval(this.state.timerInterval);
         this.state.timerInterval = null;
         this.gameAudioService.playTimeUp();
 
-        // Marcar que el juego terminó por tiempo
         this.state.juegoTerminado = true;
 
-        // Determinar si se perdió una vida
         this.state.vidasRestantes--;
 
-        // Mostrar la alerta apropiada
         if (this.state.vidasRestantes <= 0) {
           this.state.juegoFinalizado = true;
           this.showTimeUpAlert();
@@ -758,7 +746,6 @@ export class GameHangmanComponent
     return palabra.replace(/~~/g, '');
   }
 
-  // Método para procesar palabras y mostrar espacios entre ellas
   procesarPalabraParaMostrar(): Array<{
     caracter: string;
     esEspacio: boolean;
@@ -772,25 +759,21 @@ export class GameHangmanComponent
     }));
   }
 
-  // Verificar si un índice debe mostrarse como espacio
   esEspacio(index: number): boolean {
     return this.state.palabraActual[index] === ' ';
   }
 
-  // Obtener el carácter revelado o el placeholder
   obtenerCaracterRevelado(index: number): string {
     if (this.esEspacio(index)) {
-      return ' '; // Espacio siempre visible
+      return ' '; 
     }
     return this.state.palabraRevelada[index] || '';
   }
 
-  // Inicializar palabraRevelada con espacios ya revelados
   inicializarPalabraRevelada(): void {
     this.state.palabraRevelada = Array(this.state.palabraActual.length).fill(
       ''
     );
-    // Pre-revelar los espacios
     for (let i = 0; i < this.state.palabraActual.length; i++) {
       if (this.state.palabraActual[i] === ' ') {
         this.state.palabraRevelada[i] = ' ';
@@ -798,7 +781,6 @@ export class GameHangmanComponent
     }
   }
 
-  // Getters para aplicar estilos dinámicos
   get estilosJuego() {
     return {
       'background-color': this.state.colorFondo,
@@ -819,7 +801,6 @@ export class GameHangmanComponent
     this.headerExpanded = !this.headerExpanded;
   }
 
-  // Nuevo método para el menú móvil
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
   }
@@ -842,11 +823,9 @@ export class GameHangmanComponent
       const result = await this.gameAlertService.showSuccessAlert(config);
 
       if (result.isConfirmed) {
-        // Jugar de nuevo
         this.reiniciarJuego();
         shouldShowAlert = false;
       } else if (result.isDenied) {
-        // Valorar juego
         await this.showRatingAlert('completed');
         config.userAssessed = true;
       } else {
@@ -865,10 +844,8 @@ export class GameHangmanComponent
       totalWords: this.state.totalPalabras,
     };
 
-    // Mostrar alerta personalizada que dura 5 segundos
     await this.gameAlertService.showWordCompletedAlert(config);
 
-    // Continuar automáticamente después de la alerta
     this.continuarSiguientePalabra();
   }
 
@@ -885,14 +862,11 @@ export class GameHangmanComponent
     const result = await this.gameAlertService.showTimeUpAlert(config);
 
     if (result.isConfirmed) {
-      // Intentar de nuevo
       this.reiniciarPalabraActual();
     } else if (result.isDenied) {
-      // Usuario quiere valorar
       await this.showRatingAlert('timeup');
       this.state.userAssessed = true;
 
-      // Mostrar el modal nuevamente pero sin el botón de valorar
       const configWithoutRating: GameAlertConfig = {
         ...config,
         userAssessed: true,
@@ -908,10 +882,8 @@ export class GameHangmanComponent
         this.volverAlDashboard();
       }
     } else if (result.dismiss === 'cancel') {
-      // Usuario hizo click en "Volver al Inicio"
       this.volverAlDashboard();
     } else {
-      // Si el modal se cerró de manera inesperada, volver al dashboard
       this.volverAlDashboard();
     }
   }

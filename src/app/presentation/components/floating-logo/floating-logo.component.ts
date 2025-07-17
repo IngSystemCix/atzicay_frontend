@@ -1,12 +1,19 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { RedirectService } from '../../../core/infrastructure/service/RedirectService.service';
 
 @Component({
   selector: 'app-floating-logo',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="hidden md:flex fixed top-4 left-4 z-50 bg-white backdrop-blur-md rounded-2xl shadow-lg border border-atzicay-border p-4 transition-all duration-300 hover:shadow-xl">
+    <button
+      type="button"
+      (click)="goToDashboard()"
+      class="hidden md:flex fixed top-4 left-4 z-50 bg-white backdrop-blur-md rounded-2xl shadow-lg border border-atzicay-border p-4 transition-all duration-300 hover:shadow-xl focus:outline-none cursor-pointer"
+      aria-label="Ir al dashboard"
+    >
       <div class="flex items-center">
         <svg xmlns="http://www.w3.org/2000/svg"
              class="h-10 w-10 text-atzicay-purple-500 flex-shrink-0 mr-3"
@@ -18,8 +25,15 @@ import { CommonModule } from '@angular/common';
           ATZICAY
         </span>
       </div>
-    </div>
+    </button>
   `,
   styles: []
 })
-export class FloatingLogoComponent { }
+export class FloatingLogoComponent {
+  constructor(private router: Router, private redirectService: RedirectService) {}
+
+  goToDashboard() {
+    this.redirectService.clearReturnUrl();
+    this.router.navigate(['/dashboard']);
+  }
+}

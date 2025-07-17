@@ -284,10 +284,11 @@
 
 <!-- Modal de edición de juego -->
 @if (showEditModal && selectedGame) {
-  <app-edit-game-modal 
+  <app-edit-game-modal
     [gameData]="selectedGame"
     [isVisible]="showEditModal"
     (onClose)="cerrarModalEdicion()"
-    (onSaved)="onGameEditSaved()">
+    (onSaved)="onGameEditSaved()"
+    (outsideClick)="cerrarModalEdicion()">
   </app-edit-game-modal>
 }
