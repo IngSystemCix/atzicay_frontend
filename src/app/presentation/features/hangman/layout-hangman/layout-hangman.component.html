@@ -1,42 +1,22 @@
-<div
-  class="layout-hangman-scroll min-h-screen p-2 md:p-4"
-  style="background-color: var(--color-atzicay-bg)"
->
+<div class="layout-hangman-scroll min-h-screen p-2 md:p-4" style="background-color: var(--color-atzicay-bg)">
   <!-- Header with tabs - Responsive -->
   <div class="flex flex-col md:flex-row mb-0.5 p-2 md:p-4 justify-between items-start md:items-center gap-2 md:gap-0">
     <!-- Tabs -->
-    <app-atzicay-tabs
-      [tabs]="tabs"
-      [activeTab]="activeTab"
-      (tabChanged)="setActiveTab($event)"
-      tabStyle="pill"
-      activeColor="bg-atzicay-purple-500 text-white"
-      inactiveColor="bg-purple-200 text-gray-400"
-      [roundedFull]="false"
-      size="md"
-      class="font-bold w-full md:w-auto"
-    ></app-atzicay-tabs>
+    <app-atzicay-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChanged)="setActiveTab($event)" tabStyle="pill"
+      activeColor="bg-atzicay-purple-500 text-white" inactiveColor="bg-purple-200 text-gray-400" [roundedFull]="false"
+      size="md" class="font-bold w-full md:w-auto"></app-atzicay-tabs>
 
-     <div class="flex-1 text-center">
-        <h1 class="text-2xl font-bold text-atzicay-purple-500">Juego del Ahorcado</h1>
-      </div>  
+    <div class="flex-1 text-center">
+      <h1 class="text-2xl font-bold text-atzicay-purple-500">Juego del Ahorcado</h1>
+    </div>
 
     <!-- Action buttons - Responsive -->
     <div class="ml-0 md:ml-auto flex gap-2 w-full md:w-auto justify-end">
-      <app-atzicay-button
-        type="cancel"
-        label="Cancelar"
-        (click)="onCancel()"
-        class="w-full md:w-auto"
-      ></app-atzicay-button>
+      <app-atzicay-button type="cancel" label="Cancelar" (click)="onCancel()"
+        class="w-full md:w-auto"></app-atzicay-button>
 
-      <app-atzicay-button
-        type="primary"
-        [label]="isLoading ? 'Guardando...' : 'Guardar'"
-        [disabled]="!isFormValid() || isLoading"
-        (click)="onSubmit()"
-        class="w-full md:w-auto"
-      ></app-atzicay-button>
+      <app-atzicay-button type="primary" [label]="isLoading ? 'Guardando...' : 'Guardar'"
+        [disabled]="!isFormValid() || isLoading" (click)="onSubmit()" class="w-full md:w-auto"></app-atzicay-button>
     </div>
   </div>
 
@@ -55,19 +35,13 @@
       </p>
 
       <form [formGroup]="hangmanForm">
-        <!-- Game name -->
         <div class="mb-4">
           <label for="name" class="block text-gray-900 mb-2 font-semibold">
             Título del Juego <span class="text-red-500">*</span>
           </label>
-          <input
-            id="name"
-            formControlName="name"
-            type="text"
-            placeholder="Ej: Aprende Vocabulario"
+          <input id="name" formControlName="name" type="text" placeholder="Ej: Aprende Vocabulario"
             class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            [class.border-red-500]="isNameInvalid"
-          />
+            [class.border-red-500]="isNameInvalid" />
           @if (isNameInvalid) {
           <span class="text-red-500 text-sm mt-1 block">
             El nombre debe tener al menos 3 caracteres
@@ -77,20 +51,13 @@
 
         <!-- Description -->
         <div class="mb-4">
-          <label
-            for="description"
-            class="block text-gray-900 mb-2 font-semibold"
-          >
+          <label for="description" class="block text-gray-900 mb-2 font-semibold">
             Descripción <span class="text-red-500">*</span>
           </label>
-          <textarea
-            id="description"
-            formControlName="description"
-            rows="4"
+          <textarea id="description" formControlName="description" rows="4"
             placeholder="Describe el objetivo y contenido del juego..."
             class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
-            [class.border-red-500]="isDescriptionInvalid"
-          ></textarea>
+            [class.border-red-500]="isDescriptionInvalid"></textarea>
           @if (isDescriptionInvalid) {
           <span class="text-red-500 text-sm mt-1 block">
             La descripción debe tener al menos 10 caracteres
@@ -99,16 +66,9 @@
         </div>
         <!-- Presentation -->
         <div class="mb-4">
-          <label
-            for="presentation"
-            class="block text-gray-900 mb-2 font-semibold"
-            >Tipo de Presentación</label
-          >
-          <select
-            id="presentation"
-            formControlName="presentation"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
+          <label for="presentation" class="block text-gray-900 mb-2 font-semibold">Tipo de Presentación</label>
+          <select id="presentation" formControlName="presentation"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
             <option value="A" selected>Aleatorio</option>
             <option value="F">Ordenado</option>
           </select>
@@ -116,13 +76,9 @@
         <form [formGroup]="configForm">
           <div class="mb-4">
             <label for="">Tiempo limite (segundos)</label>
-            <input
-              type="number"
-              formControlName="timeLimit"
-              placeholder="Tiempo limite en segundos"
+            <input type="number" formControlName="timeLimit" placeholder="Tiempo limite en segundos"
               class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-              [class.border-red-500]="isTimeLimitInvalid"
-            />
+              [class.border-red-500]="isTimeLimitInvalid" />
             <div *ngIf="configForm.get('timeLimit')?.value" class="text-sm text-gray-500 mt-1">
               <span>Tiempo límite configurado: <b>{{ configForm.get('timeLimit')?.value }}</b> segundos</span>
             </div>
@@ -142,96 +98,50 @@
             Agrega las palabras que los estudiantes deberán adivinar
           </p>
         </div>
-        <button
-          type="button"
-          (click)="addNewWord()"
-          class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-4 py-2 rounded-md cursor-pointer font-bold transition-colors w-full md:w-auto"
-        >
+        <button type="button" (click)="addNewWord()"
+          class="bg-atzicay-purple-500 hover:bg-atzicay-purple-700 text-white px-4 py-2 rounded-md cursor-pointer font-bold transition-colors w-full md:w-auto">
           Agregar Palabra
         </button>
       </div>
 
       <div class="flex items-center gap-2 mb-4">
         <span class="text-gray-900 font-semibold">Mostrar pistas</span>
-        <div
-          (click)="toggleShowClues()"
-          class="w-12 h-6 bg-gray-200 rounded-full p-1 cursor-pointer transition-colors"
-          [class.bg-purple-500]="showClues"
-        >
-          <div
-            class="bg-white w-4 h-4 rounded-full transform duration-300 ease-in-out"
-            [class.translate-x-6]="showClues"
-          ></div>
+        <div (click)="toggleShowClues()" class="w-12 h-6 bg-gray-200 rounded-full p-1 cursor-pointer transition-colors"
+          [class.bg-purple-500]="showClues">
+          <div class="bg-white w-4 h-4 rounded-full transform duration-300 ease-in-out"
+            [class.translate-x-6]="showClues"></div>
         </div>
         <div class="flex items-center text-gray-500">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            class="w-5 h-5"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span class="ml-1 text-sm"
-            >Se requieren al menos 2 palabras</span
-          >
+          <span class="ml-1 text-sm">Se requieren al menos 2 palabras</span>
         </div>
       </div>
 
       <form [formGroup]="wordsForm">
         <div class="max-h-96 md:max-h-120 overflow-y-auto space-y-4" formArrayName="words">
           @for (wordForm of wordsArray.controls; let i = $index; track $index) {
-          <div
-            class="bg-purple-100 p-4 rounded-md relative"
-            [formGroupName]="$index"
-          >
+          <div class="bg-purple-100 p-4 rounded-md relative" [formGroupName]="$index">
             <div class="flex justify-between items-center mb-2">
-              <h3
-                class="text-white bg-atzicay-purple-500 font-medium rounded-full px-3 py-1 text-sm"
-              >
+              <h3 class="text-white bg-atzicay-purple-500 font-medium rounded-full px-3 py-1 text-sm">
                 Palabra {{ $index + 1 }}
               </h3>
-              <button
-                title="Eliminar Palabra"
-                type="button"
-                (click)="removeWord($index)"
-                [disabled]="wordsArray.length <= 1"
-                [class.opacity-50]="wordsArray.length <= 1"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+              <button title="Eliminar Palabra" type="button" (click)="removeWord($index)"
+                [disabled]="wordsArray.length <= 1" [class.opacity-50]="wordsArray.length <= 1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             <div class="mb-3">
-              <label class="block mb-1 text-gray-700 font-semibold"
-                >Palabra o Frase</label
-              >
-              <input
-                type="text"
-                formControlName="word"
-                placeholder="Ingresa la palabra..."
+              <label class="block mb-1 text-gray-700 font-semibold">Palabra o Frase</label>
+              <input type="text" formControlName="word" placeholder="Ingresa la palabra..."
                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                [class.border-red-500]="isWordInvalid($index)"
-              />
+                [class.border-red-500]="isWordInvalid($index)" />
               @if (isWordInvalid($index)) {
               <span class="text-red-500 text-sm mt-1 block">
                 {{ getWordErrorMessage($index) }}
@@ -243,21 +153,15 @@
               <label class="block mb-1 text-gray-700 font-semibold">
                 Pista @if (showClues) {<span class="text-red-500">*</span>}
               </label>
-              <input
-                title="Pista de la Palabra"
-                type="text"
-                formControlName="clue"
-                [disabled]="!showClues"
+              <input title="Pista de la Palabra" type="text" formControlName="clue" [disabled]="!showClues"
                 [placeholder]="
                   !showClues
                     ? 'Habilitar para agregar pista'
                     : 'Ingresa una pista...'
                 "
                 class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors"
-                [class.bg-gray-100]="!showClues"
-                [class.cursor-not-allowed]="!showClues"
-                [class.border-red-500]="isClueInvalid($index)"
-              />
+                [class.bg-gray-100]="!showClues" [class.cursor-not-allowed]="!showClues"
+                [class.border-red-500]="isClueInvalid($index)" />
               @if (isClueInvalid($index)) {
               <span class="text-red-500 text-sm mt-1 block">
                 {{ getClueErrorMessage($index) }}
@@ -278,10 +182,8 @@
 
   <!-- CONFIG TAB - Responsive -->
   @if (activeTab === 'config') {
-      <app-generic-config-game 
-        [settings]="configForm.value"
-        (settingsChange)="onSettingsChange($event)">
-      </app-generic-config-game>
+  <app-generic-config-game [settings]="configForm.value" (settingsChange)="onSettingsChange($event)">
+  </app-generic-config-game>
 
   }
 
@@ -295,29 +197,24 @@
       Así es como se verá tu juego de hangman
     </p>
 
-    <!-- Game visual simulation -->
-    <div
-      class="bg-gray-100 p-4 md:p-6 rounded-lg mt-4"
-      [ngStyle]="{
+    <div class="bg-gray-100 p-4 md:p-6 rounded-lg mt-4" [ngStyle]="{
         'background-color': configForm.get('backgroundColor')?.value,
         color: configForm.get('fontColor')?.value,
         'font-family': configForm.get('font')?.value
-      }"
-    >
+      }">
       <h3 class="font-bold text-lg md:text-xl mb-4 text-center">
         🎮 Vista Previa del Ahorcado
       </h3>
       @if (wordsArray.length > 0) {
       <div class="flex flex-col items-center">
-        <!-- Title and description -->
         <div class="text-center mb-4 md:mb-6">
           <h1 class="text-2xl md:text-3xl font-bold mb-2">
             {{ hangmanForm.get("name")?.value || "Juego del Ahorcado" }}
           </h1>
           <p class="text-base md:text-lg">
             {{
-              hangmanForm.get("description")?.value ||
-                "Adivina la palabra antes de que se complete el ahorcado"
+            hangmanForm.get("description")?.value ||
+            "Adivina la palabra antes de que se complete el ahorcado"
             }}
           </p>
         </div>
@@ -332,81 +229,24 @@
         </div>
 
         <!-- Game area -->
-        <div
-          class="flex flex-col lg:flex-row justify-between items-center gap-6 md:gap-8 w-full"
-        >
+        <div class="flex flex-col lg:flex-row justify-between items-center gap-6 md:gap-8 w-full">
           <!-- Hangman drawing -->
           <div class="w-full lg:w-1/3 flex justify-center">
-            <svg
-              width="160"
-              height="200"
-              viewBox="0 0 200 250"
-              style="color: currentColor"
-              class="max-w-full"
-            >
+            <svg width="160" height="200" viewBox="0 0 200 250" style="color: currentColor" class="max-w-full">
               <!-- Base -->
-              <line
-                x1="20"
-                y1="230"
-                x2="180"
-                y2="230"
-                stroke="currentColor"
-                stroke-width="4"
-              />
+              <line x1="20" y1="230" x2="180" y2="230" stroke="currentColor" stroke-width="4" />
               <!-- Vertical pole -->
-              <line
-                x1="60"
-                y1="230"
-                x2="60"
-                y2="30"
-                stroke="currentColor"
-                stroke-width="4"
-              />
+              <line x1="60" y1="230" x2="60" y2="30" stroke="currentColor" stroke-width="4" />
               <!-- Horizontal pole -->
-              <line
-                x1="60"
-                y1="30"
-                x2="140"
-                y2="30"
-                stroke="currentColor"
-                stroke-width="4"
-              />
+              <line x1="60" y1="30" x2="140" y2="30" stroke="currentColor" stroke-width="4" />
               <!-- Rope -->
-              <line
-                x1="140"
-                y1="30"
-                x2="140"
-                y2="60"
-                stroke="currentColor"
-                stroke-width="4"
-              />
+              <line x1="140" y1="30" x2="140" y2="60" stroke="currentColor" stroke-width="4" />
               <!-- Head (visible) -->
-              <circle
-                cx="140"
-                cy="80"
-                r="20"
-                stroke="currentColor"
-                stroke-width="4"
-                fill="none"
-              />
+              <circle cx="140" cy="80" r="20" stroke="currentColor" stroke-width="4" fill="none" />
               <!-- Body (visible) -->
-              <line
-                x1="140"
-                y1="100"
-                x2="140"
-                y2="150"
-                stroke="currentColor"
-                stroke-width="4"
-              />
+              <line x1="140" y1="100" x2="140" y2="150" stroke="currentColor" stroke-width="4" />
               <!-- Arms (only one visible) -->
-              <line
-                x1="140"
-                y1="120"
-                x2="120"
-                y2="100"
-                stroke="currentColor"
-                stroke-width="4"
-              />
+              <line x1="140" y1="120" x2="120" y2="100" stroke="currentColor" stroke-width="4" />
             </svg>
           </div>
 
@@ -417,55 +257,47 @@
               @for (letter of getPreviewWord(0); let i = $index; track $index) {
               <div class="mx-1 flex flex-col items-center mb-2">
                 <div
-                  class="text-xl md:text-2xl h-8 md:h-10 flex items-center justify-center min-w-[1.5rem] md:min-w-[2rem]"
-                >
-                  @if ($index < 2) { {{ letter }} } @else { _ }
+                  class="text-xl md:text-2xl h-8 md:h-10 flex items-center justify-center min-w-[1.5rem] md:min-w-[2rem]">
+                  @if ($index < 2) { {{ letter }} } @else { _ } </div>
+                    <div class="w-6 md:w-8 h-1" [style.background-color]="configForm.get('fontColor')?.value"></div>
                 </div>
-                <div
-                  class="w-6 md:w-8 h-1"
-                  [style.background-color]="configForm.get('fontColor')?.value"
-                ></div>
+                }
               </div>
-              }
-            </div>
 
-            <!-- Keyboard (disabled) -->
-            <div class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 gap-1 md:gap-2 mx-auto max-w-xs sm:max-w-md md:max-w-lg">
-              @for (letra of
-              ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
-              track letra) {
-              <button
-                class="w-8 h-8 md:w-10 md:h-10 rounded-md flex items-center justify-center text-xs md:text-sm font-medium transition-colors"
-                [ngClass]="{
+              <!-- Keyboard (disabled) -->
+              <div
+                class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 gap-1 md:gap-2 mx-auto max-w-xs sm:max-w-md md:max-w-lg">
+                @for (letra of
+                ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P'];
+                track letra) {
+                <button
+                  class="w-8 h-8 md:w-10 md:h-10 rounded-md flex items-center justify-center text-xs md:text-sm font-medium transition-colors"
+                  [ngClass]="{
                   'bg-gray-200 text-gray-600': !['A', 'E', 'I'].includes(letra),
                   'bg-green-500 text-white': ['A', 'E'].includes(letra),
                   'bg-red-500 text-white': letra === 'I'
-                }"
-                disabled
-              >
-                {{ letra }}
-              </button>
-              }
+                }" disabled>
+                  {{ letra }}
+                </button>
+                }
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Clue -->
-        @if (showClues) {
-        <div
-          class="mt-4 md:mt-6 text-center p-3 md:p-4 bg-white/10 rounded-lg backdrop-blur-sm w-full max-w-2xl"
-        >
-          <p class="font-medium mb-2">Pista:</p>
-          <p class="text-base md:text-lg">{{ getPreviewClue(0) || "Ejemplo de pista" }}</p>
+          <!-- Clue -->
+          @if (showClues) {
+          <div class="mt-4 md:mt-6 text-center p-3 md:p-4 bg-white/10 rounded-lg backdrop-blur-sm w-full max-w-2xl">
+            <p class="font-medium mb-2">Pista:</p>
+            <p class="text-base md:text-lg">{{ getPreviewClue(0) || "Ejemplo de pista" }}</p>
+          </div>
+          }
+        </div>
+        } @if (wordsArray.length === 0) {
+        <div class="text-center text-gray-500 py-6 md:py-8">
+          Agrega palabras para ver la vista previa del juego
         </div>
         }
       </div>
-      } @if (wordsArray.length === 0) {
-      <div class="text-center text-gray-500 py-6 md:py-8">
-        Agrega palabras para ver la vista previa del juego
-      </div>
-      }
     </div>
+    }
   </div>
-  }
-</div>
