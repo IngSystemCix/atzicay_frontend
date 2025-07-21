@@ -242,6 +242,7 @@ export class GameSolveTheWordComponent
 
   private iniciarJuego(): void {
     this.gameAudioService.playGameStart();
+    this.shuffleWords();
     this.updateGridSize();
     this.initializeGrid();
     this.placeWordsOnGrid();
@@ -361,82 +362,36 @@ export class GameSolveTheWordComponent
   }
 
   placeWordsOnGrid() {
+    // Mapeo extendido de orientaciones del backend
+    const orientationMap: { [key: string]: { row: number; col: number } } = {
+      HL: { row: 0, col: 1 },   // Horizontal Left to Right (→)
+      HR: { row: 0, col: -1 },  // Horizontal Right to Left (←)
+      VU: { row: -1, col: 0 },  // Vertical Up (↑)
+      VD: { row: 1, col: 0 },   // Vertical Down (↓)
+      DU: { row: -1, col: 1 },  // Diagonal Up-Right (↗)
+      DD: { row: 1, col: 1 },   // Diagonal Down-Right (↘)
+      DUL: { row: -1, col: -1 },// Diagonal Up-Left (↖)
+      DDR: { row: 1, col: -1 }, // Diagonal Down-Left (↙)
+    };
+
     for (const word of this.words) {
       let placed = false;
       let attempts = 0;
-
-      // ✅ MAPEO CORREGIDO DE ORIENTACIONES
-      const orientationMap: { [key: string]: { row: number; col: number } } = {
-        HL: { row: 0, col: 1 }, // Horizontal Left to Right (→)
-        HR: { row: 0, col: -1 }, // Horizontal Right to Left (←)
-        VU: { row: -1, col: 0 }, // Vertical Up (↑)
-        VD: { row: 1, col: 0 }, // Vertical Down (↓)
-        DU: { row: -1, col: 1 }, // Diagonal Up-Right (↗)
-        DD: { row: 1, col: 1 }, // Diagonal Down-Right (↘)
-      };
-
-      const direction = orientationMap[word.orientation || 'HL'] || {
-        row: 0,
-        col: 1,
-      };
-
-      while (!placed && attempts < 100) {
+      // Si la palabra tiene orientación definida y es válida, intentar primero con esa orientación
+      if (word.orientation && orientationMap[word.orientation]) {
+        placed = this.tryPlaceWordWithDirection(word, orientationMap[word.orientation]);
         attempts++;
-
-        // ✅ CÁLCULO CORREGIDO DE POSICIONES INICIALES
-        let maxStartRow: number;
-        let maxStartCol: number;
-
-        if (direction.row === 0) {
-          // Horizontal: la fila puede ser cualquiera
-          maxStartRow = this.gridRows - 1;
-        } else if (direction.row > 0) {
-          // Hacia abajo: debe tener espacio suficiente hacia abajo
-          maxStartRow = this.gridRows - word.text.length;
-        } else {
-          // Hacia arriba: debe empezar desde una posición que permita ir hacia arriba
-          maxStartRow = word.text.length - 1;
-        }
-
-        if (direction.col === 0) {
-          // Vertical: la columna puede ser cualquiera
-          maxStartCol = this.gridCols - 1;
-        } else if (direction.col > 0) {
-          // Hacia derecha: debe tener espacio suficiente hacia derecha
-          maxStartCol = this.gridCols - word.text.length;
-        } else {
-          // Hacia izquierda: debe empezar desde una posición que permita ir hacia izquierda
-          maxStartCol = word.text.length - 1;
-        }
-
-        // ✅ GENERAR POSICIONES VÁLIDAS
-        const minStartRow = direction.row < 0 ? word.text.length - 1 : 0;
-        const minStartCol = direction.col < 0 ? word.text.length - 1 : 0;
-
-        const startRow =
-          Math.floor(Math.random() * (maxStartRow - minStartRow + 1)) +
-          minStartRow;
-        const startCol =
-          Math.floor(Math.random() * (maxStartCol - minStartCol + 1)) +
-          minStartCol;
-
-        if (this.canPlaceWord(word.text, startRow, startCol, direction)) {
-          const positions = [];
-
-          for (let i = 0; i < word.text.length; i++) {
-            const row = startRow + i * direction.row;
-            const col = startCol + i * direction.col;
-            this.grid[row][col].letter = word.text[i];
-            positions.push({ row, col });
-          }
-
-          word.positions = positions;
-          placed = true;
-        }
       }
-
+      // Si no se pudo colocar, intentar con orientaciones aleatorias
+      while (!placed && attempts < 100) {
+        const directions = Object.values(orientationMap);
+        const randomDir = directions[Math.floor(Math.random() * directions.length)];
+        placed = this.tryPlaceWordWithDirection(word, randomDir);
+        attempts++;
+      }
+      // Si no se pudo colocar, forzar horizontal
       if (!placed) {
-        this.placeFallbackWord(word);
+        this.forceHorizontalPlacement(word);
       }
     }
   }
@@ -613,19 +568,30 @@ export class GameSolveTheWordComponent
     const startRows = this.getValidStartRows(word.text.length, direction);
     const startCols = this.getValidStartCols(word.text.length, direction);
 
-    for (const startRow of startRows) {
-      for (const startCol of startCols) {
-        if (this.canPlaceWord(word.text, startRow, startCol, direction)) {
-          const positions = [];
-          for (let i = 0; i < word.text.length; i++) {
-            const row = startRow + i * direction.row;
-            const col = startCol + i * direction.col;
-            this.grid[row][col].letter = word.text[i];
-            positions.push({ row, col });
-          }
-          word.positions = positions;
-          return true;
+    // Generar todas las combinaciones posibles de inicio
+    const startPositions: Array<{ row: number; col: number }> = [];
+    for (const row of startRows) {
+      for (const col of startCols) {
+        startPositions.push({ row, col });
+      }
+    }
+    // Mezclar las posiciones posibles para que la ubicación sea aleatoria cada vez
+    for (let i = startPositions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [startPositions[i], startPositions[j]] = [startPositions[j], startPositions[i]];
+    }
+
+    for (const pos of startPositions) {
+      if (this.canPlaceWord(word.text, pos.row, pos.col, direction)) {
+        const positions = [];
+        for (let i = 0; i < word.text.length; i++) {
+          const row = pos.row + i * direction.row;
+          const col = pos.col + i * direction.col;
+          this.grid[row][col].letter = word.text[i];
+          positions.push({ row, col });
         }
+        word.positions = positions;
+        return true;
       }
     }
     return false;
@@ -857,6 +823,7 @@ export class GameSolveTheWordComponent
     this.isSelecting = false;
     this.words.forEach((word) => (word.found = false));
 
+    this.shuffleWords();
     this.timeLeft = this.originalTimeLimit;
 
     this.initializeGrid();
@@ -867,7 +834,15 @@ export class GameSolveTheWordComponent
       clearInterval(this.timer);
     }
     this.startTimer();
+
   }
+  // Desordena el array de palabras para que la ubicación cambie cada vez
+private shuffleWords(): void {
+  for (let i = this.words.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [this.words[i], this.words[j]] = [this.words[j], this.words[i]];
+  }
+}
 
   toggleCompact(): void {
     this.isCompact = !this.isCompact;

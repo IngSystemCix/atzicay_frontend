@@ -6,20 +6,24 @@ import { AuthService } from '../../../core/infrastructure/api/auth.service';
 import { Subscription } from 'rxjs';
 import { SidebarService } from '../../../core/infrastructure/api/sidebar/sidebar.service';
 import Swal from 'sweetalert2';
+import { CreditsModalComponent } from '../../components/credits-modal/credits-modal.component';
+import { CreditsModalService } from '../../../core/infrastructure/service/credits-modal.service';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterLink, RouterLinkActive, CommonModule, CreditsModalComponent],
 })
 export class SidebarComponent {
   private document = inject(DOCUMENT);
   private auth = inject(Auth0);
   private backendAuth = inject(AuthService);
   private sidebarService = inject(SidebarService);
+  showCreditsModal = false;
 
   isCollapsed = false;
   private subscription: Subscription = new Subscription();
+  constructor(private creditsModalService: CreditsModalService) {}
 
   ngOnInit(): void {
     this.subscription.add(
@@ -27,6 +31,14 @@ export class SidebarComponent {
         this.isCollapsed = collapsed;
       })
     );
+  }
+
+  openCreditsModal() {
+    this.creditsModalService.open();
+  }
+
+  closeCreditsModal() {
+    this.showCreditsModal = false;
   }
 
   ngOnDestroy(): void {

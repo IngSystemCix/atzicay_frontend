@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GameReportService } from '../../../../core/infrastructure/api/game-report.service';
-import { GameReportResponse, GameReportData } from '../../../../core/domain/interface/game-report-response';
+import { GameReportResponse, GameReportData, GamePlayer } from '../../../../core/domain/interface/game-report-response';
 import { GameLoadingService } from '../../../../core/infrastructure/service/game-loading.service';
 import { AlertService } from '../../../../core/infrastructure/service/alert.service';
 import { Subscription } from 'rxjs';
@@ -24,7 +24,13 @@ export class GameReportComponent implements OnInit, OnDestroy {
 
   gameInstanceId: string | null = null;
   reportData: GameReportData | null = null;
+  totalPlayers: number = 0;
   error: string | null = null;
+  // Paginación
+  page: number = 1;
+  limit: number = 6;
+  offset: number = 0;
+  isLoading: boolean = false;
 
   ngOnInit(): void {
     console.log('🚀 [GameReport] Componente inicializado');
@@ -44,29 +50,22 @@ export class GameReportComponent implements OnInit, OnDestroy {
     this.gameLoadingService.hideFast();
   }
 
-  private async loadReport(): Promise<void> {
+  async loadReport(): Promise<void> {
     if (!this.gameInstanceId) return;
-
-    console.log('📊 [GameReport] Cargando reporte para:', this.gameInstanceId);
-    
+    this.isLoading = true;
+    this.error = null;
+    this.offset = (this.page - 1) * this.limit;
     try {
       const response = await this.gameLoadingService.loadGameData(
-        () => this.gameReportService.getReport(this.gameInstanceId!).toPromise(),
+        () => this.gameReportService.getReport(this.gameInstanceId!, this.limit, this.offset).toPromise(),
         'content'
       ) as GameReportResponse;
-
-      console.log('📊 [GameReport] Respuesta recibida:', response);
-
       if (!response || !response.data) {
         throw new Error('No se recibieron datos del reporte');
       }
-
       this.reportData = response.data;
-      console.log('✅ [GameReport] Datos del reporte cargados:', this.reportData);
+      this.totalPlayers = response.data.total_players || (response.data.players ? response.data.players.length : 0);
     } catch (error: any) {
-      console.error('❌ [GameReport] Error cargando reporte:', error);
-      
-      // Manejo específico de errores HTTP
       if (error.status === 404) {
         this.error = 'No se encontró el reporte para esta programación';
       } else if (error.status === 403) {
@@ -76,12 +75,31 @@ export class GameReportComponent implements OnInit, OnDestroy {
       } else {
         this.error = 'Error al cargar el reporte del juego';
       }
-      
-      await this.alertService.showError(
-        'Error al cargar reporte',
-        this.error
-      );
+      await this.alertService.showError('Error al cargar reporte', this.error);
+    } finally {
+      this.isLoading = false;
     }
+  }
+
+  nextPage() {
+    if (this.page * this.limit < this.totalPlayers) {
+      this.page++;
+      this.loadReport();
+    }
+  }
+
+  prevPage() {
+    if (this.page > 1) {
+      this.page--;
+      this.loadReport();
+    }
+  }
+
+  get showingFrom(): number {
+    return this.offset + 1;
+  }
+  get showingTo(): number {
+    return Math.min(this.offset + this.limit, this.totalPlayers);
   }
 
   goBack(): void {
@@ -90,63 +108,5 @@ export class GameReportComponent implements OnInit, OnDestroy {
     });
   }
 
-  getGameTypeIcon(gameType: string): string {
-    switch (gameType.toLowerCase()) {
-      case 'hangman':
-      case 'ahorcado':
-        return '🎯';
-      case 'puzzle':
-      case 'rompecabezas':
-        return '🧩';
-      case 'memory':
-      case 'memoria':
-        return '🧠';
-      case 'solve the word':
-      case 'pupiletras':
-        return '🔤';
-      default:
-        return '🎮';
-    }
-  }
-
-  getRatingStars(rating: string): string {
-    const numRating = parseFloat(rating);
-    const fullStars = Math.floor(numRating);
-    const hasHalfStar = numRating % 1 >= 0.5;
-    
-    let stars = '⭐'.repeat(fullStars);
-    if (hasHalfStar) {
-      stars += '⭐'; // Puedes cambiar por ⭐️ si prefieres
-    }
-    
-    return stars || '☆';
-  }
-
-  getAverageRating(): number {
-    if (!this.reportData?.comments || this.reportData.comments.length === 0) {
-      return 0;
-    }
-
-    const total = this.reportData.comments.reduce((sum, comment) => {
-      return sum + parseFloat(comment.rating);
-    }, 0);
-
-    return Math.round((total / this.reportData.comments.length) * 10) / 10;
-  }
-
-  getCommentsCount(): number {
-    return this.reportData?.comments?.length || 0;
-  }
-
-  getUserInitials(userName: string): string {
-    return userName
-      .split(' ')
-      .map(name => name.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join('');
-  }
-
-  trackByComment(index: number, comment: any): string {
-    return `${comment.user}_${comment.rating}_${index}`;
-  }
+  // Métodos antiguos de comentarios/rating eliminados porque ya no se usan con la nueva estructura
 }

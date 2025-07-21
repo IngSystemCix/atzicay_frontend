@@ -133,7 +133,6 @@ export class GameHangmanComponent
     'L',
     'M',
     'N',
-    'Ñ',
     'O',
     'P',
     'Q',
@@ -145,13 +144,7 @@ export class GameHangmanComponent
     'W',
     'X',
     'Y',
-    'Z',
-    'Á',
-    'É',
-    'Í',
-    'Ó',
-    'Ú',
-    'Ü',
+    'Z'
   ];
   mostrarModalTiempoAgotado = false;
   mostrarModalJuegoFinalizado = false;
