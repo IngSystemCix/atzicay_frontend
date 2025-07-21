@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TooltipDirective } from '../../shared/tooltip/tooltip.directive';
 
 @Component({
   selector: 'app-game-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TooltipDirective],
   templateUrl: './game-header.component.html',
   styleUrls: ['./game-header.component.css']
 })
