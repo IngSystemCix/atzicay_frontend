@@ -6,8 +6,6 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { ComponentPortal } from '@angular/cdk/portal';
 
 @Component({
   selector: 'app-credits-modal',
@@ -19,7 +17,7 @@ import { ComponentPortal } from '@angular/cdk/portal';
       (click)="closeModal()"
     >
       <div
-        class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 ease-out"
+        class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 transform transition-all duration-300 ease-out max-h-[90vh] overflow-y-auto "
         (click)="$event.stopPropagation()"
       >
         <!-- Header -->
@@ -37,7 +35,7 @@ import { ComponentPortal } from '@angular/cdk/portal';
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0z"
                 />
               </svg>
               <h2 class="text-xl font-bold">Créditos del Proyecto</h2>
@@ -87,114 +85,82 @@ import { ComponentPortal } from '@angular/cdk/portal';
               Desarrolladores
             </h3>
 
-            <div class="space-y-3">
-              <div
-                *ngFor="let dev of developers"
-                class="group bg-gradient-to-r from-white to-gray-50 rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
-              >
-                <div class="flex items-center justify-between">
-                  <!-- Avatar y nombre -->
+            <!-- Frontend Developers -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-blue-600 mb-3 uppercase tracking-wide">Frontend Team</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div
+                  *ngFor="let dev of frontendDevelopers"
+                  class="group bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
+                >
                   <div class="flex items-center space-x-3">
-                    <div
-                      class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-atzicay-purple-400 to-atzicay-purple-600 rounded-full flex items-center justify-center shadow-sm"
-                    >
-                      <span class="text-atzicay-purple-700 font-semibold text-sm">
-                        {{ dev.name.split(' ')[0][0]
-                        }}{{
-                          dev.name.split(' ')[2]
-                            ? dev.name.split(' ')[2][0]
-                            : dev.name.split(' ')[1][0]
-                        }}
+                    <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-sm">
+                      <span class="text-white font-semibold text-sm">
+                        {{ dev.name.split(' ')[0][0] }}{{ dev.name.split(' ')[2] ? dev.name.split(' ')[2][0] : dev.name.split(' ')[1][0] }}
                       </span>
                     </div>
-
-                    <div>
-                      <p
-                        class="text-gray-800 font-semibold text-sm leading-tight"
-                      >
-                        {{ dev.name }}
-                      </p>
-                      <p class="text-gray-500 text-xs mt-0.5">Desarrollador</p>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-gray-800 font-semibold text-sm leading-tight truncate">{{ dev.name }}</p>
+                      <p class="text-blue-600 text-xs mt-0.5">Frontend Developer</p>
                     </div>
                   </div>
-
-                  <!-- Badge del rol -->
-                  <div class="flex-shrink-0">
-                    <span
-                      class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-colors duration-200"
-                      [ngClass]="{
-                        'bg-blue-100 text-blue-800 border border-blue-200':
-                          dev.role === 'Frontend Developer',
-                        'bg-green-100 text-green-800 border border-green-200':
-                          dev.role === 'Backend Developer',
-                        'bg-orange-100 text-orange-800 border border-orange-200':
-                          dev.role === 'QA Tester'
-                      }"
-                    >
-                      <!-- Iconos por rol -->
-                      <svg
-                        *ngIf="dev.role === 'Frontend Developer'"
-                        class="w-3 h-3 mr-1.5 text-blue-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                        />
-                      </svg>
-
-                      <svg
-                        *ngIf="dev.role === 'Backend Developer'"
-                        class="w-3 h-3 mr-1.5 text-green-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
-                        />
-                      </svg>
-
-                      <svg
-                        *ngIf="dev.role === 'QA Tester'"
-                        class="w-3 h-3 mr-1.5 text-orange-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-
-                      {{
-                        dev.role === 'Frontend Developer'
-                          ? 'Frontend'
-                          : dev.role === 'Backend Developer'
-                          ? 'Backend'
-                          : 'QA Tester'
-                      }}
-                    </span>
-                  </div>
+                  <!-- Línea decorativa que aparece en hover -->
+                  <div class="mt-3 h-0.5 bg-gradient-to-r from-blue-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
+              </div>
+            </div>
 
-                <!-- Línea decorativa que aparece en hover -->
+            <!-- Backend Developers -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-green-600 mb-3 uppercase tracking-wide">Backend Team</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div
-                  class="mt-3 h-0.5 bg-gradient-to-r from-atzicay-purple-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                ></div>
+                  *ngFor="let dev of backendDevelopers"
+                  class="group bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 border border-green-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-sm">
+                      <span class="text-white font-semibold text-sm">
+                        {{ dev.name.split(' ')[0][0] }}{{ dev.name.split(' ')[2] ? dev.name.split(' ')[2][0] : dev.name.split(' ')[1][0] }}
+                      </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-gray-800 font-semibold text-sm leading-tight truncate">{{ dev.name }}</p>
+                      <p class="text-green-600 text-xs mt-0.5">Backend Developer</p>
+                    </div>
+                  </div>
+                  <!-- Línea decorativa que aparece en hover -->
+                  <div class="mt-3 h-0.5 bg-gradient-to-r from-green-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- QA Tester -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-orange-600 mb-3 uppercase tracking-wide">Quality Assurance</h4>
+              <div class="max-w-md">
+                <div
+                  *ngFor="let dev of qaTester"
+                  class="group bg-gradient-to-r from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 ease-out"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-sm">
+                      <span class="text-white font-semibold text-sm">
+                        {{ dev.name.split(' ')[0][0] }}{{ dev.name.split(' ')[2] ? dev.name.split(' ')[2][0] : dev.name.split(' ')[1][0] }}
+                      </span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-gray-800 font-semibold text-sm leading-tight truncate">{{ dev.name }}</p>
+                      <p class="text-orange-600 text-xs mt-0.5">QA Tester</p>
+                    </div>
+                  </div>
+                  <!-- Línea decorativa que aparece en hover -->
+                  <div class="mt-3 h-0.5 bg-gradient-to-r from-orange-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
               </div>
             </div>
           </div>
+
           <!-- Asesor Section -->
           <div>
             <h3
@@ -239,12 +205,18 @@ import { ComponentPortal } from '@angular/cdk/portal';
 export class CreditsModalComponent {
   @Output() close = new EventEmitter<void>();
 
-  developers = [
+  frontendDevelopers = [
     { name: 'Juan Rodrigo Tejeda Riojas', role: 'Frontend Developer' },
-    { name: 'Daniel David Ramos Marrufo', role: 'Frontend Developer' },
+    { name: 'Daniel David Ramos Marrufo', role: 'Frontend Developer' }
+  ];
+
+  backendDevelopers = [
     { name: 'Juan Bladimir Romero Collazos', role: 'Backend Developer' },
-    { name: 'Brian Augusto Monteza Alvarez', role: 'Backend Developer' },
-    { name: 'Jorge Hugo Fupuy Chanamé', role: 'QA Tester' },
+    { name: 'Brian Augusto Monteza Alvarez', role: 'Backend Developer' }
+  ];
+
+  qaTester = [
+    { name: 'Jorge Hugo Fupuy Chanamé', role: 'QA Tester' }
   ];
 
   advisor = 'Franklin Edinson Teran Santa Cruz';

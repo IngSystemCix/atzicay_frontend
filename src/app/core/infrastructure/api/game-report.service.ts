@@ -6,7 +6,7 @@ import { environment } from '../../../../environments/environment.development';
 @Injectable({ providedIn: 'root' })
 export class GameReportService {
   constructor(private http: HttpClient) {}
-  private baseUrl = `${environment.api_base_url}game/report`;
+  private baseUrl = `${environment.api_base_url}game/ratings`;
 
   getReport(gameInstanceId: string, limit: number = 6, offset: number = 0): Observable<GameReportResponse> {
     const params = new URLSearchParams({ limit: limit.toString(), offset: offset.toString() });

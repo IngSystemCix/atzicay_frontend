@@ -58,14 +58,7 @@
     color: var(--color-atzicay-placeholder);
   }
 }
-* Agregar en tu archivo styles.css */
-.cdk-overlay-dark-backdrop {
-  background: rgba(0, 0, 0, 0.5);
-}
 
-.credits-modal-panel {
-  pointer-events: auto;
-}
 
 @layer components {
   .btn-atzicay {
@@ -125,5 +118,3 @@
     scrollbar-color: var(--color-atzicay-bg-button) transparent;
   }
 }
-
-
